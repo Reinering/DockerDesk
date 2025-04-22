@@ -14,7 +14,8 @@ export default defineConfig((ctx) => {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
       'i18n',
-      'axios'
+      'axios',
+      'pinia'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
@@ -59,9 +60,14 @@ export default defineConfig((ctx) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf (viteConf) {
+        viteConf.resolve.alias = {
+          ...viteConf.resolve.alias,
+          'src': fileURLToPath(new URL('./src', import.meta.url))
+        }
+      },
       // viteVuePluginOptions: {},
-      
+
       vitePlugins: [
         ['@intlify/unplugin-vue-i18n/vite', {
           // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
@@ -82,7 +88,11 @@ export default defineConfig((ctx) => {
             lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{js,mjs,cjs,vue}"',
             useFlatConfig: true
           }
-        }, { server: false }]
+        }, { server: false }],
+
+        ['vite-plugin-require', {
+          fileRegex: /(.js|.ts|.jsx|.tsx)$/,
+        }]
       ]
     },
 
@@ -94,7 +104,20 @@ export default defineConfig((ctx) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      config: {},
+      config: {
+        brand: {
+          primary: '#1976d2',
+          secondary: '#7bd4cb',
+          accent: '#9C27B0',
+
+          dark: '#1d1d1d',
+
+          positive: '#4fe372',
+          negative: '#db5c6b',
+          info: '#31CCEC',
+          warning: '#F2C037'
+        }
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
@@ -115,17 +138,17 @@ export default defineConfig((ctx) => {
     animations: [],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#sourcefiles
-    // sourceFiles: {
-    //   rootComponent: 'src/App.vue',
-    //   router: 'src/router/index',
-    //   store: 'src/store/index',
-    //   pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
-    //   pwaServiceWorker: 'src-pwa/custom-service-worker',
-    //   pwaManifestFile: 'src-pwa/manifest.json',
-    //   electronMain: 'src-electron/electron-main',
-    //   electronPreload: 'src-electron/electron-preload'
-    //   bexManifestFile: 'src-bex/manifest.json
-    // },
+    sourceFiles: {
+      // rootComponent: 'src/App.vue',
+      // router: 'src/router/index',
+      // store: 'src/store/index',
+      // pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
+      // pwaServiceWorker: 'src-pwa/custom-service-worker',
+      // pwaManifestFile: 'src-pwa/manifest.json',
+      electronMain: 'src-electron/electron-main',
+      electronPreload: 'src-electron/electron-preload'
+      // bexManifestFile: 'src-bex/manifest.json
+    },
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-ssr/configuring-ssr
     ssr: {
