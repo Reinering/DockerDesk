@@ -1,7 +1,9 @@
 import { app, BrowserWindow } from 'electron'
+import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
+import { db } from 'src/utils/database/db.js';
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -14,20 +16,27 @@ async function createWindow () {
   /**
    * Initial window options
    */
+
+  initialize()
+
   mainWindow = new BrowserWindow({
     icon: path.resolve(currentDir, 'icons/icon.png'), // tray icon
     width: 1000,
     height: 600,
     useContentSize: true,
+    frame: false, // <-- 添加这里
     webPreferences: {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
       preload: path.resolve(
         currentDir,
         path.join(process.env.QUASAR_ELECTRON_PRELOAD_FOLDER, 'electron-preload' + process.env.QUASAR_ELECTRON_PRELOAD_EXTENSION)
-      )
+      ),
+      sandbox: false // <-- to be able to import @electron/remote in preload script
     }
   })
+
+  enable(mainWindow.webContents)
 
   if (process.env.DEV) {
     await mainWindow.loadURL(process.env.APP_URL)
@@ -50,7 +59,13 @@ async function createWindow () {
   })
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  // init database
+  db
+
+  createWindow
+
+})
 
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {
