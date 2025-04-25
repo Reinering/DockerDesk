@@ -4,6 +4,7 @@
 import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
 
+
 export default defineConfig((ctx) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -89,10 +90,6 @@ export default defineConfig((ctx) => {
             useFlatConfig: true
           }
         }, { server: false }],
-
-        ['vite-plugin-require', {
-          fileRegex: /(.js|.ts|.jsx|.tsx)$/,
-        }]
       ]
     },
 
@@ -104,6 +101,7 @@ export default defineConfig((ctx) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
+      cssAddon: true, // 它将为所有与间距相关的CSS类提供断点感知版本
       config: {
         brand: {
           primary: '#1976d2',
@@ -116,7 +114,10 @@ export default defineConfig((ctx) => {
           negative: '#db5c6b',
           info: '#31CCEC',
           warning: '#F2C037'
-        }
+        },
+        notify: { /* look at QUASARCONFOPTIONS from the API card (bottom of page) */ },
+        loading: { /* look at QUASARCONFOPTIONS from the API card (bottom of page) */ },
+        dark: 'false' // 或者Boolean true/false
       },
 
       // iconSet: 'material-icons', // Quasar icon set
@@ -130,7 +131,12 @@ export default defineConfig((ctx) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        'Notify',
+        'Loading',
+        'LocalStorage',
+        'SessionStorage'
+      ]
     },
 
     // animations: 'all', // --- includes all animations
