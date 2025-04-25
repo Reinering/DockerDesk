@@ -99,22 +99,22 @@
         <q-table
           :rows="services"
           :columns="columns"
-          row-key="name"
+          row-key="id"
           virtual-scroll
           v-model:pagination="pagination"
           :rows-per-page-options="[0]"
+          :visible-columns="visibleColumns"
           flat
           bordered
           :style="tableStyle"
         >
           <template v-slot:body-cell-actions="props">
-
             <q-btn
               icon="edit"
               color="primary"
               dense
               flat
-              @click="editService(props.row)"
+              @click="showEdit(props.row)"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{t('edit')}}
@@ -125,7 +125,7 @@
               color="negative"
               dense
               flat
-              @click="deleteService(props.row.name)"
+              @click="deleteService(props.row.id)"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{t('delete')}}
@@ -174,75 +174,81 @@ const background = reactive({
   height: window.innerHeight - 70 + "px"
 })
 
-const services = reactive([
-  { name: '本地 Docker', connectionType: 'local', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: 'remote', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 }
+// const services = reactive([
+//   { name: '本地 Docker', connectionType: 'local', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: 'remote', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
+//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 }
+//
+// ])
 
+const services = reactive([
+  { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker', address: 'localhost', port: 2375 },
+  { id: '111112', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
 ])
 
 const newService = reactive({
+  id: '',
   serviceName: '',
   connectionType: '',
   serviceType: '',
@@ -258,7 +264,8 @@ const connectionOptions = [t('dockerNode.localNode'), t('dockerNode.remoteNode')
 const serviceTypeOptions = ['Docker', 'Podman']
 
 const columns = [
-  { name: 'serviceName', label: t('dockerNode.serviceName'), align: 'left', field: 'name' },
+  { name: 'id', label: 'ID', align: 'left', field: 'id' },
+  { name: 'serviceName', label: t('dockerNode.serviceName'), align: 'left', field: 'serviceName' },
   { name: 'connectionType', label: t('dockerNode.connectionType'), align: 'left', field: 'connectionType' },
   { name: 'serviceType', label: t('dockerNode.serviceType'), align: 'left', field: 'serviceType' },
   { name: 'address', label: t('dockerNode.address'), align: 'left', field: 'address' },
@@ -266,21 +273,43 @@ const columns = [
   { name: 'actions', label: t('dockerNode.action'), align: 'center' }
 ]
 
+const visibleColumns = ['serviceName', 'connectionType', 'serviceType', 'address', 'port', 'actions']
+
+const isEdit = ref(false)
+
 onMounted(() => {
   window.addEventListener('resize', checkScreenHeightSize)
 
-  const result = window.DB.getDockerNodes()
-
-  if (isEmptyObj(result)) {
-    for (const node of result) {
-      if (node.connectionType == "local") {
-        node.connectionType = t('dockerNode.localNode')
-      } else if (node.connectionType == "remote") {
-        node.connectionType = t('dockerNode.remoteNode')
+  window.DB.getDockerNodes().then((result) => {
+    if (result instanceof Array) {
+      if (!isEmptyObj(result)) {
+        for (const node of result) {
+          if (node.connectionType === "local") {
+            node.connectionType = t('dockerNode.localNode')
+          } else if (node.connectionType === "remote") {
+            node.connectionType = t('dockerNode.remoteNode')
+          }
+          services.push(node)
+        }
       }
+    } else {
+      if (result.success === false) {
+        let errMsg = ''
+        if (result.error instanceof Error) {
+          errMsg = JSON.stringify(result.error)
+        } else {
+          errMsg = result.error
+        }
+
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: "访问列表失败: " +  + errMsg
+        })
+      }
+
     }
-    services.push(...result)
-  }
+  })
 })
 
 onUnmounted(() => {
@@ -296,7 +325,8 @@ const checkScreenHeightSize = () => {
   tableStyle.height = window.innerHeight - 210 + "px"
 }
 
-const closeDialog = () => {
+const cleanService = () => {
+  newService.id = ''
   newService.serviceName = ''
   newService.connectionType = ''
   newService.serviceType = ''
@@ -304,12 +334,16 @@ const closeDialog = () => {
   newService.port = ''
   newService.username = ''
   newService.password = ''
+  newService.mark = ''
+}
 
+const closeDialog = () => {
+  cleanService()
   showDialog.value = false
+  isEdit.value = false
 }
 
 const addService = () => {
-  console.log("Adding service:", newService)
   if (
     newService.serviceName &&
     newService.serviceType &&
@@ -317,25 +351,26 @@ const addService = () => {
     (newService.connectionType === t('dockerNode.localNode') || (newService.address && newService.port && newService.username && newService.password))
   ) {
     const data = deepClone(newService)
-    if (data.connectionType == t('dockerNode.localNode')) {
+    if (data.connectionType === t('dockerNode.localNode')) {
       data.connectionType = "local"
-    } else if (data.connectionType == t('dockerNode.remoteNode')) {
+    } else if (data.connectionType === t('dockerNode.remoteNode')) {
       data.connectionType = "remote"
     }
-    const result = window.DB.addDockerNode(JSON.stringify(data))
 
-    result.then((res) => {
-      console.log("result", res)
+    // edit
+    if (isEdit.value === true) {
+      editService(data)
+      isEdit.value = false
+      return
+    }
+
+    // add
+    window.DB.addDockerNode(JSON.stringify(data)).then((res) => {
       if (res.success) {
+        newService.id = res.id
         services.push({ ...newService })
 
-        newService.serviceName = ''
-        newService.connectionType = ''
-        newService.serviceType = ''
-        newService.address = ''
-        newService.port = ''
-        newService.username = ''
-        newService.password = ''
+        cleanService()
         showDialog.value = false
 
         $q.notify({
@@ -344,26 +379,116 @@ const addService = () => {
           message: "添加成功"
         })
       } else {
+        let errMsg = ''
+        if (res.error instanceof Error) {
+          errMsg = JSON.stringify(res.error)
+        } else {
+          errMsg = res.error
+        }
+
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message:"添加失败, " + res.error
+          message:"添加失败: " + errMsg
         })
-
       }
     })
   }
 }
 
-const editService = (service) => {
-  const index = services.value.findIndex((s) => s.serviceName === service.serviceName)
-  if (index !== -1) {
-    services.value[index] = { ...service }
-  }
+const showEdit = (row) => {
+  newService.id = row.id
+  newService.serviceName = row.serviceName
+  newService.connectionType = row.connectionType
+  newService.serviceType = row.serviceType
+  newService.address = row.address
+  newService.port = row.port
+  newService.username = row.username
+  newService.password = row.password
+  newService.mark = row.mark
+
+  showDialog.value = true
+  isEdit.value = true
 }
 
-const deleteService = (name) => {
-  services.value = services.value.filter((service) => service.serviceName !== name)
+const editService = (data) => {
+  window.DB.editDockerNode(JSON.stringify(data)).then((res) => {
+    if (res.success) {
+      for (let i = 0; i < services.length; i++) {
+        if ( services[i].id === data.id) {
+          services[i].serviceName = data.serviceName
+          if (services[i].connectionType === "local") {
+            services[i].connectionType = t('dockerNode.localNode')
+          } else if (services[i].connectionType === "remote") {
+            services[i].connectionType = t('dockerNode.remoteNode')
+          }
+          services[i].serviceType = data.serviceType
+          services[i].address = data.address
+          services[i].port = data.port
+          services[i].username = data.username
+          services[i].password = data.password
+          services[i].mark = data.mark
+          break
+        }
+      }
+
+      cleanService()
+      showDialog.value = false
+
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: "修改成功"
+      })
+    } else {
+      let errMsg = ''
+      if (res.error instanceof Error) {
+        errMsg = JSON.stringify(res.error)
+      } else {
+        errMsg = res.error
+      }
+
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message:"修改失败: " + errMsg
+      })
+    }
+  })
+}
+
+const deleteService = (id) => {
+  window.DB.delDockerNode(id).then((res) => {
+    if (res.success) {
+      for (let i = 0; i < services.length; i++) {
+        if ( services[i].id === id) {
+          services.splice(i, 1)
+          break
+        }
+      }
+
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: "删除成功"
+      })
+    } else {
+      if (res.success === false) {
+        let errMsg = ''
+        if (res.error instanceof Error) {
+          errMsg = JSON.stringify(res.error)
+        } else {
+          errMsg = res.error
+        }
+
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message:"删除失败: " + errMsg
+        })
+      }
+    }
+  })
 }
 
 const connectService = (name) => {

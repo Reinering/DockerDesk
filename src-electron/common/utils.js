@@ -1,8 +1,8 @@
 
 
 
-// 指定长度和进制
-export function generateUuid (len = 16, radix = 2) {
+// 指定长度和进制 len: 生成UUID长度,radix: 需要chars中字符集的长度 max:62
+export function generateUuid (len = 16, radix = 62) {
   // [0-9][a-z][A-Z]
   let chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('')
   let uuid = [], i

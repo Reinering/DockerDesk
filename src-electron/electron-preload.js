@@ -58,13 +58,20 @@ contextBridge.exposeInMainWorld('DB', {
     return ipcRenderer.invoke('getDockerNodes')
   },
 
-  addDockerNode1 (data) {
-    ipcRenderer.send('addDockerNode', data)
-    console.log("data", data)
-  },
+  // addDockerNode1 (data) {
+  //   return ipcRenderer.send('addDockerNode', data)
+  // },
 
   async addDockerNode (data) {
     return await ipcRenderer.invoke('addDockerNode', data)
+  },
+
+  async delDockerNode (data) {
+    return await ipcRenderer.invoke('delDockerNode', data)
+  },
+
+  async editDockerNode (data) {
+    return await ipcRenderer.invoke('editDockerNode', data)
   }
 
 })

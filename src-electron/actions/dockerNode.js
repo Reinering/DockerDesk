@@ -6,22 +6,21 @@ export const dockerNodes = {
     // const stmt = db.prepare('SELECT * FROM docker_node WHERE delete_flags = 0')
     // return stmt.all()
 
+    // delete_flags: 0: normal, 1: deleted
     return db('docker_node')
       .where('delete_flags', '=', '0')
       .select('*').then(
       rows => {
-        console.log(rows)
         return rows
       }).catch(error => {
-        console.log(error)
-        throw error
+        return { success: false, error: error }
       })
       // .finally(() => {
       //   db.destroy()
       // })
   },
 
-  getDockerNodesByID:  async (id) => {
+  getDockerNodeByID:  async (id) => {
     // const stmt = db.prepare('SELECT * FROM docker_node WHERE id = ?')
     // return stmt.get('id')
 
@@ -32,8 +31,7 @@ export const dockerNodes = {
         console.log(rows)
         return rows
       }).catch(error => {
-        console.log(error)
-        throw error
+        return { success: false, error: error }
       })
   },
 
@@ -47,18 +45,43 @@ export const dockerNodes = {
 
     return await db('docker_node').insert(data)
       .then(result => {
-        return { success: true, error: '' }
+        return { success: true, id: data.id, error: '' }
     }).catch(error => {
         return { success: false, error: error }
     })
   },
 
-  updateDockerNodeByID: async () => {
-
+  deleteDockerNodeByID: async (id) => {
+    return await db('docker_node').where('id', '=', id).delete().then((result) => {
+      return { success: true, id: id, error: '' }
+    }).catch(error => {
+      return { success: false, error: error }
+    })
   },
 
-  deleteDockerNodeByID: async () => {
+  delDockerNodeByID: async (id) => {
+    return await db('docker_node').where('id', '=', id).update(
+      {
+        delete_time: Date.now(),
+        delete_flags: 1,
+      }
+    ).then((result) => {
+      return { success: true, error: '' }
+    }).catch(error => {
+      return { success: false, error: error }
+    })
+  },
 
-  }
+  updateDockerNode: async (data) => {
+    return await db('docker_node').where('id', '=', data.id).update(
+      data
+    ).then((result) => {
+      console.log("mark", result)
+      if (result === 0) return { success: false, error: '' }
+      return { success: true, error: '' }
+    }).catch(error => {
+      return { success: false, error: error }
+    })
+  },
 
 }
