@@ -3,7 +3,8 @@ import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
-import { db } from 'src/utils/database/db.js';
+import { registerIpcHandlers } from './ipcManager.js'
+import { initDB } from './database/manager.js'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -59,22 +60,25 @@ async function createWindow () {
   })
 }
 
-app.whenReady().then(() => {
-  // init database
-  db
+registerIpcHandlers()
 
-  createWindow
+initDB()
 
-})
+app.whenReady().then(createWindow)
 
+// close
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {
     app.quit()
   }
+
 })
 
+
+//
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
+
   }
 })

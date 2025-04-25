@@ -29,8 +29,9 @@
  */
 
 
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { BrowserWindow } from '@electron/remote'
+
 
 contextBridge.exposeInMainWorld('myWindowAPI', {
   minimize () {
@@ -50,4 +51,20 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
   close () {
     BrowserWindow.getFocusedWindow().close()
   }
+})
+
+contextBridge.exposeInMainWorld('DB', {
+  getDockerNodes () {
+    return ipcRenderer.invoke('getDockerNodes')
+  },
+
+  addDockerNode1 (data) {
+    ipcRenderer.send('addDockerNode', data)
+    console.log("data", data)
+  },
+
+  async addDockerNode (data) {
+    return await ipcRenderer.invoke('addDockerNode', data)
+  }
+
 })
