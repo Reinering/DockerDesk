@@ -1,0 +1,86 @@
+export default {
+  failed: 'Action failed',
+  success: 'Action was successful',
+
+  save: '保存',
+  cancel: '取消',
+  ok: '确定',
+
+  username: '用户名',
+  password: '密码',
+
+  edit: '编辑',
+  add: '添加',
+  update: '更新',
+  delete: '删除',
+  search: '搜索',
+  reset: '重置',
+  refresh: '刷新',
+  connect: '连接',
+  upload: '上传',
+  download: '下载',
+  select: '选择',
+  selectAll: '全选',
+  selectNone: '全不选',
+  selectInvert: '反选',
+  selectFile: '选择文件',
+  selectFolder: '选择文件夹',
+  mark: "备注",
+
+  selectLanguage: '选择语言',
+
+
+
+
+  //
+  settings: "设置",
+
+  //navi
+  navigator: {
+    home: "首页",
+    dockerNode: "Docker节点",
+    settings: "设置"
+  },
+
+  //Docker Node
+  dockerNode: {
+    addServiceTitle: "添加 Docker/Podman 服务",
+    serviceManagement: "服务管理",
+    addService: "添加服务",
+    local: "本地",
+    remote: "远程",
+    localNode: "本地节点",
+    remoteNode: "远程节点",
+
+    serviceName: "服务名称",
+    serviceType: "服务类型",
+    connectionType: "连接类型",
+    address: "地址",
+    port: "端口",
+    serviceStatus: "服务状态",
+    action: "操作",
+    mark: "备注",
+
+    addNode: "添加节点",
+    nodeName: "节点名称",
+    nodeUrl: "节点URL",
+    nodePort: "节点端口",
+    nodeUserName: "节点用户名",
+    nodePassword: "节点密码",
+    nodeDescription: "节点描述",
+    nodeStatus: "节点状态",
+    nodeStatusOnline: "在线",
+    nodeStatusOffline: "离线",
+    nodeStatusError: "错误",
+  },
+
+  // db
+  database: {
+    initError: '数据库初始化失败',
+    initSuccess: '数据库初始化成功',
+    initTableError: '表初始化失败',
+    initTableSuccess: '表初始化成功',
+    connectionError: '数据库连接失败',
+    connectionSuccess: '数据库连接成功',
+  }
+}
