@@ -1,102 +1,233 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+  <q-layout :layout="layout">
+
+    <q-header elevated class="bg-primary text-white" height-hint="98" >
+      <ToolBar />
+
+      <q-toolbar style="height: 70px;">
+        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
+
+        <q-avatar>
+          <img src="public/icons/favicon-128x128.png" />
+        </q-avatar>
 
         <q-toolbar-title>
-          Quasar App
+          Docker Management
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <q-space />
+        <q-item-label>关于</q-item-label>
       </q-toolbar>
     </q-header>
 
     <q-drawer
-      v-model="leftDrawerOpen"
       show-if-above
+      v-model="leftDrawerOpen"
+      side="left"
       bordered
+      :behavior="behavior"
+      :mini="miniState"
+      @mouseover="miniState = false"
+      @mouseout="miniState = true"
+      mini-to-overlay
+      :width="210"
+      content-class="bg-grey-3"
     >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
+      <!-- drawer content -->
+      <navigator :naviGoto="naviGoto" :disableNavi="disableNavi" :disabled=disableNavi.disabled />
     </q-drawer>
 
     <q-page-container>
       <router-view />
     </q-page-container>
+
   </q-layout>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import { reactive, inject, toRefs } from 'vue'
+import Navigator from 'components/Navigator.vue'
+import ToolBar from 'components/ToolBar.vue'
+import { useNavigatorStore } from 'stores/navigator.js'
+import { isEmptyStr, isEmptyProxy } from 'src/utils/common.js'
 
-const linksList = [
+const navigatorStore = useNavigatorStore()
+
+const $q = inject("$q")
+const deviceInfo = $q.platform.is
+const router = inject("router")
+const t = inject("t")
+
+const pageState = reactive({
+  layout: 'hHh lpR fFf',
+  behavior: 'default',
+  leftDrawerOpen: false,
+  // isBarHide: false,
+  miniState: true
+})
+
+const { layout, behavior, leftDrawerOpen, miniState } = toRefs(pageState)
+
+if (deviceInfo.platform === 'ios' || deviceInfo.platform === 'Andriod') {
+  pageState.layout = 'lHh lpR fFf'
+  pageState.behavior = "mobile"
+} else {
+  pageState.layout = 'hHh lpR fFf'
+  pageState.behavior = 'default'
+}
+
+if (process.env.MODE === 'electron') {
+  pageState.isBarHide = true
+} else {
+  pageState.isBarHide = false
+}
+
+const naviDatas = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
+    label: t('navigator.home'),
+    icon: "home",
+    route: '',
+    state: true,
+    click: null,
+    children: []
   },
   {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
+    label: "Docker节点",
+    icon: "dialpad",
+    route: 'dockerNodes',
+    state: false,
+    click: null,
+    children: []
   },
   {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
+    label: "节点管理",
+    icon: "dialpad",
+    router: '',
+    state: false,
+    click: null,
+    children: [
+      {
+        label: "节点列表",
+        icon: "grain",
+        route: 'nodes',
+        state: false,
+        click: null,
+        children: []
+      },
+      {
+        label: "边缘节点列表",
+        icon: "commit",
+        route: 'edge_nodes',
+        state: false,
+        click: null,
+        children: []
+      },
+      {
+        label: "用户节点列表",
+        icon: "spa",
+        route: 'leafs',
+        state: false,
+        click: null,
+        children: []
+      },
+      {
+        label: "节点拓扑",
+        icon: "hub",
+        route: 'topology',
+        state: false,
+        click: null,
+        children: []
+      }
+    ]
   },
   {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
+    label: "用户管理",
+    icon: "manage_accounts",
+    route: '',
+    state: false,
+    click: null,
+    children: [
+      {
+        label: "用户账户",
+        icon: "settings",
+        route: 'users',
+        state: false,
+        click: null,
+        children: []
+      },
+      {
+        label: "用户权限",
+        icon: "app_registration",
+        route: 'cainvite',
+        state: false,
+        click: null,
+        children: []
+      }
+    ]
   },
   {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
+    label: "帮助",
+    icon: "help",
+    route: '',
+    state: false,
+    click: null,
+    children: [
+      {
+        label: "联系我们",
+        icon: "call",
+        route: '',
+        state: false,
+        click: null,
+        children: []
+      },
+      {
+        label: "报告问题",
+        icon: "report_problem",
+        route: '',
+        state: false,
+        click: null,
+        children: []
+      },
+      {
+        label: "常见问题",
+        icon: "settings",
+        route: '',
+        state: false,
+        click: null,
+        children: []
+      }
+    ]
   },
   {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
+    label: t('navigator.settings'),
+    icon: "settings",
+    route: 'settings',
+    state: false,
+    click: null,
+    children: []
   }
 ]
 
-const leftDrawerOpen = ref(false)
+if (isEmptyStr(navigatorStore.mainUri)) {
+  navigatorStore.mainUri = router.currentRoute.value.path
+}
+if (isEmptyProxy(navigatorStore.naviItems)) {
+  navigatorStore.naviItems = naviDatas
+}
+const naviGoto = (func) => {
+  func()
+}
 
-function toggleLeftDrawer () {
+// 导航栏是否禁用
+const disableNavi = reactive({
+  disabled: null, // 是否禁用导航栏 null/true
+  clickabled: true // 是否禁用导航栏的点击事件
+})
+
+const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
+
+
+
 </script>

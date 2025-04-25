@@ -3,7 +3,17 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { path: '', component: () => import('pages/IndexPage.vue') },
+      {
+        path: 'dockerNodes',
+        name: 'dockerNodes',
+        component: () => import('pages/DockerNodes.vue'),
+      },
+      {
+        path: 'settings',
+        name: 'settings',
+        component: () => import('pages/Settings.vue'),
+      },
     ]
   },
 
