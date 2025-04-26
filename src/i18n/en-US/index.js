@@ -73,6 +73,8 @@ export default {
     nodeStatusOnline: "Online",
     nodeStatusOffline: "Offline",
     nodeStatusError: "Error",
+
+    dataNotNull: "Not Null",
   },
 
   // db
@@ -83,6 +85,17 @@ export default {
     initTableSuccess: 'Table initialized successfully',
     connectionError: 'Database connection failed',
     connectionSuccess: 'Database connected successfully',
+
+    accessSuccess: 'Access successfully',
+    accessFail: 'Access failed',
+    addSuccess: 'Added successfully',
+    addFail: 'Added failed',
+    writeSuccess: 'Write successfully',
+    writeError: 'Write failed',
+    updateSuccess: 'Update successfully',
+    updateError: 'Update failed',
+    deleteSuccess: 'Delete successfully',
+    deleteFail: 'Delete failed',
   },
 
 }

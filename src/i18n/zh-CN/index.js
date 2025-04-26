@@ -72,6 +72,8 @@ export default {
     nodeStatusOnline: "在线",
     nodeStatusOffline: "离线",
     nodeStatusError: "错误",
+
+    dataNotNull: "必填数据不能为空"
   },
 
   // db
@@ -82,5 +84,16 @@ export default {
     initTableSuccess: '表初始化成功',
     connectionError: '数据库连接失败',
     connectionSuccess: '数据库连接成功',
+
+    accessSuccess: "访问成功",
+    accessFail: "访问失败",
+    addSuccess: "添加成功",
+    addFail: "添加失败",
+    writeSuccess: "写入成功",
+    writeError: "写入失败",
+    updateSuccess: "更新成功",
+    updateError: "更新失败",
+    deleteSuccess: "删除成功",
+    deleteFail: "删除失败",
   }
 }
