@@ -5,6 +5,7 @@ import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
+import { initLogging } from './common/logging.js'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -63,6 +64,7 @@ async function createWindow () {
 registerIpcHandlers()
 
 initDB()
+initLogging()
 
 app.whenReady().then(createWindow)
 

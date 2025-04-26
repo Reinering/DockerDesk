@@ -21,5 +21,11 @@ export const clientConfig = {
     key: 'igkIqttVLvw2NTPD1Uq2hMOmxCodDl3E',
     iv: 'EqzoTlqyyf',
     interference: ';' * 100
+  },
+
+  logging: {
+    logPath: 'logs',
+    logFile: 'logging.log',
+    level: 'info',      // error, warn, info, verbose, debug, silly
   }
 }

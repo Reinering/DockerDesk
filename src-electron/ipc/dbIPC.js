@@ -2,6 +2,7 @@ import { ipcMain } from 'electron'
 import { dockerNodes } from '../actions/dockerNode.js'
 import { generateUuid } from '../common/utils.js'
 import { interference, encryptPwd } from '../common/encrypt.js'
+import log from 'electron-log'
 
 
 
@@ -27,7 +28,7 @@ export function registerDBIpcHandlers() {
           })
           return data
         } catch (error) {
-          console.log(error)
+          log.error(error)
           return { success: false, error: error.message }
         }
       }
@@ -66,6 +67,7 @@ export function registerDBIpcHandlers() {
         return result
       })
     } catch (error) {
+      log.error(error)
       return { success: false, error: error.message }
     }
   })
@@ -98,6 +100,7 @@ export function registerDBIpcHandlers() {
 
       return dockerNodes.updateDockerNode(value)
     } catch (error) {
+      log.error(error)
       return { success: false, error: error.message }
     }
   })
