@@ -16,4 +16,10 @@ export const clientConfig = {
       position: 'bottom'
     }
   },
+
+  encryption: {
+    key: 'igkIqttVLvw2NTPD1Uq2hMOmxCodDl3E',
+    iv: 'EqzoTlqyyf',
+    interference: ';' * 100
+  }
 }

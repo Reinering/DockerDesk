@@ -54,7 +54,7 @@
                 v-if="newService.connectionType === t('dockerNode.remoteNode')"
                 v-model="newService.username"
                 :label="t('username') + '(SSH)'"
-                type="number"
+                type="text"
                 maxlength="30"
                 outlined
                 dense
@@ -65,7 +65,8 @@
                 v-model="newService.password"
                 :label="t('password') + '(SSH)'"
                 type="password"
-                maxlength="30"
+                maxlength="50"
+
                 outlined
                 dense
                 class="q-mb-sm"
@@ -304,10 +305,9 @@ onMounted(() => {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: "访问列表失败: " +  + errMsg
+          message: t('database.accessFail') + ': ' + errMsg
         })
       }
-
     }
   })
 })
@@ -344,6 +344,7 @@ const closeDialog = () => {
 }
 
 const addService = () => {
+  console.log('addService', newService)
   if (
     newService.serviceName &&
     newService.serviceType &&
@@ -357,6 +358,8 @@ const addService = () => {
       data.connectionType = "remote"
     }
 
+    console.log('edit data', data)
+
     // edit
     if (isEdit.value === true) {
       editService(data)
@@ -367,7 +370,8 @@ const addService = () => {
     // add
     window.DB.addDockerNode(JSON.stringify(data)).then((res) => {
       if (res.success) {
-        newService.id = res.id
+        newService.id = res.data.id
+        newService.password = res.data.password
         services.push({ ...newService })
 
         cleanService()
@@ -376,7 +380,7 @@ const addService = () => {
         $q.notify({
           type: 'positive',
           position: clientConfig.quasar.notify.position,
-          message: "添加成功"
+          message: t('database.addSuccess')
         })
       } else {
         let errMsg = ''
@@ -389,9 +393,16 @@ const addService = () => {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message:"添加失败: " + errMsg
+          message: t('database.addFail') + ': ' + errMsg
         })
       }
+    })
+  }
+  else {
+    $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: t('dockerNode.dataNotNull')
     })
   }
 }
@@ -438,7 +449,7 @@ const editService = (data) => {
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
-        message: "修改成功"
+        message: t('database.updateSuccess')
       })
     } else {
       let errMsg = ''
@@ -451,7 +462,7 @@ const editService = (data) => {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message:"修改失败: " + errMsg
+        message: t('database.updateError') + ': ' + errMsg
       })
     }
   })
@@ -470,7 +481,7 @@ const deleteService = (id) => {
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
-        message: "删除成功"
+        message: t('database.deleteSuccess')
       })
     } else {
       if (res.success === false) {
@@ -484,7 +495,7 @@ const deleteService = (id) => {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message:"删除失败: " + errMsg
+          message: t('database.deleteFail') + ': ' + errMsg
         })
       }
     }

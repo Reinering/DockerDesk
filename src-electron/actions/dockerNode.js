@@ -45,7 +45,7 @@ export const dockerNodes = {
 
     return await db('docker_node').insert(data)
       .then(result => {
-        return { success: true, id: data.id, error: '' }
+        return { success: true, error: '' }
     }).catch(error => {
         return { success: false, error: error }
     })
@@ -76,7 +76,6 @@ export const dockerNodes = {
     return await db('docker_node').where('id', '=', data.id).update(
       data
     ).then((result) => {
-      console.log("mark", result)
       if (result === 0) return { success: false, error: '' }
       return { success: true, error: '' }
     }).catch(error => {
