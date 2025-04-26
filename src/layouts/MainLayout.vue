@@ -38,7 +38,15 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+<!--      缓存页面，结合route中meta.keepalive属性，判断是否缓存-->
+      <transition name="fade" mode="out-in">
+        <router-view v-slot="{ Component, route }">
+          <keep-alive v-if="route.meta.keepAlive">
+            <component :is="Component" />
+          </keep-alive>
+          <component v-else :is="Component" />
+        </router-view>
+      </transition>
     </q-page-container>
 
   </q-layout>
@@ -91,6 +99,7 @@ const naviDatas = [
     click: null,
     children: []
   },
+
   {
     label: "Docker节点",
     icon: "dialpad",
@@ -99,6 +108,7 @@ const naviDatas = [
     click: null,
     children: []
   },
+
   {
     label: "节点管理",
     icon: "dialpad",
@@ -140,64 +150,16 @@ const naviDatas = [
       }
     ]
   },
+
   {
-    label: "用户管理",
-    icon: "manage_accounts",
-    route: '',
+    label: t('navigator.terminal'),
+    icon: "terminal",
+    route: 'terminal',
     state: false,
     click: null,
-    children: [
-      {
-        label: "用户账户",
-        icon: "settings",
-        route: 'users',
-        state: false,
-        click: null,
-        children: []
-      },
-      {
-        label: "用户权限",
-        icon: "app_registration",
-        route: 'cainvite',
-        state: false,
-        click: null,
-        children: []
-      }
-    ]
+    children: []
   },
-  {
-    label: "帮助",
-    icon: "help",
-    route: '',
-    state: false,
-    click: null,
-    children: [
-      {
-        label: "联系我们",
-        icon: "call",
-        route: '',
-        state: false,
-        click: null,
-        children: []
-      },
-      {
-        label: "报告问题",
-        icon: "report_problem",
-        route: '',
-        state: false,
-        click: null,
-        children: []
-      },
-      {
-        label: "常见问题",
-        icon: "settings",
-        route: '',
-        state: false,
-        click: null,
-        children: []
-      }
-    ]
-  },
+
   {
     label: t('navigator.settings'),
     icon: "settings",

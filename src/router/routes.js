@@ -8,6 +8,17 @@ const routes = [
         path: 'dockerNodes',
         name: 'dockerNodes',
         component: () => import('pages/DockerNodes.vue'),
+        meta: {
+          keepAlive: true,
+        }
+      },
+      {
+        path: 'terminal',
+        name: 'terminal',
+        component: () => import('pages/Terminal.vue'),
+        meta: {
+          keepAlive: true,
+        }
       },
       {
         path: 'settings',
@@ -15,6 +26,12 @@ const routes = [
         component: () => import('pages/Settings.vue'),
       },
     ]
+  },
+
+  {
+    path: '/terminal',
+    component: () => import('layouts/TerminalLayout.vue')
+
   },
 
   // Always leave this as last one,

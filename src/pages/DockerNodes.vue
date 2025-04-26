@@ -137,7 +137,7 @@
               color="negative"
               dense
               flat
-              @click="connectService(props.row.name)"
+              @click="connectService(props.row.id)"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{t('connect')}}
@@ -152,10 +152,16 @@
 </template>
 
 <script setup>
+// 定义组件名称
+defineOptions({
+  name: 'DockerNodes',
+})
 
-import { inject, ref, onMounted, onUnmounted, watch, reactive } from 'vue'
+import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive } from 'vue'
 import { deepClone, isEmptyObj } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
+
+const name = 'dockerNode'
 
 const $q = inject("$q")
 const t = inject("t")
@@ -502,13 +508,14 @@ const deleteService = (id) => {
   })
 }
 
-const connectService = (name) => {
-  const service = services.value.find((s) => s.serviceName === name)
-  if (service) {
-    console.log("Linking to service:", service)
-    // Implement the linking logic here
-  }
+const connectService = (id) => {
+  // window.open('/terminal')
+  $q.dialog({})
 }
+
+onBeforeMount(() => {
+  // console.log('beforeMount')
+})
 
 </script>
 
