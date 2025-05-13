@@ -15,7 +15,7 @@ const routes = [
       {
         path: 'terminal',
         name: 'terminal',
-        component: () => import('pages/Terminal.vue'),
+        component: () => import('pages/Terminals.vue'),
         meta: {
           keepAlive: true,
         }
