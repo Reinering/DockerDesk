@@ -4,25 +4,29 @@
       <q-dialog v-model="showDialog" persistent>
         <q-card style="min-width: 400px">
           <q-card-section>
-            <div class="text-h6">{{t('dockerNode.addServiceTitle')}}</div>
+            <div class="text-h6">{{diaglogTitle}}</div>
           </q-card-section>
           <q-card-section>
             <q-form >
               <q-input
+                class="q-mb-sm"
                 v-model="newService.serviceName"
                 :label="t('dockerNode.serviceName')"
                 maxlength="30"
                 outlined
                 dense
-                class="q-mb-sm"
+                :rules="[
+                  val => !!val || t('verifyMessage.dataNotNull'),
+                  val => val.length <= 20 || t('verifyMessage.dataLenNotMax') + '20'
+                ]"
               />
               <q-select
+                class="q-mb-sm"
                 v-model="newService.connectionType"
                 :options="connectionOptions"
                 :label="t('dockerNode.serviceType') + '(' + t('dockerNode.local') + t('dockerNode.remote') + ')'"
                 outlined
                 dense
-                class="q-mb-sm"
               />
               <q-select
                 v-model="newService.serviceType"
@@ -133,11 +137,12 @@
               </q-tooltip>
             </q-btn>
             <q-btn
+              v-if="props.row.connectionType === t('dockerNode.remoteNode')"
               icon="link"
               color="negative"
               dense
               flat
-              @click="connectService(props.row.id)"
+              @click="connectService(props.row)"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{t('connect')}}
@@ -160,11 +165,15 @@ defineOptions({
 import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive } from 'vue'
 import { deepClone, isEmptyObj } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
+import { useNavigatorStore } from 'stores/navigator.js'
+import { changeNavigatorGoto } from "src/utils/router.js"
 
 const name = 'dockerNode'
 
 const $q = inject("$q")
+const router = inject("router")
 const t = inject("t")
+const navigatorStore = useNavigatorStore()
 
 const tableStyle = reactive({
   height: window.innerHeight - 210 + "px",
@@ -173,6 +182,8 @@ const pagination = ref({
   rowsPerPage: 0
 })
 
+const diaglogTitle = ref(t('dockerNode.addServiceTitle'))
+
 const showDialog = ref(false)
 
 const background = reactive({
@@ -180,74 +191,6 @@ const background = reactive({
   backgroundSize: 'cover',
   height: window.innerHeight - 70 + "px"
 })
-
-// const services = reactive([
-//   { name: '本地 Docker', connectionType: 'local', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: 'remote', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '本地 Docker', connectionType: '本地', serviceType: 'Docker', address: 'localhost', port: 2375 },
-//   { name: '远程 Podman', connectionType: '远程', serviceType: 'Podman', address: '192.168.1.100', port: 8080 }
-//
-// ])
 
 const services = reactive([
   { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker', address: 'localhost', port: 2375 },
@@ -284,48 +227,6 @@ const visibleColumns = ['serviceName', 'connectionType', 'serviceType', 'address
 
 const isEdit = ref(false)
 
-onMounted(() => {
-  window.addEventListener('resize', checkScreenHeightSize)
-
-  window.DB.getDockerNodes().then((result) => {
-    if (result instanceof Array) {
-      if (!isEmptyObj(result)) {
-        for (const node of result) {
-          if (node.connectionType === "local") {
-            node.connectionType = t('dockerNode.localNode')
-          } else if (node.connectionType === "remote") {
-            node.connectionType = t('dockerNode.remoteNode')
-          }
-          services.push(node)
-        }
-      }
-    } else {
-      if (result.success === false) {
-        let errMsg = ''
-        if (result.error instanceof Error) {
-          errMsg = JSON.stringify(result.error)
-        } else {
-          errMsg = result.error
-        }
-
-        $q.notify({
-          type: 'negative',
-          position: clientConfig.quasar.notify.position,
-          message: t('database.accessFail') + ': ' + errMsg
-        })
-      }
-    }
-  })
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreenHeightSize)
-})
-
-// watch(newService, (value, oldValue) => {
-//   console.log(value, oldValue)
-// })
-
 const checkScreenHeightSize = () => {
   background.height = window.innerHeight - 70 + "px"
   tableStyle.height = window.innerHeight - 210 + "px"
@@ -347,10 +248,12 @@ const closeDialog = () => {
   cleanService()
   showDialog.value = false
   isEdit.value = false
+
+  diaglogTitle.value = t('dockerNode.addServiceTitle')
 }
 
 const addService = () => {
-  console.log('addService', newService)
+  diaglogTitle.value = t('dockerNode.addServiceTitle')
   if (
     newService.serviceName &&
     newService.serviceType &&
@@ -374,7 +277,7 @@ const addService = () => {
     }
 
     // add
-    window.DB.addDockerNode(JSON.stringify(data)).then((res) => {
+    window.dockerNodes.addDockerNode(JSON.stringify(data)).then((res) => {
       if (res.success) {
         newService.id = res.data.id
         newService.password = res.data.password
@@ -408,7 +311,7 @@ const addService = () => {
     $q.notify({
       type: 'negative',
       position: clientConfig.quasar.notify.position,
-      message: t('dockerNode.dataNotNull')
+      message: t('verifyMessage.dataNotNull')
     })
   }
 }
@@ -424,12 +327,13 @@ const showEdit = (row) => {
   newService.password = row.password
   newService.mark = row.mark
 
+  diaglogTitle.value = t('dockerNode.editServiceTitle')
   showDialog.value = true
   isEdit.value = true
 }
 
 const editService = (data) => {
-  window.DB.editDockerNode(JSON.stringify(data)).then((res) => {
+  window.dockerNodes.editDockerNode(JSON.stringify(data)).then((res) => {
     if (res.success) {
       for (let i = 0; i < services.length; i++) {
         if ( services[i].id === data.id) {
@@ -472,46 +376,124 @@ const editService = (data) => {
       })
     }
   })
+
+  diaglogTitle.value = t('dockerNode.addServiceTitle')
 }
 
 const deleteService = (id) => {
-  window.DB.delDockerNode(id).then((res) => {
-    if (res.success) {
-      for (let i = 0; i < services.length; i++) {
-        if ( services[i].id === id) {
-          services.splice(i, 1)
-          break
+  $q.dialog({
+    title: t('confirm'),
+    message: t('dockerNode.deleteMessage'),
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    window.dockerNodes.delDockerNode(id).then((res) => {
+      if (res.success) {
+        for (let i = 0; i < services.length; i++) {
+          if ( services[i].id === id) {
+            services.splice(i, 1)
+            break
+          }
+        }
+
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('database.deleteSuccess')
+        })
+      } else {
+        if (res.success === false) {
+          let errMsg = ''
+          if (res.error instanceof Error) {
+            errMsg = JSON.stringify(res.error)
+          } else {
+            errMsg = res.error
+          }
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('database.deleteFail') + ': ' + errMsg
+          })
         }
       }
+    })
+  })
 
-      $q.notify({
-        type: 'positive',
+}
+
+const connectService = (row) => {
+  $q.dialog({
+    title: t('confirm'),
+    message: t('dockerNode.connectMessage'),
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    if (!row.address || !row.port || !row.username || !row.password) {
+      return $q.notify({
+        type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: t('database.deleteSuccess')
+        message: t('dockerNode.connectError')
       })
+    }
+
+    for (let item of navigatorStore.naviItems) {
+      if (item.name === "Terminal") {
+        return changeNavigatorGoto(router, item, {data: row})
+      }
+    }
+
+  }).onOk(() => {
+    // console.log('>>>> second OK catcher')
+  }).onCancel(() => {
+    // console.log('>>>> Cancel')
+  }).onDismiss(() => {
+    // console.log('I am triggered on both OK and Cancel')
+  })
+
+}
+
+onMounted(() => {
+  window.addEventListener('resize', checkScreenHeightSize)
+
+  window.dockerNodes.getDockerNodes().then((result) => {
+    if (result instanceof Array) {
+      if (!isEmptyObj(result)) {
+        for (const node of result) {
+          if (node.connectionType === "local") {
+            node.connectionType = t('dockerNode.localNode')
+          } else if (node.connectionType === "remote") {
+            node.connectionType = t('dockerNode.remoteNode')
+          }
+          services.push(node)
+        }
+      }
     } else {
-      if (res.success === false) {
+      if (result.success === false) {
         let errMsg = ''
-        if (res.error instanceof Error) {
-          errMsg = JSON.stringify(res.error)
+        if (result.error instanceof Error) {
+          errMsg = JSON.stringify(result.error)
         } else {
-          errMsg = res.error
+          errMsg = result.error
         }
 
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: t('database.deleteFail') + ': ' + errMsg
+          message: t('database.accessFail') + ': ' + errMsg
         })
       }
     }
   })
-}
+})
 
-const connectService = (id) => {
-  // window.open('/terminal')
-  $q.dialog({})
-}
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreenHeightSize)
+})
+
+// watch(newService, (value, oldValue) => {
+//   console.log(value, oldValue)
+// })
 
 onBeforeMount(() => {
   // console.log('beforeMount')
