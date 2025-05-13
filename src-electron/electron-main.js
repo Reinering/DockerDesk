@@ -5,6 +5,7 @@ import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
+import { ssh_connections } from "./ipc/terminalIPC.js"
 import { initLogging } from './common/logging.js'
 
 // needed in case process is undefined under Linux
@@ -72,6 +73,11 @@ app.whenReady().then(createWindow)
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {
     app.quit()
+  }
+
+  // 退出前，断开所有ssh连接
+  for (let conn of ssh_connections) {
+
   }
 
 })
