@@ -132,7 +132,6 @@ export function registerDBIpcHandlers() {
               }
             }
           }
-          console.log("data", data)
           return data
         } catch (error) {
           log.error(error)

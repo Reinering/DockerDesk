@@ -7,6 +7,9 @@ export const usePreCmdsStore = defineStore('precmds', {
     isSync: ref("0"),
     option: ref(''),
     preCmds: reactive({}),
+
+    isSudo: ref(false),
+    isSendNow: ref(false),
   }),
 
   getters: {
@@ -21,7 +24,7 @@ export const usePreCmdsStore = defineStore('precmds', {
     },
 
     cleanPreCmds(){
-      this.option = ref('0'),
+      this.option = ref(''),
       this.preCmds = reactive({})
     }
   },
@@ -29,10 +32,9 @@ export const usePreCmdsStore = defineStore('precmds', {
 
   persist: {
     storage: sessionStorage,
-    paths: ['preCmds']
+    paths: ['option', 'preCmds', 'isSudo', 'isSendNow'],
   },
 })
-
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(usePreCmdsStore, import.meta.hot))

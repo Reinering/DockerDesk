@@ -43,7 +43,7 @@
       </q-tab-panels>
     </q-card>
 
-    <CommandBar v-if="isShowCmdBar" fixed-bottom/>
+    <CommandBar v-if="isShowCmdBar"  :send="submitCmd" fixed-bottom/>
 
     <q-page-sticky position="bottom-right" :offset="fabPos">
       <q-fab
@@ -53,16 +53,16 @@
         :disable="draggingFab"
         v-touch-pan.prevent.mouse="moveFab"
       >
-        <q-fab-action @click="showCmdBar" color="primary" icon="person_add" :disable="draggingFab">
+        <q-fab-action @click="showCmdBar" color="primary" icon="keyboard_command_key" :disable="draggingFab">
           <q-tooltip>
             CMD Bar
           </q-tooltip>
         </q-fab-action>
-        <q-fab-action @click="onClick" color="primary" icon="mail" :disable="draggingFab">
-          <q-tooltip>
-            CMD Bar
-          </q-tooltip>
-        </q-fab-action>
+<!--        <q-fab-action @click="onClick" color="primary" icon="mail" :disable="draggingFab">-->
+<!--          <q-tooltip>-->
+<!--            CMD Bar-->
+<!--          </q-tooltip>-->
+<!--        </q-fab-action>-->
       </q-fab>
     </q-page-sticky>
   </q-page>
@@ -111,9 +111,9 @@ const moveFab = (ev) => {
 const tab = ref('')
 
 const tabs = reactive([
-  { id: 'mails', label: 'Mails', icon: 'check', data: {}},
-  { id: 'alarms', label: 'Alarms', icon: 'unfold_less', data: {}},
-  { id: 'movies', label: 'Movies', icon: 'movie', data: {}},
+  // { id: 'mails', label: 'Mails', icon: 'check', data: {}},
+  // { id: 'alarms', label: 'Alarms', icon: 'unfold_less', data: {}},
+  // { id: 'movies', label: 'Movies', icon: 'movie', data: {}},
 ])
 
 const xtermRefs = ref({}); // 存储 xterm 实例的 ref
@@ -136,6 +136,10 @@ const showCmdBar = () => {
       cardStyle.height = window.innerHeight - 70 + "px"
     }
   }
+}
+
+const submitCmd = () => {
+
 }
 
 const checkScreenSize = () => {
@@ -188,7 +192,7 @@ onActivated(() => {
       tabs.push({
         id: uuid,
         label: data.serviceName,
-        icon: 'unfold_less',
+        icon: 'terminal',
         data: data
       })
       tab.value = uuid
@@ -198,6 +202,11 @@ onActivated(() => {
   }
 })
 
+watch(tabs, (newVal, oldVal) => {
+  if (tabs.length === 0) {
+    isShowCmdBar.value = false
+  }
+})
 
 </script>
 

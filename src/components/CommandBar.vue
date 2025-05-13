@@ -27,7 +27,15 @@
       </q-list>
     </q-menu>
 
-    <div class="row no-wrap q-pa-md q-gutter-sm no-padding">
+    <div class="row no-wrap q-pa-md q-gutter-sm no-padding" style="margin-left: 2px;">
+      <q-btn
+        class="square-btn"
+        icon="settings"
+        padding="none"
+        flat
+        @click="onShowSettingsDialog"
+      />
+
       <q-select
         filled
         dense
@@ -46,7 +54,7 @@
             :label="cmd.label"
             color="green"
             no-caps
-            @click="onClickCMD"
+            @click="onClickCMD(cmd)"
             style="{width: 100px;}"
           >
             <q-tooltip>
@@ -76,19 +84,18 @@
       </q-scroll-area>
     </div>
 
-
     <div>
       <q-input
         class="cmd-textarea"
         type="textarea"
         v-model="command"
-        label="Send commands to active session, press Shift+Enter to line break"
+        placeholder="Send commands to active session, press Shift+Enter to line break"
         filled
         clearable
+        @keydown="handleKeyDown"
       />
 <!--      autofocus-->
 <!--      @keyup.enter="scope.set"-->
-<!--      onChange={handleCommandChange}-->
 <!--      onKeyDown={handleKeyDown}-->
     </div>
   </q-card>
@@ -171,18 +178,33 @@
     </q-card>
   </q-dialog>
 
+  <q-dialog v-model="showSettingsDialog">
+    <q-card style="min-width: 400px">
+      <q-card-section>
+        <div class="text-h6">{{settingDialogTitle}}</div>
+      </q-card-section>
+      <q-card-section>
+        <q-checkbox v-model="isSudo" label="Sudo(enable)" color="teal" />
+        <q-checkbox v-model="isSendNow" label="Send Now" color="orange" />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
 </template>
 
 <script setup>
 
-import { inject, onMounted, onActivated, reactive, ref } from 'vue'
+import { inject, onMounted, onActivated, reactive, ref, watch } from 'vue'
 import { usePreCmdsStore } from 'stores/precmds.js'
 import { clientConfig } from 'src/common/config.js'
 import { deepClone } from 'src/utils/common.js'
 
-// const props = defineProps({
-//
-// })
+const props = defineProps({
+  send: {
+    type: Function,
+    default: () => {}
+  },
+})
 
 const $q = inject("$q")
 const t = inject("t")
@@ -515,14 +537,25 @@ const submitCmd = () => {
   }
 }
 
-const onClickCMD = () => {
+const showSettingsDialog = ref(false)
+const settingDialogTitle = ref(t('settings'))
+const isSudo = ref(false)
+const isSendNow = ref(false)
 
+const onShowSettingsDialog = () => {
+  showSettingsDialog.value = !showSettingsDialog.value
 }
 
-
-// 处理命令输入变化
-const handleCommandChange = (event) => {
-  // setCommand(event.target.value)
+const onClickCMD = (cmd) => {
+  if (isSendNow.value) {
+    if (isSudo.value) {
+      props.send("sudo " + cmd["text"] + "\n");
+    } else {
+      props.send(cmd["text"] + "\n");
+    }
+  } else {
+    command.value = (command.value + cmd["text"]);
+  }
 }
 
 // 按 Enter 键发送命令
@@ -542,15 +575,15 @@ const handleKeyDown = (event) => {
 
 // 处理发送命令（这里可以添加实际的发送逻辑）
 const handleSendCommand = () => {
-  // if (command.trim()) {
-  //   // 这里可以添加实际的 API 调用或逻辑来发送命令
-  //   if (isSudo) {
-  //     props.send("sudo " + command + "\n")
-  //   } else {
-  //     props.send(command + "\n")
-  //   }
-  //   setCommand('') // 清空输入框
-  // }
+  if (command.value.trim()) {
+    // 这里可以添加实际的 API 调用或逻辑来发送命令
+    if (isSudo.value) {
+      props.send("sudo " + command.value + "\n")
+    } else {
+      props.send(command.value + "\n")
+    }
+    command.value = '' // 清空输入框
+  }
 }
 
 onMounted(() => {
@@ -567,8 +600,23 @@ onMounted(() => {
     }
   }
   preCmdsStore.isSync = "1"
+
+  option.value = preCmdsStore.option
+  isSudo.value = preCmdsStore.isSudo
+  isSendNow.value = preCmdsStore.isSendNow
 })
 
+watch(option, (newVal, oldVal) => {
+  preCmdsStore.option = newVal
+})
+
+watch(isSudo, (newVal, oldVal) => {
+  preCmdsStore.isSudo = newVal
+})
+
+watch(isSendNow, (newVal, oldVal) => {
+  preCmdsStore.isSendNow = newVal
+})
 
 </script>
 
@@ -576,6 +624,17 @@ onMounted(() => {
 .cmd-textarea :deep(.q-field__control) {
   max-height: 100px;
   overflow-y: auto; /* 确保内容超出时显示滚动条 */
+}
+
+.square-btn {
+  width: 40px; /* 设置固定宽度 */
+  height: 40px; /* 设置固定高度 */
+  min-width: 40px; /* 防止按钮被内容撑开 */
+  padding: 0; /* 移除默认内边距 */
+  border-radius: 0; /* 移除圆角，保持正方形 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 </style>

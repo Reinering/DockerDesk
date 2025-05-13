@@ -26,7 +26,6 @@ export const preCmds = {
   },
 
   updatePreCmd: async (old, data) => {
-    console.log("mark", old, data)
     return await db('pre_cmds')
       .where('group', '=', old.group)
       .andWhere('label', '=', old.label)
