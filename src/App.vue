@@ -10,9 +10,10 @@ notify ('positive', 'negative', 'warning', 'info', 'ongoing')
 
 import { provide, onBeforeMount, onUnmounted } from 'vue'
 import { useQuasar } from 'quasar'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useConfigStore } from 'stores/config.js'
+import { usePreCmdsStore } from 'stores/precmds.js'
 import { isEmptyStr } from 'src/utils/common.js'
 
 
@@ -23,14 +24,16 @@ provide("$q", $q)
 
 const router = useRouter()
 provide("router", router)
+const route = useRoute()
+provide("route", route)
 
 const { t } = useI18n()
 provide("t", t)
 
 const configStore = useConfigStore()
+const preCmdsStore = usePreCmdsStore()
 
 const init = () => {
-  // 这里可以做一些初始化的操作，比如获取用户信息等
   // 这里可以做一些初始化的操作，比如获取用户信息等
   console.log("init", navigator.language)
   if (isEmptyStr(configStore.lang)) {
@@ -41,6 +44,8 @@ const init = () => {
   if (process.env.MODE === 'electron') {
 
   }
+
+  preCmdsStore.isSync = "0"
 
 }
 
