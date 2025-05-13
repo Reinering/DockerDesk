@@ -50,6 +50,19 @@ async function initDB() {
       table.integer('delete_flags').notNullable(); // 删除标志，整数类型，非空
       table.text('mark'); // 备注，文本类型，可空
     })
+
+    await db.schema.createTableIfNotExists('pre_cmds', function(table) {
+      table.text('label').notNullable(); // 主键，文本类型，非空
+      table.text('group').notNullable(); // 名称，文本类型，非空
+      table.text('text'); // docker 类型，文本类型，非空
+      table.text('mark'); // 备注，文本类型，可空
+      table.timestamp('create_time').notNullable(); // 创建时间戳，非空
+      table.timestamp('modify_time'); // 修改时间戳，可空
+      table.timestamp('delete_time'); // 删除时间戳，可空
+      table.integer('delete_flags').notNullable(); // 删除标志，整数类型，非空
+
+    })
+
     console.log('Table created and database initialized successfully!')
   } catch (error) {
     console.error('Error initializing database:', error)
