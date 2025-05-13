@@ -48,11 +48,12 @@ export const useNavigatorStore = defineStore('navigator', {
     },
 
     cleanNaviDatas(){
-      this.mainUri = ''
-      this.naviItems = {}
-      this.lastNaviItem = {}
+      this.mainUri = ref(''),
+      this.naviItems = reactive({}),
+      this.lastNaviItem = reactive({})
     }
   },
+
   persist: {
     storage: sessionStorage,
     paths: ['mainUri', 'naviItems', 'lastNaviItem']

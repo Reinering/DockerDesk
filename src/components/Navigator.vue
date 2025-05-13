@@ -19,7 +19,7 @@ import { provide, inject } from 'vue'
 import NavigatorItem from "./NavigatorItem.vue"
 import { useNavigatorStore } from 'stores/navigator.js'
 import { isEmptyProxy, isEmptyStr, findItem } from "../utils/common.js"
-
+import { changeNavigatorGoto } from "../utils/router.js"
 
 const props = defineProps({
   naviGoto: {
@@ -38,23 +38,23 @@ const router = inject("router")
 
 const navigatorStore = useNavigatorStore()
 
-const changeNavigatorGoto = (item) => {
-  if (!isEmptyProxy(navigatorStore.lastNaviItem)) {
-    navigatorStore.setLastNaviItemState(false)
-  }
-  navigatorStore.setNaviItemState([item, true])
-  navigatorStore.setLastNaviItem(item)
-  if (isEmptyStr(item.route)) {
-    router.push(navigatorStore.mainUri)
-  } else {
-
-    if (navigatorStore.mainUri[navigatorStore.mainUri.length - 1] === '/') {
-      router.push(navigatorStore.mainUri + item.route)
-    } else {
-      router.push(navigatorStore.mainUri + '/' + item.route)
-    }
-  }
-}
+// const changeNavigatorGoto = (item) => {
+//   if (!isEmptyProxy(navigatorStore.lastNaviItem)) {
+//     navigatorStore.setLastNaviItemState(false)
+//   }
+//   navigatorStore.setNaviItemState([item, true])
+//   navigatorStore.setLastNaviItem(item)
+//   if (isEmptyStr(item.route)) {
+//     router.push(navigatorStore.mainUri)
+//   } else {
+//
+//     if (navigatorStore.mainUri[navigatorStore.mainUri.length - 1] === '/') {
+//       router.push(navigatorStore.mainUri + item.route)
+//     } else {
+//       router.push(navigatorStore.mainUri + '/' + item.route)
+//     }
+//   }
+// }
 provide("changeNavigatorGoto", changeNavigatorGoto)
 
 const setNavigatorClick = (item, func) => {
@@ -72,7 +72,7 @@ if (isEmptyProxy(navigatorStore.lastNaviItem)) {
   if (lastNaviItem === undefined) {
     navigatorStore.setLastNaviItem(navigatorStore.naviItems[0])
     navigatorStore.setNaviItemState([navigatorStore.naviItems[0], true])
-    changeNavigatorGoto(navigatorStore.naviItems[0])
+    changeNavigatorGoto(router, navigatorStore.naviItems[0])
   } else {
     navigatorStore.setLastNaviItem(lastNaviItem)
   }

@@ -18,7 +18,7 @@
     v-ripple
     item.state
     :active="props.item.state"
-    @click="changeNavigatorGoto(props.item)"
+    @click="changeNavigatorGoto(router, props.item)"
     v-else
   >
     <q-item-section avatar >
@@ -51,7 +51,7 @@ const props = defineProps({
     default: () => {}
   }
 })
-
+const router = inject("router")
 const changeNavigatorGoto = inject("changeNavigatorGoto")
 const setNavigatorClick = inject("setNavigatorClick")
 setNavigatorClick(props.item, () => {
