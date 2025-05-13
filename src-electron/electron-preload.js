@@ -53,7 +53,7 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
   }
 })
 
-contextBridge.exposeInMainWorld('DB', {
+contextBridge.exposeInMainWorld('dockerNodes', {
   getDockerNodes () {
     return ipcRenderer.invoke('getDockerNodes')
   },
@@ -73,5 +73,47 @@ contextBridge.exposeInMainWorld('DB', {
   async editDockerNode (data) {
     return await ipcRenderer.invoke('editDockerNode', data)
   }
+
+})
+
+contextBridge.exposeInMainWorld('terminal', {
+  createTerminal () {
+    return ipcRenderer.invoke('createSSH')
+  },
+
+  closeTerminal () {
+    return ipcRenderer.invoke('closeSSH')
+  },
+
+  sendCmdToTerminal () {
+    // return ipcRenderer.invoke('')
+  }
+})
+
+contextBridge.exposeInMainWorld('precmds', {
+  getPreCmds () {
+    return ipcRenderer.invoke('getPreCmds')
+  },
+
+  addPreCmd (data) {
+    return ipcRenderer.invoke('addPreCmd', data)
+  },
+
+  editPreCmd (data) {
+    return ipcRenderer.invoke('editPreCmd', data)
+  },
+
+  delPreCmd (data) {
+    return ipcRenderer.invoke('delPreCmd', data)
+  },
+
+  editPreCmdGroup (data) {
+    return ipcRenderer.invoke('editPreCmdGroup', data)
+  },
+
+
+  delPreCmdGroup (data) {
+    return ipcRenderer.invoke('delPreCmdGroup', data)
+  },
 
 })
