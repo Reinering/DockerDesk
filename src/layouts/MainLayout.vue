@@ -1,5 +1,5 @@
 <template>
-  <q-layout :layout="layout">
+  <q-layout view="hHh lpR lFf" :layout="layout">
 
     <q-header elevated class="bg-primary text-white" height-hint="98" >
       <ToolBar />
@@ -39,14 +39,12 @@
 
     <q-page-container>
 <!--      缓存页面，结合route中meta.keepalive属性，判断是否缓存-->
-      <transition name="fade" mode="out-in">
-        <router-view v-slot="{ Component, route }">
-          <keep-alive v-if="route.meta.keepAlive">
-            <component :is="Component" />
-          </keep-alive>
-          <component v-else :is="Component" />
-        </router-view>
-      </transition>
+      <router-view v-slot="{ Component, route }">
+        <keep-alive v-if="route.meta.keepAlive">
+          <component :is="Component" />
+        </keep-alive>
+        <component v-else :is="Component" />
+      </router-view>
     </q-page-container>
 
   </q-layout>
@@ -92,6 +90,7 @@ if (process.env.MODE === 'electron') {
 
 const naviDatas = [
   {
+    name: 'Home',
     label: t('navigator.home'),
     icon: "home",
     route: '',
@@ -101,6 +100,7 @@ const naviDatas = [
   },
 
   {
+    name: 'DockerNodes',
     label: "Docker节点",
     icon: "dialpad",
     route: 'dockerNodes',
@@ -152,6 +152,7 @@ const naviDatas = [
   },
 
   {
+    name: "Terminal",
     label: t('navigator.terminal'),
     icon: "terminal",
     route: 'terminal',
@@ -161,6 +162,7 @@ const naviDatas = [
   },
 
   {
+    name: "Settings",
     label: t('navigator.settings'),
     icon: "settings",
     route: 'settings',
