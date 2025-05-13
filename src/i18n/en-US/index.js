@@ -30,6 +30,8 @@ export default {
   selectFolder: 'Select Folder',
   mark: "mark",
 
+  confirm: "Confirm",
+
   selectLanguage: 'Select Language',
 
 
@@ -40,12 +42,20 @@ export default {
   navigator: {
     home: "Home",
     dockerNode: "Docker Node",
+    terminal: "Terminal",
     settings: "Settings"
+  },
+
+  verifyMessage: {
+    dataNotNull: "Not Null",
+    dataLenNotMax: "The data length cannot exceed:",
+    dataLenNotMin: "The data length cannot be less than:",
   },
 
   //Docker Node
   dockerNode: {
     addServiceTitle: "Add Docker/Podman Service",
+    editServiceTitle: "Edit Docker/Podman Service",
     serviceManagement: "Service Management",
     addService: "Add Service",
     local: "local",
@@ -74,7 +84,29 @@ export default {
     nodeStatusOffline: "Offline",
     nodeStatusError: "Error",
 
-    dataNotNull: "Not Null",
+    connectMessage: "Do you want to make this connection?",
+    connectError: "Required connection parameters are missing",
+    deleteMessage: "Are you sure to delete?"
+  },
+
+  terminal: {
+    closeMessage: "Are you sure to close？",
+  },
+
+  cmdBar: {
+    addCmdGroup: "Add CMD Group",
+    editCmdGroup: "Edit CMD Group",
+    groupName: "Group Name",
+
+    label: "Label",
+    sendString: "Cmd String",
+    mark: "Mark",
+
+    addCmd: "Add CMD",
+    editCmd: "Edit CMD",
+
+    deleteMessage: "Are you sure to delete?",
+
   },
 
   // db

@@ -27,6 +27,8 @@ export default {
   selectFolder: '选择文件夹',
   mark: "备注",
 
+  confirm: "确认",
+
   selectLanguage: '选择语言',
 
 
@@ -39,12 +41,20 @@ export default {
   navigator: {
     home: "首页",
     dockerNode: "Docker节点",
+    terminal: "终端",
     settings: "设置"
+  },
+
+  verifyMessage: {
+    dataNotNull: "必填数据不能为空",
+    dataLenNotMax: "数据长度不能超过:",
+    dataLenNotMin: "数据长度不能超过:",
   },
 
   //Docker Node
   dockerNode: {
     addServiceTitle: "添加 Docker/Podman 服务",
+    editServiceTitle: "编辑 Docker/Podman 服务",
     serviceManagement: "服务管理",
     addService: "添加服务",
     local: "本地",
@@ -73,7 +83,28 @@ export default {
     nodeStatusOffline: "离线",
     nodeStatusError: "错误",
 
-    dataNotNull: "必填数据不能为空"
+    connectMessage: "是否要进行此连接？",
+    connectError: "缺少必要的连接参数",
+    deleteMessage: "确认删除吗？"
+  },
+
+  terminal: {
+    closeMessage: "确认关闭吗？",
+  },
+
+  cmdBar: {
+    addCmdGroup: "添加 CMD 组",
+    editCmdGroup: "编辑 CMD 组",
+    groupName: "组名",
+
+    label: "标签",
+    sendString: "命令文本",
+    mark: "备注",
+
+    addCmd: "添加 CMD",
+    editCmd: "编辑 CMD",
+
+    deleteMessage: "确认删除吗？",
   },
 
   // db
