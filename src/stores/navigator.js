@@ -5,7 +5,10 @@ export const useNavigatorStore = defineStore('navigator', {
   state: () => ({
     mainUri: ref(''),
     naviItems: reactive({}),
-    lastNaviItem: reactive({})
+    lastNaviItem: reactive({
+      prefix: '',
+      item: {}
+    })
   }),
 
   getters: {
@@ -35,12 +38,13 @@ export const useNavigatorStore = defineStore('navigator', {
       payload[0].state = payload[1]
     },
 
-    setLastNaviItem(data){
-      this.lastNaviItem = data
+    setLastNaviItem(data, prefix){
+      this.lastNaviItem.prefix = prefix
+      this.lastNaviItem.item = data
     },
 
     setLastNaviItemState(state, checked){
-      this.lastNaviItem.state = checked
+      this.lastNaviItem.item.state = checked
     },
 
     setNaviItemClick(payload){
@@ -50,7 +54,10 @@ export const useNavigatorStore = defineStore('navigator', {
     cleanNaviDatas(){
       this.mainUri = ref(''),
       this.naviItems = reactive({}),
-      this.lastNaviItem = reactive({})
+      this.lastNaviItem = reactive({
+        prefix: '',
+        item: {}
+      })
     }
   },
 

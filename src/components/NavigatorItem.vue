@@ -7,10 +7,11 @@
     v-if="props.item.children.length > 0"
   >
     <NavigatorItem
-      :disableNavi="props.disableNavi"
       v-for="( child ) in props.item.children"
-      v-bind:key="child.id"
-      v-bind:item="child"
+      :key="child.id"
+      :item="child"
+      :prefixRoute="prefixRoute === '' ? props.item.route : prefixRoute + '/' + props.item.route"
+      :disableNavi="props.disableNavi"
     />
   </q-expansion-item>
   <q-item
@@ -18,7 +19,7 @@
     v-ripple
     item.state
     :active="props.item.state"
-    @click="changeNavigatorGoto(router, props.item)"
+    @click="changeNavigatorGoto(props.item, props.prefixRoute)"
     v-else
   >
     <q-item-section avatar >
@@ -37,26 +38,35 @@ import NavigatorItem from "./NavigatorItem.vue"
 
 
 const props = defineProps({
+  prefixRoute: {
+    type: String,
+    default: "",
+  },
+
   item: {
     type: Object,
     default: () => ({
-      icon: "",
-      label: "",
-      children: [],
-      state: false
+      name: '',
+      label: '',
+      icon: '',
+      route: '',
+      state: false,
+      children: []
     })
   },
+
   disableNavi: {
     type: Object,
     default: () => {}
   }
 })
-const router = inject("router")
+
 const changeNavigatorGoto = inject("changeNavigatorGoto")
-const setNavigatorClick = inject("setNavigatorClick")
-setNavigatorClick(props.item, () => {
-  changeNavigatorGoto(props.item)
-})
+// const setNavigatorClick = inject("setNavigatorClick")
+// setNavigatorClick(props.item, () => {
+//   changeNavigatorGoto(props.item, props.prefixRoute)
+// })
+
 
 </script>
 

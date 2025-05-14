@@ -163,7 +163,7 @@ defineOptions({
 })
 
 import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive } from 'vue'
-import { deepClone, isEmptyObj } from 'src/utils/common.js'
+import { deepClone, isEmptyObj, findNaviItemByName } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 import { useNavigatorStore } from 'stores/navigator.js'
 import { changeNavigatorGoto } from "src/utils/router.js"
@@ -419,7 +419,6 @@ const deleteService = (id) => {
       }
     })
   })
-
 }
 
 const connectService = (row) => {
@@ -437,10 +436,9 @@ const connectService = (row) => {
       })
     }
 
-    for (let item of navigatorStore.naviItems) {
-      if (item.name === "Terminal") {
-        return changeNavigatorGoto(router, item, {data: row})
-      }
+    const item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
+    if (!isEmptyObj(item)) {
+      return changeNavigatorGoto(router, item[0], item[1], {data: row})
     }
 
   }).onOk(() => {
@@ -452,6 +450,9 @@ const connectService = (row) => {
   })
 
 }
+
+
+
 
 onMounted(() => {
   window.addEventListener('resize', checkScreenHeightSize)

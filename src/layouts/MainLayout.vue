@@ -34,7 +34,7 @@
       content-class="bg-grey-3"
     >
       <!-- drawer content -->
-      <navigator :naviGoto="naviGoto" :disableNavi="disableNavi" :disabled=disableNavi.disabled />
+      <navigator :disableNavi="disableNavi" :disabled=disableNavi.disabled />
     </q-drawer>
 
     <q-page-container>
@@ -95,7 +95,6 @@ const naviDatas = [
     icon: "home",
     route: '',
     state: true,
-    click: null,
     children: []
   },
 
@@ -105,7 +104,6 @@ const naviDatas = [
     icon: "hub",
     route: 'nodes',
     state: false,
-    click: null,
     children: []
   },
 
@@ -113,33 +111,31 @@ const naviDatas = [
     name: 'nodesMg',
     label: t('navigator.nodesMg'),
     icon: "dialpad",
-    router: '',
+    route: 'nodesMg',
     state: false,
-    click: null,
     children: [
       {
+        name: 'Docker',
         label: "Docker",
         icon: "grain",
-        route: 'nodesMg/dockerNode',
+        route: 'dockerNode',
         state: false,
-        click: null,
         children: []
       },
       {
         name: "Terminal",
         label: t('navigator.terminal'),
         icon: "terminal",
-        route: 'nodesMG/terminal',
+        route: 'terminal',
         state: false,
-        click: null,
         children: []
       },
       {
+        name: 'Edge',
         label: "边缘节点列表",
         icon: "commit",
-        route: 'nodesMG/edge_nodes',
+        route: 'edge_nodes',
         state: false,
-        click: null,
         children: []
       },
     ]
@@ -151,7 +147,6 @@ const naviDatas = [
     icon: "settings",
     route: 'settings',
     state: false,
-    click: null,
     children: []
   }
 ]
@@ -162,9 +157,10 @@ if (isEmptyStr(navigatorStore.mainUri)) {
 if (isEmptyProxy(navigatorStore.naviItems)) {
   navigatorStore.naviItems = naviDatas
 }
-const naviGoto = (func) => {
-  func()
-}
+// const naviGoto = (func) => {
+//   func()
+// }
+
 
 // 导航栏是否禁用
 const disableNavi = reactive({

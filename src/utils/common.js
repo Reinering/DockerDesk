@@ -113,6 +113,28 @@ export function findItem (items, item) {
   }
 }
 
+export const findNaviItemByName = (items, name, prefix='') => {
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].name === name) {
+      return [items[i], prefix]
+    }
+
+    if (items[i].children.length > 0) {
+      if (prefix !== '') {
+        prefix = prefix + '/' + items[i].route
+      } else {
+        prefix = items[i].route
+      }
+
+      const result = findNaviItemByName(items[i].children, name, prefix)
+      if (result !== undefined) {
+        return result
+      }
+    }
+  }
+  return undefined
+}
+
 
 
 export function addClass (diffValue) {
