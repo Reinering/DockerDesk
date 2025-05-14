@@ -1,6 +1,10 @@
 <template>
   <div class="tab-wrapper" style="position: relative;">
-    <q-tab :name="props.name" :label="props.label" :icon="props.icon" :selected="props.selected" />
+    <q-tab :name="props.name" :label="props.label" :icon="props.icon" :selected="props.selected">
+      <q-tooltip>
+        {{props.label}}
+      </q-tooltip>
+    </q-tab>
     <q-btn
       flat
       round
@@ -16,7 +20,7 @@
 
 <script setup>
 defineOptions({
-  name: '6t',
+  name: 'RTab',
 })
 
 const props = defineProps({

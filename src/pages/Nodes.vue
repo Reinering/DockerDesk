@@ -384,7 +384,13 @@ const deleteService = (id) => {
   $q.dialog({
     title: t('confirm'),
     message: t('node.deleteMessage'),
-    cancel: true,
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
     persistent: true
   }).onOk(() => {
     window.nodes.delNode(id).then((res) => {
@@ -425,7 +431,13 @@ const connectService = (row) => {
   $q.dialog({
     title: t('confirm'),
     message: t('node.connectMessage'),
-    cancel: true,
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
     persistent: true
   }).onOk(() => {
     if (!row.address || !row.port || !row.username || !row.password) {

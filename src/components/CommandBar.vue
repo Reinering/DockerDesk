@@ -284,7 +284,13 @@ const onDelButtonBar = () => {
   $q.dialog({
     title: t('confirm'),
     message: t('cmdBar.deleteMessage'),
-    cancel: true,
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
     persistent: true
   }).onOk(() => {
     window.precmds.delPreCmdGroup(option.value).then((res) => {
@@ -337,7 +343,13 @@ const onDelButton = (cmd) => {
   $q.dialog({
     title: t('confirm'),
     message: t('cmdBar.deleteMessage'),
-    cancel: true,
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
     persistent: true
   }).onOk(() => {
     window.precmds.delPreCmd(JSON.stringify({

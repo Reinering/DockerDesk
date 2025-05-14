@@ -88,7 +88,7 @@ if (process.env.MODE === 'electron') {
   pageState.isBarHide = false
 }
 
-const naviDatas = [
+const naviDatas = reactive([
   {
     name: 'Home',
     label: t('navigator.home'),
@@ -116,7 +116,7 @@ const naviDatas = [
     children: [
       {
         name: 'Docker',
-        label: "Docker",
+        label:  t('navigator.dockerNode'),
         icon: "grain",
         route: 'dockerNode',
         state: false,
@@ -149,7 +149,7 @@ const naviDatas = [
     state: false,
     children: []
   }
-]
+])
 
 if (isEmptyStr(navigatorStore.mainUri)) {
   navigatorStore.mainUri = router.currentRoute.value.path

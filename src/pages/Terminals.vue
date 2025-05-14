@@ -58,11 +58,11 @@
             CMD Bar
           </q-tooltip>
         </q-fab-action>
-<!--        <q-fab-action @click="onClick" color="primary" icon="mail" :disable="draggingFab">-->
-<!--          <q-tooltip>-->
-<!--            CMD Bar-->
-<!--          </q-tooltip>-->
-<!--        </q-fab-action>-->
+        <q-fab-action @click="showFileSystem" color="primary" icon="storage" :disable="draggingFab">
+          <q-tooltip>
+            FileSystem
+          </q-tooltip>
+        </q-fab-action>
       </q-fab>
     </q-page-sticky>
   </q-page>
@@ -121,7 +121,11 @@ const xtermRefs = ref({}); // 存储 xterm 实例的 ref
 const isShowCmdBar = ref(false)
 
 const showCmdBar = () => {
-  console.log('showCmdBar', window.innerHeight)
+  if (tab.value === '') {
+    isShowCmdBar.value = false
+    return
+  }
+
   isShowCmdBar.value = ! isShowCmdBar.value
   if (isShowCmdBar.value) {
     if (process.env.MODE === 'electron') {
@@ -136,6 +140,15 @@ const showCmdBar = () => {
       cardStyle.height = window.innerHeight - 70 + "px"
     }
   }
+}
+
+const showFileSystem = () => {
+  if (tab.value === '') {
+    isShowCmdBar.value = false
+    return
+  }
+
+
 }
 
 const submitCmd = () => {
@@ -165,7 +178,13 @@ const deleteTab = (id) => {
   $q.dialog({
     title: t('confirm'),
     message: t('terminal.closeMessage'),
-    cancel: true,
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
     persistent: true
   }).onOk(() => {
     for (let i = 0; i < tabs.length; i++) {
