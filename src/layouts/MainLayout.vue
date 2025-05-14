@@ -100,26 +100,36 @@ const naviDatas = [
   },
 
   {
-    name: 'DockerNodes',
-    label: "Docker节点",
-    icon: "dialpad",
-    route: 'dockerNodes',
+    name: 'nodes',
+    label: t('navigator.nodes'),
+    icon: "hub",
+    route: 'nodes',
     state: false,
     click: null,
     children: []
   },
 
   {
-    label: "节点管理",
+    name: 'nodesMg',
+    label: t('navigator.nodesMg'),
     icon: "dialpad",
     router: '',
     state: false,
     click: null,
     children: [
       {
-        label: "节点列表",
+        label: "Docker",
         icon: "grain",
-        route: 'nodes',
+        route: 'nodesMg/dockerNode',
+        state: false,
+        click: null,
+        children: []
+      },
+      {
+        name: "Terminal",
+        label: t('navigator.terminal'),
+        icon: "terminal",
+        route: 'nodesMG/terminal',
         state: false,
         click: null,
         children: []
@@ -127,38 +137,12 @@ const naviDatas = [
       {
         label: "边缘节点列表",
         icon: "commit",
-        route: 'edge_nodes',
+        route: 'nodesMG/edge_nodes',
         state: false,
         click: null,
         children: []
       },
-      {
-        label: "用户节点列表",
-        icon: "spa",
-        route: 'leafs',
-        state: false,
-        click: null,
-        children: []
-      },
-      {
-        label: "节点拓扑",
-        icon: "hub",
-        route: 'topology',
-        state: false,
-        click: null,
-        children: []
-      }
     ]
-  },
-
-  {
-    name: "Terminal",
-    label: t('navigator.terminal'),
-    icon: "terminal",
-    route: 'terminal',
-    state: false,
-    click: null,
-    children: []
   },
 
   {

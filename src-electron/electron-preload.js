@@ -53,6 +53,25 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
   }
 })
 
+contextBridge.exposeInMainWorld('nodes', {
+  getNodes () {
+    return ipcRenderer.invoke('getNodes')
+  },
+
+  async addNode (data) {
+    return await ipcRenderer.invoke('addNode', data)
+  },
+
+  async delNode (data) {
+    return await ipcRenderer.invoke('delNode', data)
+  },
+
+  async editNode (data) {
+    return await ipcRenderer.invoke('editNode', data)
+  }
+
+})
+
 contextBridge.exposeInMainWorld('dockerNodes', {
   getDockerNodes () {
     return ipcRenderer.invoke('getDockerNodes')

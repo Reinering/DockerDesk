@@ -32,16 +32,16 @@ export default {
   selectLanguage: '选择语言',
 
 
-
-
   //
   settings: "设置",
 
   //navi
   navigator: {
     home: "首页",
+    nodes: "节点",
+    nodesMg: "节点管理",
     dockerNode: "Docker节点",
-    terminal: "终端",
+    terminal: "终端节点",
     settings: "设置"
   },
 
@@ -49,6 +49,43 @@ export default {
     dataNotNull: "必填数据不能为空",
     dataLenNotMax: "数据长度不能超过:",
     dataLenNotMin: "数据长度不能超过:",
+  },
+
+  // Node
+  node: {
+    addServiceTitle: "添加服务",
+    editServiceTitle: "编辑服务",
+    serviceManagement: "服务管理",
+    addService: "添加服务",
+    local: "本地",
+    remote: "远程",
+    localNode: "本地节点",
+    remoteNode: "远程节点",
+
+    serviceName: "服务名称",
+    serviceType: "服务类型",
+    connectionType: "连接类型",
+    address: "地址",
+    port: "端口",
+    serviceStatus: "服务状态",
+    action: "操作",
+    mark: "备注",
+
+    addNode: "添加节点",
+    nodeName: "节点名称",
+    nodeUrl: "节点URL",
+    nodePort: "节点端口",
+    nodeUserName: "节点用户名",
+    nodePassword: "节点密码",
+    nodeDescription: "节点描述",
+    nodeStatus: "节点状态",
+    nodeStatusOnline: "在线",
+    nodeStatusOffline: "离线",
+    nodeStatusError: "错误",
+
+    connectMessage: "是否要进行此连接？",
+    connectError: "缺少必要的连接参数",
+    deleteMessage: "确认删除吗？"
   },
 
   //Docker Node
@@ -103,6 +140,8 @@ export default {
 
     addCmd: "添加 CMD",
     editCmd: "编辑 CMD",
+
+
 
     deleteMessage: "确认删除吗？",
   },

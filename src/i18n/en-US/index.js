@@ -41,8 +41,10 @@ export default {
   //navi
   navigator: {
     home: "Home",
+    nodes: "Nodes",
+    nodesMg: "Nodes Management",
     dockerNode: "Docker Node",
-    terminal: "Terminal",
+    terminal: "Terminal Node",
     settings: "Settings"
   },
 
@@ -50,6 +52,43 @@ export default {
     dataNotNull: "Not Null",
     dataLenNotMax: "The data length cannot exceed:",
     dataLenNotMin: "The data length cannot be less than:",
+  },
+
+  // Node
+  node: {
+    addServiceTitle: "Add Docker/Podman Service",
+    editServiceTitle: "Edit Docker/Podman Service",
+    serviceManagement: "Service Management",
+    addService: "Add Service",
+    local: "local",
+    remote: "remote",
+    localNode: "local node",
+    remoteNode: "remote node",
+
+    serviceName: "Service Name",
+    serviceType: "Service Type",
+    connectionType: "Link Type",
+    address: "Address",
+    port: "Port",
+    serviceStatus: "Service Status",
+    action: "Action",
+    mark: "Mark",
+
+    addNode: "Add Node",
+    nodeName: "Node Name",
+    nodeUrl: "Node URL",
+    nodePort: "Node Port",
+    nodeUserName: "Node User Name",
+    nodePassword: "Node Password",
+    nodeDescription: "Node Description",
+    nodeStatus: "Node Status",
+    nodeStatusOnline: "Online",
+    nodeStatusOffline: "Offline",
+    nodeStatusError: "Error",
+
+    connectMessage: "Do you want to make this connection?",
+    connectError: "Required connection parameters are missing",
+    deleteMessage: "Are you sure to delete?"
   },
 
   //Docker Node
