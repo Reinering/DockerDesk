@@ -1,14 +1,19 @@
 import { defineBoot } from '#q-app/wrappers'
 import { createI18n } from 'vue-i18n'
 import messages from 'src/i18n'
-import { useConfigStore } from 'stores/config.js'
+import { isEmptyStr } from 'src/utils/common.js'
 
-
-const configStore = useConfigStore()
 
 export default defineBoot(({ app }) => {
+
+  console.log(localStorage.getItem('config'))
+  let lang = ''
+  if (!isEmptyStr(localStorage.getItem('config'))) {
+    lang = JSON.parse(localStorage.getItem('config')).lang
+  }
+
   const i18n = createI18n({
-    locale: configStore.lang || 'zh-CN', // set locale
+    locale: lang || 'zh-CN', // set locale
     globalInjection: true,
     messages: {
       'en-US': messages['en-US'],

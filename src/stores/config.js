@@ -3,11 +3,12 @@ import { ref } from 'vue'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
-    lang: ref(''),
+    lang: '',
 
   }),
 
   getters: {
+
   },
 
   actions: {
@@ -15,6 +16,7 @@ export const useConfigStore = defineStore('config', {
       this.lang = data
     }
   },
+
   persist: {
     storage: localStorage,
     paths: ['lang']
