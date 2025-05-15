@@ -6,7 +6,6 @@ import { isEmptyStr } from 'src/utils/common.js'
 
 export default defineBoot(({ app }) => {
 
-  console.log(localStorage.getItem('config'))
   let lang = ''
   if (!isEmptyStr(localStorage.getItem('config'))) {
     lang = JSON.parse(localStorage.getItem('config')).lang
