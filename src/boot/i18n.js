@@ -1,4 +1,5 @@
 import { defineBoot } from '#q-app/wrappers'
+import { LocalStorage, SessionStorage } from 'quasar'
 import { createI18n } from 'vue-i18n'
 import messages from 'src/i18n'
 import { isEmptyStr } from 'src/utils/common.js'
@@ -7,8 +8,8 @@ import { isEmptyStr } from 'src/utils/common.js'
 export default defineBoot(({ app }) => {
 
   let lang = ''
-  if (!isEmptyStr(localStorage.getItem('config'))) {
-    lang = JSON.parse(localStorage.getItem('config')).lang
+  if (!isEmptyStr(LocalStorage.getItem('config'))) {
+    lang = JSON.parse(LocalStorage.getItem('config')).lang
   }
 
   const i18n = createI18n({

@@ -1,5 +1,5 @@
 import { defineBoot } from '#q-app/wrappers'
-import { Lang } from 'quasar'
+import { Lang, LocalStorage, SessionStorage } from 'quasar'
 import { isEmptyStr } from 'src/utils/common.js'
 
 
@@ -17,8 +17,8 @@ export default defineBoot(async (/* { app, router, ... } */) => {
   // something to do
 
   let lang = ''
-  if (!isEmptyStr(localStorage.getItem('config'))) {
-    lang = JSON.parse(localStorage.getItem('config')).lang
+  if (!isEmptyStr(LocalStorage.getItem('config'))) {
+    lang = JSON.parse(LocalStorage.getItem('config')).lang
   }
 
   const langIso = lang || 'zh-CN' // ... some logic to determine it (use Cookies Plugin?)
