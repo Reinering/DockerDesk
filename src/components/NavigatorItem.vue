@@ -14,11 +14,14 @@
       :disableNavi="props.disableNavi"
     />
   </q-expansion-item>
+
+<!--  // text-pink bg-primary-->
   <q-item
     :clickable=props.disableNavi.clickabled
     v-ripple
     item.state
     :active="props.item.state"
+    active-class="text-pink"
     @click="changeNavigatorGoto(props.item, props.prefixRoute)"
     v-else
   >
@@ -26,7 +29,7 @@
       <q-icon :name="props.item.icon" />
     </q-item-section>
     <q-item-section>
-      {{ props.item.label }}
+      {{ t(props.item.label) }}
     </q-item-section>
   </q-item>
 </template>
@@ -61,12 +64,9 @@ const props = defineProps({
   }
 })
 
-const changeNavigatorGoto = inject("changeNavigatorGoto")
-// const setNavigatorClick = inject("setNavigatorClick")
-// setNavigatorClick(props.item, () => {
-//   changeNavigatorGoto(props.item, props.prefixRoute)
-// })
+const t = inject("t")  // i18
 
+const changeNavigatorGoto = inject("changeNavigatorGoto")
 
 </script>
 

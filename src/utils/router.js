@@ -9,8 +9,10 @@ export const changeNavigatorGoto = (router, item, prefix='', params=null) => {
   if (!isEmptyProxy(navigatorStore.lastNaviItem)) {
     navigatorStore.setLastNaviItemState(false)
   }
+
   navigatorStore.setNaviItemState([item, true])
   navigatorStore.setLastNaviItem(item, prefix)
+
   if (isEmptyStr(item.route)) {
     router.push(navigatorStore.mainUri)
   } else {
@@ -27,6 +29,5 @@ export const changeNavigatorGoto = (router, item, prefix='', params=null) => {
         router.push({path: `${navigatorStore.mainUri}/${prefix}/${item.route}`, query: {data: JSON.stringify(params)}})
       }
     }
-
   }
 }

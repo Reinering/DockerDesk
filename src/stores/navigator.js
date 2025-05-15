@@ -1,14 +1,14 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
-import { ref, reactive } from 'vue'
+
 
 export const useNavigatorStore = defineStore('navigator', {
   state: () => ({
-    mainUri: ref(''),
-    naviItems: reactive({}),
-    lastNaviItem: reactive({
+    mainUri: '',
+    naviItems: {},
+    lastNaviItem: {
       prefix: '',
       item: {}
-    })
+    }
   }),
 
   getters: {
@@ -43,7 +43,7 @@ export const useNavigatorStore = defineStore('navigator', {
       this.lastNaviItem.item = data
     },
 
-    setLastNaviItemState(state, checked){
+    setLastNaviItemState(checked){
       this.lastNaviItem.item.state = checked
     },
 
@@ -51,13 +51,12 @@ export const useNavigatorStore = defineStore('navigator', {
       payload[0].click = payload[1]
     },
 
-    cleanNaviDatas(){
-      this.mainUri = ref(''),
-      this.naviItems = reactive({}),
-      this.lastNaviItem = reactive({
+    clear(){
+      this.mainUri = '',
+      this.lastNaviItem = {
         prefix: '',
         item: {}
-      })
+      }
     }
   },
 

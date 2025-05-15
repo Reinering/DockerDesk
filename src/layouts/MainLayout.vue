@@ -22,15 +22,15 @@
 
     <q-drawer
       show-if-above
+      bordered
       v-model="leftDrawerOpen"
       side="left"
-      bordered
       :behavior="behavior"
       :mini="miniState"
       @mouseover="miniState = false"
       @mouseout="miniState = true"
       mini-to-overlay
-      :width="210"
+      :width="260"
       content-class="bg-grey-3"
     >
       <!-- drawer content -->
@@ -54,10 +54,7 @@
 import { reactive, inject, toRefs } from 'vue'
 import Navigator from 'components/Navigator.vue'
 import ToolBar from 'components/ToolBar.vue'
-import { useNavigatorStore } from 'stores/navigator.js'
-import { isEmptyStr, isEmptyProxy } from 'src/utils/common.js'
 
-const navigatorStore = useNavigatorStore()
 
 const $q = inject("$q")
 const deviceInfo = $q.platform.is
@@ -87,80 +84,6 @@ if (process.env.MODE === 'electron') {
 } else {
   pageState.isBarHide = false
 }
-
-const naviDatas = reactive([
-  {
-    name: 'Home',
-    label: t('navigator.home'),
-    icon: "home",
-    route: '',
-    state: true,
-    children: []
-  },
-
-  {
-    name: 'nodes',
-    label: t('navigator.nodes'),
-    icon: "hub",
-    route: 'nodes',
-    state: false,
-    children: []
-  },
-
-  {
-    name: 'nodesMg',
-    label: t('navigator.nodesMg'),
-    icon: "dialpad",
-    route: 'nodesMg',
-    state: false,
-    children: [
-      {
-        name: 'Docker',
-        label:  t('navigator.dockerNode'),
-        icon: "grain",
-        route: 'dockerNode',
-        state: false,
-        children: []
-      },
-      {
-        name: "Terminal",
-        label: t('navigator.terminal'),
-        icon: "terminal",
-        route: 'terminal',
-        state: false,
-        children: []
-      },
-      {
-        name: 'Edge',
-        label: "边缘节点列表",
-        icon: "commit",
-        route: 'edge_nodes',
-        state: false,
-        children: []
-      },
-    ]
-  },
-
-  {
-    name: "Settings",
-    label: t('navigator.settings'),
-    icon: "settings",
-    route: 'settings',
-    state: false,
-    children: []
-  }
-])
-
-if (isEmptyStr(navigatorStore.mainUri)) {
-  navigatorStore.mainUri = router.currentRoute.value.path
-}
-if (isEmptyProxy(navigatorStore.naviItems)) {
-  navigatorStore.naviItems = naviDatas
-}
-// const naviGoto = (func) => {
-//   func()
-// }
-
 
 // 导航栏是否禁用
 const disableNavi = reactive({
