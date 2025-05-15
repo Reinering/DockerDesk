@@ -1,4 +1,5 @@
 
+const dev = true
 
 export const clientConfig = {
   lang: 'en',
@@ -29,3 +30,11 @@ export const clientConfig = {
     level: 'info',      // error, warn, info, verbose, debug, silly
   }
 }
+
+
+export const devConsole = (...datas) => {
+  if (dev === true) {
+    console.log(datas)
+  }
+}
+

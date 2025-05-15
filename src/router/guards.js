@@ -14,7 +14,10 @@ export const beforeEach = (store, to, from) => {
 
   const navigatorStore = useNavigatorStore()
 
-  if (to.fullPath === '/') {
+  // 判断是否进入错误页面
+  if (to.matched.some(record => record.path === '/:catchAll(.*)*') || to.name === 'NotFound') {
+    // console.log('Navigated to ErrorNotFound page');
+    // 可在此处添加逻辑，例如记录日志或触发某些操作
     navigatorStore.clear()
   }
 }

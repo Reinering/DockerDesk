@@ -3,7 +3,7 @@
     expand-separator
     :content-inset-level="0.5"
     :icon="props.item.icon"
-    :label="props.item.label"
+    :label="t(props.item.label)"
     v-if="props.item.children.length > 0"
   >
     <NavigatorItem
@@ -27,8 +27,11 @@
   >
     <q-item-section avatar >
       <q-icon :name="props.item.icon" />
+<!--      // 导航文字位置-->
+<!--      {{ t(props.item.label) }} -->
     </q-item-section>
     <q-item-section>
+<!--      // 导航文字位置-->
       {{ t(props.item.label) }}
     </q-item-section>
   </q-item>

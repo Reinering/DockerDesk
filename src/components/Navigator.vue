@@ -12,9 +12,9 @@
     // click: null,
     children: [
       {
-        name: 'Home',
-        label: ’home,
-        icon: "home",
+        name: 'Main',
+        label: ’main,
+        icon: "main",
         route: '', // 相对路径
         state: false,
         children: []
@@ -85,7 +85,7 @@ const naviItems = reactive([
     children: [
       {
         name: 'Docker',
-        label:  'navigator.dockerNode',
+        label: 'navigator.dockerNode',
         icon: "grain",
         route: 'dockerNode',
         state: false,
@@ -127,7 +127,7 @@ const changeNavigatorGoto = (item, prefix='') => {
     navigatorStore.setLastNaviItemState(false)
   }
 
-  navigatorStore.setNaviItemState([item, true])
+  item.state = true
   navigatorStore.setLastNaviItem(item, prefix)
 
   if (navigatorStore.mainUri[navigatorStore.mainUri.length - 1] === '/') {
@@ -222,7 +222,7 @@ const initNavigator = () => {
 
       changeNavigatorGoto(naviItems[0], naviItems[0].route)
     } else {
-      changeNavigatorGoto(navigatorStore.lastNaviItem.item, navigatorStore.lastNaviItem.prefix)
+      changeNavigatorGoto(lastNaviItem, navigatorStore.lastNaviItem.prefix)
     }
   }
 }
