@@ -24,7 +24,7 @@
                 class="q-mb-sm"
                 v-model="newService.connectionType"
                 :options="connectionOptions"
-                :label="t('node.serviceType') + '(' + t('node.local') + t('node.remote') + ')'"
+                :label="t('node.serviceType') + '(' + t('node.local') + '/' + t('node.remote') + ')'"
                 outlined
                 dense
               />
@@ -39,7 +39,7 @@
               <q-input
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.address"
-                :label="t('node.address')+ '(SSH: localhost)'"
+                :label="t('node.address')"
                 maxlength="30"
                 outlined
                 dense
@@ -48,7 +48,7 @@
               <q-input
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.port"
-                :label="t('node.port') + '(SSH: 22)'"
+                :label="t('node.port')"
                 type="number"
                 outlined
                 dense
@@ -57,7 +57,7 @@
               <q-input
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.username"
-                :label="t('username') + '(SSH)'"
+                :label="t('username')"
                 type="text"
                 maxlength="30"
                 outlined
@@ -67,7 +67,7 @@
               <q-input
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.password"
-                :label="t('password') + '(SSH)'"
+                :label="t('password')"
                 type="password"
                 maxlength="50"
 
@@ -139,13 +139,25 @@
             <q-btn
               v-if="props.row.connectionType === t('node.remoteNode')"
               icon="link"
-              color="negative"
+              color="blue"
               dense
               flat
               @click="connectService(props.row)"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{t('connect')}}
+              </q-tooltip>
+            </q-btn>
+            <q-btn
+              v-if="isShowPanelBtn(props.row)"
+              icon="dashboard"
+              color="green"
+              dense
+              flat
+              @click="connectService(props.row)"
+            >
+              <q-tooltip class="bg-amber text-black shadow-4">
+                {{t('node.dockerPanel')}}
               </q-tooltip>
             </q-btn>
 
@@ -159,10 +171,10 @@
 <script setup>
 // 定义组件名称
 defineOptions({
-  name: 'rNodes',
+  name: 'Nodes',
 })
 
-import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive } from 'vue'
+import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive, computed } from 'vue'
 import { deepClone, isEmptyObj, findNaviItemByName } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 import { useNavigatorStore } from 'stores/navigator.js'
@@ -211,7 +223,9 @@ const newService = reactive({
 
 const connectionOptions = [t('node.localNode'), t('node.remoteNode')]
 
-const serviceTypeOptions = ['Docker', 'Podman', 'SSH', 'Telnet']
+const localServiceTypeOptions = ['Docker', 'Podman']
+const remoteServiceTypeOptions = ['Docker', 'Podman', 'SSH', 'Telnet']
+const serviceTypeOptions = reactive(['Docker', 'Podman', 'SSH', 'Telnet'])
 
 const columns = [
   { name: 'id', label: 'ID', align: 'left', field: 'id' },
@@ -226,6 +240,13 @@ const columns = [
 const visibleColumns = ['serviceName', 'connectionType', 'serviceType', 'address', 'port', 'actions']
 
 const isEdit = ref(false)
+
+const isShowPanelBtn = (row) => {
+  if (row.connectionType === t('node.remoteNode') && row.serviceType ===  'Docker' || row.serviceType ===  'Podman') {
+    return true
+  }
+  return false
+}
 
 const checkScreenHeightSize = () => {
   background.height = window.innerHeight - 70 + "px"
@@ -266,8 +287,6 @@ const addService = () => {
     } else if (data.connectionType === t('node.remoteNode')) {
       data.connectionType = "remote"
     }
-
-    console.log('edit data', data)
 
     // edit
     if (isEdit.value === true) {
@@ -448,11 +467,17 @@ const connectService = (row) => {
       })
     }
 
-    const item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
-    if (!isEmptyObj(item)) {
-      return changeNavigatorGoto(router, item[0], item[1], {data: row})
+    if (row.serviceType === "Docker" || row.serviceType === "Podman") {
+      const item = findNaviItemByName(navigatorStore.naviItems, "Docker")
+      if (!isEmptyObj(item)) {
+        return changeNavigatorGoto(router, item[0], item[1], {data: row})
+      }
+    } else {
+      const item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
+      if (!isEmptyObj(item)) {
+        return changeNavigatorGoto(router, item[0], item[1], {data: row})
+      }
     }
-
   }).onOk(() => {
     // console.log('>>>> second OK catcher')
   }).onCancel(() => {
@@ -462,9 +487,6 @@ const connectService = (row) => {
   })
 
 }
-
-
-
 
 onMounted(() => {
   window.addEventListener('resize', checkScreenHeightSize)
@@ -504,12 +526,25 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreenHeightSize)
 })
 
-// watch(newService, (value, oldValue) => {
-//   console.log(value, oldValue)
-// })
-
 onBeforeMount(() => {
   // console.log('beforeMount')
+})
+
+watch(() => newService.connectionType, (newValue, oldValue) => {
+  if (newValue === t('node.localNode')) {
+    serviceTypeOptions.length = 0
+    serviceTypeOptions.push.apply(serviceTypeOptions, localServiceTypeOptions)
+    newService.serviceType = ''
+
+    console.log(serviceTypeOptions)
+  } else if (newValue === t('node.remoteNode')) {
+    serviceTypeOptions.length = 0
+    serviceTypeOptions.push.apply(serviceTypeOptions, remoteServiceTypeOptions)
+
+    newService.serviceType = ''
+  } else {
+
+  }
 })
 
 </script>
