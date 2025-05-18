@@ -36,7 +36,8 @@ export default {
 
 
   //
-  settings: "settings",
+  settings: "Settings",
+  management: "Management",
 
   //navi
   navigator: {
@@ -64,6 +65,7 @@ export default {
     remote: "remote",
     localNode: "local node",
     remoteNode: "remote node",
+    dockerPanel: "docker panel",
 
     serviceName: "Service Name",
     serviceType: "Service Type",
@@ -88,6 +90,7 @@ export default {
 
     connectMessage: "Do you want to make this connection?",
     connectError: "Required connection parameters are missing",
+    connectError1: "Failed to find route",
     deleteMessage: "Are you sure to delete?"
   },
 
@@ -130,6 +133,14 @@ export default {
 
   terminal: {
     closeMessage: "Are you sure to close？",
+  },
+
+  xterm: {
+
+    termInitError: "Terminal init error",
+
+    nodePtyInitError: "node-pty uninitialized",
+
   },
 
   cmdBar: {

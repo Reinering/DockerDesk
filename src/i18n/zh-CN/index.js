@@ -34,6 +34,7 @@ export default {
 
   //
   settings: "设置",
+  management: "管理",
 
   //navi
   navigator: {
@@ -61,6 +62,7 @@ export default {
     remote: "远程",
     localNode: "本地节点",
     remoteNode: "远程节点",
+    dockerPanel: "docker面板",
 
     serviceName: "服务名称",
     serviceType: "服务类型",
@@ -85,14 +87,21 @@ export default {
 
     connectMessage: "是否要进行此连接？",
     connectError: "缺少必要的连接参数",
+    connectError1: "查找路由失败",
     deleteMessage: "确认删除吗？"
   },
 
   //Docker Node
   dockerNode: {
+    serviceManagement: "服务管理",
+
+
+
+
+
+
     addServiceTitle: "添加 Docker/Podman 服务",
     editServiceTitle: "编辑 Docker/Podman 服务",
-    serviceManagement: "服务管理",
     addService: "添加服务",
     local: "本地",
     remote: "远程",
@@ -127,6 +136,15 @@ export default {
 
   terminal: {
     closeMessage: "确认关闭吗？",
+  },
+
+  xterm: {
+
+    termInitError: "终端初始化失败",
+
+    nodePtyInitError: "node-pty 未初始化",
+
+
   },
 
   cmdBar: {

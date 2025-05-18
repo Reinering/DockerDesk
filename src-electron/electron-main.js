@@ -5,7 +5,7 @@ import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
-import { ssh_connections } from "./ipc/terminalIPC.js"
+import { ssh_connections } from "./ipc/sshIPC.js"
 import { initLogging } from './common/logging.js'
 
 // needed in case process is undefined under Linux
@@ -24,8 +24,8 @@ async function createWindow () {
 
   mainWindow = new BrowserWindow({
     icon: path.resolve(currentDir, 'icons/icon.png'), // tray icon
-    width: 1000,
-    height: 600,
+    width: 1600,
+    height: 800,
     useContentSize: true,
     frame: false, // <-- 添加这里
     webPreferences: {
@@ -60,14 +60,18 @@ async function createWindow () {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
-}
 
-registerIpcHandlers()
+  registerIpcHandlers(mainWindow)
+}
 
 initDB()
 initLogging()
 
 app.whenReady().then(createWindow)
+
+app.on('did-finish-load', () => {
+
+})
 
 // close
 app.on('window-all-closed', () => {
@@ -81,7 +85,6 @@ app.on('window-all-closed', () => {
   }
 
 })
-
 
 //
 app.on('activate', () => {

@@ -136,8 +136,8 @@
                 {{t('delete')}}
               </q-tooltip>
             </q-btn>
+<!--            v-if="props.row.connectionType === t('node.remoteNode')"-->
             <q-btn
-              v-if="props.row.connectionType === t('node.remoteNode')"
               icon="link"
               color="blue"
               dense
@@ -205,8 +205,10 @@ const background = reactive({
 })
 
 const services = reactive([
-  { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker', address: 'localhost', port: 2375 },
-  { id: '111112', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+  { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker'},
+  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', address: 'localhost', port: 2375 },
+  { id: '111121', serviceName: '本地 Podman', connectionType: '本地节点', serviceType: 'Podman'},
+  { id: '111122', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
 ])
 
 const newService = reactive({
@@ -459,25 +461,47 @@ const connectService = (row) => {
     },
     persistent: true
   }).onOk(() => {
-    if (!row.address || !row.port || !row.username || !row.password) {
-      return $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: t('node.connectError')
-      })
-    }
+    let item
+    if (row.connectionType === t('node.remoteNode')) {
+      if (!row.address || !row.port || !row.username || !row.password) {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('node.connectError')
+        })
+      }
 
-    if (row.serviceType === "Docker" || row.serviceType === "Podman") {
-      const item = findNaviItemByName(navigatorStore.naviItems, "Docker")
-      if (!isEmptyObj(item)) {
-        return changeNavigatorGoto(router, item[0], item[1], {data: row})
+      if (row.serviceType === "Docker" || row.serviceType === "Podman") {
+        item = findNaviItemByName(navigatorStore.naviItems, "Docker")
+        if (isEmptyObj(item)) {
+          return $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('node.connectError1')
+          })
+        }
+      } else {
+        item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
+        if (isEmptyObj(item)) {
+          return $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('node.connectError1')
+          })
+        }
       }
     } else {
-      const item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
-      if (!isEmptyObj(item)) {
-        return changeNavigatorGoto(router, item[0], item[1], {data: row})
+      item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
+      if (isEmptyObj(item)) {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('node.connectError1')
+        })
       }
     }
+
+    return changeNavigatorGoto(router, item[0], item[1], {data: row})
   }).onOk(() => {
     // console.log('>>>> second OK catcher')
   }).onCancel(() => {
@@ -535,8 +559,6 @@ watch(() => newService.connectionType, (newValue, oldValue) => {
     serviceTypeOptions.length = 0
     serviceTypeOptions.push.apply(serviceTypeOptions, localServiceTypeOptions)
     newService.serviceType = ''
-
-    console.log(serviceTypeOptions)
   } else if (newValue === t('node.remoteNode')) {
     serviceTypeOptions.length = 0
     serviceTypeOptions.push.apply(serviceTypeOptions, remoteServiceTypeOptions)

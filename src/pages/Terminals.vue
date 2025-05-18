@@ -22,10 +22,9 @@
         />
       </q-tabs>
 
-
       <q-separator />
 
-      <q-tab-panels v-model="tab" animated style="height: 100%">
+      <q-tab-panels v-model="tab" animated style="height: 100%" keep-alive>
 <!--        class="grey-9 text-white"-->
         <q-tab-panel
           v-for="item in tabs"
@@ -35,7 +34,7 @@
         >
           <Xterm
             :terminal-id="item.id"
-            :connection="tab.connection"
+            :data="item.data"
             :ref="(el) => (xtermRefs[item.id] = el)"
             :style="cardStyle"
           />
@@ -73,7 +72,7 @@ defineOptions({
   name: 'Terminals',
 })
 
-import { inject, onMounted, onActivated, reactive, ref, nextTick, watch } from 'vue'
+import { inject, onMounted, onActivated, reactive, ref, nextTick, watch, onUnmounted } from 'vue'
 import CommandBar from 'components/CommandBar.vue'
 import Xterm from 'components/Xterm.vue'
 import rtab from 'components/RTab.vue'
@@ -92,7 +91,7 @@ const background = reactive({
 })
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 70 + "px" : window.innerHeight - 70 + "px"
+  height: process.env.MODE === 'electron' ? window.innerHeight - 151 + "px" : window.innerHeight - 70 + "px"
   // height: "100%",
 })
 
@@ -116,7 +115,7 @@ const tabs = reactive([
   // { id: 'movies', label: 'Movies', icon: 'movie', data: {}},
 ])
 
-const xtermRefs = ref({}); // 存储 xterm 实例的 ref
+const xtermRefs = reactive({}); // 存储 xterm 实例的 ref
 
 const isShowCmdBar = ref(false)
 
@@ -135,7 +134,7 @@ const showCmdBar = () => {
     }
   } else {
     if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 70 + "px"
+      cardStyle.height = window.innerHeight - 151 + "px"
     } else {
       cardStyle.height = window.innerHeight - 70 + "px"
     }
@@ -147,12 +146,23 @@ const showFileSystem = () => {
     isShowCmdBar.value = false
     return
   }
-
-
 }
 
-const submitCmd = () => {
+// 按键发送命令
+const numberKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+const handleKeyDown = (event) => {
+  // 标签页切换，快捷键 alt + 数字键
+  if (event.altKey) {
+    if (numberKeys.includes(event.key)) {
+      if (parseInt(event.key) <= tabs.length) {
+        tab.value = tabs[parseInt(event.key) - 1].id
+      }
+    }
+  }
+}
 
+const submitCmd = (cmd) => {
+  xtermRefs[tab.value].send(cmd + '\r')
 }
 
 const checkScreenSize = () => {
@@ -160,13 +170,13 @@ const checkScreenSize = () => {
 
   if (isShowCmdBar.value) {
     if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 230 - 66 + "px"
+      cardStyle.height = window.innerHeight - 230 - 66 - 5 + "px"
     } else {
-      cardStyle.height = window.innerHeight - 222 - 42 + "px"
+      cardStyle.height = window.innerHeight - 222 - 42 - 5 + "px"
     }
   } else {
     if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 70 + "px"
+      cardStyle.height = window.innerHeight - 151 + "px"
     } else {
       cardStyle.height = window.innerHeight - 70 + "px"
     }
@@ -192,6 +202,7 @@ const deleteTab = (id) => {
         window.terminal.closeTerminal()
 
         tabs.splice(i, 1)
+        tab.value = tabs[0].id
         return
       }
     }
@@ -200,7 +211,12 @@ const deleteTab = (id) => {
 
 onMounted(() => {
   window.addEventListener('resize', checkScreenSize)
+  window.addEventListener('keydown', handleKeyDown)
+})
 
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreenSize)
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 onActivated(() => {

@@ -95,20 +95,6 @@ contextBridge.exposeInMainWorld('dockerNodes', {
 
 })
 
-contextBridge.exposeInMainWorld('terminal', {
-  createTerminal () {
-    return ipcRenderer.invoke('createSSH')
-  },
-
-  closeTerminal () {
-    return ipcRenderer.invoke('closeSSH')
-  },
-
-  sendCmdToTerminal () {
-    // return ipcRenderer.invoke('')
-  }
-})
-
 contextBridge.exposeInMainWorld('precmds', {
   getPreCmds () {
     return ipcRenderer.invoke('getPreCmds')
@@ -134,5 +120,40 @@ contextBridge.exposeInMainWorld('precmds', {
   delPreCmdGroup (data) {
     return ipcRenderer.invoke('delPreCmdGroup', data)
   },
+})
 
+contextBridge.exposeInMainWorld('terminal', {
+  createTerminal (uuid) {
+    return ipcRenderer.invoke('createTerminal', uuid)
+  },
+
+  closeTerminal (uuid) {
+    return ipcRenderer.invoke('closeTerminal', uuid)
+  },
+
+  resize (data) {
+    return ipcRenderer.invoke('terminalResize', data)
+  },
+
+  send (data) {
+    return ipcRenderer.invoke('terminalSend', data)
+  },
+
+  receive (callback) {
+    return ipcRenderer.on('terminalReceive', (event, data) => callback(data))
+  }
+})
+
+contextBridge.exposeInMainWorld('ssh', {
+  createSSH () {
+    return ipcRenderer.invoke('createSSH')
+  },
+
+  closeTerminal () {
+    return ipcRenderer.invoke('closeSSH')
+  },
+
+  sendCmdToTerminal () {
+    // return ipcRenderer.invoke('')
+  }
 })

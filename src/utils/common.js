@@ -111,6 +111,7 @@ export function findItem (items, item) {
       }
     }
   }
+  return undefined
 }
 
 export const findNaviItemByName = (items, name, prefix='') => {
