@@ -5,6 +5,7 @@ node_modules
 # Quasar core related directories
 .quasar
 /dist
+/build
 /quasar.config.*.temporary.compiled*
 
 # Cordova related directories and files
@@ -36,3 +37,5 @@ pnpm-lock.yaml
 
 .vscode
 
+package-lock.json
+npminstall-debug.log
