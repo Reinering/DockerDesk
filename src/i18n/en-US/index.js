@@ -70,6 +70,7 @@ export default {
     serviceName: "Service Name",
     serviceType: "Service Type",
     connectionType: "Link Type",
+    protocol: "Protocol",
     address: "Address",
     port: "Port",
     serviceStatus: "Service Status",
@@ -78,6 +79,12 @@ export default {
 
     addNode: "Add Node",
     nodeName: "Node Name",
+    authType: "Auth Type",
+    password: 'password',
+    key: 'Key',
+    selectKeyFile: "Select key file",
+    keyFileHint: "Key hidden",
+
     nodeUrl: "Node URL",
     nodePort: "Node Port",
     nodeUserName: "Node User Name",
@@ -91,7 +98,8 @@ export default {
     connectMessage: "Do you want to make this connection?",
     connectError: "Required connection parameters are missing",
     connectError1: "Failed to find route",
-    deleteMessage: "Are you sure to delete?"
+    deleteMessage: "Are you sure to delete?",
+    fileReadError: "File Read Error",
   },
 
   //Docker Node
@@ -132,6 +140,8 @@ export default {
   },
 
   terminal: {
+    globalSettingsTitle: "Terminal Node Global Settings",
+
     closeMessage: "Are you sure to close？",
   },
 

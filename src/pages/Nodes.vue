@@ -73,18 +73,35 @@
                 dense
                 class="q-mb-sm"
               />
-              <q-input
+              <q-select
                 v-if="newService.connectionType === t('node.remoteNode')"
-                v-model="newService.password"
-                :label="t('password')"
-                type="password"
-                maxlength="50"
-
+                v-model="newService.authType"
+                :options="passwordOptions"
+                :label="t('node.authType')"
                 outlined
                 dense
                 class="q-mb-sm"
               />
-
+              <q-input
+                v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.password')"
+                v-model="newService.password"
+                :label="t('node.password')"
+                type="password"
+                maxlength="50"
+                outlined
+                dense
+                class="q-mb-sm"
+              />
+              <q-file
+                v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.key')"
+                v-model="keyFile"
+                :label="labelKey"
+                outlined
+                dense
+                clearable
+                class="q-mb-sm"
+                @update:model-value="onFileSelected"
+               />
               <q-input
                 v-model="newService.mark"
                 :label="t('node.mark')"
@@ -229,16 +246,22 @@ const newService = reactive({
   address: '',
   port: '',
   username: '',
+  authType: '',
   password: '',
+  key: '',
   mark: ''
 })
 
+const keyFile = ref('')
+const labelKey = ref(t('node.key') + ' | ' + t('node.selectKeyFile'))
+
 const connectionOptions = [t('node.localNode'), t('node.remoteNode')]
 const protocolOptions = ['SSH', 'Telnet']
+const passwordOptions = [t('node.password'), t('node.key')]
 
 const localServiceTypeOptions = ['Docker', 'Podman']
 const remoteServiceTypeOptions = ['Docker', 'Podman', 'SSH', 'Telnet']
-const serviceTypeOptions = reactive(['Docker', 'Podman', 'SSH', 'Telnet'])
+const serviceTypeOptions = reactive(['Docker', 'Podman'])
 
 const columns = [
   { name: 'id', label: 'ID', align: 'left', field: 'id' },
@@ -276,8 +299,13 @@ const cleanService = () => {
   newService.protocol= ''
   newService.port = ''
   newService.username = ''
+  newService.authType = ''
   newService.password = ''
+  newService.key = ''
   newService.mark = ''
+
+  keyFile.value = ''
+  labelKey.value = t('node.key') + ' | ' + t('node.selectKeyFile')
 }
 
 const closeDialog = () => {
@@ -288,18 +316,70 @@ const closeDialog = () => {
   diaglogTitle.value = t('node.addServiceTitle')
 }
 
+const onFileSelected = (file) => {
+  if (file) {
+    const reader = new FileReader()
+
+    // 当文件读取完成时触发
+    reader.onload = (e) => {
+      newService.key = e.target.result; // 将读取的内容存储到 fileContent
+    }
+
+    // 读取失败
+    reader.onerror = () => {
+      return $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: t('node.fileReadError')
+      })
+    }
+
+    // 以文本形式读取文件
+    reader.readAsText(file, 'utf8')
+  } else {
+    keyFile.value = ''
+
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: t('node.fileReadError')
+    })
+  }
+}
+
 const addService = () => {
   if (
     newService.serviceName &&
     newService.serviceType &&
     newService.connectionType &&
-    (newService.connectionType === t('node.localNode') || (newService.address && newService.port && newService.username && newService.password))
+    (newService.connectionType === t('node.localNode') || (newService.address && newService.port && newService.username))
   ) {
     const data = deepClone(newService)
     if (data.connectionType === t('node.localNode')) {
       data.connectionType = "local"
     } else if (data.connectionType === t('node.remoteNode')) {
       data.connectionType = "remote"
+    }
+
+    if (data.authType === t('node.password')) {
+      data.authType = "password"
+      if (isEmptyObj(data.password)) {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('verifyMessage.dataNotNull')
+        })
+      }
+    } else if (data.authType === t('node.key')) {
+      data.authType = "key"
+
+      if (isEmptyObj(data.key)) {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('verifyMessage.dataNotNull')
+        })
+      }
     }
 
     if ( data.serviceType === 'SSH' || data.serviceType === 'Telnet' && isEmptyObj(data.protocol) ) {
@@ -317,7 +397,12 @@ const addService = () => {
     window.nodes.addNode(JSON.stringify(data)).then((res) => {
       if (res.success) {
         newService.id = res.data.id
-        newService.password = res.data.password
+        if (newService.authType === t('node.password')) {
+          newService.password = res.data.password
+        } else if (newService.authType === t('node.key')) {
+          newService.key = res.data.key
+        }
+
         services.push({ ...newService })
 
         cleanService()
@@ -329,17 +414,11 @@ const addService = () => {
           message: t('database.addSuccess')
         })
       } else {
-        let errMsg = ''
-        if (res.error instanceof Error) {
-          errMsg = JSON.stringify(res.error)
-        } else {
-          errMsg = res.error
-        }
 
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: t('database.addFail') + ': ' + errMsg
+          message: t('database.addFail') + ': ' + res.error
         })
       }
     })
@@ -362,8 +441,14 @@ const showEdit = (row) => {
   newService.address = row.address
   newService.port = row.port
   newService.username = row.username
+  newService.authType = row.authType
   newService.password = row.password
+  newService.key = row.key
   newService.mark = row.mark
+
+  if (newService.key) {
+    labelKey.value = t('node.keyFileHint')
+  }
 
   diaglogTitle.value = t('node.editServiceTitle')
   showDialog.value = true
@@ -386,8 +471,17 @@ const editService = (data) => {
           services[i].address = data.address
           services[i].port = data.port
           services[i].username = data.username
+          services[i].authType = data.authType
           services[i].password = data.password
+          services[i].key = data.key
           services[i].mark = data.mark
+
+          if (services[i].authType === "password") {
+            services[i].authType = t('node.password')
+          } else if (services[i].authType === "key") {
+            services[i].authType = t('node.key')
+          }
+
           break
         }
       }
@@ -400,17 +494,11 @@ const editService = (data) => {
         message: t('database.updateSuccess')
       })
     } else {
-      let errMsg = ''
-      if (res.error instanceof Error) {
-        errMsg = JSON.stringify(res.error)
-      } else {
-        errMsg = res.error
-      }
 
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: t('database.updateError') + ': ' + errMsg
+        message: t('database.updateError') + ': ' + res.error
       })
     }
   })
@@ -445,17 +533,11 @@ const deleteService = (id) => {
         })
       } else {
         if (res.success === false) {
-          let errMsg = ''
-          if (res.error instanceof Error) {
-            errMsg = JSON.stringify(res.error)
-          } else {
-            errMsg = res.error
-          }
 
           $q.notify({
             type: 'negative',
             position: clientConfig.quasar.notify.position,
-            message: t('database.deleteFail') + ': ' + errMsg
+            message: t('database.deleteFail') + ': ' + res.error
           })
         }
       }
@@ -578,22 +660,29 @@ onMounted(() => {
           } else if (node.connectionType === "remote") {
             node.connectionType = t('node.remoteNode')
           }
+
+          if (node.protocol === "telnet") {
+            node.protocol = "Telnet"
+          } else if (node.protocol === "ssh") {
+            node.protocol = "SSH"
+          }
+
+          if (node.authType === "password") {
+            node.authType = t('node.password')
+          } else if (node.authType === "key") {
+            node.authType = t('node.key')
+          }
+
           services.push(node)
         }
       }
     } else {
       if (result.success === false) {
-        let errMsg = ''
-        if (result.error instanceof Error) {
-          errMsg = JSON.stringify(result.error)
-        } else {
-          errMsg = result.error
-        }
 
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: t('database.accessFail') + ': ' + errMsg
+          message: t('database.accessFail') + ': ' + result.error
         })
       }
     }
@@ -609,33 +698,26 @@ onBeforeMount(() => {
 })
 
 watch(() => newService.connectionType, (newValue, oldValue) => {
+  if (oldValue !== '') {
+    newService.serviceType = ''
+  }
+
   if (newValue === t('node.localNode')) {
     serviceTypeOptions.length = 0
     serviceTypeOptions.push.apply(serviceTypeOptions, localServiceTypeOptions)
-    if (!oldValue === '') {
-      newService.serviceType = ''
-    }
-  } else if (newValue === t('node.remoteNode')) {
-    serviceTypeOptions.length = 0
-    serviceTypeOptions.push.apply(serviceTypeOptions, remoteServiceTypeOptions)
 
-    if (!oldValue === '') {
-      newService.serviceType = ''
-    }
-  } else {
-
-  }
-})
-
-watch(() => newService.connectionType, (newValue, oldValue) => {
-  if (newService.connectionType === t('node.localNode')) {
-    if (!oldValue === '') {
+    if (oldValue !== '') {
       newService.protocol = ''
       newService.address = ''
       newService.port = ''
       newService.username = ''
       newService.password = ''
     }
+  } else if (newValue === t('node.remoteNode')) {
+    serviceTypeOptions.length = 0
+    serviceTypeOptions.push.apply(serviceTypeOptions, remoteServiceTypeOptions)
+  } else {
+
   }
 })
 

@@ -23,7 +23,9 @@ export function registerNodesIpcHandlers(win) {
               address: node.address,
               port: node.port,
               username: node.username,
+              authType: node.auth_type,
               password: (node.password !== null && node.password.length > 0) ? interference : '',
+              key: (node.key !== null && node.key.length > 0) ? interference : '',
               mark: node.mark
             })
           })
@@ -45,11 +47,13 @@ export function registerNodesIpcHandlers(win) {
         name: res.serviceName,
         service_type: res.serviceType,
         connect_type: res.connectionType,
-        protocol: res.protocol,
+        protocol: res.protocol !== null && res.protocol.length > 0 ? res.protocol : null,
         address: res.address !== null && res.address.length > 0 ? res.address : null,
         port: res.address !== null && res.port.length > 0 ? res.port : null,
         username: res.username !== null && res.username.length > 0 ? res.username : null,
+        auth_type: res.authType !== null && res.authType.length > 0 ? res.authType : null,
         password: res.password !== null && res.password.length > 0 ? encryptPwd(res.password) : null,
+        key: res.key !== null && res.key.length > 0 ? encryptPwd(res.key) : null,
         create_time: Date.now(),
         modify_time: null,
         delete_time: null,
@@ -59,7 +63,12 @@ export function registerNodesIpcHandlers(win) {
 
       return nodes.addNode(value).then((result) => {
         if(result.success ) {
-          res.password = res.password !== null && res.password.length > 0 ? interference : res.password
+          if (res.authType === "password") {
+            res.password = res.password !== null && res.password.length > 0 ? interference : res.password
+          } else if (res.authType === "key") {
+            res.key = res.key !== null && res.key.length > 0 ? interference : res.key
+          }
+
           res.id = value.id
           result.data = res
         }
@@ -87,15 +96,22 @@ export function registerNodesIpcHandlers(win) {
         name: res.serviceName,
         service_type: res.serviceType,
         connect_type: res.connectionType,
-        protocol: res.protocol,
+        protocol: res.protocol !== null && res.protocol.length > 0 ? res.protocol : null,
         address: res.address !== null && res.address.length > 0 ? res.address : null,
         port: res.port !== null && res.port.length > 0 ? res.port : null,
         username: res.username !== null && res.username.length > 0 ? res.username : null,
+        auth_type: res.authType !== null && res.authType.length > 0 ? res.authType : null,
         modify_time: Date.now(),
         mark: res.mark !== null && res.mark.length > 0 ? res.mark : null,
       }
-      if (res.password !== null && res.password.length > 0 && res.password !== interference) {
-        value.password = encryptPwd(res.password)
+      if (res.authType === "password") {
+        if (res.password !== null && res.password.length > 0 && res.password !== interference) {
+          value.password = encryptPwd(res.password)
+        }
+      } else if (res.authType === "key") {
+        if (res.key !== null && res.key.length > 0 && res.key !== interference) {
+          value.key = encryptPwd(res.key)
+        }
       }
 
       return nodes.updateNode(value)

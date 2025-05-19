@@ -67,6 +67,7 @@ export default {
     serviceName: "服务名称",
     serviceType: "服务类型",
     connectionType: "连接类型",
+    protocol: "协议",
     address: "地址",
     port: "端口",
     serviceStatus: "服务状态",
@@ -75,6 +76,12 @@ export default {
 
     addNode: "添加节点",
     nodeName: "节点名称",
+    authType: "认证方式",
+    password: "密码",
+    key: "密钥",
+    selectKeyFile: "选择密钥文件",
+    keyFileHint: "密钥已隐藏",
+
     nodeUrl: "节点URL",
     nodePort: "节点端口",
     nodeUserName: "节点用户名",
@@ -88,7 +95,8 @@ export default {
     connectMessage: "是否要进行此连接？",
     connectError: "缺少必要的连接参数",
     connectError1: "查找路由失败",
-    deleteMessage: "确认删除吗？"
+    deleteMessage: "确认删除吗？",
+    fileReadError: "文件读取失败",
   },
 
   //Docker Node
@@ -135,6 +143,8 @@ export default {
   },
 
   terminal: {
+    globalSettingsTitle: "终端节点全局设置",
+
     closeMessage: "确认关闭吗？",
   },
 

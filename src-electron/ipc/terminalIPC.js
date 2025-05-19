@@ -29,7 +29,7 @@ export function registerTerminalIpcHandlers(win) {
         term.destroy()
         return { success: true, error: '' }
       } else {
-        return { success: false, error: "node-pty uninitialized" }
+        return { success: false, error: "node-pty close error" }
       }
     } catch (error) {
       return { success: false, error: error }
@@ -48,7 +48,6 @@ export function registerTerminalIpcHandlers(win) {
         return { success: false, error: "node-pty uninitialized" }
       }
     } catch (error) {
-      console.log(error)
       return { success: false, error: error }
     }
   })
@@ -63,10 +62,9 @@ export function registerTerminalIpcHandlers(win) {
         term.write(data)
         return { success: true, error: '' }
       } else {
-        return { success: false, error: "node-pty uninitialized" }
+        return { success: false, error: "node-pty resize error" }
       }
     } catch (error) {
-      console.log(error)
       return { success: false, error: error }
     }
   })

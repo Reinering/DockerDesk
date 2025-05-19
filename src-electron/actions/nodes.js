@@ -18,13 +18,16 @@ export const nodes = {
   },
 
   getNodeByID:  async (id) => {
-    db('nodes')
-      .where('delete_flags', '=', '0', '&&', 'id', '=', id)
+    return await db('nodes')
+      .where('delete_flags', '=', '0')
+      .andWhere('id', '=', id)
       .select('*').then(
       rows => {
-
         return rows
-      }).catch(error => {
+      }, (error) => {
+        return { success: false, error: error }
+      })
+      .catch(error => {
       return { success: false, error: error }
     })
   },
