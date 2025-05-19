@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { dockerNodes } from '../actions/dockerNode.js'
+import { nodes } from '../actions/nodes.js'
 import { preCmds } from '../actions/preCmds.js'
 import { generateUuid } from '../common/utils.js'
 import { interference, encryptPwd } from '../common/encrypt.js'
@@ -11,7 +12,7 @@ export function registerDBIpcHandlers() {
 
   // nodes
   ipcMain.handle('getNodes', () => {
-    return  dockerNodes.getDockerNodes().then((result) => {
+    return  nodes.getNodes().then((result) => {
       if (result instanceof Array) {
         try {
           const data = []
@@ -57,7 +58,7 @@ export function registerDBIpcHandlers() {
         mark: res.mark !== null && res.mark.length > 0 ? res.mark : null,
       }
 
-      return dockerNodes.addDockerNode(value).then((result) => {
+      return nodes.addNode(value).then((result) => {
         if(result.success ) {
           res.password = res.password !== null && res.password.length > 0 ? interference : res.password
           result.data = res
@@ -71,11 +72,11 @@ export function registerDBIpcHandlers() {
   })
 
   ipcMain.handle('deleteNode', async (event, id) => {
-    return await dockerNodes.deleteDockerNodeByID(id)
+    return await nodes.deleteNodeByID(id)
   })
 
   ipcMain.handle('delNode', async (event, id) => {
-    return await dockerNodes.delDockerNodeByID(id)
+    return await nodes.delNodeByID(id)
   })
 
   ipcMain.handle('editNode', async (event, data) => {
@@ -96,7 +97,7 @@ export function registerDBIpcHandlers() {
         value.ssh_password = encryptPwd(res.password)
       }
 
-      return dockerNodes.updateDockerNode(value)
+      return nodes.updateNode(value)
     } catch (error) {
       log.error(error)
       return { success: false, error: error.message }
