@@ -1,15 +1,21 @@
-import { registerDBIpcHandlers } from "./ipc/dbIPC.js"
+import { registerNodesIpcHandlers } from "./ipc/nodesIPC.js"
+import { registerPreCmdsIpcHandlers } from "./ipc/preCmdsIPC.js"
 import { registerTerminalIpcHandlers } from "./ipc/terminalIPC.js"
 import { registerSSHIpcHandlers } from "./ipc/sshIPC.js"
-import { BrowserWindow } from 'electron'
+
 
 export function registerIpcHandlers(win) {
 
-  registerDBIpcHandlers(win)
+  // registerDBIpcHandlers(win)
+
+  registerNodesIpcHandlers(win)
+
+  registerPreCmdsIpcHandlers(win)
 
   registerTerminalIpcHandlers(win)
 
   registerSSHIpcHandlers(win)
+
 }
 
 

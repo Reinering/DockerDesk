@@ -5,7 +5,7 @@ import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
-import { ssh_connections } from "./ipc/sshIPC.js"
+import { ssh_clients } from "./ipc/sshIPC.js"
 import { initLogging } from './common/logging.js'
 
 // needed in case process is undefined under Linux
@@ -80,7 +80,7 @@ app.on('window-all-closed', () => {
   }
 
   // 退出前，断开所有ssh连接
-  for (let conn of ssh_connections) {
+  for (let conn of ssh_clients) {
 
   }
 

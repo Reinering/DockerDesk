@@ -36,6 +36,15 @@
                 dense
                 class="q-mb-sm"
               />
+              <q-select
+                class="q-mb-sm"
+                v-if="newService.connectionType === t('node.remoteNode') && (newService.serviceType === 'Docker' || newService.serviceType === 'Podman')"
+                v-model="newService.protocol"
+                :options="protocolOptions"
+                :label="t('node.protocol')"
+                outlined
+                dense
+              />
               <q-input
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.address"
@@ -88,7 +97,7 @@
             </q-form>
           </q-card-section>
           <q-card-actions align="right">
-            <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="primary" @click="addService" />
+            <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="addService" />
             <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="closeDialog" />
           </q-card-actions>
         </q-card>
@@ -142,7 +151,7 @@
               color="blue"
               dense
               flat
-              @click="connectService(props.row)"
+              @click="connectTerminal(props.row)"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{t('connect')}}
@@ -154,7 +163,7 @@
               color="green"
               dense
               flat
-              @click="connectService(props.row)"
+              @click="connectPanel(props.row)"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{t('node.dockerPanel')}}
@@ -206,9 +215,9 @@ const background = reactive({
 
 const services = reactive([
   { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker'},
-  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', address: 'localhost', port: 2375 },
+  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
   { id: '111121', serviceName: '本地 Podman', connectionType: '本地节点', serviceType: 'Podman'},
-  { id: '111122', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', address: '192.168.1.100', port: 8080 },
+  { id: '111122', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', protocol: 'ssh', address: '192.168.1.100', port: 8080 },
 ])
 
 const newService = reactive({
@@ -216,6 +225,7 @@ const newService = reactive({
   serviceName: '',
   connectionType: '',
   serviceType: '',
+  protocol: '',
   address: '',
   port: '',
   username: '',
@@ -224,6 +234,7 @@ const newService = reactive({
 })
 
 const connectionOptions = [t('node.localNode'), t('node.remoteNode')]
+const protocolOptions = ['SSH', 'Telnet']
 
 const localServiceTypeOptions = ['Docker', 'Podman']
 const remoteServiceTypeOptions = ['Docker', 'Podman', 'SSH', 'Telnet']
@@ -234,12 +245,13 @@ const columns = [
   { name: 'serviceName', label: t('node.serviceName'), align: 'left', field: 'serviceName' },
   { name: 'connectionType', label: t('node.connectionType'), align: 'left', field: 'connectionType' },
   { name: 'serviceType', label: t('node.serviceType'), align: 'left', field: 'serviceType' },
+  { name: 'protocol', label: t('node.protocol'), align: 'left', field: 'protocol' },
   { name: 'address', label: t('node.address'), align: 'left', field: 'address' },
   { name: 'port', label: t('node.port'), align: 'left', field: 'port' },
   { name: 'actions', label: t('node.action'), align: 'center' }
 ]
 
-const visibleColumns = ['serviceName', 'connectionType', 'serviceType', 'address', 'port', 'actions']
+const visibleColumns = ['serviceName', 'connectionType', 'serviceType', 'protocol', 'address', 'port', 'actions']
 
 const isEdit = ref(false)
 
@@ -261,6 +273,7 @@ const cleanService = () => {
   newService.connectionType = ''
   newService.serviceType = ''
   newService.address = ''
+  newService.protocol= ''
   newService.port = ''
   newService.username = ''
   newService.password = ''
@@ -276,7 +289,6 @@ const closeDialog = () => {
 }
 
 const addService = () => {
-  diaglogTitle.value = t('node.addServiceTitle')
   if (
     newService.serviceName &&
     newService.serviceType &&
@@ -290,10 +302,14 @@ const addService = () => {
       data.connectionType = "remote"
     }
 
+    if ( data.serviceType === 'SSH' || data.serviceType === 'Telnet' && isEmptyObj(data.protocol) ) {
+      data.protocol = data.serviceType
+    }
+    data.protocol = data.protocol.toLowerCase()
+
     // edit
     if (isEdit.value === true) {
       editService(data)
-      isEdit.value = false
       return
     }
 
@@ -342,6 +358,7 @@ const showEdit = (row) => {
   newService.serviceName = row.serviceName
   newService.connectionType = row.connectionType
   newService.serviceType = row.serviceType
+  newService.protocol = row.protocol
   newService.address = row.address
   newService.port = row.port
   newService.username = row.username
@@ -365,6 +382,7 @@ const editService = (data) => {
             services[i].connectionType = t('node.remoteNode')
           }
           services[i].serviceType = data.serviceType
+          services[i].protocol = data.protocol
           services[i].address = data.address
           services[i].port = data.port
           services[i].username = data.username
@@ -374,8 +392,7 @@ const editService = (data) => {
         }
       }
 
-      cleanService()
-      showDialog.value = false
+      closeDialog()
 
       $q.notify({
         type: 'positive',
@@ -397,8 +414,6 @@ const editService = (data) => {
       })
     }
   })
-
-  diaglogTitle.value = t('node.addServiceTitle')
 }
 
 const deleteService = (id) => {
@@ -448,7 +463,7 @@ const deleteService = (id) => {
   })
 }
 
-const connectService = (row) => {
+const connectTerminal = (row) => {
   $q.dialog({
     title: t('confirm'),
     message: t('node.connectMessage'),
@@ -471,6 +486,61 @@ const connectService = (row) => {
         })
       }
 
+      // ssh | telnet
+      item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
+      if (isEmptyObj(item)) {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('node.connectError1')
+        })
+      }
+    } else {
+      // bash
+      item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
+      if (isEmptyObj(item)) {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('node.connectError1')
+        })
+      }
+    }
+
+    return changeNavigatorGoto(router, item[0], item[1], {data: row})
+  }).onOk(() => {
+    // console.log('>>>> second OK catcher')
+  }).onCancel(() => {
+    // console.log('>>>> Cancel')
+  }).onDismiss(() => {
+    // console.log('I am triggered on both OK and Cancel')
+  })
+
+}
+
+const connectPanel = (row) => {
+  $q.dialog({
+    title: t('confirm'),
+    message: t('node.connectMessage'),
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk(() => {
+    let item
+    if (row.connectionType === t('node.remoteNode')) {
+      if (!row.address || !row.port || !row.username || !row.password) {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('node.connectError')
+        })
+      }
+      // docker | podman
       if (row.serviceType === "Docker" || row.serviceType === "Podman") {
         item = findNaviItemByName(navigatorStore.naviItems, "Docker")
         if (isEmptyObj(item)) {
@@ -480,25 +550,9 @@ const connectService = (row) => {
             message: t('node.connectError1')
           })
         }
-      } else {
-        item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
-        if (isEmptyObj(item)) {
-          return $q.notify({
-            type: 'negative',
-            position: clientConfig.quasar.notify.position,
-            message: t('node.connectError1')
-          })
-        }
       }
     } else {
-      item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
-      if (isEmptyObj(item)) {
-        return $q.notify({
-          type: 'negative',
-          position: clientConfig.quasar.notify.position,
-          message: t('node.connectError1')
-        })
-      }
+      return
     }
 
     return changeNavigatorGoto(router, item[0], item[1], {data: row})
@@ -558,16 +612,33 @@ watch(() => newService.connectionType, (newValue, oldValue) => {
   if (newValue === t('node.localNode')) {
     serviceTypeOptions.length = 0
     serviceTypeOptions.push.apply(serviceTypeOptions, localServiceTypeOptions)
-    newService.serviceType = ''
+    if (!oldValue === '') {
+      newService.serviceType = ''
+    }
   } else if (newValue === t('node.remoteNode')) {
     serviceTypeOptions.length = 0
     serviceTypeOptions.push.apply(serviceTypeOptions, remoteServiceTypeOptions)
 
-    newService.serviceType = ''
+    if (!oldValue === '') {
+      newService.serviceType = ''
+    }
   } else {
 
   }
 })
+
+watch(() => newService.connectionType, (newValue, oldValue) => {
+  if (newService.connectionType === t('node.localNode')) {
+    if (!oldValue === '') {
+      newService.protocol = ''
+      newService.address = ''
+      newService.port = ''
+      newService.username = ''
+      newService.password = ''
+    }
+  }
+})
+
 
 </script>
 

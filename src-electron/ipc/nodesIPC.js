@@ -1,0 +1,110 @@
+import { ipcMain } from 'electron'
+import { nodes } from '../actions/nodes.js'
+import { generateUuid } from '../common/utils.js'
+import { interference, encryptPwd } from '../common/encrypt.js'
+import log from 'electron-log'
+
+
+export function registerNodesIpcHandlers(win) {
+
+  // nodes
+  ipcMain.handle('getNodes', () => {
+    return nodes.getNodes().then((result) => {
+      if (result instanceof Array) {
+        try {
+          const data = []
+          result.forEach(node => {
+            data.push({
+              id: node.id,
+              serviceName: node.name,
+              serviceType: node.service_type,
+              connectionType: node.connect_type,
+              protocol: node.protocol,
+              address: node.address,
+              port: node.port,
+              username: node.username,
+              password: (node.password !== null && node.password.length > 0) ? interference : '',
+              mark: node.mark
+            })
+          })
+          return data
+        } catch (error) {
+          log.error(error)
+          return { success: false, error: error.message }
+        }
+      }
+      return result
+    })
+  })
+
+  ipcMain.handle('addNode', async (event, data) => {
+    try {
+      const res = JSON.parse(data)
+      const value = {
+        id: generateUuid(),
+        name: res.serviceName,
+        service_type: res.serviceType,
+        connect_type: res.connectionType,
+        protocol: res.protocol,
+        address: res.address !== null && res.address.length > 0 ? res.address : null,
+        port: res.address !== null && res.port.length > 0 ? res.port : null,
+        username: res.username !== null && res.username.length > 0 ? res.username : null,
+        password: res.password !== null && res.password.length > 0 ? encryptPwd(res.password) : null,
+        create_time: Date.now(),
+        modify_time: null,
+        delete_time: null,
+        delete_flags: 0,
+        mark: res.mark !== null && res.mark.length > 0 ? res.mark : null,
+      }
+
+      return nodes.addNode(value).then((result) => {
+        if(result.success ) {
+          res.password = res.password !== null && res.password.length > 0 ? interference : res.password
+          res.id = value.id
+          result.data = res
+        }
+        return result
+      })
+    } catch (error) {
+      log.error(error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle('deleteNode', async (event, id) => {
+    return await nodes.deleteNodeByID(id)
+  })
+
+  ipcMain.handle('delNode', async (event, id) => {
+    return await nodes.delNodeByID(id)
+  })
+
+  ipcMain.handle('editNode', async (event, data) => {
+    try {
+      const res = JSON.parse(data)
+      const value = {
+        id: res.id,
+        name: res.serviceName,
+        service_type: res.serviceType,
+        connect_type: res.connectionType,
+        protocol: res.protocol,
+        address: res.address !== null && res.address.length > 0 ? res.address : null,
+        port: res.port !== null && res.port.length > 0 ? res.port : null,
+        username: res.username !== null && res.username.length > 0 ? res.username : null,
+        modify_time: Date.now(),
+        mark: res.mark !== null && res.mark.length > 0 ? res.mark : null,
+      }
+      if (res.password !== null && res.password.length > 0 && res.password !== interference) {
+        value.password = encryptPwd(res.password)
+      }
+
+      return nodes.updateNode(value)
+    } catch (error) {
+      log.error(error)
+      return { success: false, error: error.message }
+    }
+  })
+
+
+
+}

@@ -38,12 +38,13 @@ async function initDB() {
    await db.schema.createTableIfNotExists('docker_node', function(table) {
       table.text('id').notNullable().primary(); // 主键，文本类型，非空
       table.text('name').notNullable(); // 名称，文本类型，非空
-      table.text('docker_type').notNullable(); // docker 类型，文本类型，非空
+      table.text('service_type').notNullable(); // 服务类型，文本类型，非空
       table.text('connect_type').notNullable(); // 连接类型，文本类型，非空
-      table.text('ssh_address'); // SSH 地址，文本类型，可空
-      table.text('ssh_port'); // SSH 端口，文本类型，可空
-      table.text('ssh_username'); // SSH 用户名，文本类型，可空
-      table.text('ssh_password'); // SSH 密码，文本类型，可空
+      table.text('protocol'); // 协议类型，文本类型，非空
+      table.text('address'); // 地址，文本类型，可空
+      table.text('port'); // 端口，文本类型，可空
+      table.text('username'); // 用户名，文本类型，可空
+      table.text('password'); // 密码，文本类型，可空
       table.timestamp('create_time').notNullable(); // 创建时间戳，非空
       table.timestamp('modify_time'); // 修改时间戳，可空
       table.timestamp('delete_time'); // 删除时间戳，可空
