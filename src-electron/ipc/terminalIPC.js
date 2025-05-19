@@ -27,6 +27,7 @@ export function registerTerminalIpcHandlers(win) {
       if (terminals.has(uuid)) {
         const term = terminals.get(uuid)
         term.destroy()
+        terminals.delete(uuid)
         return { success: true, error: '' }
       } else {
         return { success: false, error: "node-pty close error" }
@@ -45,7 +46,7 @@ export function registerTerminalIpcHandlers(win) {
         term.resize(cols, rows)
         return { success: true, error: '' }
       } else {
-        return { success: false, error: "node-pty uninitialized" }
+        return { success: false, error: "node-pty resize error" }
       }
     } catch (error) {
       return { success: false, error: error }
@@ -62,7 +63,7 @@ export function registerTerminalIpcHandlers(win) {
         term.write(data)
         return { success: true, error: '' }
       } else {
-        return { success: false, error: "node-pty resize error" }
+        return { success: false, error: "node-pty write error" }
       }
     } catch (error) {
       return { success: false, error: error }

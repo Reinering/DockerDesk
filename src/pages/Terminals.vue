@@ -52,18 +52,41 @@
         :disable="draggingFab"
         v-touch-pan.prevent.mouse="moveFab"
       >
-        <q-fab-action @click="showCmdBar" color="primary" icon="keyboard_command_key" :disable="draggingFab">
+        <q-fab-action @click="showSettings" color="primary" icon="settings" :disable="draggingFab">
+          <q-tooltip>
+            Settings
+          </q-tooltip>
+        </q-fab-action>
+        <q-fab-action @click="showCmdBar" color="blue" icon="keyboard_command_key" :disable="draggingFab">
           <q-tooltip>
             CMD Bar
           </q-tooltip>
         </q-fab-action>
-        <q-fab-action @click="showFileSystem" color="primary" icon="storage" :disable="draggingFab">
+        <q-fab-action @click="showFileSystem" color="deep-orange" icon="storage" :disable="draggingFab">
           <q-tooltip>
             FileSystem
           </q-tooltip>
         </q-fab-action>
       </q-fab>
     </q-page-sticky>
+
+    <q-dialog v-model="isShowSettingsDialog">
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">{{settingDialogTitle}}</div>
+        </q-card-section>
+        <q-card-section>
+          <q-checkbox v-model="isSudo" label="Sudo(enable)" color="teal" />
+          <q-checkbox v-model="isSendNow" label="Send Now" color="orange" />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="addService" />
+          <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="closeDialog" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -91,8 +114,7 @@ const background = reactive({
 })
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 151 + "px" : window.innerHeight - 70 + "px"
-  // height: "100%",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 151 + "px" : window.innerHeight - 70 + "px",
 })
 
 const fabPos = ref([ 30, 200 ])
@@ -109,11 +131,7 @@ const moveFab = (ev) => {
 
 const tab = ref('')
 
-const tabs = reactive([
-  // { id: 'mails', label: 'Mails', icon: 'check', data: {}},
-  // { id: 'alarms', label: 'Alarms', icon: 'unfold_less', data: {}},
-  // { id: 'movies', label: 'Movies', icon: 'movie', data: {}},
-])
+const tabs = reactive([])
 
 const xtermRefs = reactive({}); // 存储 xterm 实例的 ref
 
@@ -146,6 +164,18 @@ const showFileSystem = () => {
     isShowCmdBar.value = false
     return
   }
+}
+
+const isShowSettingsDialog = ref(false)
+
+const showSettings = () => {
+  isShowSettingsDialog.value = !isShowSettingsDialog.value
+}
+
+const settingDialogTitle = ref(t('terminal.globalSettingsTitle'))
+
+const closeDialog = () => {
+  isShowSettingsDialog.value = false
 }
 
 // 按键发送命令
@@ -202,6 +232,7 @@ const deleteTab = (id) => {
         window.terminal.closeTerminal()
 
         tabs.splice(i, 1)
+        if (tabs.length === 0) break
         tab.value = tabs[0].id
         return
       }

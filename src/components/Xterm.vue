@@ -32,7 +32,6 @@ let term = null
 let fitAddon = null
 let channels = null
 let sshStream = null
-const cmdCache = ref('')
 
 const initTerminal = () => {
   term = new Terminal({
@@ -49,27 +48,22 @@ const initTerminal = () => {
   fitAddon.fit()
 
   handleResize()
-
-  term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
+  console.log("mark", props.data)
 
   // init connect
   if (props.data.connectionType === t('node.remoteNode')) {
-
-  } else {
-    window.terminal.createTerminal(props.terminalId)
+    window.sshTerminal.createSSHTerminal(JSON.stringify({
+      uuid: props.terminalId,
+      connID: props.data.id
+    }))
       .then((result) => {
+        console.log("ssh", result)
         if (result.success === false) {
-          let errMsg = ''
-          if (result.error instanceof Error) {
-            errMsg = JSON.stringify(result.error)
-          } else {
-            errMsg = result.error
-          }
 
           $q.notify({
             type: 'negative',
             position: clientConfig.quasar.notify.position,
-            message: t('xterm.termInitError') + ': ' + errMsg
+            message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
           })
         } else {
           term.onData((data) => {
@@ -80,11 +74,39 @@ const initTerminal = () => {
             })
           })
         }
+    })
+
+    window.sshTerminal.receive(
+      (result) => {
+        const { uuid, data } = JSON.parse(result)
+
+        if (props.terminalId === uuid && term) {
+          term.write(data)
+        }
+      }
+    )
+  } else {
+    window.terminal.createTerminal(props.terminalId)
+      .then((result) => {
+        if (result.success === false) {
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('xterm.termInitError') + ': ' + result.error
+          })
+        } else {
+          term.onData((data) => {
+            sendTerminal({
+              uuid: props.terminalId,
+              data: data,
+            })
+          })
+        }
       })
 
     window.terminal.receive(
       (result) => {
-        console.log("receive", result)
         const { uuid, data } = JSON.parse(result)
 
         if (props.terminalId === uuid && term) {
@@ -110,7 +132,7 @@ const destroyTerminal = () => {
   }
 
   if (props.data.connectionType === t('node.remoteNode')) {
-
+    window.sshTerminal.closeSSHTerminal(props.terminalId)
   } else {
     window.terminal.closeTerminal(props.terminalId)
   }
@@ -121,17 +143,26 @@ const sendTerminal = (data) => {
   console.log("send", data)
   window.terminal.send(JSON.stringify(data)).then((result) => {
     if (!result.success) {
-      let errMsg = ''
-      if (result.error instanceof Error) {
-        errMsg = JSON.stringify(result.error)
-      } else {
-        errMsg = result.error
-      }
 
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: t('xterm.termInitError') + ': ' + errMsg
+        message: t('xterm.termInitError') + ': ' + result.error
+      })
+    }
+  })
+}
+
+const sendSSHTerminal = (data) => {
+  console.log("sendSSHTerminal", data)
+
+  window.sshTerminal.send(JSON.stringify(data)).then((result) => {
+    if (!result.success) {
+
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
       })
     }
   })
@@ -149,14 +180,26 @@ const handleResize = () => {
   })
 }
 
+const debounce = (func, wait) => {
+  let timeout
+
+  return (...args) => {
+    const context = this
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      func.apply(context, args)
+    }, wait)
+  }
+}
+
 // 使用 ResizeObserver 监听容器尺寸变化
 const setupResizeObserver = () => {
-  const resizeObserver = new ResizeObserver(() => {
+  const resizeObserver = new ResizeObserver(debounce(() => {
     if (fitAddon && xtermRef.value) {
       fitAddon.fit()
       handleResize()
     }
-  })
+  }, 200))
   resizeObserver.observe(xtermRef.value)
   onBeforeUnmount(() => resizeObserver.disconnect())
 }
@@ -179,8 +222,11 @@ defineExpose({
   send: (data) => {
     if (term) {
       console.log('send', data)
-      if (props.data.connectionType === t('node.remoteNode')) {
-
+      if (props.data.connectionType === t('node.remoteNode') && props.data.serviceType === 'SSH') {
+        sendSSHTerminal({
+          uuid: props.terminalId,
+          data: data,
+        })
       } else {
         sendTerminal({
           uuid: props.terminalId,
@@ -198,7 +244,7 @@ onMounted(async () => {
   fitAddon.fit()
   setupResizeObserver()
 
-  // window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('keydown', handleKeyDown)
 })
 
 onBeforeUnmount(() => {

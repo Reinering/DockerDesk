@@ -144,16 +144,24 @@ contextBridge.exposeInMainWorld('terminal', {
   }
 })
 
-contextBridge.exposeInMainWorld('ssh', {
-  createSSH () {
-    return ipcRenderer.invoke('createSSH')
+contextBridge.exposeInMainWorld('sshTerminal', {
+  createSSHTerminal (data) {
+    return ipcRenderer.invoke('createSSHTerminal', data)
   },
 
-  closeTerminal () {
-    return ipcRenderer.invoke('closeSSH')
+  closeSSHTerminal (uuid) {
+    return ipcRenderer.invoke('closeSSHTerminal', uuid)
   },
 
-  sendCmdToTerminal () {
-    // return ipcRenderer.invoke('')
+  resize (data) {
+    return ipcRenderer.invoke('sshTerminalReize', data)
+  },
+
+  send (data) {
+    return ipcRenderer.invoke('sshTerminalSend', data)
+  },
+
+  receive (callback) {
+    return ipcRenderer.on('sshTerminalReceive', (event, data) => callback(data))
   }
 })
