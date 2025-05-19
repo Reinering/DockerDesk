@@ -12,7 +12,7 @@ export function registerDBIpcHandlers() {
 
   // nodes
   ipcMain.handle('getNodes', () => {
-    return  nodes.getNodes().then((result) => {
+    return nodes.getNodes().then((result) => {
       if (result instanceof Array) {
         try {
           const data = []
@@ -203,7 +203,7 @@ export function registerDBIpcHandlers() {
   })
 
   // pre_cmds
-  ipcMain.handle('getPreCmds', () => {
+  ipcMain.handle('getPreCmds', async () => {
     return preCmds.getPreCmds().then((result) => {
       if (result instanceof Array) {
         try {
@@ -237,7 +237,7 @@ export function registerDBIpcHandlers() {
     })
   })
 
-  ipcMain.handle('addPreCmd', (event, data) => {
+  ipcMain.handle('addPreCmd', async (event, data) => {
     try {
       const res = JSON.parse(data)
       const value = {
@@ -257,7 +257,7 @@ export function registerDBIpcHandlers() {
     }
   })
 
-  ipcMain.handle('editPreCmd', (event, data) => {
+  ipcMain.handle('editPreCmd', async (event, data) => {
     try {
       const res = JSON.parse(data)
       const value = {
@@ -274,7 +274,7 @@ export function registerDBIpcHandlers() {
     }
   })
 
-  ipcMain.handle('delPreCmd', (event, data) => {
+  ipcMain.handle('delPreCmd', async (event, data) => {
     try {
       const res = JSON.parse(data)
       return preCmds.delPreCmd(res)
@@ -284,7 +284,7 @@ export function registerDBIpcHandlers() {
     }
   })
 
-  ipcMain.handle('editPreCmdGroup', (event, data) => {
+  ipcMain.handle('editPreCmdGroup', async (event, data) => {
     try {
       const res = JSON.parse(data)
       return preCmds.updateGroup(res.old, res.new)
@@ -294,7 +294,7 @@ export function registerDBIpcHandlers() {
     }
   })
 
-  ipcMain.handle('delPreCmdGroup', (event, data) => {
+  ipcMain.handle('delPreCmdGroup', async (event, data) => {
     try {
       return preCmds.delGroup(data)
     } catch (error) {
