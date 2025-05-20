@@ -1,88 +1,87 @@
-import { readFileSync } from 'fs'
+// import { readFileSync } from 'fs'
 import { Client } from 'ssh2'
-import path from 'node:path'
-import * as pty from 'node-pty'
 
 
 export class SSHClient {
-  constructor({ host, username, password, port }) {
+  constructor(uuid, win, { host, username, password, port }) {
     this.config = { host, username, password, port: port || 22 }
+    this.uuid = uuid
+    this.win = win
     this.conn = new Client()
-    this.ptyProcess = null
     this.stream = null
-    this.shell = 'bash' // 默认值，稍后动态更新
+    this.status = 'disconnected'       // connecting | connected | disconnected |
   }
 
   // 连接到 SSH 服务器
   async connect() {
+    if (this.status === 'connecting') {
+      return
+    } else {
+      this.status = 'connecting'
+    }
     return new Promise((resolve, reject) => {
       this.conn
         .on('ready', async () => {
-          await this._detectShell() // 检测远程 shell
-          this._startShell()
-            .then(() => resolve('Connected'))
-            .catch(reject)
+          this.conn.shell((err, stream) => {
+            if (err) {
+              console.error('SSH shell error:', err)
+              this.status = 'disconnected'
+              return
+            }
+
+            this.stream = stream
+
+            // 将 SSH 输出发送到前端
+            stream.on('data', (data) => {
+              // console.log(data.toString())
+              this.win.webContents.send("sshTerminalReceive",
+                JSON.stringify({
+                  uuid: this.uuid,
+                  data: data.toString()
+                }))
+            }).stderr.on('data', (data) => {
+              this.win.webContents.send("sshTerminalReceive",
+                JSON.stringify({
+                  uuid: this.uuid,
+                  data: data.toString()
+                }))
+            })
+
+            stream.on('close', () => {
+              this.conn.end()
+              resolve({ status: 'closed' })
+            })
+          })
+
+          this.status = 'connected'
           console.log('Connected')
-          this.conn.end()
-        })
+        }).on('end', () => {
+      })
         .on('error', (err) => {
           reject(err)
-        })
+        }).on('close', () => {
+        this.sendDisconnect()
+      })
         .connect(this.config)
+
+      resolve()
     })
   }
 
-  // 检测远程默认 shell
-  async _detectShell() {
+  reconnect() {
     return new Promise((resolve, reject) => {
-      this.conn.exec('echo $SHELL', (err, stream) => {
-        if (err) return reject(err)
-        let shellData = ''
-        stream
-          .on('data', (data) => {
-            shellData += data.toString()
-          })
-          .on('close', () => {
-            const shellPath = shellData.trim() // 例如 /bin/bash 或 /bin/sh
-            const shellName = path.basename(shellPath) || 'bash' // 提取 shell 名称，默认为 bash
-            this.shell = shellName
-            resolve()
-          })
-          .stderr.on('data', () => {}) // 忽略 stderr
-      })
-    })
-  }
+      this.conn
+        .on('ready', async () => {
+          this.status = 'connected'
+          console.log('Connected')
+        }).on('error', (err) => {
+        reject(err)
+      }).on('close', () => {
+        this.sendDisconnect()
+      }).connect(this.config)
 
-  // 启动 SSH shell 会话
-  _startShell() {
-    return new Promise((resolve, reject) => {
-      this.conn.shell((err, stream) => {
-        if (err) return reject(err)
-        this.stream = stream
-        this.ptyProcess = pty.spawn(this.shell, [], {
-          name: 'xterm-color',
-          cols: 80,
-          rows: 24,
-          cwd: process.env.HOME,
-          env: process.env,
-        })
-        this.stream.on('data', (data) => {
-          this.ptyProcess.write(data)
-        })
-        this.stream.on('close', () => {
-          this.ptyProcess.kill()
-          this.conn.end()
-        })
-        resolve()
-      })
+      resolve()
     })
-  }
-
-  // 获取 PTY 数据（供渲染进程订阅）
-  onData(callback) {
-    if (this.ptyProcess) {
-      this.ptyProcess.on('data', callback)
-    }
   }
 
   // 写入数据到 SSH 流
@@ -92,16 +91,13 @@ export class SSHClient {
     }
   }
 
-  // 调整终端大小
-  resize(cols, rows) {
-    if (this.ptyProcess) {
-      if (cols > 0 && rows > 0) {
-        this.ptyProcess.resize(cols, rows)
-      } else {
-        console.error('Invalid cols or rows:', cols, rows)
-      }
-      this.ptyProcess.resize(cols, rows)
-    }
+  sendDisconnect() {
+    this.status = 'disconnected'
+    this.win.webContents.send("sshTerminalReceive",
+      JSON.stringify({
+        uuid: this.uuid,
+        data: "Terminal disconnected"
+      }))
   }
 
   // 清理连接
@@ -112,9 +108,8 @@ export class SSHClient {
     if (this.conn) {
       this.conn.end()
     }
-    if (this.ptyProcess) {
-      this.ptyProcess.kill()
-    }
+
+    this.status = 'Disconnected'
   }
 }
 
@@ -190,3 +185,4 @@ class SFTPClient {
     if (this.conn) this.conn.end()
   }
 }
+

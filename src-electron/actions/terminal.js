@@ -48,7 +48,7 @@ export class Terminal {
   // 写入数据到终端
   write(data) {
     if (this.ptyProcess) {
-      console.log("write", data)
+      // console.log("write", data)
       this.ptyProcess.write(data)
 
       if (data === 'exit') {
@@ -78,30 +78,3 @@ export class Terminal {
   }
 }
 
-// 示例：创建多个终端实例
-function createMultipleTerminals() {
-  // 终端 1
-  const term1 = new Terminal({
-    onData: data => process.stdout.write(`[Term1] ${data}`),
-    onExit: ({ exitCode, signal }) => console.log(`Term1 exited with code ${exitCode}`),
-  }).start()
-
-  // 终端 2
-  const term2 = new Terminal({
-    onData: data => process.stdout.write(`[Term2] ${data}`),
-    onExit: ({ exitCode, signal }) => console.log(`Term2 exited with code ${exitCode}`),
-  }).start()
-
-  // 示例输入
-  term1.write('echo "Hello from Terminal 1"\n')
-  term2.write('echo "Hello from Terminal 2"\n')
-
-  // 示例：定时销毁
-  setTimeout(() => {
-    term1.destroy()
-    term2.destroy()
-  }, 5000)
-}
-
-// 运行示例
-// createMultipleTerminals()

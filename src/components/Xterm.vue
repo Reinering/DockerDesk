@@ -7,7 +7,7 @@ defineOptions({
   name: 'Xterm',
 })
 
-import { inject, ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { inject, ref, onMounted, onBeforeUnmount, nextTick, watch, reactive } from 'vue'
 import { Terminal } from "@xterm/xterm"
 import { FitAddon } from "@xterm/addon-fit"
 import '@xterm/xterm/css/xterm.css'
@@ -33,14 +33,19 @@ let fitAddon = null
 let channels = null
 let sshStream = null
 
+const xtermConfig = reactive({
+  cursorBlink: true,
+  theme: {
+    background: '#1e1e1e',
+    foreground: '#ffffff',
+  },
+  fontFamily: 'Consolas, "Courier New", monospace', // 设置字体
+  fontSize: 16, // 设置字体大小
+  fontWeight: 'normal', // 可选：字体粗细（normal, bold, 100-900）
+})
+
 const initTerminal = () => {
-  term = new Terminal({
-    cursorBlink: true,
-    theme: {
-      background: '#1e1e1e',
-      foreground: '#ffffff',
-    },
-  })
+  term = new Terminal(xtermConfig)
   fitAddon = new FitAddon()
   term.loadAddon(fitAddon)
 
@@ -48,16 +53,14 @@ const initTerminal = () => {
   fitAddon.fit()
 
   handleResize()
-  console.log("mark", props.data)
 
   // init connect
-  if (props.data.connectionType === t('node.remoteNode')) {
+  if (props.data.connectionType === t('node.remoteNode')  && props.data.serviceType === 'SSH') {
     window.sshTerminal.createSSHTerminal(JSON.stringify({
       uuid: props.terminalId,
       connID: props.data.id
     }))
       .then((result) => {
-        console.log("ssh", result)
         if (result.success === false) {
 
           $q.notify({
@@ -67,8 +70,7 @@ const initTerminal = () => {
           })
         } else {
           term.onData((data) => {
-            console.log(data)
-            sendTerminal({
+            sendSSHTerminal({
               uuid: props.terminalId,
               data: data,
             })
@@ -140,7 +142,6 @@ const destroyTerminal = () => {
 }
 
 const sendTerminal = (data) => {
-  console.log("send", data)
   window.terminal.send(JSON.stringify(data)).then((result) => {
     if (!result.success) {
 
@@ -154,8 +155,7 @@ const sendTerminal = (data) => {
 }
 
 const sendSSHTerminal = (data) => {
-  console.log("sendSSHTerminal", data)
-
+  // console.log("sendSSHTerminal", data)
   window.sshTerminal.send(JSON.stringify(data)).then((result) => {
     if (!result.success) {
 
@@ -170,14 +170,14 @@ const sendSSHTerminal = (data) => {
 
 
 const handleResize = () => {
-  console.log('resize', term.rows, term.cols)
-  window.terminal.resize(JSON.stringify({
-    uuid: props.terminalId,
-    rows: term.rows,
-    cols: term.cols,
-  })).then((result) => {
-
-  })
+  // console.log('resize', term.rows, term.cols)
+  // window.terminal.resize(JSON.stringify({
+  //   uuid: props.terminalId,
+  //   rows: term.rows,
+  //   cols: term.cols,
+  // })).then((result) => {
+  //
+  // })
 }
 
 const debounce = (func, wait) => {
@@ -221,7 +221,6 @@ defineExpose({
 
   send: (data) => {
     if (term) {
-      console.log('send', data)
       if (props.data.connectionType === t('node.remoteNode') && props.data.serviceType === 'SSH') {
         sendSSHTerminal({
           uuid: props.terminalId,

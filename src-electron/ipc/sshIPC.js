@@ -40,21 +40,21 @@ export function registerSSHIpcHandlers(win) {
            }
          }
 
-        const sshClient = new SSHClient(config)
+        // const sshClient = new SSHClient(config)
+        const sshClient = new SSHClient(uuid, win, config)
 
         ssh_clients.set(uuid, sshClient)
 
         return await sshClient.connect()
           .then((result) => {
-            console.log("ssh connect ", result)
 
-            sshClient.onData((data) => {
-              win.webContents.send("sshTerminalReceive",
-                JSON.stringify({
-                  uuid: uuid,
-                  data: data
-                }))
-            })
+            // sshClient.onData((data) => {
+            //   win.webContents.send("sshTerminalReceive",
+            //     JSON.stringify({
+            //       uuid: uuid,
+            //       data: data
+            //     }))
+            // })
 
             return { success: true, error: '' }
           }, (error) => {
@@ -105,10 +105,22 @@ export function registerSSHIpcHandlers(win) {
   ipcMain.handle('sshTerminalSend', async (event, value) => {
     try {
       const { uuid, data } = JSON.parse(value)
-
       if (ssh_clients.has(uuid)) {
         const sshClient = ssh_clients.get(uuid)
-        sshClient.write(data)
+
+        if (sshClient.status == "disconnected" && data === '\r') {
+          console.log(uuid, data)
+          return await sshClient.reconnect()
+            .then((result) => {
+              console.log("ssh connect ")
+              return { success: true, error: '' }
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        } else {
+          sshClient.write(data)
+        }
+
         return { success: true, error: '' }
       } else {
         return { success: false, error: "node-pty write error" }
