@@ -5,23 +5,23 @@
       <q-list>
         <q-item clickable @click="onAddButton">
           <q-item-section>
-            添加Button
+            {{ t('add') + 'Button' }}
           </q-item-section>
         </q-item>
         <q-separator />
         <q-item clickable @click="onAddButtonBar">
           <q-item-section>
-            添加Button Bar
+            {{ t('add') + 'Button Bar' }}
           </q-item-section>
         </q-item>
         <q-item clickable @click="onEditButtonBar">
           <q-item-section>
-            编辑Button Bar
+            {{ t('edit') + 'Button Bar' }}
           </q-item-section>
         </q-item>
         <q-item clickable @click="onDelButtonBar">
           <q-item-section>
-            删除Button Bar
+            {{ t('delete') + 'Button Bar' }}
           </q-item-section>
         </q-item>
       </q-list>
@@ -64,17 +64,17 @@
               <q-list>
                 <q-item clickable @click="onAddButton">
                   <q-item-section>
-                    添加Button
+                    {{ t('add') + 'Button' }}
                   </q-item-section>
                 </q-item>
                 <q-item clickable @click="onEditButton(cmd)">
                   <q-item-section>
-                    编辑Button
+                    {{ t('edit') + 'Button' }}
                   </q-item-section>
                 </q-item>
                 <q-item clickable @click="onDelButton(cmd)">
                   <q-item-section>
-                    删除Button
+                    {{ t('delete') + 'Button' }}
                   </q-item-section>
                 </q-item>
               </q-list>
