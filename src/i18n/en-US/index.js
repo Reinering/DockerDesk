@@ -8,9 +8,14 @@ export default {
   save: 'Save',
   cancel: 'Cancel',
   ok: 'OK',
+  close: "Close",
 
   username: 'Username',
   password: 'Password',
+
+  copy: "Copy",
+  paste: "Paste",
+  selectPaste: "Select Paste",
 
   edit: 'Edit',
   add: 'Add',
@@ -95,6 +100,8 @@ export default {
     nodeStatusOffline: "Offline",
     nodeStatusError: "Error",
 
+    portRange: "Port Range",
+
     connectMessage: "Do you want to make this connection?",
     connectError: "Required connection parameters are missing",
     connectError1: "Failed to find route",
@@ -167,6 +174,29 @@ export default {
 
     deleteMessage: "Are you sure to delete?",
 
+  },
+
+  filesystem: {
+    title: "File System",
+
+    name: "Name",
+    attr: "Attribute",
+    modifyTime: "Modified Time",
+    size: "Size",
+    action: "Action",
+
+    parentFolder: "Parent Folder",
+    createFolder: "Create Folder",
+    createFile: "Create File",
+    uploadFolder: "Upload Folder",
+    uploadFile: "Upload File",
+    refresh: "Refresh",
+    batchDelete: "Batch Delete",
+    fullscreen: "Fullscreen",
+    fullWidth: "FullWidth",
+    rename: "Rename",
+
+    termInitError: "Init error",
   },
 
   // db

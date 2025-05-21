@@ -13,12 +13,18 @@
       icon="close"
       style="position: absolute; top: 0; left: 0;"
       @click="onClick"
-    />
+    >
+      <q-tooltip>
+        {{t('close')}}
+      </q-tooltip>
+    </q-btn>
   </div>
 </template>
 
 
 <script setup>
+import { inject } from 'vue'
+
 defineOptions({
   name: 'RTab',
 })
@@ -49,6 +55,8 @@ const props = defineProps({
     default: () => {}
   }
 })
+
+const t = inject("t")
 
 const onClick = (e) => {
   e.stopPropagation()

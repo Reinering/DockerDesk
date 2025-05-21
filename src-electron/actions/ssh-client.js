@@ -1,14 +1,18 @@
 // import { readFileSync } from 'fs'
-import { Client } from 'ssh2'
+import { Client  } from 'ssh2'
+import { formatPermissions, formatDate } from '../common/utils.js'
 
+
+// { host, username, password, port }
 
 export class SSHClient {
-  constructor(uuid, win, { host, username, password, port }) {
-    this.config = { host, username, password, port: port || 22 }
+  constructor(uuid, win, config) {
+    this.config = config
     this.uuid = uuid
     this.win = win
     this.conn = new Client()
     this.stream = null
+    this.isSftp = null
     this.status = 'disconnected'       // connecting | connected | disconnected |
   }
 
@@ -54,15 +58,13 @@ export class SSHClient {
           })
 
           this.status = 'connected'
-          console.log('Connected')
+          console.log('ssh connected')
         }).on('end', () => {
-      })
-        .on('error', (err) => {
-          reject(err)
-        }).on('close', () => {
-        this.sendDisconnect()
-      })
-        .connect(this.config)
+      }).on('error', (err) => {
+        reject(err)
+      }).on('close', () => {
+      this.sendDisconnect()
+      }).connect(this.config)
 
       resolve()
     })
@@ -73,7 +75,7 @@ export class SSHClient {
       this.conn
         .on('ready', async () => {
           this.status = 'connected'
-          console.log('Connected')
+          console.log('ssh connected')
         }).on('error', (err) => {
         reject(err)
       }).on('close', () => {
@@ -86,6 +88,7 @@ export class SSHClient {
 
   // 写入数据到 SSH 流
   write(data) {
+    console.log('ssh write', data)
     if (this.stream) {
       this.stream.write(data)
     }
@@ -114,11 +117,12 @@ export class SSHClient {
 }
 
 
-class SFTPClient {
-  constructor({ host, username, password, port }) {
-    this.config = { host, username, password, port: port || 22 }
+export class SFTPClient {
+  constructor(config) {
+    this.config = config
     this.conn = new Client()
     this.sftp = null
+    this.status = 'disconnected'    // connecting | connected | disconnected |
   }
 
   // 连接到 SFTP
@@ -129,13 +133,15 @@ class SFTPClient {
           this.conn.sftp((err, sftp) => {
             if (err) return reject(err)
             this.sftp = sftp
+            this.status = 'connected'
             resolve('Connected')
           })
         })
         .on('error', (err) => {
           reject(err)
-        })
-        .connect(this.config)
+        }).on('close', () => {
+          this.status = 'disconnected'
+        }).connect(this.config)
     })
   }
 
@@ -143,14 +149,19 @@ class SFTPClient {
   listDir(remotePath) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
+
       this.sftp.readdir(remotePath, (err, list) => {
         if (err) return reject(err)
         resolve(
           list.map((item) => ({
             name: item.filename,
+            attrs: item.attrs,
+            mode: item.attrs.permissions || item.attrs.mode,
+            permString: formatPermissions(item.attrs.mode, item.attrs.isDirectory()),
+            nlink: item.attrs.nlink || 2,
             isDir: item.attrs.isDirectory(),
             size: item.attrs.size,
-            mtime: item.attrs.mtime,
+            mtime: formatDate(item.attrs.mtime),
           }))
         )
       })
@@ -185,4 +196,7 @@ class SFTPClient {
     if (this.conn) this.conn.end()
   }
 }
+
+
+
 

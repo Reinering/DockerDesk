@@ -5,9 +5,14 @@ export default {
   save: '保存',
   cancel: '取消',
   ok: '确定',
+  close: "关闭",
 
   username: '用户名',
   password: '密码',
+
+  copy: "复制",
+  paste: "粘贴",
+  selectPaste: "选中粘贴",
 
   edit: '编辑',
   add: '添加',
@@ -92,6 +97,8 @@ export default {
     nodeStatusOffline: "离线",
     nodeStatusError: "错误",
 
+    portRange: "端口范围",
+
     connectMessage: "是否要进行此连接？",
     connectError: "缺少必要的连接参数",
     connectError1: "查找路由失败",
@@ -172,6 +179,29 @@ export default {
 
 
     deleteMessage: "确认删除吗？",
+  },
+
+  filesystem: {
+    title: "文件系统",
+
+    name: "名称",
+    attr: "属性",
+    modifyTime: "修改日期",
+    size: "大小",
+    action: "操作",
+
+    parentFolder: "上级目录",
+    createFolder: "创建文件夹",
+    createFile: "创建文件夹",
+    uploadFolder: "上传文件夹",
+    uploadFile: "上传文件",
+    refresh: "刷新",
+    batchDelete: "批量删除",
+    fullscreen: "全屏",
+    fullWidth: "全宽",
+    rename: "重命名",
+
+    initError: "初始化失败",
   },
 
   // db

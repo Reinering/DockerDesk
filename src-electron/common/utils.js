@@ -26,3 +26,24 @@ export function generateUuid (len = 16, radix = 62) {
 
   return uuid.join('')
 }
+
+
+// 辅助函数：格式化权限
+export function formatPermissions(mode, isDir) {
+  const perms = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'];
+  const owner = perms[(mode >> 6) & 7];
+  const group = perms[(mode >> 3) & 7];
+  const others = perms[mode & 7];
+  const type = isDir ? 'd' : '-';
+  return `${type}${owner}${group}${others}`;
+}
+
+// 辅助函数：格式化日期为“月日 时:分”
+export function formatDate(timestamp) {
+  const date = new Date(timestamp * 1000); // 假设 timestamp 是秒
+  const month = date.getMonth() + 1; // 月份从 0 开始
+  const day = date.getDate();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${month}月${day}日 ${hours}:${minutes}`;
+}

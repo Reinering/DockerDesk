@@ -149,6 +149,10 @@ contextBridge.exposeInMainWorld('sshTerminal', {
     return ipcRenderer.invoke('createSSHTerminal', data)
   },
 
+  detect (uuid) {
+    return ipcRenderer.invoke('detectSSHTerminal', uuid)
+  },
+
   closeSSHTerminal (uuid) {
     return ipcRenderer.invoke('closeSSHTerminal', uuid)
   },
@@ -164,4 +168,104 @@ contextBridge.exposeInMainWorld('sshTerminal', {
   receive (callback) {
     return ipcRenderer.on('sshTerminalReceive', (event, data) => callback(data))
   }
+})
+
+contextBridge.exposeInMainWorld('sftpTerminal', {
+  create (uuid) {
+    return ipcRenderer.invoke('createSFTPTerminal', uuid)
+  },
+
+  listDir (data) {
+    return ipcRenderer.invoke('listDirSFTP', data)
+  },
+
+  cteateFile (data) {
+    return ipcRenderer.invoke('createFileSFTP', data)
+  },
+
+  cteateFolder (data) {
+    return ipcRenderer.invoke('createFolderSFTP', data)
+  },
+
+  downloadFile (data) {
+    return ipcRenderer.on('downloadFileSFTP', data)
+  },
+
+  uploadFile (data) {
+    return ipcRenderer.on('uploadFileSFTP', data)
+  },
+
+  downloadFolder (data) {
+    return ipcRenderer.on('downloadFolderSFTP', data)
+  },
+
+  uploadFolder (data) {
+    return ipcRenderer.on('uploadFolderSFTP', data)
+  },
+
+  deleteFile (data) {
+    return ipcRenderer.on('deleteFileSFTP', data)
+  },
+
+  deleteFolder (data) {
+    return ipcRenderer.on('deleteFolderSFTP', data)
+  },
+
+  readFile (data) {
+    return ipcRenderer.on('readFileSFTP', data)
+  },
+
+  saveFile (data) {
+    return ipcRenderer.on('saveFileSFTP', data)
+  },
+})
+
+contextBridge.exposeInMainWorld('scpTerminal', {
+  create (uuid) {
+    return ipcRenderer.invoke('createSCPTerminal', uuid)
+  },
+
+  listDir (data) {
+    return ipcRenderer.invoke('listDirSCP', data)
+  },
+
+  cteateFile (data) {
+    return ipcRenderer.invoke('createFileSCP', data)
+  },
+
+  cteateFolder (data) {
+    return ipcRenderer.invoke('createFolderSCP', data)
+  },
+
+  downloadFile (data) {
+    return ipcRenderer.on('downloadFileSCP', data)
+  },
+
+  uploadFile (data) {
+    return ipcRenderer.on('uploadFileSCP', data)
+  },
+
+  downloadFolder (data) {
+    return ipcRenderer.on('downloadFolderSCP', data)
+  },
+
+  uploadFolder (data) {
+    return ipcRenderer.on('uploadFolderSCP', data)
+  },
+
+  deleteFile (data) {
+    return ipcRenderer.on('deleteFileSCP', data)
+  },
+
+  deleteFolder (data) {
+    return ipcRenderer.on('deleteFolderSCP', data)
+  },
+
+  readFile (data) {
+    return ipcRenderer.on('readFileSCP', data)
+  },
+
+  saveFile (data) {
+    return ipcRenderer.on('saveFileSCP', data)
+  },
 })

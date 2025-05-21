@@ -8,6 +8,7 @@
         inline-label
         switch-indicator
         indicator-color="primary"
+        active-color="purple"
         class="bg-lime shadow-2"
         align="left"
         v-model="tab"
@@ -42,7 +43,7 @@
       </q-tab-panels>
     </q-card>
 
-    <CommandBar v-if="isShowCmdBar"  :send="submitCmd" fixed-bottom/>
+    <CommandBar v-if="isShowCmdBar" :send="submitCmd" fixed-bottom/>
 
     <q-page-sticky position="bottom-right" :offset="fabPos">
       <q-fab
@@ -87,6 +88,10 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog v-model="isShowFileSystemDialog" >
+      <FileSystem  :data="fsData" />
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -99,13 +104,13 @@ import { inject, onMounted, onActivated, reactive, ref, nextTick, watch, onUnmou
 import CommandBar from 'components/CommandBar.vue'
 import Xterm from 'components/Xterm.vue'
 import rtab from 'components/RTab.vue'
+import FileSystem from 'components/FileSystem.vue'
 import { generateUuid, isEmptyObj } from 'src/utils/common.js'
 
 const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
-
 
 const background = reactive({
   backgroundRepeat: 'no-repeat',
@@ -159,11 +164,15 @@ const showCmdBar = () => {
   }
 }
 
+const isShowFileSystemDialog = ref(false)
+
 const showFileSystem = () => {
   if (tab.value === '') {
-    isShowCmdBar.value = false
+    isShowFileSystemDialog.value = false
     return
   }
+
+  isShowFileSystemDialog.value = ! isShowFileSystemDialog.value
 }
 
 const isShowSettingsDialog = ref(false)
@@ -173,6 +182,8 @@ const showSettings = () => {
 }
 
 const settingDialogTitle = ref(t('terminal.globalSettingsTitle'))
+
+const fsData = ref({})
 
 const closeDialog = () => {
   isShowSettingsDialog.value = false
@@ -271,8 +282,28 @@ onActivated(() => {
 watch(tabs, (newVal, oldVal) => {
   if (tabs.length === 0) {
     isShowCmdBar.value = false
+    isShowSettingsDialog.value = false
+  } else {
+    for (let i = 0; i < tabs.length; i++) {
+
+    }
+    fsData.value = oldVal
   }
 })
+
+watch(tab, (newVal, oldVal) => {
+  if (isEmptyObj(newVal)) {
+    isShowSettingsDialog.value = false
+  } else {
+    for (let i = 0; i < tabs.length; i++) {
+      if (tabs[i].id === newVal) {
+        fsData.value = tabs[i]
+        return
+      }
+    }
+  }
+})
+
 
 </script>
 
