@@ -29,12 +29,12 @@
                 dense
               />
               <q-select
+                class="q-mb-sm"
                 v-model="newService.serviceType"
                 :options="serviceTypeOptions"
                 :label="t('node.serviceType') + '(Docker/Podman/SSH/Telnet)'"
                 outlined
                 dense
-                class="q-mb-sm"
               />
               <q-select
                 class="q-mb-sm"
@@ -46,24 +46,29 @@
                 dense
               />
               <q-input
+                class="q-mb-sm"
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.address"
                 :label="t('node.address')"
                 maxlength="30"
                 outlined
                 dense
-                class="q-mb-sm"
               />
               <q-input
+                class="q-mb-sm"
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.port"
                 :label="t('node.port')"
                 type="number"
                 outlined
                 dense
-                class="q-mb-sm"
+                :rules="[
+                  val => parseInt(val) > 0 || t('node.portRange') + ': 1 - 65535',
+                  val => parseInt(val) <= 65535 || t('node.portRange') + ': 1 - 65535'
+                ]"
               />
               <q-input
+                class="q-mb-sm"
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.username"
                 :label="t('username')"
@@ -71,18 +76,18 @@
                 maxlength="30"
                 outlined
                 dense
-                class="q-mb-sm"
               />
               <q-select
+                class="q-mb-sm"
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.authType"
                 :options="passwordOptions"
                 :label="t('node.authType')"
                 outlined
                 dense
-                class="q-mb-sm"
               />
               <q-input
+                class="q-mb-sm"
                 v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.password')"
                 v-model="newService.password"
                 :label="t('node.password')"
@@ -90,25 +95,24 @@
                 maxlength="50"
                 outlined
                 dense
-                class="q-mb-sm"
               />
               <q-file
+                class="q-mb-sm"
                 v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.key')"
                 v-model="keyFile"
                 :label="labelKey"
                 outlined
                 dense
                 clearable
-                class="q-mb-sm"
                 @update:model-value="onFileSelected"
                />
               <q-input
+                class="q-mb-sm"
                 v-model="newService.mark"
                 :label="t('node.mark')"
                 maxlength="50"
                 outlined
                 dense
-                class="q-mb-sm"
               />
 
             </q-form>
@@ -149,7 +153,7 @@
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{t('edit')}}
-            </q-tooltip>
+              </q-tooltip>
             </q-btn>
             <q-btn
               icon="delete"
@@ -397,6 +401,10 @@ const addService = () => {
     window.nodes.addNode(JSON.stringify(data)).then((res) => {
       if (res.success) {
         newService.id = res.data.id
+        if ( newService.serviceType === 'SSH' || newService.serviceType === 'Telnet' && isEmptyObj(newService.protocol) ) {
+          newService.protocol = newService.serviceType
+        }
+
         if (newService.authType === t('node.password')) {
           newService.password = res.data.password
         } else if (newService.authType === t('node.key')) {
