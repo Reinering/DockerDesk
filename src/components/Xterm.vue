@@ -1,5 +1,27 @@
 <template>
-  <div ref="xtermRef" :id="'xterm-container-' + terminalId"></div>
+
+  <div ref="xtermRef" :id="'xterm-container-' + terminalId">
+    <q-menu context-menu auto-close>
+      <q-list>
+        <q-item clickable @click="onCopyButton">
+          <q-item-section>
+            {{ t('copy') }}
+          </q-item-section>
+        </q-item>
+        <q-separator />
+        <q-item clickable @click="onPasteButton">
+          <q-item-section>
+            {{ t('paste') }}
+          </q-item-section>
+        </q-item>
+        <q-item clickable @click="onSelectPasteButton">
+          <q-item-section>
+            {{ t('selectPaste') }}
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-menu>
+  </div>
 </template>
 
 <script setup>
@@ -31,7 +53,6 @@ const xtermRef = ref(null)
 let term = null
 let fitAddon = null
 let channels = null
-let sshStream = null
 
 const xtermConfig = reactive({
   cursorBlink: true,
@@ -55,7 +76,7 @@ const initTerminal = () => {
   handleResize()
 
   // init connect
-  if (props.data.connectionType === t('node.remoteNode')  && props.data.serviceType === 'SSH') {
+  if (props.data.connectionType === t('node.remoteNode')  && props.data.protocol === 'SSH') {
     window.sshTerminal.createSSHTerminal(JSON.stringify({
       uuid: props.terminalId,
       connID: props.data.id
@@ -141,6 +162,61 @@ const destroyTerminal = () => {
 
 }
 
+const onCopyButton = () => {
+  let selectedText = term.getSelection()
+  if (selectedText) {
+    try {
+      navigator.clipboard.writeText(selectedText)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+}
+
+const onPasteButton = () => {
+  navigator.clipboard.readText().then(text => {
+    console.log("selectedText", text)
+
+    if (props.data.connectionType === t('node.remoteNode')  && props.data.protocol === 'SSH') {
+      sendSSHTerminal({
+        uuid: props.terminalId,
+        data: text,
+      })
+    } else {
+      sendTerminal({
+        uuid: props.terminalId,
+        data: text,
+      })
+    }
+
+  })
+
+}
+
+const onSelectPasteButton = () => {
+  let selectedText = term.getSelection()
+  if (selectedText) {
+    try {
+      navigator.clipboard.writeText(selectedText)
+
+
+      if (props.data.connectionType === t('node.remoteNode')  && props.data.protocol === 'SSH') {
+        sendSSHTerminal({
+          uuid: props.terminalId,
+          data: selectedText,
+        })
+      } else {
+        sendTerminal({
+          uuid: props.terminalId,
+          data: selectedText,
+        })
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+}
+
 const sendTerminal = (data) => {
   window.terminal.send(JSON.stringify(data)).then((result) => {
     if (!result.success) {
@@ -155,7 +231,6 @@ const sendTerminal = (data) => {
 }
 
 const sendSSHTerminal = (data) => {
-  // console.log("sendSSHTerminal", data)
   window.sshTerminal.send(JSON.stringify(data)).then((result) => {
     if (!result.success) {
 
@@ -168,16 +243,16 @@ const sendSSHTerminal = (data) => {
   })
 }
 
-
+// 行列匹配
 const handleResize = () => {
-  // console.log('resize', term.rows, term.cols)
-  // window.terminal.resize(JSON.stringify({
-  //   uuid: props.terminalId,
-  //   rows: term.rows,
-  //   cols: term.cols,
-  // })).then((result) => {
-  //
-  // })
+  console.log('resize', term.rows, term.cols)
+  window.terminal.resize(JSON.stringify({
+    uuid: props.terminalId,
+    rows: term.rows,
+    cols: term.cols,
+  })).then((result) => {
+
+  })
 }
 
 const debounce = (func, wait) => {
@@ -215,13 +290,13 @@ const handleKeyDown = (event) => {
 defineExpose({
   resize: () => {
     if (fitAddon) {
-      fitAddon.fit();
+      fitAddon.fit()
     }
   },
 
   send: (data) => {
     if (term) {
-      if (props.data.connectionType === t('node.remoteNode') && props.data.serviceType === 'SSH') {
+      if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
         sendSSHTerminal({
           uuid: props.terminalId,
           data: data,
@@ -249,9 +324,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   destroyTerminal()
 
-  if (sshStream) {
-    sshStream.end()
-  }
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 </script>
