@@ -53,6 +53,12 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
   }
 })
 
+contextBridge.exposeInMainWorld('client', {
+  openDownloadFolder () {
+    return ipcRenderer.invoke('openDownloadFolder')
+  }
+})
+
 contextBridge.exposeInMainWorld('nodes', {
   getNodes () {
     return ipcRenderer.invoke('getNodes')
