@@ -14,9 +14,11 @@ export default defineConfig((ctx) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
+      'quasar-lang-pack',
       'i18n',
       'axios',
-      'pinia'
+      'pinia',
+
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
@@ -90,6 +92,10 @@ export default defineConfig((ctx) => {
             useFlatConfig: true
           }
         }, { server: false }],
+
+        ['vite-plugin-monaco-editor-esm', {
+
+        }]
       ]
     },
 
@@ -101,17 +107,18 @@ export default defineConfig((ctx) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
+      // lang: 'zh-CN', //使用中文简体语言包
       cssAddon: true, // 它将为所有与间距相关的CSS类提供断点感知版本
       config: {
         brand: {
-          primary: '#1976d2',
-          secondary: '#7bd4cb',
+          primary: '#4c4c4c',
+          secondary: '#5ceddf',
           accent: '#9C27B0',
 
-          dark: '#1d1d1d',
+          dark: '#4c4c4c',
 
-          positive: '#4fe372',
-          negative: '#db5c6b',
+          positive: '#2ef25c',
+          negative: '#eb095c',
           info: '#31CCEC',
           warning: '#F2C037'
         },

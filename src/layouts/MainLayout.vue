@@ -12,7 +12,7 @@
         </q-avatar>
 
         <q-toolbar-title>
-          Docker Management
+          App for Docker
         </q-toolbar-title>
 
         <q-space />
