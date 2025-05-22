@@ -1,7 +1,12 @@
-// import { readFileSync } from 'fs'
+import { readFileSync, mkdirSync } from 'fs'
 import { Client  } from 'ssh2'
-import { formatPermissions, formatDate } from '../common/utils.js'
+import path from 'node:path'
+import os from 'os'
+import { formatPermissions, formatDate, isExists } from '../common/utils.js'
 
+
+const homeDir = os.homedir();
+const downloadDir = path.join(homeDir, 'Downloads')
 
 // { host, username, password, port }
 
@@ -168,19 +173,135 @@ export class SFTPClient {
     })
   }
 
-  // 下载文件
-  downloadFile(remotePath, localPath) {
+  // 执行重命名操作
+  rename(oldPath, newPath) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
-      this.sftp.fastGet(remotePath, localPath, (err) => {
-        if (err) return reject(err)
-        resolve('Downloaded')
+
+      this.sftp.rename(oldPath, newPath, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
+  }
+
+  // 创建远程文件
+  createRemoteFile(filePath, content = '') {
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+
+      return this.sftp.writeFile(filePath, content, { encoding: 'utf8' }, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
+  }
+
+  // 创建远程文件夹
+  createRemoteFolder(folderPath, connectionConfig) {
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+
+      this.sftp.mkdir(folderPath, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
+  }
+
+  // 下载文件
+  downloadFile(remotePath, localPath=downloadDir) {
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+
+      const filename = path.basename(remotePath)
+      const localFilePath = path.join(localPath, filename)
+
+      isExists(localFilePath, (exists) => {
+        if (exists) {
+          reject(new Error('File already exists'))
+          return
+        }
+
+        try {
+          this.sftp.fastGet(
+            remotePath,
+            localFilePath,
+            (err) => {
+              if (err) return reject(err)
+              resolve('Downloaded')
+            })
+        } catch (error) {
+          reject(error)
+        }
+      })
+
+    })
+  }
+
+  // 下载文件夹
+  downloadFolder(remotePath, localPath=downloadDir) {
+    let localFolder = localPath
+
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+
+      this.sftp.readdir(remotePath, (err, list) => {
+        if (err) {
+          if (err) return reject(err)
+        }
+
+        const foldername = path.basename(remotePath)
+        localFolder = path.join(localFolder, foldername)
+
+        isExists(localFolder, (exists) => {
+          if (exists) {
+            reject(new Error('Folder already exists'))
+            return
+          }
+
+          try {
+            mkdirSync(localFolder, { recursive: true })
+
+            list.forEach(item => {
+
+              const childRemotePath = `${remotePath}/${item.filename}`
+              let childLocalFolder = localFolder
+
+              if (item.attrs.isDirectory()) {
+                this.downloadFolder(childRemotePath, childLocalFolder)
+              } else {
+                this.downloadFile(childRemotePath, childLocalFolder)
+              }
+            })
+            resolve()
+          } catch (error) {
+            reject(error)
+          }
+        })
       })
     })
   }
 
   // 上传文件
   uploadFile(localPath, remotePath) {
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+      this.sftp.fastPut(localPath, remotePath, (err) => {
+        if (err) return reject(err)
+        resolve('Uploaded')
+      })
+    })
+  }
+
+  // 上传文件
+  uploadFolder(localPath, remotePath) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
       this.sftp.fastPut(localPath, remotePath, (err) => {

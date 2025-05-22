@@ -50,6 +50,11 @@
               {{t('filesystem.uploadFile')}}
             </q-tooltip>
           </q-btn>
+          <q-btn icon="arrow_downward" size="xs" padding="xs" color="teal" @click="onDownloadBatch">
+            <q-tooltip class="bg-amber text-black shadow-4">
+              {{t('filesystem.batchDownload')}}
+            </q-tooltip>
+          </q-btn>
           <q-btn icon="refresh" size="xs" padding="xs" color="green" @click="onRefresh">
             <q-tooltip class="bg-amber text-black shadow-4">
               {{t('filesystem.refresh')}}
@@ -88,22 +93,10 @@
           color="primary"
           dense
           flat
-          @click="showEdit(props.row)"
+          @click="onRename(props.row)"
         >
-          <q-tooltip class="bg-amber text-black shadow-4" @click="onRename(props.row)">
+          <q-tooltip class="bg-amber text-black shadow-4">
             {{t('filesystem.rename')}}
-          </q-tooltip>
-        </q-btn>
-
-        <q-btn
-          icon="edit_document"
-          color="primary"
-          dense
-          flat
-          @click="showEdit(props.row)"
-        >
-          <q-tooltip class="bg-amber text-black shadow-4" @click="onEditFile(props.row)">
-            {{t('edit')}}
           </q-tooltip>
         </q-btn>
 
@@ -112,9 +105,9 @@
           color="blue"
           dense
           flat
-          @click="connectTerminal(props.row)"
+          @click="onDownload(props.row)"
         >
-          <q-tooltip class="bg-amber text-black shadow-4" @click="onDownload(props.row)">
+          <q-tooltip class="bg-amber text-black shadow-4">
             {{t('download')}}
           </q-tooltip>
         </q-btn>
@@ -124,20 +117,47 @@
           color="negative"
           dense
           flat
-          @click="deleteService(props.row.id)"
+          @click="onDelete(props.row)"
         >
-          <q-tooltip class="bg-amber text-black shadow-4" @click="onDelete(props.row)">
+          <q-tooltip class="bg-amber text-black shadow-4">
             {{t('delete')}}
+          </q-tooltip>
+        </q-btn>
+
+        <q-btn
+          v-if="!props.row.isDir"
+          icon="edit_document"
+          color="primary"
+          dense
+          flat
+          @click="onEditFile(props.row)"
+        >
+          <q-tooltip class="bg-amber text-black shadow-4">
+            {{t('edit')}}
           </q-tooltip>
         </q-btn>
       </template>
     </q-table>
 
   </q-card>
+
+  <q-dialog v-model="isShowEditorDialog" style="width: 90%; height: 90%" persistent>
+    <q-card>
+      <q-card-actions>
+        <Editor />
+      </q-card-actions>
+
+      <q-card-actions align="right">
+        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="addService" />
+        <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="closeEditorDialog" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
 import { clientConfig } from 'src/common/config.js'
+import Editor from 'src/components/Editor.vue'
 
 defineOptions({
   name: 'FileSystem',
@@ -249,8 +269,143 @@ const listDir = (path) => {
   } else {
     // window.scpTerminal
   }
+}
 
+const createFolder = (path) => {
+  if (isSftp.value) {
+    window.sftpTerminal.cteateFolder(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    }))
+      .then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: t('filesystem.createFolderSuccess')
+          })
 
+          listDir(currentPath.value)
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('filesystem.createFolderError') + ':' + result.error,
+          })
+        }
+      })
+  } else {
+
+  }
+}
+
+const createFile = (path) => {
+  if (isSftp.value) {
+    window.sftpTerminal.cteateFile(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    }))
+      .then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: t('filesystem.createFileSuccess')
+          })
+
+          listDir(currentPath.value)
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('filesystem.createFileError') + ':' + result.error,
+          })
+        }
+      })
+  } else {
+
+  }
+}
+
+const rename = (newValue, oldValue) => {
+  if (isSftp.value) {
+    window.sftpTerminal.rename(JSON.stringify({
+      uuid: props.data.id,
+      newValue: newValue,
+      oldValue: oldValue
+    })).then((result) => {
+        console.log(result)
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: t('filesystem.renameSuccess')
+          })
+
+          listDir(currentPath.value)
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('filesystem.renameError') + ':' + result.error,
+          })
+        }
+      })
+  } else {
+
+  }
+}
+
+const downloadFile = (path) => {
+  if (isSftp.value) {
+    window.sftpTerminal.downloadFile(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path,
+    })).then((result) => {
+      console.log(result)
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.downloadFileSuccess')
+        })
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.downloadFileError') + ':' + result.error,
+        })
+      }
+    })
+  } else {
+
+  }
+}
+
+const downloadFolder = (path) => {
+  if (isSftp.value) {
+    window.sftpTerminal.downloadFolder(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path,
+    })).then((result) => {
+      console.log(result)
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.downloadFolderSuccess')
+        })
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.downloadFolderError') + ':' + result.error,
+        })
+      }
+    })
+  } else {
+
+  }
 }
 
 const enterFolder = (event, row, index) => {
@@ -262,15 +417,54 @@ const enterFolder = (event, row, index) => {
 }
 
 const onRename = (row) => {
-  console.log(row)
+  $q.dialog({
+    title: t('filesystem.rename'),
+    message: row.isDir ? t('filesystem.modify') + t('filesystem.folderName') : t('filesystem.modify') + t('filesystem.fileName'),
+    prompt: {
+      model: row.name,
+      type: 'text' // optional
+    },
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk((data) => {
+    if (row.name === data) {
+      return $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: t('filesystem.modifyNameHint'),
+      })
+    }
+
+    rename(currentPath.value + '/' + data, currentPath.value + '/' + row.name)
+  }).onCancel(() => {
+    // console.log('>>>> Cancel')
+  }).onDismiss(() => {
+    // console.log('I am triggered on both OK and Cancel')
+  })
+}
+
+const isShowEditorDialog = ref(false)
+
+const closeEditorDialog = () => {
+  isShowEditorDialog.value = false
 }
 
 const onEditFile = () => {
-
+  isShowEditorDialog.value = !isShowEditorDialog.value
 }
 
-const onDownload = () => {
-
+const onDownload = (row) => {
+  if (row.isDir) {
+    downloadFolder(currentPath.value + '/' + row.name)
+  } else {
+    downloadFile(currentPath.value + '/' + row.name)
+  }
 }
 
 const onDelete = () => {
@@ -283,11 +477,53 @@ const onParentFolder = () => {
 }
 
 const onCreateFolder = () => {
-
+  $q.dialog({
+    title: t('filesystem.createFolder'),
+    message: t('filesystem.enter') + t('filesystem.folderName'),
+    prompt: {
+      model: '',
+      type: 'text' // optional
+    },
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk((data) => {
+    createFolder(currentPath.value + '/' + data)
+  }).onCancel(() => {
+    // console.log('>>>> Cancel')
+  }).onDismiss(() => {
+    // console.log('I am triggered on both OK and Cancel')
+  })
 }
 
 const onCreateFile = () => {
-
+  $q.dialog({
+    title: t('filesystem.createFile'),
+    message: t('filesystem.enter') + t('filesystem.fileName'),
+    prompt: {
+      model: '',
+      type: 'text' // optional
+    },
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk((data) => {
+    createFile(currentPath.value + '/' + data)
+  }).onCancel(() => {
+    // console.log('>>>> Cancel')
+  }).onDismiss(() => {
+    // console.log('I am triggered on both OK and Cancel')
+  })
 }
 
 const onUploadFolder = () => {
@@ -298,8 +534,12 @@ const onUploadFile = () => {
 
 }
 
-const onRefresh = () => {
+const onDownloadBatch = () => {
 
+}
+
+const onRefresh = () => {
+  listDir(currentPath.value)
 }
 
 const onDeleteBatch = () => {

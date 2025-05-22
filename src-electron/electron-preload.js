@@ -188,35 +188,39 @@ contextBridge.exposeInMainWorld('sftpTerminal', {
   },
 
   downloadFile (data) {
-    return ipcRenderer.on('downloadFileSFTP', data)
+    return ipcRenderer.invoke('downloadFileSFTP', data)
   },
 
   uploadFile (data) {
-    return ipcRenderer.on('uploadFileSFTP', data)
+    return ipcRenderer.invoke('uploadFileSFTP', data)
   },
 
   downloadFolder (data) {
-    return ipcRenderer.on('downloadFolderSFTP', data)
+    return ipcRenderer.invoke('downloadFolderSFTP', data)
   },
 
   uploadFolder (data) {
-    return ipcRenderer.on('uploadFolderSFTP', data)
+    return ipcRenderer.invoke('uploadFolderSFTP', data)
   },
 
   deleteFile (data) {
-    return ipcRenderer.on('deleteFileSFTP', data)
+    return ipcRenderer.invoke('deleteFileSFTP', data)
   },
 
   deleteFolder (data) {
-    return ipcRenderer.on('deleteFolderSFTP', data)
+    return ipcRenderer.invoke('deleteFolderSFTP', data)
+  },
+
+  rename (data) {
+    return ipcRenderer.invoke('renameSFTP', data)
   },
 
   readFile (data) {
-    return ipcRenderer.on('readFileSFTP', data)
+    return ipcRenderer.invoke('readFileSFTP', data)
   },
 
   saveFile (data) {
-    return ipcRenderer.on('saveFileSFTP', data)
+    return ipcRenderer.invoke('saveFileSFTP', data)
   },
 })
 
@@ -238,34 +242,34 @@ contextBridge.exposeInMainWorld('scpTerminal', {
   },
 
   downloadFile (data) {
-    return ipcRenderer.on('downloadFileSCP', data)
+    return ipcRenderer.invoke('downloadFileSCP', data)
   },
 
   uploadFile (data) {
-    return ipcRenderer.on('uploadFileSCP', data)
+    return ipcRenderer.invoke('uploadFileSCP', data)
   },
 
   downloadFolder (data) {
-    return ipcRenderer.on('downloadFolderSCP', data)
+    return ipcRenderer.invoke('downloadFolderSCP', data)
   },
 
   uploadFolder (data) {
-    return ipcRenderer.on('uploadFolderSCP', data)
+    return ipcRenderer.invoke('uploadFolderSCP', data)
   },
 
   deleteFile (data) {
-    return ipcRenderer.on('deleteFileSCP', data)
+    return ipcRenderer.invoke('deleteFileSCP', data)
   },
 
   deleteFolder (data) {
-    return ipcRenderer.on('deleteFolderSCP', data)
+    return ipcRenderer.invoke('deleteFolderSCP', data)
   },
 
   readFile (data) {
-    return ipcRenderer.on('readFileSCP', data)
+    return ipcRenderer.invoke('readFileSCP', data)
   },
 
   saveFile (data) {
-    return ipcRenderer.on('saveFileSCP', data)
+    return ipcRenderer.invoke('saveFileSCP', data)
   },
 })
