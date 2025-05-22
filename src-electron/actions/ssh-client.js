@@ -42,7 +42,6 @@ export class SSHClient {
 
             // 将 SSH 输出发送到前端
             stream.on('data', (data) => {
-              // console.log(data.toString())
               this.win.webContents.send("sshTerminalReceive",
                 JSON.stringify({
                   uuid: this.uuid,
@@ -93,7 +92,7 @@ export class SSHClient {
 
   // 写入数据到 SSH 流
   write(data) {
-    console.log('ssh write', data)
+    // console.log('ssh write', data)
     if (this.stream) {
       this.stream.write(data)
     }
@@ -293,6 +292,7 @@ export class SFTPClient {
   uploadFile(localPath, remotePath) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
+
       this.sftp.fastPut(localPath, remotePath, (err) => {
         if (err) return reject(err)
         resolve('Uploaded')

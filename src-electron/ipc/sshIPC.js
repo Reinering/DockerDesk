@@ -2,7 +2,6 @@ import { ipcMain } from 'electron'
 import { SSHClient, SFTPClient } from '../actions/ssh-client.js'
 import { SCPClient } from '../actions/scp-client.js'
 import { nodes } from '../actions/nodes.js'
-import { generateUuid } from '../common/utils.js'
 import { interference, encryptPwd, dencryptPwd } from '../common/encrypt.js'
 import log from 'electron-log'
 
@@ -146,10 +145,8 @@ export function registerSSHIpcHandlers(win) {
         const sshClient = ssh_clients.get(uuid)
 
         if (sshClient.ssh_status === "disconnected" && data === '\r') {
-          console.log(uuid, data)
           return await sshClient.reconnect()
             .then((result) => {
-              console.log("ssh connect ")
               return { success: true, error: '' }
             }, (error) => {
               return { success: false, error: error }
@@ -177,7 +174,6 @@ export function registerSSHIpcHandlers(win) {
 export function registerSFTPIpcHandlers(win) {
 
   ipcMain.handle('createSFTPTerminal', async (event, uuid) => {
-    console.log("uuid", uuid)
     if (uuid === undefined || uuid === null) {
       return { success: false, error: 'id required' }
     }
@@ -337,7 +333,33 @@ export function registerSFTPIpcHandlers(win) {
   })
 
   ipcMain.handle('uploadFileSFTP', async (event, data) => {
+    try {
+      const { uuid, remotePath, localPath } = JSON.parse(data)
 
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.uploadFile(remotePath, localPath)
+        .then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
   ipcMain.handle('downloadFolderSFTP', async (event, data) => {
@@ -477,7 +499,6 @@ export function registerSFTPIpcHandlers(win) {
 export function registerSCPIpcHandlers(win) {
 
   ipcMain.handle('createSCPTerminal', async (event, uuid) => {
-    console.log("uuid", uuid)
     if (uuid === undefined || uuid === null) {
       return { success: false, error: 'id required' }
     }

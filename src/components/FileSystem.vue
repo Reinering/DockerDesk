@@ -23,7 +23,6 @@
     >
       <template v-slot:top="props">
         <q-breadcrumbs gutter="xs" class="text-orange" >
-<!--          <q-breadcrumbs-el icon="navigation" @click="onBreadcrumbs" />-->
           <q-breadcrumbs-el
             v-for="(item, index ) in breadcrumbs"
             :key="index"
@@ -66,10 +65,18 @@
               {{ t('filesystem.uploadFolder') }}
             </q-tooltip>
           </q-btn>
-          <q-btn icon="file_upload" size="xs" padding="xs" color="blue" @click="onUploadFile">
+          <q-btn icon="file_upload" size="xs" padding="xs" color="blue" @click="triggerUploadFilesRef">
             <q-tooltip class="bg-amber text-black shadow-4">
               {{ t('filesystem.uploadFile') }}
             </q-tooltip>
+            <q-file
+              ref="uploadFilesRef"
+              v-model="uploadFiles"
+              filled
+              multiple
+              style="display: none;"
+              @update:modelValue="onUploadFiles"
+            />
           </q-btn>
           <q-btn icon="arrow_downward" size="xs" padding="xs" color="teal" @click="onDownloadBatch">
             <q-tooltip class="bg-amber text-black shadow-4">
@@ -219,6 +226,11 @@ const breadcrumbs = reactive([
   },
 ])
 
+const uploadFilesRef = ref(null);
+const uploadFiles = reactive([])
+
+const isBatch = ref(false)
+
 const init = () => {
   console.log("init", props.data)
   if (props.data.data.connectionType === t('node.remoteNode')  && props.data.data.protocol === 'SSH') {
@@ -263,7 +275,6 @@ const listDir = (path) => {
       uuid: props.data.id,
       remotePath: path
     })).then((result) => {
-      console.log(result)
       if (result.success) {
         rows.length = 0
 
@@ -346,7 +357,6 @@ const rename = (newValue, oldValue) => {
       newValue: newValue,
       oldValue: oldValue
     })).then((result) => {
-        console.log(result)
         if (result.success) {
           $q.notify({
             type: 'positive',
@@ -384,7 +394,7 @@ const downloadFile = (path) => {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: t('filesystem.downloadFileError') + ':' + result.error,
+          message: `${t('filesystem.downloadFileError')}:${path}:${result.error}`,
         })
       }
     })
@@ -406,12 +416,14 @@ const deleteFile = (path) => {
           message: t('filesystem.deleteFileSuccess')
         })
 
-        listDir(currentPath.value)
+        if (!isBatch.value) {
+          listDir(currentPath.value)
+        }
       } else {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: t('filesystem.deleteFileError') + ':' + result.error,
+          message: `${t('filesystem.deleteFileError')}:${path}:${result.error}`,
         })
       }
     })
@@ -433,12 +445,14 @@ const deleteFolder = (path) => {
           message: t('filesystem.deleteFolderSuccess')
         })
 
-        listDir(currentPath.value)
+        if (!isBatch.value) {
+          listDir(currentPath.value)
+        }
       } else {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: t('filesystem.deleteFolderError') + ':' + result.error,
+          message: `${t('filesystem.deleteFolderError')}:${path}:${result.error}`,
         })
       }
     })
@@ -453,7 +467,6 @@ const downloadFolder = (path) => {
       uuid: props.data.id,
       remotePath: path,
     })).then((result) => {
-      console.log(result)
       if (result.success) {
         $q.notify({
           type: 'positive',
@@ -490,6 +503,31 @@ const enterFolder = (event, row, index) => {
   }
 }
 
+const uploadFile = async (file) => {
+  if (isSftp.value) {
+    window.sftpTerminal.uploadFile(JSON.stringify({
+      uuid: props.data.id,
+      file: file,
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.uploadFileSuccess')
+        })
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFileError')}:${file.name}:${result.error}`,
+        })
+      }
+    })
+  } else {
+
+  }
+}
+
 const onBreadcrumbs = (item) => {
   listDir(item.path)
 
@@ -497,7 +535,7 @@ const onBreadcrumbs = (item) => {
   for (let i = 0; i <= breadcrumbs.length; i++) {
     if (breadcrumbs[i].path === itemPath ) {
       breadcrumbs.splice(i+1)
-      return
+      break
     }
   }
   if (breadcrumbs.length === 1) {
@@ -578,6 +616,9 @@ const onDelete = (row) => {
 }
 
 const onParentFolder = () => {
+  if (currentPath.value === rootPath) {
+    return
+  }
   const parentFolder = currentPath.value.split('/').slice(0, -1).join('/')
 
   listDir(parentFolder)
@@ -607,9 +648,7 @@ const onCreateFolder = () => {
   }).onOk((data) => {
     createFolder(currentPath.value + '/' + data)
   }).onCancel(() => {
-    // console.log('>>>> Cancel')
   }).onDismiss(() => {
-    // console.log('I am triggered on both OK and Cancel')
   })
 }
 
@@ -632,9 +671,7 @@ const onCreateFile = () => {
   }).onOk((data) => {
     createFile(currentPath.value + '/' + data)
   }).onCancel(() => {
-    // console.log('>>>> Cancel')
   }).onDismiss(() => {
-    // console.log('I am triggered on both OK and Cancel')
   })
 }
 
@@ -642,12 +679,34 @@ const onUploadFolder = () => {
 
 }
 
-const onUploadFile = () => {
+const triggerUploadFilesRef = () => {
+  if (uploadFilesRef.value) {
+    uploadFilesRef.value.pickFiles() // 调用目标按钮的 click 方法
+  }
+}
 
+const onUploadFiles = (files) => {
+  console.log("mark", files)
+
+  for (const file of files) {
+    uploadFile(file)
+  }
 }
 
 const onDownloadBatch = () => {
+  if (selected.value.length === 0) {
+    return
+  }
 
+  for (const file of selected.value) {
+    if (file.isDir) {
+      downloadFolder(currentPath.value + '/' + file.name)
+    } else {
+      downloadFile(currentPath.value + '/' + file.name)
+    }
+  }
+
+  selected.value.length = 0
 }
 
 const onRefresh = () => {
@@ -655,7 +714,37 @@ const onRefresh = () => {
 }
 
 const onDeleteBatch = () => {
+  if (selected.value.length === 0) {
+    return
+  }
 
+  $q.dialog({
+    title: t('confirm'),
+    message: t('filesystem.deleteMessage'),
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk(() => {
+
+    isBatch.value = true
+    for (const file of selected.value) {
+      if (file.isDir) {
+        deleteFolder(currentPath.value + '/' + file.name)
+      } else {
+        deleteFile(currentPath.value + '/' + file.name)
+      }
+    }
+
+    isBatch.value = false
+    listDir(currentPath.value)
+  })
+
+  selected.value.length = 0
 }
 
 onMounted(() => {

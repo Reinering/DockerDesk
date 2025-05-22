@@ -195,6 +195,10 @@ contextBridge.exposeInMainWorld('sftpTerminal', {
     return ipcRenderer.invoke('uploadFileSFTP', data)
   },
 
+  uploadStream (data) {
+    return ipcRenderer.invoke('uploadStreamSFTP', data)
+  },
+
   downloadFolder (data) {
     return ipcRenderer.invoke('downloadFolderSFTP', data)
   },
