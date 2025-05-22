@@ -219,6 +219,12 @@ export default {
     uploadFileError: "File Upload Error",
     uploadFolderSuccess: "Folder Upload Success",
     uploadFolderError: "Folder Upload Error",
+    deleteFileSuccess: "File Delete Success",
+    deleteFileError: "File Delete Error",
+    deleteFolderSuccess: "Folder Delete Success",
+    deleteFolderError: "Folder Delete Error",
+
+    deleteMessage: "Are you sure to delete?",
   },
 
   // db

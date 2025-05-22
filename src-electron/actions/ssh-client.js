@@ -5,7 +5,7 @@ import os from 'os'
 import { formatPermissions, formatDate, isExists } from '../common/utils.js'
 
 
-const homeDir = os.homedir();
+const homeDir = os.homedir()
 const downloadDir = path.join(homeDir, 'Downloads')
 
 // { host, username, password, port }
@@ -304,12 +304,51 @@ export class SFTPClient {
   uploadFolder(localPath, remotePath) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
+
       this.sftp.fastPut(localPath, remotePath, (err) => {
         if (err) return reject(err)
         resolve('Uploaded')
       })
     })
   }
+
+  deleteFile(remotePath) {
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+
+      this.sftp.unlink(remotePath, (err) => {
+        if (err) return reject(err)
+        resolve('file deleted')
+      })
+    })
+  }
+
+  deleteFolder(remotePath) {
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+
+      this.sftp.readdir(remotePath, (err, list) => {
+        if (err) return reject(err)
+
+        Promise.all(
+          list.map(item => {
+            const childRemotePath = `${remotePath}/${item.filename}`
+            return item.attrs.isDirectory()
+              ? this.deleteFolder(childRemotePath)
+              : this.deleteFile(childRemotePath)
+          })
+        )
+          .then(() => {
+            this.sftp.rmdir(remotePath, err => {
+              if (err) return reject(err)
+              resolve('folder deleted')
+            })
+          })
+          .catch(err => reject(err))
+      })
+    })
+  }
+
 
   // 断开连接
   disconnect() {

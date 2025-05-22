@@ -1,8 +1,7 @@
-
 <template>
   <q-card style="min-width: 90%">
     <q-card-section>
-      <div class="text-h6">{{t('filesystem.title')}}</div>
+      <div class="text-h6">{{ t('filesystem.title') }}</div>
     </q-card-section>
 
     <q-table
@@ -23,55 +22,78 @@
       @row-dblclick="enterFolder"
     >
       <template v-slot:top="props">
+        <q-breadcrumbs gutter="xs" class="text-orange" >
+<!--          <q-breadcrumbs-el icon="navigation" @click="onBreadcrumbs" />-->
+          <q-breadcrumbs-el
+            v-for="(item, index ) in breadcrumbs"
+            :key="index"
+            :label="item.label"
+            :icon="item.icon"
+            @click="onBreadcrumbs(item)"
+          />
+        </q-breadcrumbs>
         <q-space />
         <div class="q-gutter-sm">
-          <q-btn icon="arrow_upward" size="xs" padding="xs" color="deep-purple" @click="onParentFolder">
+          <q-btn
+            icon="arrow_upward"
+            size="xs"
+            padding="xs"
+            color="deep-purple"
+            @click="onParentFolder"
+          >
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.parentFolder')}}
+              {{ t('filesystem.parentFolder') }}
             </q-tooltip>
           </q-btn>
-          <q-btn icon="create_new_folder" size="xs" padding="xs" color="deep-purple" @click="onCreateFolder">
+          <q-btn
+            icon="create_new_folder"
+            size="xs"
+            padding="xs"
+            color="deep-purple"
+            @click="onCreateFolder"
+          >
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.createFolder')}}
+              {{ t('filesystem.createFolder') }}
             </q-tooltip>
           </q-btn>
           <q-btn icon="note_add" size="xs" padding="xs" color="purple" @click="onCreateFile">
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.createFile')}}
+              {{ t('filesystem.createFile') }}
             </q-tooltip>
           </q-btn>
           <q-btn icon="cloud_upload" size="xs" padding="xs" color="indigo" @click="onUploadFolder">
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.uploadFolder')}}
+              {{ t('filesystem.uploadFolder') }}
             </q-tooltip>
           </q-btn>
           <q-btn icon="file_upload" size="xs" padding="xs" color="blue" @click="onUploadFile">
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.uploadFile')}}
+              {{ t('filesystem.uploadFile') }}
             </q-tooltip>
           </q-btn>
           <q-btn icon="arrow_downward" size="xs" padding="xs" color="teal" @click="onDownloadBatch">
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.batchDownload')}}
+              {{ t('filesystem.batchDownload') }}
             </q-tooltip>
           </q-btn>
           <q-btn icon="refresh" size="xs" padding="xs" color="green" @click="onRefresh">
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.refresh')}}
+              {{ t('filesystem.refresh') }}
             </q-tooltip>
           </q-btn>
           <q-btn icon="delete" size="xs" padding="xs" color="red" @click="onDeleteBatch">
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.batchDelete')}}
+              {{ t('filesystem.batchDelete') }}
             </q-tooltip>
           </q-btn>
           <q-btn
-            size="xs" padding="xs"
+            size="xs"
+            padding="xs"
             :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
             @click="props.toggleFullscreen"
           >
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('filesystem.fullWidth')}}
+              {{ t('filesystem.fullWidth') }}
             </q-tooltip>
           </q-btn>
         </div>
@@ -79,48 +101,28 @@
 
       <template v-slot:body-cell-name="props">
         <q-td :props="props">
-          <div
-            :class="props.row.isDir ? 'text-indigo' : ''"
-          >
+          <div :class="props.row.isDir ? 'text-indigo' : ''">
             {{ props.row.name }}
           </div>
         </q-td>
       </template>
 
       <template v-slot:body-cell-actions="props">
-        <q-btn
-          icon="edit"
-          color="primary"
-          dense
-          flat
-          @click="onRename(props.row)"
-        >
+        <q-btn icon="edit" color="primary" dense flat @click="onRename(props.row)">
           <q-tooltip class="bg-amber text-black shadow-4">
-            {{t('filesystem.rename')}}
+            {{ t('filesystem.rename') }}
           </q-tooltip>
         </q-btn>
 
-        <q-btn
-          icon="download"
-          color="blue"
-          dense
-          flat
-          @click="onDownload(props.row)"
-        >
+        <q-btn icon="download" color="blue" dense flat @click="onDownload(props.row)">
           <q-tooltip class="bg-amber text-black shadow-4">
-            {{t('download')}}
+            {{ t('download') }}
           </q-tooltip>
         </q-btn>
 
-        <q-btn
-          icon="delete"
-          color="negative"
-          dense
-          flat
-          @click="onDelete(props.row)"
-        >
+        <q-btn icon="delete" color="negative" dense flat @click="onDelete(props.row)">
           <q-tooltip class="bg-amber text-black shadow-4">
-            {{t('delete')}}
+            {{ t('delete') }}
           </q-tooltip>
         </q-btn>
 
@@ -133,12 +135,11 @@
           @click="onEditFile(props.row)"
         >
           <q-tooltip class="bg-amber text-black shadow-4">
-            {{t('edit')}}
+            {{ t('edit') }}
           </q-tooltip>
         </q-btn>
       </template>
     </q-table>
-
   </q-card>
 
   <q-dialog v-model="isShowEditorDialog" style="width: 90%; height: 90%" persistent>
@@ -149,7 +150,7 @@
 
       <q-card-actions align="right">
         <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="addService" />
-        <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="closeEditorDialog" />
+        <q-btn :label="t('cancel')" class="q-mt-md" color="negative" @click="closeEditorDialog" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -181,11 +182,15 @@ const tableStyle = reactive({
   height: window.innerHeight - 210 + "px",
 })
 const pagination = ref({
-  rowsPerPage: 0
+  rowsPerPage: 0,
+  sortBy: 'name', // 初始排序的列名
+  descending: false, // true 为降序，false 为升序
 })
 
+const rootPath = '/'
+
 const columns = [
-  { name: 'name', label: t('filesystem.name'), align: 'left', sortable: true, style: 'max-width: 150px', classes: 'ellipsis', field: 'name' },
+  { name: 'name', label: t('filesystem.name'), align: 'left', sortOrder: 'ad', sortable: true, style: 'max-width: 150px', classes: 'ellipsis', field: 'name' },
   { name: 'attribute', label: t('filesystem.attr'), align: 'left', field: 'permString' },
   { name: 'modifyTime', label: t('filesystem.modifyTime'), align: 'left', sortable: true, field: 'mtime' },
   { name: 'size', label: t('filesystem.size'), align: 'left', sortable: true, field: 'size' },
@@ -206,6 +211,14 @@ const isSftp = ref(false)
 
 const currentPath = ref(null)
 
+const breadcrumbs = reactive([
+  {
+    label: rootPath,
+    icon: "navigation",
+    path: rootPath
+  },
+])
+
 const init = () => {
   console.log("init", props.data)
   if (props.data.data.connectionType === t('node.remoteNode')  && props.data.data.protocol === 'SSH') {
@@ -214,7 +227,7 @@ const init = () => {
         isSftp.value = result.success
 
         createTerminal()
-        listDir('/home/reiner')
+        listDir(rootPath)
       })
   } else {
     $q.notify({
@@ -223,7 +236,6 @@ const init = () => {
       message: t('filesystem.initError')
     })
   }
-
 }
 
 const createTerminal = () => {
@@ -362,7 +374,6 @@ const downloadFile = (path) => {
       uuid: props.data.id,
       remotePath: path,
     })).then((result) => {
-      console.log(result)
       if (result.success) {
         $q.notify({
           type: 'positive',
@@ -374,6 +385,60 @@ const downloadFile = (path) => {
           type: 'negative',
           position: clientConfig.quasar.notify.position,
           message: t('filesystem.downloadFileError') + ':' + result.error,
+        })
+      }
+    })
+  } else {
+
+  }
+}
+
+const deleteFile = (path) => {
+  if (isSftp.value) {
+    window.sftpTerminal.deleteFile(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path,
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.deleteFileSuccess')
+        })
+
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.deleteFileError') + ':' + result.error,
+        })
+      }
+    })
+  } else {
+
+  }
+}
+
+const deleteFolder = (path) => {
+  if (isSftp.value) {
+    window.sftpTerminal.deleteFolder(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path,
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.deleteFolderSuccess')
+        })
+
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.deleteFolderError') + ':' + result.error,
         })
       }
     })
@@ -414,6 +479,30 @@ const enterFolder = (event, row, index) => {
   }
 
   listDir(currentPath.value + '/' + row.name)
+
+  breadcrumbs.push({
+    label: row.name,
+    path: currentPath.value + '/' + row.name,
+  })
+
+  if (breadcrumbs.length === 2) {
+    breadcrumbs[0].label = ''
+  }
+}
+
+const onBreadcrumbs = (item) => {
+  listDir(item.path)
+
+  const itemPath = item.path
+  for (let i = 0; i <= breadcrumbs.length; i++) {
+    if (breadcrumbs[i].path === itemPath ) {
+      breadcrumbs.splice(i+1)
+      return
+    }
+  }
+  if (breadcrumbs.length === 1) {
+    breadcrumbs[0].label = rootPath
+  }
 }
 
 const onRename = (row) => {
@@ -467,13 +556,36 @@ const onDownload = (row) => {
   }
 }
 
-const onDelete = () => {
-
+const onDelete = (row) => {
+  $q.dialog({
+    title: t('confirm'),
+    message: t('filesystem.deleteMessage'),
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk(() => {
+    if (row.isDir) {
+      deleteFolder(currentPath.value + '/' + row.name)
+    } else {
+      deleteFile(currentPath.value + '/' + row.name)
+    }
+  })
 }
 
 const onParentFolder = () => {
   const parentFolder = currentPath.value.split('/').slice(0, -1).join('/')
+
   listDir(parentFolder)
+
+  breadcrumbs.pop()
+  if (breadcrumbs.length === 1) {
+    breadcrumbs[0].label = rootPath
+  }
 }
 
 const onCreateFolder = () => {
@@ -554,10 +666,6 @@ onMounted(() => {
 onUnmounted(() => {
 
 })
-
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

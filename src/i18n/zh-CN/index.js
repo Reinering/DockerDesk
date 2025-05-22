@@ -224,6 +224,12 @@ export default {
     uploadFileError: "文件上传失败",
     uploadFolderSuccess: "文件夹上传成功",
     uploadFolderError: "文件夹上传失败",
+    deleteFileSuccess: "文件删除成功",
+    deleteFileError: "文件删除成功",
+    deleteFolderSuccess: "文件夹删除成功",
+    deleteFolderError: "文件夹删除失败",
+
+    deleteMessage: "确认删除吗？",
   },
 
   // db
