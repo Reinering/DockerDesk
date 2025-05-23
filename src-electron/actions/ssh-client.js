@@ -9,6 +9,7 @@ import { formatPermissions, formatDate, isLocalExists } from '../common/utils.js
 const homeDir = os.homedir()
 const downloadDir = path.join(homeDir, 'Downloads')
 
+
 // { host, username, password, port }
 
 export class SSHClient {
@@ -128,6 +129,7 @@ export class SFTPClient {
     this.conn = new Client()
     this.sftp = null
     this.status = 'disconnected'    // connecting | connected | disconnected |
+    this.activeUploads = new Map()  // 存储当前上传文件的 SFTP 流和连接
   }
 
   // 连接到 SFTP
@@ -146,6 +148,7 @@ export class SFTPClient {
           reject(err)
         }).on('close', () => {
           this.status = 'disconnected'
+          this.activeUploads.clear()
         }).connect(this.config)
     })
   }
@@ -360,6 +363,77 @@ export class SFTPClient {
 
     })
   }
+
+  async uploadFileStart(remotePath) {
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+
+      try {
+        const writeStream = this.sftp.createWriteStream(remotePath)
+
+        this.activeUploads.set(remotePath, writeStream)
+
+        writeStream.on('error', (error) => {
+          this.activeUploads.delete(remotePath)
+          this.win.webContents.send("uploadFileSFTP",
+            JSON.stringify({
+              uuid: this.uuid,
+              data: "Stream disconnected",
+              error: error
+            }))
+        })
+        resolve()
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+
+  // 处理文件块
+  async uploadFileChunk(remotePath, chunk) {
+
+    return new Promise((resolve, reject) => {
+      try {
+        const writeStream = this.activeUploads.get(remotePath)
+        if (writeStream) {
+          const buffer = Buffer.from(chunk)
+          writeStream.write(buffer)
+          resolve()
+        } else {
+          reject(new Error('writeStream not Found'))
+        }
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+
+  // 处理文件传输结束
+  async uploadFileEnd(remotePath) {
+
+    return new Promise((resolve, reject) => {
+      try {
+
+        const writeStream = this.activeUploads.get(remotePath)
+        if (writeStream) {
+          writeStream.end(() => {
+            this.activeUploads.delete(remotePath)
+
+            resolve()
+          })
+        } else {
+          reject(new Error('writeStream not Found'))
+        }
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+
+  }
+
+
+
 
   // 上传文件夹
   uploadFolder(localPath, remotePath) {

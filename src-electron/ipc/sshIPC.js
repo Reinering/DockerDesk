@@ -390,10 +390,8 @@ export function registerSFTPIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('uploadFileStartSFTP', async (event, data) => {
+  ipcMain.handle('uploadStreamStartSFTP', async (event, { uuid, remotePath }) => {
     try {
-      const { uuid, remotePath, localPath } = JSON.parse(data)
-
       if (!sftp_clients.has(uuid)) {
         return { success: false, error: "sftp disconnected" }
       }
@@ -408,7 +406,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: 'sftp disconnected' }
       }
 
-      return await sftpClient.uploadFile(remotePath, localPath)
+      return await sftpClient.uploadFileStart(remotePath)
         .then((result) => {
           return { success: true, data: result, error: '' }
         }, (error) => {
@@ -419,10 +417,8 @@ export function registerSFTPIpcHandlers(win) {
       return { success: false, error: error }
     }
   })
-  ipcMain.handle('uploadFileChunkSFTP', async (event, data) => {
+  ipcMain.handle('uploadStreamChunkSFTP', async (event, { uuid, remotePath, chunk }) => {
     try {
-      const { uuid, remotePath, localPath } = JSON.parse(data)
-
       if (!sftp_clients.has(uuid)) {
         return { success: false, error: "sftp disconnected" }
       }
@@ -437,7 +433,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: 'sftp disconnected' }
       }
 
-      return await sftpClient.uploadFile(remotePath, localPath)
+      return await sftpClient.uploadFileChunk(remotePath, chunk)
         .then((result) => {
           return { success: true, data: result, error: '' }
         }, (error) => {
@@ -448,10 +444,8 @@ export function registerSFTPIpcHandlers(win) {
       return { success: false, error: error }
     }
   })
-  ipcMain.handle('uploadFileEndSFTP', async (event, data) => {
+  ipcMain.handle('uploadStreamEndSFTP', async (event, { uuid, remotePath }) => {
     try {
-      const { uuid, remotePath, localPath } = JSON.parse(data)
-
       if (!sftp_clients.has(uuid)) {
         return { success: false, error: "sftp disconnected" }
       }
@@ -466,7 +460,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: 'sftp disconnected' }
       }
 
-      return await sftpClient.uploadFile(remotePath, localPath)
+      return await sftpClient.uploadFileEnd(remotePath)
         .then((result) => {
           return { success: true, data: result, error: '' }
         }, (error) => {

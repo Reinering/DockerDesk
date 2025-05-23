@@ -541,13 +541,9 @@ const uploadFile = async (file) => {
           buffer: buffer,
         },
       }).then((result) => {
-        console.log('Original file size:', file.size); // 打印原始文件大小
-        console.log('ArrayBuffer size:', buffer.byteLength); // 打印 ArrayBuffer 大小
-        if (buffer.byteLength !== file.size) {
-          console.error('ArrayBuffer size does not match file size!');
-        }
+        // console.log('Original file size:', file.size); // 打印原始文件大小
+        // console.log('ArrayBuffer size:', buffer.byteLength); // 打印 ArrayBuffer 大小
 
-        console.log(result)
         if (result.success) {
           $q.notify({
             type: 'positive',
@@ -565,13 +561,84 @@ const uploadFile = async (file) => {
         }
       })
     } else {
+      await window.sftpTerminal.uploadStreamStart({
+        uuid: props.data.id,
+        remotePath: currentPath.value + '/' + file.name
+      }).then(async (result) => {
+        if (!result.success) {
+          return $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('filesystem.uploadFileError')}:${file.name}:${result.error}`,
+          })
+        }
 
+        $q.notify({
+          type: 'info',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFileStart')}:${file.name}`,
+        })
+
+        // file.size
+        $q.loadingBar.start()
+
+        const stream = file.stream()
+        const reader = stream.getReader()
+
+        await uploadFileChunk(file, reader)
+
+      })
     }
-
-
   } else {
 
   }
+}
+
+const uploadFileChunk = async (file, reader) => {
+  const { done, value } = await reader.read()
+  if (done) {
+    return window.sftpTerminal.uploadStreamEnd({
+      uuid: props.data.id,
+      remotePath: currentPath.value + '/' + file.name,
+    }).then(async (result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFileSuccess')}:${file.name}`,
+        })
+
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFileError')}:${file.name}:${result.error}`,
+        })
+      }
+
+      $q.loadingBar.stop()
+    })
+  }
+
+  // const buffer = Buffer.from(value)
+  $q.loadingBar.increment(value.byteLength)
+
+  window.sftpTerminal.uploadStreamChunk({
+    uuid: props.data.id,
+    remotePath: currentPath.value + '/' + file.name,
+    chunk: value,
+  }).then(async (result) => {
+    if (!result.success) {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('filesystem.uploadFileError')}:${file.name}:${result.error}`,
+      })
+    }
+  })
+
+  uploadFileChunk(file, reader)
 }
 
 const onBreadcrumbs = (item) => {
@@ -616,9 +683,7 @@ const onRename = (row) => {
 
     rename(currentPath.value + '/' + data, currentPath.value + '/' + row.name)
   }).onCancel(() => {
-    // console.log('>>>> Cancel')
   }).onDismiss(() => {
-    // console.log('I am triggered on both OK and Cancel')
   })
 }
 
@@ -737,7 +802,6 @@ const onCreateFile = () => {
 }
 
 const onUploadFolder = () => {
-  console.log("mark")
   // $q.loadingBar.start()
   $q.loadingBar.stop()
 }
@@ -814,6 +878,13 @@ const onDeleteBatch = () => {
 onMounted(() => {
   init()
 
+  window.sftpTerminal.uploadFile((result) => {
+    const { uuid, data, error } = JSON.parse(result)
+
+    if (props.terminalId === uuid) {
+
+    }
+  })
 })
 
 onUnmounted(() => {

@@ -217,6 +217,7 @@ export default {
     downloadFolderError: "Folder Download Error",
     uploadFileSuccess: "File Upload Success",
     uploadFileError: "File Upload Error",
+    uploadFileStart: "Start uploading file",
     uploadFolderSuccess: "Folder Upload Success",
     uploadFolderError: "Folder Upload Error",
     deleteFileSuccess: "File Delete Success",

@@ -222,6 +222,7 @@ export default {
     downloadFolderError: "文件夹下载失败",
     uploadFileSuccess: "文件上传成功",
     uploadFileError: "文件上传失败",
+    uploadFileStart: "文件开始上传",
     uploadFolderSuccess: "文件夹上传成功",
     uploadFolderError: "文件夹上传失败",
     deleteFileSuccess: "文件删除成功",

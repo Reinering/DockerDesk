@@ -201,8 +201,8 @@ contextBridge.exposeInMainWorld('sftpTerminal', {
     return ipcRenderer.invoke('uploadSFileSFTP', data)
   },
 
-  uploadFile (data) {
-    return ipcRenderer.invoke('uploadFileSFTP', data)
+  uploadFile (callback) {
+    return ipcRenderer.on('uploadFileSFTP', (event, data) => callback(data))
   },
 
   uploadStreamStart (data) {
