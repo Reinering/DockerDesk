@@ -24,6 +24,10 @@ export const clientConfig = {
     interference: ';' * 100
   },
 
+  file: {
+    limitSize: 1048576,
+  },
+
   logging: {
     logPath: 'logs',
     logFile: 'logging.log',

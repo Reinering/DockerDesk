@@ -164,6 +164,7 @@
 </template>
 
 <script setup>
+import { ref, inject, reactive, onMounted, onUnmounted } from 'vue'
 import { clientConfig } from 'src/common/config.js'
 import Editor from 'src/components/Editor.vue'
 
@@ -177,8 +178,6 @@ const props = defineProps({
     default: () => {},
   }
 })
-
-import { ref, inject, reactive, onMounted, onUnmounted } from 'vue'
 
 const $q = inject("$q")
 const router = inject("router")
@@ -289,6 +288,17 @@ const listDir = (path) => {
         })
       }
     })
+  } else {
+    // window.scpTerminal
+  }
+}
+
+const listDirs = (path) => {
+  if (isSftp.value) {
+    return window.sftpTerminal.listDir(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    }))
   } else {
     // window.scpTerminal
   }
@@ -491,38 +501,74 @@ const enterFolder = (event, row, index) => {
     return
   }
 
-  listDir(currentPath.value + '/' + row.name)
-
-  breadcrumbs.push({
-    label: row.name,
-    path: currentPath.value + '/' + row.name,
-  })
-
-  if (breadcrumbs.length === 2) {
-    breadcrumbs[0].label = ''
-  }
-}
-
-const uploadFile = async (file) => {
-  if (isSftp.value) {
-    window.sftpTerminal.uploadFile(JSON.stringify({
-      uuid: props.data.id,
-      file: file,
-    })).then((result) => {
+  listDirs(currentPath.value + '/' + row.name)
+    .then((result) => {
       if (result.success) {
-        $q.notify({
-          type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: t('filesystem.uploadFileSuccess')
+        rows.length = 0
+
+        rows.push(...result.data)
+
+        currentPath.value = currentPath.value + '/' + row.name
+
+        breadcrumbs.push({
+          label: row.name,
+          path: currentPath.value,
         })
+
+        if (breadcrumbs.length === 2) {
+          breadcrumbs[0].label = ''
+        }
       } else {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: `${t('filesystem.uploadFileError')}:${file.name}:${result.error}`,
+          message: t('filesystem.initError') + ':' + result.error,
         })
       }
-    })
+  })
+}
+
+const uploadFile = async (file) => {
+  console.log("mark", file)
+  if (isSftp.value) {
+    if (file.size <= clientConfig.file.limitSize) {
+      const buffer = await file.arrayBuffer()
+      await window.sftpTerminal.uploadSFile({
+        uuid: props.data.id,
+        remotePath: currentPath.value + '/' + file.name,
+        fileData: {
+          name: file.name,
+          buffer: buffer,
+        },
+      }).then((result) => {
+        console.log('Original file size:', file.size); // 打印原始文件大小
+        console.log('ArrayBuffer size:', buffer.byteLength); // 打印 ArrayBuffer 大小
+        if (buffer.byteLength !== file.size) {
+          console.error('ArrayBuffer size does not match file size!');
+        }
+
+        console.log(result)
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: t('filesystem.uploadFileSuccess')
+          })
+
+          listDir(currentPath.value)
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('filesystem.uploadFileError')}:${file.name}:${result.error}`,
+          })
+        }
+      })
+    } else {
+
+    }
+
+
   } else {
 
   }
@@ -621,12 +667,27 @@ const onParentFolder = () => {
   }
   const parentFolder = currentPath.value.split('/').slice(0, -1).join('/')
 
-  listDir(parentFolder)
+  listDirs(parentFolder)
+    .then((result) => {
+      if (result.success) {
+        rows.length = 0
 
-  breadcrumbs.pop()
-  if (breadcrumbs.length === 1) {
-    breadcrumbs[0].label = rootPath
-  }
+        rows.push(...result.data)
+
+        currentPath.value = parentFolder
+
+        breadcrumbs.pop()
+        if (breadcrumbs.length === 1) {
+          breadcrumbs[0].label = rootPath
+        }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.initError') + ':' + result.error,
+        })
+      }
+    })
 }
 
 const onCreateFolder = () => {
@@ -676,7 +737,9 @@ const onCreateFile = () => {
 }
 
 const onUploadFolder = () => {
-
+  console.log("mark")
+  // $q.loadingBar.start()
+  $q.loadingBar.stop()
 }
 
 const triggerUploadFilesRef = () => {
@@ -685,11 +748,12 @@ const triggerUploadFilesRef = () => {
   }
 }
 
-const onUploadFiles = (files) => {
-  console.log("mark", files)
+const onUploadFiles = async (files) => {
+  const tmpFiles = files.slice(0)
+  files.length = 0
 
-  for (const file of files) {
-    uploadFile(file)
+  for (const file of tmpFiles) {
+    await uploadFile(file)
   }
 }
 

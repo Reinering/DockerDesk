@@ -197,12 +197,24 @@ contextBridge.exposeInMainWorld('sftpTerminal', {
     return ipcRenderer.invoke('downloadFileSFTP', data)
   },
 
+  uploadSFile (data) {
+    return ipcRenderer.invoke('uploadSFileSFTP', data)
+  },
+
   uploadFile (data) {
     return ipcRenderer.invoke('uploadFileSFTP', data)
   },
 
-  uploadStream (data) {
-    return ipcRenderer.invoke('uploadStreamSFTP', data)
+  uploadStreamStart (data) {
+    return ipcRenderer.invoke('uploadStreamStartSFTP', data)
+  },
+
+  uploadStreamChunk (data) {
+    return ipcRenderer.invoke('uploadStreamChunkSFTP', data)
+  },
+
+  uploadStreamEnd (data) {
+    return ipcRenderer.invoke('uploadStreamEndSFTP', data)
   },
 
   downloadFolder (data) {

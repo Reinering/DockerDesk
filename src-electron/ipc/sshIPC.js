@@ -332,7 +332,123 @@ export function registerSFTPIpcHandlers(win) {
     }
   })
 
+  ipcMain.handle('uploadSFileSFTP', async (event, { uuid, remotePath, fileData }) => {
+    try {
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.uploadSFile(remotePath, fileData)
+        .then((result) => {
+          return { success: true, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
   ipcMain.handle('uploadFileSFTP', async (event, data) => {
+    try {
+      const { uuid, remotePath, localPath } = JSON.parse(data)
+
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.uploadFile(remotePath, localPath)
+        .then((result) => {
+          return { success: true, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('uploadFileStartSFTP', async (event, data) => {
+    try {
+      const { uuid, remotePath, localPath } = JSON.parse(data)
+
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.uploadFile(remotePath, localPath)
+        .then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+  ipcMain.handle('uploadFileChunkSFTP', async (event, data) => {
+    try {
+      const { uuid, remotePath, localPath } = JSON.parse(data)
+
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.uploadFile(remotePath, localPath)
+        .then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+  ipcMain.handle('uploadFileEndSFTP', async (event, data) => {
     try {
       const { uuid, remotePath, localPath } = JSON.parse(data)
 

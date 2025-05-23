@@ -50,7 +50,7 @@ export function formatDate(timestamp) {
 
 
 // 检查本地文件或文件夹是否存在
-export function isExists(localPath, callback) {
+export function isLocalExists(localPath, callback) {
   fs.access(localPath, fs.constants.F_OK, (err) => {
     if (err) {
       callback(false) // 本地路径不存在
@@ -59,3 +59,5 @@ export function isExists(localPath, callback) {
     callback(true) // 本地路径存在
   })
 }
+
+

@@ -1,8 +1,9 @@
 import { readFileSync, mkdirSync } from 'fs'
-import { Client  } from 'ssh2'
+import * as fs from 'fs'
+import { Client } from 'ssh2'
 import path from 'node:path'
 import os from 'os'
-import { formatPermissions, formatDate, isExists } from '../common/utils.js'
+import { formatPermissions, formatDate, isLocalExists } from '../common/utils.js'
 
 
 const homeDir = os.homedir()
@@ -222,7 +223,7 @@ export class SFTPClient {
       const filename = path.basename(remotePath)
       const localFilePath = path.join(localPath, filename)
 
-      isExists(localFilePath, (exists) => {
+      isLocalExists(localFilePath, (exists) => {
         if (exists) {
           reject(new Error('File already exists'))
           return
@@ -259,7 +260,7 @@ export class SFTPClient {
         const foldername = path.basename(remotePath)
         localFolder = path.join(localFolder, foldername)
 
-        isExists(localFolder, (exists) => {
+        isLocalExists(localFolder, (exists) => {
           if (exists) {
             reject(new Error('Folder already exists'))
             return
@@ -288,7 +289,66 @@ export class SFTPClient {
     })
   }
 
-  // 上传文件
+  // 上传小文件 sftp.fastPut()
+  uploadSFile(remotePath, fileData) {
+    return new Promise((resolve, reject) => {
+      if (!this.sftp) return reject(new Error('SFTP not connected'))
+      console.log('ArrayBuffer size:', fileData.buffer.byteLength)
+
+      this.isRemoteExists(remotePath)
+        .then(async (result) => {
+          const tempFilePath = path.join(os.tmpdir(), fileData.name)
+
+          await fs.promises.writeFile(tempFilePath, Buffer.from(fileData.buffer))
+            .then(() => {
+              // const stats = fs.promises.stat(tempFilePath)
+              // console.log('Temp file size1:', stats.size)
+            })
+
+          this.sftp.fastPut(tempFilePath, remotePath, (err)=> {
+            if (err) {
+              reject(err)
+            } else {
+              fs.promises.unlink(tempFilePath)
+              resolve()
+            }
+          })
+        }, (err) => {
+          reject(err)
+        })
+    })
+  }
+
+  // 上传小文件 sftp.fastPut()
+  async uploadSFile1(remotePath, fileData) {
+    if (!this.sftp) throw new Error('SFTP not connected')
+    // console.log('ArrayBuffer size:', fileData.buffer.byteLength)
+
+    const tempFilePath = path.join(os.tmpdir(), fileData.name)
+
+    await fs.promises.writeFile(tempFilePath, Buffer.from(fileData.buffer))
+      .then(() => {
+        // const stats = fs.promises.stat(tempFilePath)
+        // console.log('Temp file size1:', stats.size)
+      })
+
+    return new Promise((resolve, reject) => {
+      try {
+        this.sftp.fastPut(tempFilePath, remotePath, (err)=> {
+          if (err) {
+            reject(err)
+          } else {
+            fs.promises.unlink(tempFilePath)
+            resolve()
+          }
+        })
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+
+  // 上传大文件
   uploadFile(localPath, remotePath) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
@@ -297,10 +357,11 @@ export class SFTPClient {
         if (err) return reject(err)
         resolve('Uploaded')
       })
+
     })
   }
 
-  // 上传文件
+  // 上传文件夹
   uploadFolder(localPath, remotePath) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
@@ -345,6 +406,18 @@ export class SFTPClient {
             })
           })
           .catch(err => reject(err))
+      })
+    })
+  }
+
+  isRemoteExists(remotePath,) {
+    return new Promise((resolve, reject) => {
+       this.sftp.stat(remotePath, (err, stats) => {
+        if (err) {
+          resolve(stats)
+        } else {
+          reject("file already exists")
+        }
       })
     })
   }
