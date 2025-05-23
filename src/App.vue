@@ -30,6 +30,12 @@ provide("route", route)
 const { t } = useI18n()
 provide("t", t)
 
+$q.loadingBar.setDefaults({
+  color: 'brown',
+  size: '3px',
+  position: 'bottom'
+})
+
 const configStore = useConfigStore()
 const preCmdsStore = usePreCmdsStore()
 

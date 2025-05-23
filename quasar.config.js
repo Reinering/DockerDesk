@@ -124,6 +124,7 @@ export default defineConfig((ctx) => {
         },
         notify: { /* look at QUASARCONFOPTIONS from the API card (bottom of page) */ },
         loading: { /* look at QUASARCONFOPTIONS from the API card (bottom of page) */ },
+        loadingBar: { /* 参考 API 卡片中的 QuasarConfOptions  */ },
         dark: 'false' // 或者Boolean true/false
       },
 
@@ -142,6 +143,7 @@ export default defineConfig((ctx) => {
         'Dialog',
         'Notify',
         'Loading',
+        'LoadingBar',
         'LocalStorage',
         'SessionStorage'
       ]
