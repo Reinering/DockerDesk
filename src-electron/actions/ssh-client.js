@@ -428,12 +428,7 @@ export class SFTPClient {
         reject(err)
       }
     })
-
-
   }
-
-
-
 
   // 上传文件夹
   uploadFolder(localPath, remotePath) {

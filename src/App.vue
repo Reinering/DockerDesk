@@ -31,7 +31,7 @@ const { t } = useI18n()
 provide("t", t)
 
 $q.loadingBar.setDefaults({
-  color: 'brown',
+  color: 'teal',
   size: '3px',
   position: 'bottom'
 })

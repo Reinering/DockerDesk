@@ -4,6 +4,8 @@
       <div class="text-h6">{{ t('filesystem.title') }}</div>
     </q-card-section>
 
+    <q-linear-progress size="2px" :value="lineProgress" color="accent" />
+
     <q-table
       :rows="rows"
       :columns="columns"
@@ -168,6 +170,7 @@ import { ref, inject, reactive, onMounted, onUnmounted } from 'vue'
 import { clientConfig } from 'src/common/config.js'
 import Editor from 'src/components/Editor.vue'
 
+
 defineOptions({
   name: 'FileSystem',
 })
@@ -234,10 +237,10 @@ const init = () => {
   console.log("init", props.data)
   if (props.data.data.connectionType === t('node.remoteNode')  && props.data.data.protocol === 'SSH') {
     window.sshTerminal.detect(props.data.id)
-      .then((result) => {
+      .then(async (result) => {
         isSftp.value = result.success
 
-        createTerminal()
+        await createTerminal()
         listDir(rootPath)
       })
   } else {
@@ -249,9 +252,9 @@ const init = () => {
   }
 }
 
-const createTerminal = () => {
+const createTerminal = async () => {
   if (isSftp.value) {
-    window.sftpTerminal.create(props.data.id)
+    await window.sftpTerminal.create(props.data.id)
       .then((result) => {
         if (result.success) {
 
@@ -528,6 +531,10 @@ const enterFolder = (event, row, index) => {
   })
 }
 
+const totalBytesRead = ref(0)
+const lastProgress = ref(0)
+const lineProgress = ref(0.0)
+
 const uploadFile = async (file) => {
   console.log("mark", file)
   if (isSftp.value) {
@@ -579,8 +586,13 @@ const uploadFile = async (file) => {
           message: `${t('filesystem.uploadFileStart')}:${file.name}`,
         })
 
+        console.log("mark start")
+
         // file.size
         $q.loadingBar.start()
+        totalBytesRead.value = 0
+        lastProgress.value = 0
+        lineProgress.value = 0.0
 
         const stream = file.stream()
         const reader = stream.getReader()
@@ -621,8 +633,14 @@ const uploadFileChunk = async (file, reader) => {
     })
   }
 
-  // const buffer = Buffer.from(value)
-  $q.loadingBar.increment(value.byteLength)
+  totalBytesRead.value += value.byteLength
+  const progress = parseInt((totalBytesRead.value / file.size).toFixed(2))
+  if (progress - lastProgress.value >= 0.01) { // 每增加1%更新一次
+    // console.log('progress', progress, Object.prototype.toString.call(progress))
+    lineProgress.value = progress
+    $q.loadingBar.increment(progress - lastProgress.value)
+    lastProgress.value = progress
+  }
 
   window.sftpTerminal.uploadStreamChunk({
     uuid: props.data.id,
@@ -882,7 +900,11 @@ onMounted(() => {
     const { uuid, data, error } = JSON.parse(result)
 
     if (props.terminalId === uuid) {
-
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('filesystem.uploadFileError')}:${error}`,
+      })
     }
   })
 })
