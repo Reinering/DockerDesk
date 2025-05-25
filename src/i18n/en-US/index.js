@@ -204,11 +204,12 @@ export default {
 
     modifyNameHint: "The content has not changed, no modification is required",
 
-    termInitError: "Init error",
+    sftpError: "SFTP Error",
+    termInitError: "Init Error",
     createFolderSuccess: "Create Folder Success",
-    createFolderError: "Create Folder error",
+    createFolderError: "Create Folder Error",
     createFileSuccess: "Create File Success",
-    createFileError: "Create File error",
+    createFileError: "Create File Error",
     renameSuccess: "Rename Success",
     renameError: "Rename error",
     downloadFileSuccess: "File Download Success",

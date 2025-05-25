@@ -29,7 +29,7 @@
  */
 
 
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer,  } from 'electron'
 import { BrowserWindow } from '@electron/remote'
 
 
@@ -50,7 +50,18 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
 
   close () {
     BrowserWindow.getFocusedWindow().close()
-  }
+  },
+
+  selectFiles (data) {
+    return ipcRenderer.invoke('selectFiles')
+  },
+
+  selectFolders (data) {
+    return ipcRenderer.invoke('selectFolders')
+  },
+
+
+
 })
 
 contextBridge.exposeInMainWorld('client', {
@@ -177,8 +188,14 @@ contextBridge.exposeInMainWorld('sshTerminal', {
 })
 
 contextBridge.exposeInMainWorld('sftpTerminal', {
+
   create (uuid) {
+    console.log("uuid", uuid)
     return ipcRenderer.invoke('createSFTPTerminal', uuid)
+  },
+
+  receive (callback) {
+    return ipcRenderer.on('sftpTerminalReceive', (event, data) => callback(data))
   },
 
   listDir (data) {
@@ -193,8 +210,12 @@ contextBridge.exposeInMainWorld('sftpTerminal', {
     return ipcRenderer.invoke('createFolderSFTP', data)
   },
 
-  downloadFile (data) {
-    return ipcRenderer.invoke('downloadFileSFTP', data)
+  downloadSFile (data) {
+    return ipcRenderer.invoke('downloadSFileSFTP', data)
+  },
+
+  downloadStream (data) {
+    return ipcRenderer.invoke('downloadStreamSFTP', data)
   },
 
   uploadSFile (data) {
@@ -244,6 +265,19 @@ contextBridge.exposeInMainWorld('sftpTerminal', {
   saveFile (data) {
     return ipcRenderer.invoke('saveFileSFTP', data)
   },
+
+  uploadStream (data) {
+    return ipcRenderer.invoke('uploadStreamSFTP', data)
+  },
+
+  uploadProgress (callback) {
+    return ipcRenderer.on('uploadProgressSFTP', (event, data) => callback(data))
+  },
+
+  onProgress (callback) {
+    return ipcRenderer.on('onProgressSFTP', (event, data) => callback(data))
+  }
+
 })
 
 contextBridge.exposeInMainWorld('scpTerminal', {

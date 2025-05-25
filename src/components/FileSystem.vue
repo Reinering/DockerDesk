@@ -1,5 +1,5 @@
 <template>
-  <q-card style="min-width: 90%">
+  <q-card style="min-width: 100%">
     <q-card-section>
       <div class="text-h6">{{ t('filesystem.title') }}</div>
     </q-card-section>
@@ -7,6 +7,7 @@
     <q-linear-progress size="2px" :value="lineProgress" color="accent" />
 
     <q-table
+      class="filesystem-table"
       :rows="rows"
       :columns="columns"
       row-key="name"
@@ -62,7 +63,7 @@
               {{ t('filesystem.createFile') }}
             </q-tooltip>
           </q-btn>
-          <q-btn icon="cloud_upload" size="xs" padding="xs" color="indigo" @click="onUploadFolder">
+          <q-btn icon="cloud_upload" size="xs" padding="xs" color="indigo" @click="triggerUploadFolder">
             <q-tooltip class="bg-amber text-black shadow-4">
               {{ t('filesystem.uploadFolder') }}
             </q-tooltip>
@@ -279,7 +280,6 @@ const listDir = (path) => {
     })).then((result) => {
       if (result.success) {
         rows.length = 0
-
         rows.push(...result.data)
 
         currentPath.value = path
@@ -391,26 +391,48 @@ const rename = (newValue, oldValue) => {
   }
 }
 
-const downloadFile = (path) => {
+const downloadSFile = (path) => {
   if (isSftp.value) {
-    window.sftpTerminal.downloadFile(JSON.stringify({
+    window.sftpTerminal.downloadSFile(JSON.stringify({
       uuid: props.data.id,
       remotePath: path,
     })).then((result) => {
+      const filename = path.split('/').slice(-1)
       if (result.success) {
         $q.notify({
           type: 'positive',
           position: clientConfig.quasar.notify.position,
-          message: t('filesystem.downloadFileSuccess')
+          message: `${t('filesystem.downloadFileSuccess')}:${filename}`
         })
       } else {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: `${t('filesystem.downloadFileError')}:${path}:${result.error}`,
+          message: `${t('filesystem.downloadFileError')}:${filename}:${result.error}`,
         })
       }
     })
+  } else {
+
+  }
+}
+
+const downloadStream = (path) => {
+  if (isSftp.value) {
+    window.sftpTerminal.downloadStream({
+      uuid: props.data.id,
+      remotePath: path,
+    }).then((result) => {
+      if (!result.success) {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.downloadFileError')}:${path.split('/').slice(-1)}:${result.error}`,
+        })
+      }
+    })
+
+    lineProgress.value = 0
   } else {
 
   }
@@ -535,14 +557,14 @@ const totalBytesRead = ref(0)
 const lastProgress = ref(0)
 const lineProgress = ref(0.0)
 
-const uploadFile = async (file) => {
-  console.log("mark", file)
+const uploadFile1 = async (file) => {
   if (isSftp.value) {
     if (file.size <= clientConfig.file.limitSize) {
       const buffer = await file.arrayBuffer()
       await window.sftpTerminal.uploadSFile({
         uuid: props.data.id,
         remotePath: currentPath.value + '/' + file.name,
+        // fileData: file
         fileData: {
           name: file.name,
           buffer: buffer,
@@ -586,8 +608,6 @@ const uploadFile = async (file) => {
           message: `${t('filesystem.uploadFileStart')}:${file.name}`,
         })
 
-        console.log("mark start")
-
         // file.size
         $q.loadingBar.start()
         totalBytesRead.value = 0
@@ -601,6 +621,20 @@ const uploadFile = async (file) => {
 
       })
     }
+  } else {
+
+  }
+}
+
+const uploadFile = async (file) => {
+  if (isSftp.value) {
+    window.sftpTerminal.uploadStream({
+      uuid: props.data.id,
+      remotePath: currentPath.value,
+      localPath: file
+    })
+
+    lineProgress.value = 0.0
   } else {
 
   }
@@ -657,6 +691,36 @@ const uploadFileChunk = async (file, reader) => {
   })
 
   uploadFileChunk(file, reader)
+}
+
+const uploadFolder = async (folder, ) => {
+  if (isSftp.value) {
+    window.sftpTerminal.uploadFolder({
+      uuid: props.data.id,
+      remotePath: currentPath.value,
+      localPath: folder,
+    }).then(async (result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFolderSuccess')}:${folder.split('\\').slice(-1)}`,
+        })
+
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFolderError')}:${folder.split('\\').slice(-1)}:${result.error}`,
+        })
+      }
+    })
+
+  } else {
+
+  }
+
 }
 
 const onBreadcrumbs = (item) => {
@@ -719,14 +783,18 @@ const onDownload = (row) => {
   if (row.isDir) {
     downloadFolder(currentPath.value + '/' + row.name)
   } else {
-    downloadFile(currentPath.value + '/' + row.name)
+    if (row.size <= clientConfig.file.limitSize) {
+      downloadSFile(currentPath.value + '/' + row.name)
+    } else {
+      downloadStream(currentPath.value + '/' + row.name)
+    }
   }
 }
 
 const onDelete = (row) => {
   $q.dialog({
     title: t('confirm'),
-    message: t('filesystem.deleteMessage'),
+    message: `${t('filesystem.deleteMessage')} ${row.name}`,
     ok: {
       push: true
     },
@@ -824,9 +892,38 @@ const onUploadFolder = () => {
   $q.loadingBar.stop()
 }
 
-const triggerUploadFilesRef = () => {
-  if (uploadFilesRef.value) {
-    uploadFilesRef.value.pickFiles() // 调用目标按钮的 click 方法
+const triggerUploadFilesRef = async () => {
+  // if (uploadFilesRef.value) {
+  //   uploadFilesRef.value.pickFiles() // 调用目标按钮的 click 方法
+  // }
+
+  const files = await window.myWindowAPI.selectFiles()
+  try {
+    if (files.length === 0) {
+      return
+    }
+  } catch (err) {
+    return
+  }
+
+  for (const file of files) {
+    await uploadFile(file)
+  }
+}
+
+const triggerUploadFolder = async () => {
+  const folders = await window.myWindowAPI.selectFolders()
+  try {
+    if (folders.length === 0) {
+      return
+    }
+  } catch (err) {
+    return
+  }
+
+  // console.log(folders)
+  for (const folder of folders) {
+    await uploadFolder(folder)
   }
 }
 
@@ -848,7 +945,7 @@ const onDownloadBatch = () => {
     if (file.isDir) {
       downloadFolder(currentPath.value + '/' + file.name)
     } else {
-      downloadFile(currentPath.value + '/' + file.name)
+      downloadSFile(currentPath.value + '/' + file.name)
     }
   }
 
@@ -896,15 +993,57 @@ const onDeleteBatch = () => {
 onMounted(() => {
   init()
 
-  window.sftpTerminal.uploadFile((result) => {
-    const { uuid, data, error } = JSON.parse(result)
+  window.sftpTerminal.receive(
+    (result) => {
+      // const { uuid, data } = JSON.parse(result)
+      const { uuid, data } = result
 
-    if (props.terminalId === uuid) {
+      if (props.data.id === uuid) {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.sftpError')}:${data}`,
+        })
+      }
+    }
+  )
+
+  window.sftpTerminal.uploadFile((result) => {
+    // const { uuid, data, error } = JSON.parse(result)
+    const { uuid, data, error } = result
+
+    if (props.data.id === uuid) {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
         message: `${t('filesystem.uploadFileError')}:${error}`,
       })
+    }
+  })
+
+  window.sftpTerminal.onProgress((result) => {
+    console.log(result)
+    const { uuid, type, file, progress, status, error } = result
+    if (props.data.id === uuid ) {
+      if (status === "doing") {
+        lineProgress.value = progress
+      } else if (status === "done"  && type === "upload") {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFileSuccess')}: ${file}`
+        })
+
+        if (!isBatch.value) {
+          listDir(currentPath.value)
+        }
+      } else if (status === "done"  && type === "download") {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.downloadFileSuccess')}: ${file}`
+        })
+      }
     }
   })
 })
@@ -914,4 +1053,21 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+/* fix table header */
+.filesystem-table thead tr th {
+  position: sticky;
+  z-index: 1;
+}
+.filesystem-table thead tr:first-child th {
+  top: 0;
+}
+
+.filesystem-table .q-table__top,
+.filesystem-table .q-table__bottom,
+.filesystem-table thead tr:first-child th {
+  /* set background color for fixed header rows */
+  background-color: #00b4ff;
+}
+
+</style>

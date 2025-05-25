@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
-import { SSHClient, SFTPClient } from '../actions/ssh-client.js'
+import { SSHClient } from '../actions/ssh-client.js'
+import { SFTPClient } from '../actions/sftp-client.js'
 import { SCPClient } from '../actions/scp-client.js'
 import { nodes } from '../actions/nodes.js'
 import { interference, encryptPwd, dencryptPwd } from '../common/encrypt.js'
@@ -81,7 +82,7 @@ export function registerSSHIpcHandlers(win) {
           return { success: sshClient.isSftp, error: '' }
         }
 
-        const sftpClient = new SFTPClient(sshClient.config)
+        const sftpClient = new SFTPClient(uuid, win, sshClient.config)
 
         return await sftpClient.connect()
           .then((result) => {
@@ -214,7 +215,6 @@ export function registerSFTPIpcHandlers(win) {
   ipcMain.handle('listDirSFTP', async (event, data) => {
     try {
       const { uuid, remotePath } = JSON.parse(data)
-
       if (!sftp_clients.has(uuid)) {
         return { success: false, error: "sftp disconnected" }
       }
@@ -302,7 +302,7 @@ export function registerSFTPIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('downloadFileSFTP', async (event, data) => {
+  ipcMain.handle('downloadSFileSFTP', async (event, data) => {
     try {
       const { uuid, remotePath } = JSON.parse(data)
 
@@ -320,7 +320,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: 'sftp disconnected' }
       }
 
-      return await sftpClient.downloadFile(remotePath)
+      return await sftpClient.downloadSFile(remotePath)
         .then((result) => {
           return { success: true, data: result, error: '' }
         }, (error) => {
@@ -332,7 +332,7 @@ export function registerSFTPIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('uploadSFileSFTP', async (event, { uuid, remotePath, fileData }) => {
+  ipcMain.handle('downloadStreamSFTP', async (event, {uuid, remotePath}) => {
     try {
       if (!sftp_clients.has(uuid)) {
         return { success: false, error: "sftp disconnected" }
@@ -348,7 +348,35 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: 'sftp disconnected' }
       }
 
-      return await sftpClient.uploadSFile(remotePath, fileData)
+      return await sftpClient.downloadFileStream(remotePath)
+        .then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('uploadSFileSFTP', async (event, { uuid, remotePath, localPath }) => {
+    try {
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.uploadSFile(remotePath, localPath)
         .then((result) => {
           return { success: true, error: '' }
         }, (error) => {
@@ -390,7 +418,7 @@ export function registerSFTPIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('uploadStreamStartSFTP', async (event, { uuid, remotePath }) => {
+  ipcMain.handle('uploadStreamStartSFTP', async (event, { uuid, remotePath, fileData }) => {
     try {
       if (!sftp_clients.has(uuid)) {
         return { success: false, error: "sftp disconnected" }
@@ -406,7 +434,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: 'sftp disconnected' }
       }
 
-      return await sftpClient.uploadFileStart(remotePath)
+      return await sftpClient.uploadFileStart(remotePath, fileData)
         .then((result) => {
           return { success: true, data: result, error: '' }
         }, (error) => {
@@ -472,6 +500,34 @@ export function registerSFTPIpcHandlers(win) {
     }
   })
 
+  ipcMain.handle('uploadStreamSFTP', async (event, { uuid, remotePath, localPath }) => {
+    try {
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.uploadFileStream(remotePath, localPath)
+        .then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
   ipcMain.handle('downloadFolderSFTP', async (event, data) => {
     try {
       const { uuid, remotePath } = JSON.parse(data)
@@ -502,8 +558,32 @@ export function registerSFTPIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('uploadFolderSFTP', async (event, data) => {
+  ipcMain.handle('uploadFolderSFTP', async (event, {uuid, remotePath, localPath}) => {
+    try {
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
 
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.uploadFolder(remotePath, localPath)
+        .then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
   ipcMain.handle('deleteFileSFTP', async (event, data) => {

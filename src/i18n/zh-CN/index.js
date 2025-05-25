@@ -209,6 +209,7 @@ export default {
 
     modifyNameHint: "内容未改变，无需修改",
 
+    sftpError: "SFTP错误",
     initError: "初始化失败",
     createFolderSuccess: "创建文件夹成功",
     createFolderError: "创建文件夹失败",

@@ -66,12 +66,11 @@ export class SSHClient {
           this.status = 'connected'
           console.log('ssh connected')
         }).on('end', () => {
-      }).on('error', (err) => {
-        reject(err)
-      }).on('close', () => {
-      this.sendDisconnect()
-      }).connect(this.config)
-
+        }).on('error', (err) => {
+          reject(err)
+        }).on('close', () => {
+        this.sendDisconnected()
+        }).connect(this.config)
       resolve()
     })
   }
@@ -85,7 +84,7 @@ export class SSHClient {
         }).on('error', (err) => {
         reject(err)
       }).on('close', () => {
-        this.sendDisconnect()
+        this.sendDisconnected()
       }).connect(this.config)
 
       resolve()
@@ -100,7 +99,7 @@ export class SSHClient {
     }
   }
 
-  sendDisconnect() {
+  sendDisconnected() {
     this.status = 'disconnected'
     this.win.webContents.send("sshTerminalReceive",
       JSON.stringify({
@@ -124,8 +123,10 @@ export class SSHClient {
 
 
 export class SFTPClient {
-  constructor(config) {
+  constructor(uuid, win, config) {
     this.config = config
+    this.uuid = uuid
+    this.win = win
     this.conn = new Client()
     this.sftp = null
     this.status = 'disconnected'    // connecting | connected | disconnected |
@@ -205,7 +206,7 @@ export class SFTPClient {
   }
 
   // 创建远程文件夹
-  createRemoteFolder(folderPath, connectionConfig) {
+  createRemoteFolder(folderPath) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
 
@@ -296,7 +297,7 @@ export class SFTPClient {
   uploadSFile(remotePath, fileData) {
     return new Promise((resolve, reject) => {
       if (!this.sftp) return reject(new Error('SFTP not connected'))
-      console.log('ArrayBuffer size:', fileData.buffer.byteLength)
+      // console.log('ArrayBuffer size:', fileData.buffer.byteLength)
 
       this.isRemoteExists(remotePath)
         .then(async (result) => {
@@ -325,10 +326,9 @@ export class SFTPClient {
   // 上传小文件 sftp.fastPut()
   async uploadSFile1(remotePath, fileData) {
     if (!this.sftp) throw new Error('SFTP not connected')
-    // console.log('ArrayBuffer size:', fileData.buffer.byteLength)
+    console.log('ArrayBuffer size:', fileData.buffer)
 
     const tempFilePath = path.join(os.tmpdir(), fileData.name)
-
     await fs.promises.writeFile(tempFilePath, Buffer.from(fileData.buffer))
       .then(() => {
         // const stats = fs.promises.stat(tempFilePath)
@@ -373,7 +373,9 @@ export class SFTPClient {
 
         this.activeUploads.set(remotePath, writeStream)
 
-        writeStream.on('error', (error) => {
+        writeStream.on('data', (chunk) => {
+
+        }).on('error', (error) => {
           this.activeUploads.delete(remotePath)
           this.win.webContents.send("uploadFileSFTP",
             JSON.stringify({
@@ -381,6 +383,8 @@ export class SFTPClient {
               data: "Stream disconnected",
               error: error
             }))
+        }).on('end', () => {
+
         })
         resolve()
       } catch (err) {
