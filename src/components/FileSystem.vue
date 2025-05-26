@@ -514,19 +514,23 @@ const downloadFolder = (path) => {
       uuid: props.data.id,
       remotePath: path,
     })).then((result) => {
-      if (result.success) {
-        $q.notify({
-          type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: t('filesystem.downloadFolderSuccess')
-        })
-      } else {
+      if (!result.success) {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
           message: t('filesystem.downloadFolderError') + ':' + result.error,
         })
       }
+    })
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('filesystem.downloadingFolder'),
+      caption: '0%'
     })
   } else {
 
@@ -646,7 +650,7 @@ const uploadFile = async (file) => {
       localPath: file
     })
 
-    lineProgress.value = 0
+    lineProgress.value = 0.0
 
     notify.value = $q.notify({
       type: 'info',
@@ -723,13 +727,13 @@ const uploadFolder = async (folder, ) => {
       localPath: folder,
     }).then(async (result) => {
       if (result.success) {
-        $q.notify({
-          type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('filesystem.uploadFolderSuccess')}:${folder.split('\\').slice(-1)}`,
-        })
+        // $q.notify({
+        //   type: 'positive',
+        //   position: clientConfig.quasar.notify.position,
+        //   message: `${t('filesystem.uploadFolderSuccess')}:${folder.split('\\').slice(-1)}`,
+        // })
 
-        listDir(currentPath.value)
+        // listDir(currentPath.value)
       } else {
         $q.notify({
           type: 'negative',
@@ -739,6 +743,15 @@ const uploadFolder = async (folder, ) => {
       }
     })
 
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('filesystem.uploadingFolder'),
+      caption: '0%'
+    })
   } else {
 
   }
@@ -1046,11 +1059,11 @@ onMounted(() => {
   })
 
   window.sftpTerminal.onProgress((result) => {
-    console.log(result)
+    // console.log(result)
     const { uuid, type, file, progress, status, error } = result
     if (props.data.id === uuid ) {
       if (status === "doing") {
-        lineProgress.value = progress
+        lineProgress.value = parseFloat(progress)
 
         notify.value({
           caption: `${parseInt(progress*100)}%`
