@@ -1098,7 +1098,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style>
 /* fix table header */
 .filesystem-table thead tr th {
   position: sticky;
@@ -1112,7 +1112,7 @@ onUnmounted(() => {
 .filesystem-table .q-table__bottom,
 .filesystem-table thead tr:first-child th {
   /* set background color for fixed header rows */
-  background-color: #00b4ff;
+  background-color: #aba79d;
 }
 
 </style>

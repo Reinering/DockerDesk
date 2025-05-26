@@ -136,6 +136,7 @@
           </div>
         </q-card-section>
         <q-table
+          class="nodes-table"
           :rows="services"
           :columns="columns"
           row-key="id"
@@ -240,6 +241,10 @@ const background = reactive({
 
 const services = reactive([
   { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker'},
+  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
+  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
+  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
+  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
   { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
   { id: '111121', serviceName: '本地 Podman', connectionType: '本地节点', serviceType: 'Podman'},
   { id: '111122', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', protocol: 'ssh', address: '192.168.1.100', port: 8080 },
@@ -736,8 +741,25 @@ watch(() => newService.connectionType, (newValue, oldValue) => {
 
 </script>
 
-<style scoped>
+<style>
 .text-h6 {
   font-weight: bold;
 }
+
+.nodes-table .q-table__top,
+.nodes-table .q-table__bottom,
+.nodes-table thead tr:first-child th {
+  /* set background color for fixed header rows */
+  background-color: #aba79d;
+}
+
+.nodes-table thead tr th {
+  position: sticky;
+  z-index: 1;
+}
+.nodes-table thead tr:first-child th {
+  top: 0;
+}
+
 </style>
+
