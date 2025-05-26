@@ -4,6 +4,7 @@ import { ref } from 'vue'
 export const useConfigStore = defineStore('config', {
   state: () => ({
     lang: '',
+    theme: 'dark'
 
   }),
 
@@ -19,7 +20,7 @@ export const useConfigStore = defineStore('config', {
 
   persist: {
     storage: localStorage,
-    paths: ['lang']
+    paths: ['lang', 'theme'],
   },
 })
 

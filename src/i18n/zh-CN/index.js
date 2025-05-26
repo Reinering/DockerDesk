@@ -234,6 +234,14 @@ export default {
     deleteMessage: "确认删除吗？",
   },
 
+  setting: {
+    theme: {
+      auto: "自动模式",
+      light: "浅色模式",
+      dark: "深色模式",
+    }
+  },
+
   // db
   database: {
     initError: '数据库初始化失败',

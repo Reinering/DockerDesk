@@ -22,6 +22,7 @@
               />
               <q-select
                 class="q-mb-sm"
+                color="blue"
                 v-model="newService.connectionType"
                 :options="connectionOptions"
                 :label="t('node.serviceType') + '(' + t('node.local') + '/' + t('node.remote') + ')'"
@@ -30,6 +31,7 @@
               />
               <q-select
                 class="q-mb-sm"
+                color="blue"
                 v-model="newService.serviceType"
                 :options="serviceTypeOptions"
                 :label="t('node.serviceType') + '(Docker/Podman/SSH/Telnet)'"
@@ -38,6 +40,7 @@
               />
               <q-select
                 class="q-mb-sm"
+                color="blue"
                 v-if="newService.connectionType === t('node.remoteNode') && (newService.serviceType === 'Docker' || newService.serviceType === 'Podman')"
                 v-model="newService.protocol"
                 :options="protocolOptions"
@@ -79,6 +82,7 @@
               />
               <q-select
                 class="q-mb-sm"
+                color="blue"
                 v-if="newService.connectionType === t('node.remoteNode')"
                 v-model="newService.authType"
                 :options="passwordOptions"

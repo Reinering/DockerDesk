@@ -51,6 +51,11 @@ const init = () => {
 
   }
 
+  // theme
+  if (configStore.theme === 'dark') {
+    $q.dark.set(true)
+  }
+
   preCmdsStore.isSync = "0"
 
 }

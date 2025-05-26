@@ -229,6 +229,14 @@ export default {
     deleteMessage: "Are you sure to delete?",
   },
 
+  setting: {
+    theme: {
+      auto: "Auto",
+      light: "Light",
+      dark: "Dark",
+    }
+  },
+
   // db
   database: {
     initError: '',

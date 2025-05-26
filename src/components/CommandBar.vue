@@ -37,6 +37,7 @@
       />
 
       <q-select
+        color="blue"
         filled
         dense
         v-model="option"
