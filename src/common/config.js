@@ -14,7 +14,7 @@ export const clientConfig = {
 
   quasar: {
     notify: {
-      position: 'bottom'
+      position: 'bottom'     // left | right | top | bottom | center | top-left | top-right | bottom-left | bottom-right
     }
   },
 

@@ -111,7 +111,7 @@
 
       <template v-slot:body-cell-name="props">
         <q-td :props="props">
-          <div :class="props.row.isDir ? 'text-indigo' : ''">
+          <div :class="props.row.isDir ? 'text-blue' : ''">
             {{ props.row.name }}
           </div>
         </q-td>
@@ -197,13 +197,15 @@ const pagination = ref({
   descending: false, // true 为降序，false 为升序
 })
 
+let notify = ref(null)
+
 const rootPath = '/'
 
 const columns = [
   { name: 'name', label: t('filesystem.name'), align: 'left', sortOrder: 'ad', sortable: true, style: 'max-width: 150px', classes: 'ellipsis', field: 'name' },
-  { name: 'attribute', label: t('filesystem.attr'), align: 'left', field: 'permString' },
-  { name: 'modifyTime', label: t('filesystem.modifyTime'), align: 'left', sortable: true, field: 'mtime' },
-  { name: 'size', label: t('filesystem.size'), align: 'left', sortable: true, field: 'size' },
+  { name: 'attribute', label: t('filesystem.attr'), align: 'center', field: 'permString' },
+  { name: 'modifyTime', label: t('filesystem.modifyTime'), align: 'center', sortable: true, field: 'mtime' },
+  { name: 'size', label: t('filesystem.size'), align: 'right', sortable: true, field: 'size' },
   { name: 'actions', label: t('filesystem.action'), align: 'center' }
 ]
 
@@ -433,6 +435,16 @@ const downloadStream = (path) => {
     })
 
     lineProgress.value = 0
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('filesystem.downloadingFile'),
+      caption: '0%'
+    })
   } else {
 
   }
@@ -634,7 +646,17 @@ const uploadFile = async (file) => {
       localPath: file
     })
 
-    lineProgress.value = 0.0
+    lineProgress.value = 0
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('filesystem.uploadingFile'),
+      caption: '0%'
+    })
   } else {
 
   }
@@ -794,7 +816,7 @@ const onDownload = (row) => {
 const onDelete = (row) => {
   $q.dialog({
     title: t('confirm'),
-    message: `${t('filesystem.deleteMessage')} ${row.name}`,
+    message: `${t('filesystem.deleteMessage')}\n${row.name}`,
     ok: {
       push: true
     },
@@ -990,6 +1012,8 @@ const onDeleteBatch = () => {
   selected.value.length = 0
 }
 
+
+
 onMounted(() => {
   init()
 
@@ -1027,21 +1051,29 @@ onMounted(() => {
     if (props.data.id === uuid ) {
       if (status === "doing") {
         lineProgress.value = progress
+
+        notify.value({
+          caption: `${parseInt(progress*100)}%`
+        })
       } else if (status === "done"  && type === "upload") {
-        $q.notify({
+        notify.value({
           type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('filesystem.uploadFileSuccess')}: ${file}`
+          icon: 'done',
+          spinner: false,
+          message: `${t('filesystem.uploadFileSuccess')}: ${file}`,
+          timeout: 3000
         })
 
         if (!isBatch.value) {
           listDir(currentPath.value)
         }
       } else if (status === "done"  && type === "download") {
-        $q.notify({
+        notify.value({
           type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('filesystem.downloadFileSuccess')}: ${file}`
+          icon: 'done',
+          spinner: false,
+          message: `${t('filesystem.downloadFileSuccess')}: ${file}`,
+          timeout: 3000
         })
       }
     }

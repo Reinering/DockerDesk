@@ -3,6 +3,7 @@
 
 import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
+import { clientConfig } from 'src/common/config.js'
 
 
 export default defineConfig((ctx) => {
@@ -122,9 +123,15 @@ export default defineConfig((ctx) => {
           info: '#31CCEC',
           warning: '#F2C037'
         },
-        notify: { /* look at QUASARCONFOPTIONS from the API card (bottom of page) */ },
+        notify: { /* look at QUASARCONFOPTIONS from the API card (bottom of page) */
+          position: 'bottom'
+          },
         loading: { /* look at QUASARCONFOPTIONS from the API card (bottom of page) */ },
-        loadingBar: { /* 参考 API 卡片中的 QuasarConfOptions  */ },
+        loadingBar: { /* 参考 API 卡片中的 QuasarConfOptions  */
+          color: 'teal',
+          size: '3px',
+          position: 'bottom'
+          },
         dark: 'false' // 或者Boolean true/false
       },
 
