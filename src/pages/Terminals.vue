@@ -240,7 +240,12 @@ const deleteTab = (id) => {
   }).onOk(() => {
     for (let i = 0; i < tabs.length; i++) {
       if ( tabs[i].id === id) {
-        window.terminal.closeTerminal()
+
+        if (tabs[i].data.connectionType === t('node.remoteNode') && tabs[i].data.protocol === 'SSH') {
+          window.sshTerminal.closeSSHTerminal(id)
+        } else {
+          window.terminal.closeTerminal(id)
+        }
 
         tabs.splice(i, 1)
         if (tabs.length === 0) break

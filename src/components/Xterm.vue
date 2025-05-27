@@ -76,7 +76,7 @@ const initTerminal = () => {
   handleResize()
 
   // init connect
-  if (props.data.connectionType === t('node.remoteNode')  && props.data.protocol === 'SSH') {
+  if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
     window.sshTerminal.createSSHTerminal(JSON.stringify({
       uuid: props.terminalId,
       connID: props.data.id
