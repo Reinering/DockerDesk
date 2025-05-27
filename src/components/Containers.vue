@@ -1,6 +1,6 @@
 
 <template>
-  <q-card ref="containerCard"  :style="cardStyle">
+  <q-card :style="cardStyle">
     <q-card-section>
       <div class="row items-center justify-between">
         <div class="text-h6">{{ t('filesystem.title') }}</div>
@@ -33,15 +33,15 @@
 <script setup>
 defineOptions({
   name: 'Containers',
+
+  components: {
+    Container0: Container,
+    Container1: Container,
+    Container2: Container
+  }
 })
 
-defineComponent({
-  Container0: Container,
-  Container1: Container,
-  Container2: Container
-})
-
-import { defineComponent, inject, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { inject, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Container from './Container.vue'
 
 const $q = inject("$q")
@@ -67,8 +67,6 @@ const containerStyles = [
     margin: "20px"
   }
 ]
-
-const containerCard = ref(null)
 
 const containerDatas = [
   {
@@ -135,10 +133,7 @@ const containerDatas = [
   }
 ]
 
-// console.log(containerCard.value.offsetHeight)
-
 const scrollStyle = reactive({
-
   height: process.env.MODE === 'electron' ? window.innerHeight - 183 - 122 + "px" : window.innerHeight - 149 - 122 + "px",
 })
 

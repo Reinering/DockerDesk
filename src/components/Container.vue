@@ -58,7 +58,6 @@ import { reactive, ref, watch } from 'vue'
 import ContainerSetting from "./ContainerSetting.vue"
 
 
-
 const color = ref("yellow")
 
 const changeState = (newVal) => {
