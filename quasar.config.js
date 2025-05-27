@@ -3,7 +3,7 @@
 
 import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
-import { clientConfig } from 'src/common/config.js'
+import { execSync } from 'child_process'
 
 
 export default defineConfig((ctx) => {
@@ -29,7 +29,7 @@ export default defineConfig((ctx) => {
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
-      // 'ionicons-v4',
+      'ionicons-v4',
       // 'mdi-v7',
       // 'fontawesome-v6',
       // 'eva-icons',
@@ -246,12 +246,53 @@ export default defineConfig((ctx) => {
 
         // Windows only
         // win32metadata: { ... }
+
+        asar: true, // 可选，建议启用
+        extraResource: [
+          'public' // 指定 public 目录
+        ],
+        ignore: [
+          'public' // 指定 public 目录
+        ],
+
+        // 打包前重新编译native模块
+        afterCopy: [
+          (buildPath, electronVersion, platform, arch, callback) => {
+            try {
+              execSync('npm rebuild better-sqlite3 --runtime=electron --target=35.2.0 --abi=127 --dist-url=electronjs.org/headers', {
+                cwd: buildPath,
+                stdio: 'inherit'
+              })
+
+              console.log('Native modules rebuilt successfully')
+              callback()
+            } catch (error) {
+              console.error('Failed to rebuild native modules:', error)
+              callback(error)
+            }
+          }
+        ],
       },
 
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'dockerdesk'
+        appId: 'dockerdesk',
+
+
+        // 重要：配置原生模块重建
+        beforeBuild: async (context) => {
+          // 在构建前重建原生模块
+          try {
+            execSync('npm rebuild better-sqlite3 --runtime=electron --target=35.2.0 --abi=127 --dist-url=electronjs.org/headers', {
+              stdio: 'inherit'
+            })
+
+            console.log('Native modules rebuilt successfully')
+          } catch (error) {
+            console.error('Failed to rebuild native modules:', error)
+          }
+        },
       }
     },
 

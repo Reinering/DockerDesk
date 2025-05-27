@@ -3,11 +3,24 @@ import { clientConfig } from 'src/common/config.js'
 import path from 'path'
 import { fileURLToPath } from 'node:url'
 import fs from 'fs'
+import { app } from 'electron'
 // import Database from 'better-sqlite3'
 
+const isDev = process.defaultApp || process.env.NODE_ENV === 'development'
 
 // 数据库文件路径
-const dbPath = path.resolve(fileURLToPath(new URL('.', import.meta.url)), clientConfig.sqlite.dbPath)
+let dbPath
+
+if (isDev) {
+  // 开发环境，使用源代码目录
+  const __dirname = path.dirname(fileURLToPath(import.meta.url))
+  dbPath = path.resolve(__dirname, clientConfig.sqlite.dbPath)
+} else {
+  // 生产环境，使用exe所在目录
+  const exeDir = path.dirname(app.getPath('exe'))
+  dbPath = path.resolve(exeDir, clientConfig.sqlite.dbPath)
+}
+// const dbPath = path.resolve(fileURLToPath(new URL('.', import.meta.url)), clientConfig.sqlite.dbPath)
 
 console.log(`Connected to ${dbPath}`)
 
