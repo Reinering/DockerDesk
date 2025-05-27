@@ -3,7 +3,12 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') },
+      { path: '',
+        component: () => import('pages/Index.vue'),
+        meta: {
+          keepAlive: true,
+        }
+      },
       {
         path: 'nodes',
         name: 'nodes',
@@ -38,6 +43,9 @@ const routes = [
         path: 'settings',
         name: 'settings',
         component: () => import('pages/Settings.vue'),
+        meta: {
+          keepAlive: true,
+        }
       },
     ]
   },
