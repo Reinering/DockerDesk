@@ -8,7 +8,7 @@
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
         <q-avatar>
-          <img src="public/icons/favicon-128x128.png" />
+          <img :src="faviconPath" />
         </q-avatar>
 
         <q-toolbar-title>
@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { reactive, inject, toRefs } from 'vue'
+import { ref, reactive, inject, toRefs } from 'vue'
 import Navigator from 'components/Navigator.vue'
 import ToolBar from 'components/ToolBar.vue'
 
@@ -79,11 +79,19 @@ if (deviceInfo.platform === 'ios' || deviceInfo.platform === 'Andriod') {
   pageState.behavior = 'default'
 }
 
+const faviconPath = ref('src/static/icons/favicon-128x128.png')
+
 if (process.env.MODE === 'electron') {
   pageState.isBarHide = true
+
+  if (process.env.NODE_ENV !== 'development') {
+    faviconPath.value = 'icons/favicon-128x128.png'
+  }
+
 } else {
   pageState.isBarHide = false
 }
+
 
 // 导航栏是否禁用
 const disableNavi = reactive({
