@@ -62,7 +62,7 @@ export function registerNodesIpcHandlers(win) {
       }
 
       return nodes.addNode(value).then((result) => {
-        if(result.success ) {
+        if (result.success ) {
           if (res.authType === "password") {
             res.password = res.password !== null && res.password.length > 0 ? interference : res.password
           } else if (res.authType === "key") {
@@ -114,7 +114,18 @@ export function registerNodesIpcHandlers(win) {
         }
       }
 
-      return nodes.updateNode(value)
+      return nodes.updateNode(value).then((result) => {
+        if (result.success ) {
+          if (res.authType === "password") {
+            res.password = res.password !== null && res.password.length > 0 ? interference : res.password
+          } else if (res.authType === "key") {
+            res.key = res.key !== null && res.key.length > 0 ? interference : res.key
+          }
+
+          result.data = res
+          return result
+        }
+      })
     } catch (error) {
       log.error(error)
       return { success: false, error: error.message }

@@ -242,10 +242,6 @@ const background = reactive({
 const services = reactive([
   { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker'},
   { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
-  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
-  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
-  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
-  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
   { id: '111121', serviceName: '本地 Podman', connectionType: '本地节点', serviceType: 'Podman'},
   { id: '111122', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', protocol: 'ssh', address: '192.168.1.100', port: 8080 },
 ])
@@ -483,8 +479,14 @@ const editService = (data) => {
           } else if (services[i].connectionType === "remote") {
             services[i].connectionType = t('node.remoteNode')
           }
+
+          if (data.protocol === "ssh") {
+            services[i].protocol = 'SSH'
+          } else if (data.protocol === "telnet") {
+            services[i].protocol = 'Telnet'
+          }
+
           services[i].serviceType = data.serviceType
-          services[i].protocol = data.protocol
           services[i].address = data.address
           services[i].port = data.port
           services[i].username = data.username
