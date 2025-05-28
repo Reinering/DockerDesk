@@ -288,7 +288,7 @@ const visibleColumns = ['serviceName', 'connectionType', 'serviceType', 'protoco
 const isEdit = ref(false)
 
 const isShowPanelBtn = (row) => {
-  if (row.connectionType === t('node.remoteNode') && row.serviceType ===  'Docker' || row.serviceType ===  'Podman') {
+  if (row.serviceType ===  'Docker' || row.serviceType ===  'Podman') {
     return true
   }
   return false
@@ -633,28 +633,43 @@ const connectPanel = (row) => {
     persistent: true
   }).onOk(() => {
     let item
-    if (row.connectionType === t('node.remoteNode')) {
-      if (!row.address || !row.port || !row.username || !row.password) {
+    // if (row.connectionType === t('node.remoteNode')) {
+    //   if (!row.address || !row.port || !row.username || !row.password) {
+    //     return $q.notify({
+    //       type: 'negative',
+    //       position: clientConfig.quasar.notify.position,
+    //       message: t('node.connectError')
+    //     })
+    //   }
+    //   // docker | podman
+    //   if (row.serviceType === "Docker" || row.serviceType === "Podman") {
+    //     item = findNaviItemByName(navigatorStore.naviItems, "Docker")
+    //     if (isEmptyObj(item)) {
+    //       return $q.notify({
+    //         type: 'negative',
+    //         position: clientConfig.quasar.notify.position,
+    //         message: t('node.connectError1')
+    //       })
+    //     }
+    //   }
+    // } else {
+    //   return
+    // }
+
+    // docker | podman
+    if (row.serviceType === "Docker" || row.serviceType === "Podman") {
+      item = findNaviItemByName(navigatorStore.naviItems, "Docker")
+      if (isEmptyObj(item)) {
         return $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: t('node.connectError')
+          message: t('node.connectError1')
         })
-      }
-      // docker | podman
-      if (row.serviceType === "Docker" || row.serviceType === "Podman") {
-        item = findNaviItemByName(navigatorStore.naviItems, "Docker")
-        if (isEmptyObj(item)) {
-          return $q.notify({
-            type: 'negative',
-            position: clientConfig.quasar.notify.position,
-            message: t('node.connectError1')
-          })
-        }
       }
     } else {
       return
     }
+
 
     return changeNavigatorGoto(router, item[0], item[1], {data: row})
   }).onOk(() => {
