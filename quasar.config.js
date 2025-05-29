@@ -249,10 +249,12 @@ export default defineConfig((ctx) => {
 
         asar: true, // 可选，建议启用
         extraResource: [
-          'public' // 指定 public 目录
+          'public', // 指定 public 目录
+          'src/static'
         ],
         ignore: [
-          'public' // 指定 public 目录
+          'public', // 指定 public 目录
+          'src/static'
         ],
 
         // 打包前重新编译native模块

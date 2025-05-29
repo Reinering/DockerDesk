@@ -3,7 +3,7 @@
   <q-card :style="cardStyle">
     <q-card-section>
       <div class="row items-center justify-between">
-        <div class="text-h6">{{ t('filesystem.title') }}</div>
+        <div class="text-h6">{{ props.data.serviceType + t('filesystem.title') }}</div>
         <q-input v-model="search" dense label="Search" outlined clearable >
           <template v-slot:append>
             <q-icon name="search" />
@@ -12,13 +12,13 @@
       </div>
     </q-card-section>
 
-    <q-card-section>
-      <q-list bordered>
-        <q-item v-for="item in filteredNodes" :key="item.id" clickable v-ripple>
-          <q-item-section>{{ item.name }}</q-item-section>
-        </q-item>
-      </q-list>
-    </q-card-section>
+<!--    <q-card-section>-->
+<!--      <q-list bordered>-->
+<!--        <q-item v-for="item in filteredNodes" :key="item.id" clickable v-ripple>-->
+<!--          <q-item-section>{{ item.name }}</q-item-section>-->
+<!--        </q-item>-->
+<!--      </q-list>-->
+<!--    </q-card-section>-->
 
     <q-scroll-area :style="scrollStyle">
       <div class="q-gutter-x-md q-gutter-y-md row justify-center">
@@ -38,6 +38,17 @@ defineOptions({
     Container0: Container,
     Container1: Container,
     Container2: Container
+  }
+})
+
+const props = defineProps({
+  containerId: {
+    type: String,
+    required: true,
+  },
+  data: {
+    type: Object,
+    default: () => {},
   }
 })
 
@@ -137,6 +148,25 @@ const scrollStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 183 - 122 + "px" : window.innerHeight - 149 - 122 + "px",
 })
 
+const search = ref('')
+
+console.log("props.data", props.data)
+
+const init = () => {
+  if (props.data.connectionType === t('node.remoteNode') && props.data.serviceType === "Docker" && props.data.protocol === 'SSH') {
+    window.dockerTerminal.connect({
+      uuid: props.containerId,
+      connID: props.data.id
+    }).then((result) => {
+      console.log(result)
+
+    })
+
+
+  } else if (props.data.connectionType === t('node.remoteNode') && props.data.serviceType === "Podman" && props.data.protocol === 'SSH') {
+
+  }
+}
 
 
 const checkScreenSize = () => {
@@ -152,6 +182,10 @@ const checkScreenSize = () => {
 }
 
 onMounted(() => {
+  init()
+
+
+
   window.addEventListener('resize', checkScreenSize)
 
 })

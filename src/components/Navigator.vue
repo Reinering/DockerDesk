@@ -68,6 +68,15 @@ const naviItems = reactive([
   },
 
   {
+    name: 'Assistant',
+    label: 'navigator.assistant',
+    icon: "assistant_direction",
+    route: 'assistant',
+    state: false,
+    children: []
+  },
+
+  {
     name: 'nodes',
     label: 'navigator.nodes',
     icon: "hub",

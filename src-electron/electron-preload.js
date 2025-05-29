@@ -52,23 +52,32 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
     BrowserWindow.getFocusedWindow().close()
   },
 
-  selectFiles (data) {
+  selectFiles () {
     return ipcRenderer.invoke('selectFiles')
   },
 
-  selectFolders (data) {
+  selectFolders () {
     return ipcRenderer.invoke('selectFolders')
   },
 
-
-
 })
+
 
 contextBridge.exposeInMainWorld('client', {
   openDownloadFolder () {
     return ipcRenderer.invoke('openDownloadFolder')
-  }
+  },
+
+  getOSInfo () {
+    return ipcRenderer.invoke('getOSInfo')
+  },
+
+  getOSUtilization () {
+    return ipcRenderer.invoke('getOSUtilization')
+  },
+
 })
+
 
 contextBridge.exposeInMainWorld('nodes', {
   getNodes () {
@@ -88,6 +97,7 @@ contextBridge.exposeInMainWorld('nodes', {
   }
 
 })
+
 
 contextBridge.exposeInMainWorld('dockerNodes', {
   getDockerNodes () {
@@ -111,6 +121,7 @@ contextBridge.exposeInMainWorld('dockerNodes', {
   }
 
 })
+
 
 contextBridge.exposeInMainWorld('precmds', {
   getPreCmds () {
@@ -139,6 +150,7 @@ contextBridge.exposeInMainWorld('precmds', {
   },
 })
 
+
 contextBridge.exposeInMainWorld('terminal', {
   createTerminal (uuid) {
     return ipcRenderer.invoke('createTerminal', uuid)
@@ -160,6 +172,7 @@ contextBridge.exposeInMainWorld('terminal', {
     return ipcRenderer.on('terminalReceive', (event, data) => callback(data))
   }
 })
+
 
 contextBridge.exposeInMainWorld('sshTerminal', {
   createSSHTerminal (data) {
@@ -186,6 +199,7 @@ contextBridge.exposeInMainWorld('sshTerminal', {
     return ipcRenderer.on('sshTerminalReceive', (event, data) => callback(data))
   }
 })
+
 
 contextBridge.exposeInMainWorld('sftpTerminal', {
 
@@ -280,6 +294,7 @@ contextBridge.exposeInMainWorld('sftpTerminal', {
 
 })
 
+
 contextBridge.exposeInMainWorld('scpTerminal', {
   create (uuid) {
     return ipcRenderer.invoke('createSCPTerminal', uuid)
@@ -328,4 +343,47 @@ contextBridge.exposeInMainWorld('scpTerminal', {
   saveFile (data) {
     return ipcRenderer.invoke('saveFileSCP', data)
   },
+})
+
+
+contextBridge.exposeInMainWorld("wslTerminal", {
+
+  checkWSLInfo() {
+    return ipcRenderer.invoke('checkWSLInfo')
+  },
+
+  getWSLList () {
+    return ipcRenderer.invoke('getWSLList')
+  }
+
+})
+
+
+contextBridge.exposeInMainWorld("dockerTerminal", {
+
+  checkDockerInfo() {
+    return ipcRenderer.invoke('checkDockerInfo')
+  },
+
+  connect (data) {
+    return ipcRenderer.invoke('connectDocker', data)
+  },
+
+  close (uuid) {
+    return ipcRenderer.invoke('closeDocker', uuid)
+  },
+
+  status (uuid) {
+    return ipcRenderer.invoke('statusDocker', uuid)
+  }
+
+})
+
+
+contextBridge.exposeInMainWorld("podmanTerminal", {
+
+  checkPodmanInfo() {
+    return ipcRenderer.invoke('checkPodmanInfo')
+  },
+
 })

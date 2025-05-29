@@ -245,7 +245,7 @@ const sendSSHTerminal = (data) => {
 
 // 行列匹配
 const handleResize = () => {
-  console.log('resize', term.rows, term.cols)
+  // console.log('resize', term.rows, term.cols)
   window.terminal.resize(JSON.stringify({
     uuid: props.terminalId,
     rows: term.rows,

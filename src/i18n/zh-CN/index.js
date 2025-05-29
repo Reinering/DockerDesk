@@ -44,6 +44,7 @@ export default {
   //navi
   navigator: {
     home: "首页",
+    assistant: "引导",
     nodes: "节点",
     nodesMg: "节点管理",
     dockerNode: "Docker节点",
@@ -108,12 +109,6 @@ export default {
 
   //Docker Node
   dockerNode: {
-    serviceManagement: "服务管理",
-
-
-
-
-
 
     addServiceTitle: "添加 Docker/Podman 服务",
     editServiceTitle: "编辑 Docker/Podman 服务",
@@ -147,6 +142,11 @@ export default {
     connectMessage: "是否要进行此连接？",
     connectError: "缺少必要的连接参数",
     deleteMessage: "确认删除吗？"
+  },
+
+  container: {
+
+
   },
 
   terminal: {

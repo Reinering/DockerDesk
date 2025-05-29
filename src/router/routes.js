@@ -4,11 +4,39 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '',
-        component: () => import('pages/Index.vue'),
+        component: () => import('pages/IndexPage.vue'),
         meta: {
           keepAlive: true,
         }
       },
+
+      { path: 'assistant',
+        name: 'assistant',
+        component: () => import('layouts/AssistantLayout.vue'),
+        children: [
+          { path: '',
+            component: () => import('pages/Assistant.vue'),
+            meta: {
+              keepAlive: true,
+            }
+          },
+          { path: 'asslocal',
+            name: 'asslocal',
+            component: () => import('pages/AssLocal.vue'),
+            meta: {
+              keepAlive: true,
+            }
+          },
+          { path: 'assremote',
+            name: 'assremote',
+            component: () => import('pages/AssRemote.vue'),
+            meta: {
+              keepAlive: true,
+            }
+          },
+        ],
+      },
+
       {
         path: 'nodes',
         name: 'nodes',

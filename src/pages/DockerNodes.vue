@@ -31,7 +31,8 @@
         :name="item.id"
       >
         <Containers
-
+          :container-id="item.id"
+          :data="item.data"
         />
       </q-tab-panel>
     </q-tab-panels>
@@ -82,8 +83,6 @@ const background = reactive({
   height: window.innerHeight - 70 + "px"
 })
 
-
-
 const fabPos = ref([ 30, 200 ])
 const draggingFab = ref(false)
 
@@ -100,14 +99,14 @@ const tab = ref('')
 
 const tabs = reactive([
   { id: 'mails', label: 'Mails', icon: 'check', data: {}},
-  { id: 'alarms', label: 'Alarms', icon: 'unfold_less', data: {}},
-  { id: 'movies', label: 'Movies', icon: 'movie', data: {}},
+  // { id: 'alarms', label: 'Alarms', icon: 'unfold_less', data: {}},
+  // { id: 'movies', label: 'Movies', icon: 'movie', data: {}},
 ])
 
 
 const checkScreenSize = () => {
   console.log('check screenSize', window.innerHeight, background.height)
-  // background.height = window.innerHeight - 70 + "px"
+
 }
 
 const deleteTab = (id) => {
@@ -125,9 +124,13 @@ const deleteTab = (id) => {
   }).onOk(() => {
     for (let i = 0; i < tabs.length; i++) {
       if ( tabs[i].id === id) {
-        window.terminal.closeTerminal()
+        if (tabs[i].data.connectionType === t('node.remoteNode') && tabs[i].data.serviceType === "Docker" && tabs[i].data.protocol === 'SSH') {
+          window.dockerTerminal.close(id)
+        }
 
         tabs.splice(i, 1)
+        if (tabs.length === 0) break
+        tab.value = tabs[0].id
         return
       }
     }
@@ -144,21 +147,21 @@ onUnmounted(() => {
 })
 
 onActivated(() => {
-  // try {
-  //   const data = JSON.parse(route.query.data).data
-  //   if (data) {
-  //     const uuid = generateUuid()
-  //     tabs.push({
-  //       id: uuid,
-  //       label: data.serviceName,
-  //       icon: 'terminal',
-  //       data: data
-  //     })
-  //     tab.value = uuid
-  //   }
-  // } catch (e) {
-  //   // console.error(e)
-  // }
+  try {
+    const data = JSON.parse(route.query.data).data
+    if (data) {
+      const uuid = generateUuid()
+      tabs.push({
+        id: uuid,
+        label: data.serviceName,
+        icon: 'view_comfy',
+        data: data
+      })
+      tab.value = uuid
+    }
+  } catch (e) {
+    // console.error(e)
+  }
 })
 
 watch(tabs, (newVal, oldVal) => {

@@ -47,6 +47,7 @@ export default {
   //navi
   navigator: {
     home: "Home",
+    assistant: "Assistant",
     nodes: "Nodes",
     nodesMg: "Nodes Management",
     dockerNode: "Docker Node",

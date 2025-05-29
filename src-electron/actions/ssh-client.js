@@ -75,6 +75,29 @@ export class SSHClient {
     })
   }
 
+  exec(command) {
+    return new Promise((resolve, reject) => {
+      this.conn.exec(command, (err, stream) => {
+        if (err) return reject(err)
+
+        let stdout = ''
+        let stderr = ''
+
+        stream
+          .on('data', (data) => {
+            stdout += data; // 收集 STDOUT
+          })
+          .stderr.on('data', (data) => {
+          stderr += data; // 收集 STDERR
+        })
+          .on('close', (code, signal) => {
+            console.log(`Command "${command}" finished with code ${code}, signal ${signal}`)
+            resolve({ command, stdout, stderr, code, signal })
+          })
+      })
+    })
+  }
+
   reconnect() {
     return new Promise((resolve, reject) => {
       this.conn

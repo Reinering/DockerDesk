@@ -19,7 +19,7 @@
       </div>
     </q-card-section>
 
-    <q-card-section align="center">
+    <q-card-actions align="center">
       <q-btn
         class="text-h8"
         text-color="blue-grey-5"
@@ -28,7 +28,7 @@
         style="width: 40px"
         @click="isClick = true"
       />
-    </q-card-section>
+    </q-card-actions>
 
   </q-card>
 

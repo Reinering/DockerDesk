@@ -8,7 +8,7 @@ notify ('positive', 'negative', 'warning', 'info', 'ongoing')
 <script setup>
 //
 
-import { provide, onBeforeMount, onUnmounted } from 'vue'
+import { ref, provide, onBeforeMount, onUnmounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -19,8 +19,6 @@ import { isEmptyStr } from 'src/utils/common.js'
 
 const $q = useQuasar()
 provide("$q", $q)
-
-// const deviceInfo = $q.platform.is
 
 const router = useRouter()
 provide("router", router)
@@ -35,6 +33,9 @@ $q.loadingBar.setDefaults({
   size: '3px',
   position: 'bottom'
 })
+
+const deviceInfo = ref(null)
+provide("deviceInfo", deviceInfo)
 
 const configStore = useConfigStore()
 const preCmdsStore = usePreCmdsStore()
@@ -58,6 +59,9 @@ const init = () => {
 
   preCmdsStore.isSync = "0"
 
+  window.client.getOSInfo().then((result) => {
+    deviceInfo.value = result
+  })
 }
 
 onBeforeMount(() => {

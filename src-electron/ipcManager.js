@@ -3,6 +3,9 @@ import { registerNodesIpcHandlers } from "./ipc/nodesIPC.js"
 import { registerPreCmdsIpcHandlers } from "./ipc/preCmdsIPC.js"
 import { registerTerminalIpcHandlers } from "./ipc/terminalIPC.js"
 import { registerSSHIpcHandlers, registerSFTPIpcHandlers } from "./ipc/sshIPC.js"
+import { registerDockerIpcHandlers } from "./ipc/dockerIPC.js"
+import { registerPodmanIpcHandlers } from "./ipc/podmanIPC.js"
+import { registerWSLIpcHandlers } from "./ipc/wslIPC.js"
 
 
 export function registerIpcHandlers(win) {
@@ -20,6 +23,12 @@ export function registerIpcHandlers(win) {
   registerSSHIpcHandlers(win)
 
   registerSFTPIpcHandlers(win)
+
+  registerWSLIpcHandlers(win)
+
+  registerDockerIpcHandlers(win)
+
+  registerPodmanIpcHandlers(win)
 
 }
 

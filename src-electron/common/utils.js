@@ -1,4 +1,19 @@
 import * as fs from 'fs'
+import { exec, execSync, spawn } from 'child_process'
+import os from 'node:os'
+import iconv from 'iconv-lite'
+
+
+// 获取总内存（单位：字节）
+export const totalMemory = os.totalmem()
+
+// 获取系统类型（操作系统）'win32', 'linux', 'darwin' (macOS)
+export const platform = os.platform()
+
+// 获取 CPU 架构 'x64', 'arm', 'arm64', 'ia32'
+export const arch = os.arch()
+
+const isWindows = platform === 'win32'
 
 
 // 指定长度和进制 len: 生成UUID长度,radix: 需要chars中字符集的长度 max:62
@@ -57,6 +72,72 @@ export function isLocalExists(localPath, callback) {
       return
     }
     callback(true) // 本地路径存在
+  })
+}
+
+
+// 执行 CMD 命令
+export function cmd(command) {
+  if (command instanceof Array) {
+    command = command.join(' ')
+  }
+
+  return new Promise((resolve, reject) => {
+    exec(command, { cwd: process.cwd(), encoding: 'binary' }, (error, stdout, stderr) => {
+      if (error) {
+        // console.error(`执行错误: ${error.message}`)
+        return reject(isWindows ? iconv.decode(error.message, 'cp936') : error.message.toString('utf8'))
+      }
+      if (stderr) {
+        // console.error(`标准错误: ${stderr}`)
+        return reject(isWindows ? iconv.decode(stderr, 'cp936') : stderr.toString('utf8'))
+      }
+      // console.log(`命令输出: ${stdout}`)
+      return resolve(isWindows ? iconv.decode(stdout, 'cp936') : stdout.toString('utf8'))
+    })
+  })
+}
+
+
+// 执行 CMD 命令
+export function cmd1(command) {
+  if (command instanceof Array) {
+    command = command.join(' ')
+  }
+
+  return new Promise((resolve, reject) => {
+    exec(command, { cwd: process.cwd(), encoding: 'binary' }, (error, stdout, stderr) => {
+      if (error) {
+        // console.error(`执行错误: ${error.message}`)
+        return reject(isWindows ? iconv.decode(error.message, 'cp936') : error.message.toString('utf8'))
+      }
+      if (stderr) {
+        // console.error(`标准错误: ${stderr}`)
+        return reject(isWindows ? iconv.decode(stderr, 'cp936') : stderr.toString('utf8'))
+      }
+      // console.log(`命令输出: ${stdout}.toString('utf8')`)
+      return resolve(stdout.toString('utf8'))
+    })
+  })
+}
+
+
+
+export function cmdSync(command) {
+  if (command instanceof Array) {
+    command = command.join(' ')
+  }
+
+  return new Promise((resolve, reject) => {
+    try {
+      // 执行 CMD 命令并获取输出
+      const output = execSync(command, { encoding: 'binary' })
+      resolve(isWindows ? iconv.decode(output, 'cp936') : output.toString('utf8'))
+    } catch (error) {
+      // console.error(`执行错误: ${error.message}`)
+      // console.error(`标准错误: ${error.stderr}`)
+      reject(isWindows ? iconv.decode(error.message, 'cp936') : error.message.toString('utf8'))
+    }
   })
 }
 

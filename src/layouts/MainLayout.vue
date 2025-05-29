@@ -8,7 +8,10 @@
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
         <q-avatar>
-          <img :src="faviconPath" />
+          <img
+            alt="logo"
+            :src="faviconPath"
+          />
         </q-avatar>
 
         <q-toolbar-title>
@@ -43,6 +46,7 @@
         <keep-alive v-if="route.meta.keepAlive">
           <component :is="Component" />
         </keep-alive>
+
         <component v-else :is="Component" />
       </router-view>
     </q-page-container>
