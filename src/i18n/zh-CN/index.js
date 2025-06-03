@@ -36,7 +36,6 @@ export default {
 
   selectLanguage: '选择语言',
 
-
   //
   settings: "设置",
   management: "管理",
@@ -45,6 +44,7 @@ export default {
   navigator: {
     home: "首页",
     assistant: "引导",
+    wsl: "WSL",
     nodes: "节点",
     nodesMg: "节点管理",
     dockerNode: "Docker节点",
@@ -56,6 +56,36 @@ export default {
     dataNotNull: "必填数据不能为空",
     dataLenNotMax: "数据长度不能超过:",
     dataLenNotMin: "数据长度不能超过:",
+  },
+
+  wsl: {
+
+    officialTutorial: "官方教程",
+
+    tabs: {
+      subSys: "子系统",
+      create: "创建新子系统"
+    },
+
+    run: "运行",
+    stop: "停止",
+    restart: "重启",
+    delete: "删除",
+    terminal: "终端",
+    export: "导出",
+
+    wslCreate: "WSL 创建",
+    create: "创建",
+    wslName: "名称",
+    rootPrivilege: "使用Root权限",
+    startNow: "立即启动",
+
+    wslDistribution: "WSL 发行版",
+    distributionName: "",
+    customImage: "自定义镜像",
+    localImagePath: "选择本地镜像文件(非必选)",
+    username: "用户名",
+    password: "密码"
   },
 
   // Node

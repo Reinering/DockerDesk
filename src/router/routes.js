@@ -38,6 +38,15 @@ const routes = [
       },
 
       {
+        path: 'wsl',
+        name: 'wsl',
+        component: () => import('pages/WSL.vue'),
+        meta: {
+          keepAlive: true,
+        }
+      },
+
+      {
         path: 'nodes',
         name: 'nodes',
         component: () => import('pages/Nodes.vue'),
@@ -45,6 +54,7 @@ const routes = [
           keepAlive: true,
         }
       },
+
       {
         path: 'nodesMg',
         name: 'nodesMg',

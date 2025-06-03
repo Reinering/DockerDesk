@@ -1,5 +1,5 @@
 import { ipcMain, dialog } from 'electron'
-import { getWSLInfo, getWSList } from 'app/src-electron/actions/client.js'
+import { getWSLInfo, getWSLList } from 'app/src-electron/actions/wsl.js'
 
 
 
@@ -15,7 +15,7 @@ export function registerWSLIpcHandlers(win) {
 
 
   ipcMain.handle('getWSLList', async (event) => {
-    return getWSList().then((data) => {
+    return getWSLList().then((data) => {
       return { success: true, data:data, error: '' }
     }, (error) => {
       return { success: false, error: error }

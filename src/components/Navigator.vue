@@ -75,6 +75,14 @@ const naviItems = reactive([
     state: false,
     children: []
   },
+  {
+    name: 'WSL',
+    label: 'navigator.wsl',
+    icon: "view_module",
+    route: 'wsl',
+    state: false,
+    children: []
+  },
 
   {
     name: 'nodes',

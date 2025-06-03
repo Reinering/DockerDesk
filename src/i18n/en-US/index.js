@@ -48,6 +48,7 @@ export default {
   navigator: {
     home: "Home",
     assistant: "Assistant",
+    wsl: "WSL",
     nodes: "Nodes",
     nodesMg: "Nodes Management",
     dockerNode: "Docker Node",
@@ -59,6 +60,36 @@ export default {
     dataNotNull: "Not Null",
     dataLenNotMax: "The data length cannot exceed:",
     dataLenNotMin: "The data length cannot be less than:",
+  },
+
+  wsl: {
+
+    officialTutorial: "Official Tutorial",
+
+    tabs: {
+      subSys: "SubSystem",
+      create: "Create SubSystem"
+    },
+
+    run: "Run",
+    stop: "Stop",
+    restart: "Restart",
+    delete: "Delete",
+    terminal: "Terminal",
+    export: "Export",
+
+    wslCreate: "WSL Create",
+    create: "Create",
+    wslName: "Name",
+    rootPrivilege: "Machine with root privileges",
+    startNow: "Start Now",
+
+    wslDistribution: "WSL Distribution",
+    customImage: "Custom Image",
+    localImagePath: "Select Local Image Path(Optional)",
+    username: "Username",
+    password: "Password"
+
   },
 
   // Node
