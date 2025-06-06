@@ -354,7 +354,51 @@ contextBridge.exposeInMainWorld("wslTerminal", {
 
   getWSLList () {
     return ipcRenderer.invoke('getWSLList')
-  }
+  },
+
+  installSubSystem () {
+    return ipcRenderer.invoke('installSubSystem')
+  },
+
+  upgradeWSL () {
+    return ipcRenderer.invoke('upgradeWSL')
+  },
+
+  startSubSystem () {
+    return ipcRenderer.invoke('startSubSystem')
+  },
+
+  stopSubSystem () {
+    return ipcRenderer.invoke('stopSubSystem')
+  },
+
+  startWSL(data) {
+    return ipcRenderer.invoke('startWSL', data)
+  },
+
+  stopWSL(data) {
+    return ipcRenderer.invoke('stopWSL', data)
+  },
+
+  restartWSL(data) {
+    return ipcRenderer.invoke('restartWSL', data)
+  },
+
+  deleteWSL(data) {
+    return ipcRenderer.invoke('deleteWSL', data)
+  },
+
+  termimalWSL(data) {
+    return ipcRenderer.invoke('termimalWSL', data)
+  },
+
+  exportWSL(data) {
+    return ipcRenderer.invoke('exportWSL', data)
+  },
+
+  moveWSL(data) {
+    return ipcRenderer.invoke('moveWSL', data)
+  },
 
 })
 

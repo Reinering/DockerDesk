@@ -1,7 +1,6 @@
 import { ipcMain, dialog } from 'electron'
 import {
   getOSInfo, getUtilization, getPodmanInfo, getDockerInfo,
-  getWSLInfo, getWSList
 
 } from '../actions/client.js'
 

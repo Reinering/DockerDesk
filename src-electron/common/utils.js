@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import { exec, execSync, spawn } from 'child_process'
+import readline from 'readline'
 import os from 'node:os'
 import iconv from 'iconv-lite'
 
@@ -77,48 +78,52 @@ export function isLocalExists(localPath, callback) {
 
 
 // 执行 CMD 命令
-export function cmd(command) {
+export function cmd1(command, encoding='cp936') {
   if (command instanceof Array) {
     command = command.join(' ')
   }
 
   return new Promise((resolve, reject) => {
-    exec(command, { cwd: process.cwd(), encoding: 'binary' }, (error, stdout, stderr) => {
+    exec(command, { cwd: process.cwd(), windowsHide: true, encoding: 'binary' }, (error, stdout, stderr) => {
       if (error) {
-        // console.error(`执行错误: ${error.message}`)
-        return reject(isWindows ? iconv.decode(error.message, 'cp936') : error.message.toString('utf8'))
+        return reject(isWindows ? iconv.decode(error.message, encoding) : error.message.toString('utf8'))
       }
       if (stderr) {
-        // console.error(`标准错误: ${stderr}`)
-        return reject(isWindows ? iconv.decode(stderr, 'cp936') : stderr.toString('utf8'))
+        return reject(isWindows ? iconv.decode(stderr, encoding) : stderr.toString('utf8'))
       }
-      // console.log(`命令输出: ${stdout}`)
-      return resolve(isWindows ? iconv.decode(stdout, 'cp936') : stdout.toString('utf8'))
+      return resolve(isWindows ? iconv.decode(stdout, encoding) : stdout.toString('utf8'))
     })
   })
 }
 
 
 // 执行 CMD 命令
-export function cmd1(command) {
+export function cmd(command, encoding='cp936') {
   if (command instanceof Array) {
     command = command.join(' ')
   }
 
   return new Promise((resolve, reject) => {
-    exec(command, { cwd: process.cwd(), encoding: 'binary' }, (error, stdout, stderr) => {
+    exec(command, { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }, (error, stdout, stderr) => {
       if (error) {
-        // console.error(`执行错误: ${error.message}`)
-        return reject(isWindows ? iconv.decode(error.message, 'cp936') : error.message.toString('utf8'))
+        // console.error(`error: ${error}`)
+        return reject(isWindows ? iconv.decode(error.message, encoding) : error.message.toString('utf8'))
       }
-      if (stderr) {
-        // console.error(`标准错误: ${stderr}`)
-        return reject(isWindows ? iconv.decode(stderr, 'cp936') : stderr.toString('utf8'))
+      if (stderr && stderr.length > 0) {
+        // console.error(`stderr: ${stderr}`)
+        return reject(isWindows ? iconv.decode(stderr, encoding) : stderr.toString('utf8'))
       }
-      // console.log(`命令输出: ${stdout}.toString('utf8')`)
-      return resolve(stdout.toString('utf8'))
+      // console.log(`stdout: ${stdout}.toString('utf8')`)
+      return resolve(isWindows ? iconv.decode(stdout, encoding) : stderr.toString('utf8'))
     })
   })
+}
+
+
+export function cmdSpawn(command, encoding='cp936') {
+
+
+
 }
 
 
@@ -142,3 +147,104 @@ export function cmdSync(command) {
 }
 
 
+export class CmdRunner {
+  constructor(options = {}) {
+    this.encoding = options.encoding || 'utf8' // 默认编码
+    this.cmd = null // 保存 cmd 进程
+    this.isRunning = false // 进程状态
+  }
+
+  // 启动 cmd 进程
+  start() {
+    if (this.isRunning) {
+      throw new Error('Cmd 进程已经在运行！')
+    }
+
+    this.cmd = spawn('cmd.exe')
+    this.isRunning = true
+
+    // 设置编码
+    this.cmd.stdout.setEncoding(this.encoding)
+    this.cmd.stderr.setEncoding(this.encoding)
+
+    // 返回 Promise，方便异步操作
+    return new Promise((resolve) => {
+      // 监听输出
+      this.cmd.stdout.on('data', (data) => {
+        console.log(`cmd 输出: ${data}`)
+      })
+
+      // 监听错误
+      this.cmd.stderr.on('data', (data) => {
+        console.error(`cmd 错误: ${data}`)
+      })
+
+      // 监听进程关闭
+      this.cmd.on('close', (code) => {
+        this.isRunning = false
+        console.log(`cmd 进程退出，退出码: ${code}`)
+      })
+
+      // 确保进程启动
+      resolve(this)
+    })
+  }
+
+  // 发送命令
+  sendCommand(command) {
+    if (!this.isRunning) {
+      throw new Error('Cmd 进程未启动！请先调用 start 方法。')
+    }
+
+    return new Promise((resolve, reject) => {
+      // 发送命令并添加换行符
+      this.cmd.stdin.write(`${command}\n`)
+
+      // 监听输出（这里可以根据需要扩展，例如收集特定输出）
+      const onData = (data) => {
+        resolve(data.toString())
+        this.cmd.stdout.off('data', onData) // 移除监听，避免重复触发
+      }
+
+      this.cmd.stdout.on('data', onData)
+
+      // 错误处理
+      this.cmd.stderr.once('data', (data) => {
+        reject(new Error(`命令执行错误: ${data}`))
+      })
+    })
+  }
+
+  // 停止 cmd 进程
+  stop() {
+    if (!this.isRunning) {
+      return Promise.resolve('Cmd 进程未运行。')
+    }
+
+    return new Promise((resolve) => {
+      this.cmd.stdin.end() // 结束输入流
+      this.cmd.on('close', () => {
+        this.isRunning = false
+        resolve('Cmd 进程已停止。')
+      })
+    })
+  }
+
+  // 连续发送多条命令
+  async runCommands(commands) {
+    if (!this.isRunning) {
+      await this.start()
+    }
+
+    const results = []
+    for (const command of commands) {
+      try {
+        const result = await this.sendCommand(command)
+        results.push({ command, result })
+      } catch (error) {
+        results.push({ command, error: error.message })
+      }
+    }
+    return results
+  }
+}

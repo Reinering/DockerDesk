@@ -2,52 +2,41 @@
   <q-page q-pa-md padding >
     <div class="text-h5 q-mb-md">本地 Docker / Podman</div>
 
-    <div class="q-pa-md row q-gutter-md justify-center">
+    <div class="q-pa-md row  justify-center">
       <q-card class="bg-primary " style="width: 80%; height: 250px;">
         <div class="q-ma-md row justify-evenly">
-          <q-card class="bg-light-blue q-ma-md" style="width: 200px;height: 200px;">
-            <q-card-section align="center" style="height: 80px;" >
-              <q-icon name="img:src/static/png/docker-512x512.png" style="width: 80px;height: 80px;" />
-            </q-card-section>
-
-            <q-card-section align="center">
+          <q-card class="bg-light-blue q-ma-md q-pa-md" style="width: 200px; height: 200px;">
+            <div class="column items-center">
+              <q-icon name="img:src/static/png/docker-512x512.png" style="width: 80px; height: 80px;" />
               <div class="text-h6">Docker</div>
-            </q-card-section>
-            <q-card-actions align="center">
-              <q-btn label="添加" color="primary" />
-              <div>{{ dockerInfo }}</div>
-            </q-card-actions>
+            </div>
+
+            <div class="column items-center">
+              <div class="text-amber">{{ dockerInfo }}</div>
+              <q-card-actions align="center">
+                <q-btn label="添加" color="primary" />
+              </q-card-actions>
+            </div>
+
           </q-card>
 
-          <q-card class="bg-grey-6 q-ma-md"  style="width: 200px;height: 200px;" >
-            <q-card-section align="center" style="height: 80px;">
+          <q-card class="bg-grey-6 q-ma-md q-pa-md"  style="width: 200px; height: 200px;">
+            <div class="column items-center">
               <q-icon name="img:src/static/png/podman-512x512.png" style="width: 80px; height: 80px;" />
-            </q-card-section>
-
-            <q-card-section align="center">
               <div class="text-h6">Podman</div>
-            </q-card-section>
-            <q-card-actions align="center">
-              <q-btn label="添加" color="primary" />
-              <div>{{ podmanInfo }}</div>
-            </q-card-actions>
+            </div>
+
+            <div class="column items-center">
+              <div class="text-amber">{{ podmanInfo }}</div>
+              <q-card-actions align="center">
+                <q-btn label="添加" color="primary" />
+              </q-card-actions>
+            </div>
           </q-card>
         </div>
       </q-card>
 
-      <q-card class="bg-grey-6 q-ma-md"  style="width: 200px;height: 200px;" >
-        <q-card-section align="center" style="height: 80px;">
-          <q-icon name="img:src/static/png/podman-512x512.png" style="width: 80px; height: 80px;" />
-        </q-card-section>
 
-        <q-card-section align="center">
-          <div class="text-h6">Podman</div>
-        </q-card-section>
-        <q-card-actions align="center">
-          <q-btn label="添加" color="primary" />
-          <div>{{ podmanInfo }}</div>
-        </q-card-actions>
-      </q-card>
 
       <q-card>
         <div class="q-pa-md flex flex-center">

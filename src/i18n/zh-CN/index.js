@@ -58,6 +58,27 @@ export default {
     dataLenNotMin: "数据长度不能超过:",
   },
 
+  assistant: {
+    local: "本地",
+    remote: "远程",
+
+    addService: "添加服务",
+    installed: "已安装",
+    notInstalled: "未安装",
+    needUpgrade: "需要升级",
+    addSubSystem: "添加子系统",
+    start: "启动",
+    stop: "停止",
+
+
+    upgradeSuccess: "升级成功",
+    upgradeError: "升级失败",
+    startSuccess: "启动成功",
+    startError: "启动失败",
+    stopSuccess: "停止成功",
+    stopError: "停止失败",
+  },
+
   wsl: {
 
     officialTutorial: "官方教程",
@@ -73,6 +94,7 @@ export default {
     delete: "删除",
     terminal: "终端",
     export: "导出",
+    move: "迁移",
 
     wslCreate: "WSL 创建",
     create: "创建",
@@ -85,7 +107,18 @@ export default {
     customImage: "自定义镜像",
     localImagePath: "选择本地镜像文件(非必选)",
     username: "用户名",
-    password: "密码"
+    password: "密码",
+
+    deleteSuccess: "删除成功",
+    deleteError: "删除失败",
+    exporting: "正在导出",
+    exportSuccess: "导出成功",
+    exportError: "导出失败",
+    moving: "正在迁移",
+    movingSuccess: "迁移成功",
+    movingError: "迁移失败",
+
+
   },
 
   // Node

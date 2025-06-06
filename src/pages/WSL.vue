@@ -1,12 +1,11 @@
 <template>
   <q-page q-pa-md padding>
-    <div class="q-pa-md row q-gutter-md justify-center">
+    <div class="q-pa-md q-gutter-md row justify-center">
       <q-card class="bg-primary" style="width: 90%; height: 250px">
         <div class="text-h5 q-pa-md text-secondary">
-          Windows Subsystem for Linux（WSL）
-          <!--          <q-space />-->
+          Windows Subsystem for Linux(WSL) 2
           <q-btn
-            ref="https://learn.microsoft.com/zh-cn/windows/wsl"
+            href="https://learn.microsoft.com/zh-cn/windows/wsl"
             :label="t('wsl.officialTutorial')"
             target="_blank"
             outline
@@ -14,20 +13,35 @@
           />
         </div>
 
-        <div><q-badge color="blue" rounded class="q-mr-sm" />Status</div>
+        <q-separator />
 
-        <div class="q-pa-md row q-gutter-md justify-end">
-          <!--        :loading="progress[0].loading"-->
-          <!--        :percentage="progress[0].percentage"-->
-          <!--        @click="startComputing(0)"-->
-          <q-btn color="accent" icon="flight_takeoff" style="width: 150px">
-            未安装
-            <template v-slot:loading>
-              <q-spinner-gears class="on-left" />
-              Computing...
-            </template>
-          </q-btn>
-        </div>
+        <q-card-section >
+          <q-chip square color="orange" text-color="white" icon="star">
+            建议升级Windows 10 版本 2004 及更高版本（内部版本 19041 及更高版本）或 Windows 11
+          </q-chip>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="q-pa-md row justify-between">
+<!--            <div class="col"><q-badge :color="wslStatusColor" rounded class="q-mr-sm" />{{wslStatus}}</div>-->
+
+            <q-space />
+
+            <q-btn
+              :disable="disabledWslStatusBtn"
+              color="accent"
+              icon="flight_takeoff"
+              style="width: 150px"
+              @click="onWslStatusBtn"
+            >
+              {{wslStatusBtn}}
+              <template v-slot:loading>
+                <q-spinner-gears class="on-left" />
+                Computing...
+              </template>
+            </q-btn>
+          </div>
+        </q-card-section>
       </q-card>
     </div>
 
@@ -55,7 +69,7 @@
           >
             <q-tab-panel name="subsystem">
               <div class="q-gutter-x-md q-gutter-y-md row justify-center">
-                <VM v-for="(item, index) in vms" :key="index" :data="item" />
+                <VM v-for="(item, index) in vms" :key="index" :data="item" :onDelete="onDelete" />
               </div>
             </q-tab-panel>
 
@@ -219,11 +233,14 @@
 <script setup>
 import { inject, reactive, ref, onMounted } from 'vue'
 import VM from 'src/components/VM.vue'
+import { parseWSLListVersion } from 'src/utils/wsl.js'
+import { clientConfig } from 'src/common/config.js'
 
 const $q = inject('$q')
 const router = inject('router')
 const route = inject('route')
 const t = inject('t')
+const deviceInfo = inject("deviceInfo")
 
 const splitterStyle = reactive({
   height:
@@ -259,22 +276,8 @@ const tabs = reactive([
 
 const vms = reactive([
   {
-    templateId: 1,
     nodeId: 1,
-    servername: 'Node 1',
-    description: 'This is a node',
-    state: 'offline',
-  },
-  {
     templateId: 1,
-    nodeId: 2,
-    servername: 'Node 1',
-    description: 'This is a node',
-    state: 'offline',
-  },
-  {
-    templateId: 1,
-    nodeId: 2,
     servername: 'Node 1',
     description: 'This is a node',
     state: 'offline',
@@ -312,10 +315,84 @@ const newWSL = reactive({
 })
 
 
+const wslStatusColor = ref('red')
+const wslStatus = ref('Stopped')
+const wslStatusBtn = ref(t('assistant.notInstalled'))
+const disabledWslStatusBtn = ref(false)
+
+const onWslStatusBtn = () => {
+  if (wslStatusBtn.value === t('assistant.notInstalled')) {
+
+  } else if (wslStatusBtn.value === t('assistant.needUpgrade')) {
+    window.wslTerminal.upgradeWSL().then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('assistant.upgradeSuccess')
+        })
+
+        wslStatusBtn.value = t('assistant.installed')
+        disabledWslStatusBtn.value = true
+      } else {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('assistant.upgradeError')}: ${result.error}`
+        })
+      }
+    })
+  }
+}
+
+const onDelete = (name) => {
+  for (let index in vms) {
+    if (vms[index].name === name) {
+      vms.splice(index, 1)
+      break
+    }
+  }
+}
 
 
 
 
+const init = () => {
+  if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32") {
+    window.wslTerminal.checkWSLInfo().then((result) => {
+      if (result.success) {
+        const line = result.data.split('\r\n')[0]
+
+        if (line.indexOf('WSL') !== -1) {
+          wslStatusBtn.value = t('assistant.installed')
+          disabledWslStatusBtn.value = true
+
+          window.wslTerminal.getWSLList().then((result) => {
+            if (result.success) {
+              const data = parseWSLListVersion(result.data)
+
+              for (let index in data) {
+                vms.push({
+                  nodeId: vms.length + 1,
+                  templateId: 1,
+                  servername: data[index].name,
+                  description: data[index].name,
+                  state: data[index].state,
+                })
+              }
+            }
+          })
+        } else {
+          wslStatusBtn.value = t('assistant.needUpgrade')
+        }
+      } else {
+        wslStatusBtn.value = t('assistant.notInstalled')
+      }
+    })
+
+  }
+
+}
 
 const checkScreenHeightSize = () => {
   splitterStyle.height =
@@ -330,6 +407,13 @@ const checkScreenHeightSize = () => {
 
 onMounted(() => {
   window.removeEventListener('resize', checkScreenHeightSize)
+
+  if (deviceInfo.value.platform !== "win32") {
+    return
+  }
+
+  init()
+
 })
 </script>
 

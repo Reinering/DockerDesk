@@ -48,10 +48,6 @@ const init = () => {
     configStore.lang = navigator.language
   }
 
-  if (process.env.MODE === 'electron') {
-
-  }
-
   // theme
   if (configStore.theme === 'dark') {
     $q.dark.set(true)
@@ -59,9 +55,12 @@ const init = () => {
 
   preCmdsStore.isSync = "0"
 
-  window.client.getOSInfo().then((result) => {
-    deviceInfo.value = result
-  })
+  if (process.env.MODE === 'electron') {
+    window.client.getOSInfo().then((result) => {
+      deviceInfo.value = result
+    })
+  }
+
 }
 
 onBeforeMount(() => {

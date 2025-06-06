@@ -62,6 +62,27 @@ export default {
     dataLenNotMin: "The data length cannot be less than:",
   },
 
+  assistant: {
+    local: "Local",
+    remote: "Remote",
+
+    addService: "Add Service",
+    installed: "Installed",
+    notInstalled: "Not installed",
+    needUpgrade: "Need to upgrade",
+    addSubSystem: "Add SubSystem",
+    start: "Start",
+    stop: "Stop",
+
+    upgradeSuccess: "Upgrade Successfully",
+    upgradeError: "Upgrade Error",
+    startSuccess: "Start Successfully",
+    startError: "Start Error",
+    stopSuccess: "Stop Successfully",
+    stopError: "Stop Error",
+
+  },
+
   wsl: {
 
     officialTutorial: "Official Tutorial",
@@ -77,6 +98,7 @@ export default {
     delete: "Delete",
     terminal: "Terminal",
     export: "Export",
+    move: "Move",
 
     wslCreate: "WSL Create",
     create: "Create",
@@ -88,7 +110,16 @@ export default {
     customImage: "Custom Image",
     localImagePath: "Select Local Image Path(Optional)",
     username: "Username",
-    password: "Password"
+    password: "Password",
+
+    deleteSuccess: "Delete Successfully",
+    deleteError: "Delete Error",
+    exporting: "Exporting",
+    exportSuccess: "Export Successfully",
+    exportError: "Export Error",
+    moving: "Moving",
+    movingSuccess: "Moved Successfully",
+    movingError: "Moved Error",
 
   },
 
