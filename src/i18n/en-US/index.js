@@ -89,7 +89,8 @@ export default {
 
     tabs: {
       subSys: "SubSystem",
-      create: "Create SubSystem"
+      create: "Create SubSystem",
+      settings: "Settings"
     },
 
     run: "Run",
@@ -112,14 +113,24 @@ export default {
     username: "Username",
     password: "Password",
 
+    display: "Display",
+
+    startSuccess: "Start Successfully",
+    startFail: "Start Failure",
+    stopSuccess: "Stop Successfully",
+    stopFail: "Stop Failure",
+    restartSuccess: "Restart Successfully",
+    restartFail: "Restart Failure",
     deleteSuccess: "Delete Successfully",
-    deleteError: "Delete Error",
+    deleteFail: "Delete Failure",
     exporting: "Exporting",
     exportSuccess: "Export Successfully",
-    exportError: "Export Error",
+    exportFail: "Export Failure",
     moving: "Moving",
     movingSuccess: "Moved Successfully",
-    movingError: "Moved Error",
+    movingFail: "Moved Failure",
+    configModifySuccess: "Configuration Modification Successful",
+    configModifyFail: "Configuration modification Failure",
 
   },
 

@@ -1,7 +1,7 @@
 import { ipcMain, shell } from 'electron'
 
 import si from 'systeminformation'
-import { cmd, cmd1, cmdSync, totalMemory, platform, arch } from '../common/utils.js'
+import { cmd, cmd1, totalMemory, platform, arch } from '../common/utils.js'
 
 
 
@@ -30,7 +30,7 @@ export async function getUtilization () {
 }
 
 export async function getDockerInfo () {
-  return cmd('docker -v')
+  return cmd1('docker -v')
 }
 
 export async function getPodmanInfo () {

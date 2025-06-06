@@ -1,7 +1,22 @@
-import { cmd, cmd1, CmdRunner } from 'app/src-electron/common/utils.js'
+import { cmd, cmd1, CmdRunner, modifyIniConfig, } from 'app/src-electron/common/utils.js'
 import readline from 'readline'
 import path from 'path'
 
+
+const homeDir = process.env.HOME || process.env.USERPROFILE
+const wslConfigFile = path.join(homeDir, '.wslconfig')
+
+export async function modifyWSLDebugConfig (data) {
+  return new Promise((resolve, reject) => {
+    try {
+      // {wsl2: { debugConsole: false }
+      modifyIniConfig(data, wslConfigFile)
+      resolve()
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 
 export async function getWSLInfo () {
   return cmd('wsl -v', 'utf16le')
@@ -46,15 +61,26 @@ export async function wslInstallSubSystem () {
 }
 
 export async function startSubSystem (name='DockerDesk') {
-  return cmd(`wsl --distribution ${name} --user root`, 'utf16le')
+  return cmd1(`wsl --distribution ${name}`, 'utf16le')
 }
 
 export async function stopSubSystem (name='DockerDesk') {
-  return cmd(`wsl --terminate ${name}`, 'utf16le')
+  return cmd1(`wsl --terminate ${name}`, 'utf16le')
+}
+
+export async function restartSubSystem (name='DockerDesk') {
+  cmd1(`wsl --terminate ${name}`, 'utf16le')
+    .then((result) => {
+      return cmd1(`wsl --distribution ${name} --user root`, 'utf16le')
+    }, (error) => {
+      return error
+    })
+
+  return
 }
 
 export async function unregisterSubSystem (name) {
-  return cmd(`wsl --unregister ${name}`, 'utf16le')
+  return cmd1(`wsl --unregister ${name}`, 'utf16le')
 }
 
 export async function exportSubSystem (name, distDir) {

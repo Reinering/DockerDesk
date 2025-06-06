@@ -156,6 +156,10 @@ contextBridge.exposeInMainWorld('terminal', {
     return ipcRenderer.invoke('createTerminal', uuid)
   },
 
+  createWSLTerminal (data) {
+    return ipcRenderer.invoke('createWSLTerminal', data)
+  },
+
   closeTerminal (uuid) {
     return ipcRenderer.invoke('closeTerminal', uuid)
   },
@@ -347,6 +351,10 @@ contextBridge.exposeInMainWorld('scpTerminal', {
 
 
 contextBridge.exposeInMainWorld("wslTerminal", {
+
+  modifyWSLDebugConfig (data) {
+    return ipcRenderer.invoke('modifyWSLDebugConfig', data)
+  },
 
   checkWSLInfo() {
     return ipcRenderer.invoke('checkWSLInfo')

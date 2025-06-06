@@ -3,6 +3,7 @@ import { exec, execSync, spawn } from 'child_process'
 import readline from 'readline'
 import os from 'node:os'
 import iconv from 'iconv-lite'
+import ini from 'ini'
 
 
 // 获取总内存（单位：字节）
@@ -76,6 +77,35 @@ export function isLocalExists(localPath, callback) {
   })
 }
 
+export async function modifyIniConfig(data, file) {
+  let configContent
+  try {
+    configContent = await fs.readFileSync(file, 'utf8')
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log(`${file} The file does not exist, a new file will be created`)
+      configContent = ''    // 文件不存在时初始化为空
+    } else {
+      throw err
+    }
+  }
+
+  const config = ini.parse(configContent)
+
+  Object.keys(data).forEach((key) => {
+    if (!Object.prototype.hasOwnProperty.call(config, key)) {
+      config[key] = {}
+    }
+
+    Object.keys(data[key]).forEach((k) => {
+      config[key][k] = data[key][k]
+    })
+  })
+
+  const newConfigContent = ini.stringify(config)
+  await fs.writeFileSync(file, newConfigContent, 'utf8')
+}
+
 
 // 执行 CMD 命令
 export function cmd1(command, encoding='cp936') {
@@ -86,12 +116,12 @@ export function cmd1(command, encoding='cp936') {
   return new Promise((resolve, reject) => {
     exec(command, { cwd: process.cwd(), windowsHide: true, encoding: 'binary' }, (error, stdout, stderr) => {
       if (error) {
-        return reject(isWindows ? iconv.decode(error.message, encoding) : error.message.toString('utf8'))
+        return reject(isWindows ? error.message.toString(encoding) : error.message.toString('utf8'))
       }
       if (stderr) {
-        return reject(isWindows ? iconv.decode(stderr, encoding) : stderr.toString('utf8'))
+        return reject(isWindows ? stderr.toString(encoding) : stderr.toString('utf8'))
       }
-      return resolve(isWindows ? iconv.decode(stdout, encoding) : stdout.toString('utf8'))
+      return resolve(isWindows ? stdout.toString(encoding) : stdout.toString('utf8'))
     })
   })
 }

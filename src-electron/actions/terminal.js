@@ -4,11 +4,12 @@ import * as os from 'node:os'
 
 // 终端实例类
 export class Terminal {
-  constructor(uuid, win, options = {}) {
+  constructor(uuid, win, cmd= [], options = {}) {
     this.shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash'
     this.uuid=uuid
     this.win=win
     this.ptyProcess = null
+    this.cmd = cmd
     this.options = {
       name: 'xterm-color',
       cols: options.cols || 80,
@@ -22,7 +23,7 @@ export class Terminal {
 
   // 启动终端
   start() {
-    this.ptyProcess = pty.spawn(this.shell, [], this.options)
+    this.ptyProcess = pty.spawn(this.shell, this.cmd, this.options)
 
     // 处理输出
     this.ptyProcess.onData(data => {

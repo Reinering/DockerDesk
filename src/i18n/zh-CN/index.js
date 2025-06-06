@@ -85,7 +85,8 @@ export default {
 
     tabs: {
       subSys: "子系统",
-      create: "创建新子系统"
+      create: "创建新子系统",
+      settings: "设置"
     },
 
     run: "运行",
@@ -109,14 +110,24 @@ export default {
     username: "用户名",
     password: "密码",
 
+    display: "显示",
+
+    startSuccess: "启动成功",
+    startFail: "启动失败",
+    stopSuccess: "停止成功",
+    stopFail: "停止失败",
+    restartSuccess: "重启成功",
+    restartFail: "重启失败",
     deleteSuccess: "删除成功",
-    deleteError: "删除失败",
+    deleteFail: "删除失败",
     exporting: "正在导出",
     exportSuccess: "导出成功",
-    exportError: "导出失败",
+    exportFail: "导出失败",
     moving: "正在迁移",
     movingSuccess: "迁移成功",
-    movingError: "迁移失败",
+    movingFail: "迁移失败",
+    configModifySuccess: "配置修改成功",
+    configModifyFail: "配置修改失败",
 
 
   },

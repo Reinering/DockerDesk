@@ -1,7 +1,8 @@
 import { ipcMain, dialog } from 'electron'
 import {
+  modifyWSLDebugConfig,
   getWSLInfo, getWSLList, wslUpdate,
-  wslInstallSubSystem, startSubSystem, stopSubSystem,
+  wslInstallSubSystem, startSubSystem, stopSubSystem, restartSubSystem,
   unregisterSubSystem, exportSubSystem, moveSubSystem,
 
 } from 'app/src-electron/actions/wsl.js'
@@ -10,9 +11,17 @@ import {
 
 export function registerWSLIpcHandlers(win) {
 
+  ipcMain.handle('modifyWSLDebugConfig', async (event, data) => {
+    return modifyWSLDebugConfig(data).then((result) => {
+      return { success: true, data: result, error: '' }
+    }, (error) => {
+      return { success: false, error: error }
+    })
+  })
+
   ipcMain.handle('checkWSLInfo', async (event) => {
     return getWSLInfo().then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -21,7 +30,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('getWSLList', async (event) => {
     return getWSLList().then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -29,7 +38,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('upgradeWSL', async (event) => {
     return wslUpdate().then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -37,7 +46,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('installSubSystem', async (event) => {
     return wslInstallSubSystem().then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -46,7 +55,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('startSubSystem', async (event) => {
     return startSubSystem().then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -62,7 +71,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('startWSL', async (event, {name}) => {
     return startSubSystem(name).then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -70,15 +79,15 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('stopWSL', async (event, {name}) => {
     return stopSubSystem(name).then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
   })
 
   ipcMain.handle('restartWSL', async (event) => {
-    return stopSubSystem().then((data) => {
-      return { success: true, data:data, error: '' }
+    return restartSubSystem().then((data) => {
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -86,7 +95,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('deleteWSL', async (event, {name}) => {
     return unregisterSubSystem(name).then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -94,7 +103,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('termimalWSL', async (event) => {
     return stopSubSystem().then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -102,7 +111,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('exportWSL', async (event, {name, distDir}) => {
     return exportSubSystem(name, distDir).then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })
@@ -110,7 +119,7 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('moveWSL', async (event, {name, distDir}) => {
     return moveSubSystem(name, distDir).then((data) => {
-      return { success: true, data:data, error: '' }
+      return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })

@@ -69,7 +69,12 @@
           >
             <q-tab-panel name="subsystem">
               <div class="q-gutter-x-md q-gutter-y-md row justify-center">
-                <VM v-for="(item, index) in vms" :key="index" :data="item" :onDelete="onDelete" />
+                <VM
+                  v-for="(item, index) in vms"
+                  :key="index" :data="item"
+                  :onDelete="onDelete"
+                  @update:value="updateChild"
+                />
               </div>
             </q-tab-panel>
 
@@ -205,23 +210,19 @@
               </q-card>
             </q-tab-panel>
 
-            <q-tab-panel name="movies">
-              <div class="text-h4 q-mb-md">Movies</div>
-              <p>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis praesentium cumque
-                magnam odio iure quidem, quod illum numquam possimus obcaecati commodi minima
-                assumenda consectetur culpa fuga nulla ullam. In, libero.
-              </p>
-              <p>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis praesentium cumque
-                magnam odio iure quidem, quod illum numquam possimus obcaecati commodi minima
-                assumenda consectetur culpa fuga nulla ullam. In, libero.
-              </p>
-              <p>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis praesentium cumque
-                magnam odio iure quidem, quod illum numquam possimus obcaecati commodi minima
-                assumenda consectetur culpa fuga nulla ullam. In, libero.
-              </p>
+            <q-tab-panel name="settings">
+              <div>
+                <q-item tag="label" v-ripple dense>
+                  <q-item-section>
+                    <q-item-label>WSL Debug Console</q-item-label>
+                    <q-item-label caption>{{t('wsl.display')}}</q-item-label>
+                  </q-item-section>
+                  <q-item-section avatar>
+                    <q-toggle color="green" v-model="isDebugConsole" @update:model-value="changeDebugConsole"/>
+                  </q-item-section>
+                </q-item>
+
+              </div>
             </q-tab-panel>
           </q-tab-panels>
         </template>
@@ -260,28 +261,22 @@ const cardStyle = reactive({
 
 const splitterModel1 = ref(50)
 
-const splitterStyle1 = reactive({
-  height:
-    process.env.MODE === 'electron'
-      ? window.innerHeight - 516 + 'px'
-      : window.innerHeight - 484 + 'px',
-})
-
 const tab = ref('subsystem')
 
 const tabs = reactive([
   { id: 'subsystem', label: t('wsl.tabs.subSys'), icon: 'settings_system_daydream', data: {} },
   { id: 'add', label: t('wsl.tabs.create'), icon: 'create', data: {} },
+  { id: 'settings', label: t('wsl.tabs.settings'), icon: 'settings', data: {} },
 ])
 
 const vms = reactive([
-  {
-    nodeId: 1,
-    templateId: 1,
-    servername: 'Node 1',
-    description: 'This is a node',
-    state: 'offline',
-  },
+  // {
+  //   nodeId: 1,
+  //   templateId: 1,
+  //   servername: 'Node 1',
+  //   description: 'This is a node',
+  //   state: 'offline',
+  // },
 ])
 
 const selected = ref('')
@@ -303,7 +298,6 @@ const filterFn = (val, update, abort) => {
   }, 2000)
 }
 
-
 const newWSL = reactive({
   name: '',
   root: false,
@@ -314,6 +308,36 @@ const newWSL = reactive({
   password: '',
 })
 
+const updateChild = (data) => {
+  vms.forEach((vm) => {
+    if (vm.servername === data.name) {
+      vm.state = data.state
+      return
+    }
+  })
+}
+
+const isDebugConsole = ref(false)
+const changeDebugConsole = (value) => {
+  window.wslTerminal.modifyWSLDebugConfig({
+    wsl2: { debugConsole: value }
+  }).then((result) => {
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('wsl.configModifySuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.configModifyFail')}: ${result.error}`
+      })
+    }
+
+  })
+}
 
 const wslStatusColor = ref('red')
 const wslStatus = ref('Stopped')
@@ -354,8 +378,23 @@ const onDelete = (name) => {
   }
 }
 
-
-
+const getWSLListInterval = setInterval(() => {
+  window.wslTerminal.getWSLList().then((result) => {
+    if (result.success) {
+      const data = parseWSLListVersion(result.data)
+      vms.length = 0
+      for (let index in data) {
+        vms.push({
+          nodeId: vms.length + 1,
+          templateId: 1,
+          servername: data[index].name,
+          description: data[index].name,
+          state: data[index].state,
+        })
+      }
+    }
+  })
+}, 30000)
 
 const init = () => {
   if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32") {
@@ -383,15 +422,16 @@ const init = () => {
             }
           })
         } else {
+          clearInterval(getWSLListInterval)
           wslStatusBtn.value = t('assistant.needUpgrade')
         }
       } else {
+        clearInterval(getWSLListInterval)
         wslStatusBtn.value = t('assistant.notInstalled')
       }
     })
 
   }
-
 }
 
 const checkScreenHeightSize = () => {

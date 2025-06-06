@@ -22,6 +22,18 @@ export function registerTerminalIpcHandlers(win) {
     }
   })
 
+  ipcMain.handle('createWSLTerminal', async (event, {uuid, name, user, }) => {
+    try {
+      const cmd = `wsl -d ${name} --user ${user}`
+      const term = new Terminal(uuid, win, cmd).start()
+
+      terminals.set(uuid, term)
+      return { success: true, error: '' }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
   ipcMain.handle('closeTerminal', async (event, uuid) => {
     try{
       if (terminals.has(uuid)) {

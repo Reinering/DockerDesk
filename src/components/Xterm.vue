@@ -108,6 +108,40 @@ const initTerminal = () => {
         }
       }
     )
+  } else if (props.data.serviceType === 'WSL') {
+    window.terminal.createWSLTerminal({
+      uuid: props.terminalId,
+      name: props.data.serviceName,
+      user: 'root',
+
+    })
+      .then((result) => {
+        if (result.success === false) {
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('xterm.termInitError') + ': ' + result.error
+          })
+        } else {
+          term.onData((data) => {
+            sendTerminal({
+              uuid: props.terminalId,
+              data: data,
+            })
+          })
+        }
+      })
+
+    window.terminal.receive(
+      (result) => {
+        const { uuid, data } = JSON.parse(result)
+
+        if (props.terminalId === uuid && term) {
+          term.write(data)
+        }
+      }
+    )
   } else {
     window.terminal.createTerminal(props.terminalId)
       .then((result) => {
@@ -281,7 +315,7 @@ const setupResizeObserver = () => {
 
 const handleKeyDown = (event) => {
   // 标签页切换，快捷键 alt + 数字键
-  console.log("mark", event.key)
+  console.log("handleKeyDown", event.key)
   if (event.altKey) {
   }
 }

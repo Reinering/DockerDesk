@@ -8,7 +8,7 @@
       <q-badge col floating :color="color" rounded/>
     </div>
 
-    <div class="col text-subtitle1 text-weight-bold text-center">{{ data.servername }}</div>
+    <div class="col text-subtitle1 text-weight-bold text-center">{{ props.data.servername }}</div>
 
 <!--    <q-item style="height: 30px">-->
 <!--      -->
@@ -17,7 +17,7 @@
     <q-separator />
 
     <q-card-section class="q-gutter-y-sm">
-      <div class="text-caption">OS: {{}}</div>
+      <div class="text-caption">wsl2</div>
 
       <div class="row flex flex-center">
         <q-knob
@@ -68,7 +68,7 @@
           <q-btn
             :disabled="isStart"
             class="text-h8"
-            :text-color="templates[data.templateId].btn.color"
+            :text-color="templates[props.data.templateId].btn.color"
             unelevated
             icon="play_arrow"
             size="sm"
@@ -96,7 +96,7 @@
           <q-btn
             :disabled="isRestart"
             class="text-h8"
-            :text-color="templates[data.templateId].btn.color"
+            :text-color="templates[props.data.templateId].btn.color"
             unelevated
             icon="restart_alt"
             size="sm"
@@ -110,12 +110,12 @@
           <q-btn-dropdown
             :disabled="isMore"
             class="text-h8"
-            :text-color="templates[data.templateId].btn.color"
+            :text-color="templates[props.data.templateId].btn.color"
             unelevated
             icon="more_horiz"
             size="sm"
           >
-            <q-list :style="`backgroundColor:${templates[data.templateId].backgroundColor}`">
+            <q-list :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
               <q-item clickable v-close-popup size="sm" @click="onDelete">
                 <q-item-section>
                   <q-icon name="delete" color="teal-9" />
@@ -183,18 +183,21 @@ const props = defineProps({
   }
 })
 
-import { inject, reactive, ref, watch, onMounted } from 'vue'
+import { inject, reactive, ref, watch, onMounted, defineEmits } from 'vue'
 import { changeNavigatorGoto } from "src/utils/router.js"
+import { useNavigatorStore } from 'stores/navigator.js'
+import { findNaviItemByName, isEmptyObj } from 'src/utils/common.js'
 
 const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
 const deviceInfo = inject("deviceInfo")
+const navigatorStore = useNavigatorStore()
+
+const emit = defineEmits(['update:value'])
 
 let notify = ref(null)
-
-const data = reactive(props.data)
 
 const templates = [
   {
@@ -251,22 +254,21 @@ const changeState = (newVal) => {
   }
 }
 
-changeState(data.state)
-
+changeState(props.data.state)
 
 const onStart = () => {
   let isCall = true
   window.wslTerminal.startWSL({
-    name: data.servername
+    name: props.data.servername
   }).then((result) => {
     if (! result.success && isCall) {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: `${t('assistant.startError')}: ${data.servername}: ${result.error}`
+        message: `${t('wsl.startFail')}: ${props.data.servername}: ${result.error}`
       })
 
-      data.state = "Stopped"
+      emit('update:value', {name: props.data.servername, state: "Stopped"})
     }
   })
 
@@ -274,45 +276,59 @@ const onStart = () => {
     isCall = false
   }, 5000)
 
-  data.state = "Running"
+  emit('update:value', {name: props.data.servername, state: "Running"})
 }
 
 const onStop = () => {
   window.wslTerminal.stopWSL({
-    name: data.servername
+    name: props.data.servername
   }).then((result) => {
     if (result.success) {
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
-        message: t('assistant.stopSuccess')
+        message: t('wsl.stopSuccess')
       })
 
-      data.state = "Stopped"
+      emit('update:value', {name: props.data.servername, state: "Stopped"})
     } else {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: `${t('assistant.stopError')}: ${data.servername}: ${result.error}`
+        message: `${t('wsl.stopFail')}: ${props.data.servername}: ${result.error}`
       })
     }
   })
 }
 const onRestart = () => {
   window.wslTerminal.restartWSL({
-    name: data.servername
+    name: props.data.servername
   }).then((result) => {
     if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('wsl.restartSuccess')
+      })
 
+      emit('update:value', {name: props.data.servername, state: "Running"})
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.restartFail')}: ${props.data.servername}: ${result.error}`
+      })
     }
   })
+
+  emit('update:value', {name: props.data.servername, state: "Stopped"})
 }
 const onDelete = () => {
   window.wslTerminal.deleteWSL({
-    name: data.servername
+    name: props.data.servername
   }).then((result) => {
     if (result.success) {
-      props.onDelete(data.name)
+      props.onDelete(props.data.name)
 
       $q.notify({
         type: 'positive',
@@ -323,21 +339,37 @@ const onDelete = () => {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: `${t('wsl.deleteError')}: ${data.servername}: ${result.error}`
+        message: `${t('wsl.deleteFail')}: ${props.data.servername}: ${result.error}`
       })
     }
   })
 }
 const onTerminal = () => {
   window.wslTerminal.termimalWSL({
-    name: data.servername
+    name: props.data.servername
   }).then((result) => {
     if (result.success) {
 
     }
   })
 
-  // return changeNavigatorGoto(router, item[0], item[1], {data: row})
+  let item
+
+  item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
+  if (isEmptyObj(item)) {
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: t('node.connectError1')
+    })
+  }
+
+  return changeNavigatorGoto(router, item[0], item[1],
+    {data: {
+        serviceName: props.data.servername,
+        connectionType: t('node.localNode'),
+        serviceType: "WSL"
+      }})
 }
 const onExport = async () => {
   const folders = await window.myWindowAPI.selectFolders()
@@ -350,7 +382,7 @@ const onExport = async () => {
   }
 
   window.wslTerminal.exportWSL({
-    name: data.servername,
+    name: props.data.servername,
     distDir: folders[0]
   }).then((result) => {
     if (result.success) {
@@ -358,7 +390,7 @@ const onExport = async () => {
         type: 'positive',
         icon: 'done',
         spinner: false,
-        message: `${t('wsl.exportSuccess')}: ${data.servername}`,
+        message: `${t('wsl.exportSuccess')}: ${props.data.servername}`,
         timeout: 3000
       })
     } else {
@@ -366,7 +398,7 @@ const onExport = async () => {
         type: 'positive',
         icon: 'done',
         spinner: false,
-        message: `${t('wsl.exportError')}: ${data.servername}: ${result.error}`,
+        message: `${t('wsl.exportFail')}: ${props.data.servername}: ${result.error}`,
         timeout: 3000
       })
     }
@@ -392,7 +424,7 @@ const onMove = async () => {
   }
 
   window.wslTerminal.moveWSL({
-    name: data.servername,
+    name: props.data.servername,
     distDir: folders[0]
   }).then((result) => {
     if (result.success) {
@@ -400,7 +432,7 @@ const onMove = async () => {
         type: 'positive',
         icon: 'done',
         spinner: false,
-        message: `${t('wsl.movingSuccess')}: ${data.servername}`,
+        message: `${t('wsl.movingSuccess')}: ${props.data.servername}`,
         timeout: 3000
       })
     } else {
@@ -408,7 +440,7 @@ const onMove = async () => {
         type: 'positive',
         icon: 'done',
         spinner: false,
-        message: `${t('wsl.movingError')}: ${data.servername}: ${result.error}`,
+        message: `${t('wsl.movingFail')}: ${props.data.servername}: ${result.error}`,
         timeout: 3000
       })
     }
@@ -426,7 +458,7 @@ const onMove = async () => {
 
 
 const init = () => {
-  if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32" && data.servername) {
+  if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32" && props.data.servername) {
     // window.wslTerminal
   }
 
@@ -437,7 +469,7 @@ onMounted(() => {
 })
 
 
-watch(() => data.state, (newVal) => {
+watch(() => props.data.state, (newVal) => {
   changeState(newVal)
 })
 
