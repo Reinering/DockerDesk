@@ -2,8 +2,8 @@ import { ipcMain, dialog } from 'electron'
 import {
   modifyWSLDebugConfig,
   getWSLInfo, getWSLList, wslUpdate,
-  wslInstallSubSystem, startSubSystem, stopSubSystem, restartSubSystem,
-  unregisterSubSystem, exportSubSystem, moveSubSystem,
+  wslInstallSubSystem, installWSL, startSubSystem, stopSubSystem, restartSubSystem,
+  unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList
 
 } from 'app/src-electron/actions/wsl.js'
 
@@ -27,9 +27,16 @@ export function registerWSLIpcHandlers(win) {
     })
   })
 
-
   ipcMain.handle('getWSLList', async (event) => {
     return getWSLList().then((data) => {
+      return { success: true, data: data, error: '' }
+    }, (error) => {
+      return { success: false, error: error }
+    })
+  })
+
+  ipcMain.handle('getDistributionList', async (event) => {
+    return getDistributionList().then((data) => {
       return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
@@ -64,6 +71,14 @@ export function registerWSLIpcHandlers(win) {
   ipcMain.handle('stopSubSystem', async (event) => {
     return stopSubSystem().then((data) => {
       return { success: true, data:data, error: '' }
+    }, (error) => {
+      return { success: false, error: error }
+    })
+  })
+
+  ipcMain.handle('installWSL', async (event, data) => {
+    return installWSL(win, JSON.parse(data)).then((result) => {
+      return { success: true, data: result, error: '' }
     }, (error) => {
       return { success: false, error: error }
     })

@@ -364,6 +364,10 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('getWSLList')
   },
 
+  getDistributionList () {
+    return ipcRenderer.invoke('getDistributionList')
+  },
+
   installSubSystem () {
     return ipcRenderer.invoke('installSubSystem')
   },
@@ -378,6 +382,14 @@ contextBridge.exposeInMainWorld("wslTerminal", {
 
   stopSubSystem () {
     return ipcRenderer.invoke('stopSubSystem')
+  },
+
+  installWSL(data) {
+    return ipcRenderer.invoke('installWSL', data)
+  },
+
+  receive (callback) {
+    return ipcRenderer.on('wslSpawnReceive', (event, data) => callback(data))
   },
 
   startWSL(data) {

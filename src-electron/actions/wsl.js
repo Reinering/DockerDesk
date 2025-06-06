@@ -1,4 +1,5 @@
 import { cmd, cmd1, CmdRunner, modifyIniConfig, } from 'app/src-electron/common/utils.js'
+import { WslCmdRunner } from 'app/src-electron/common/wsl.js'
 import readline from 'readline'
 import path from 'path'
 
@@ -30,34 +31,51 @@ export async function wslUpdate () {
   return cmd('wsl --update --web-download', 'utf16le')
 }
 
+export async function getDistributionList () {
+  return cmd('wsl -l -o', 'utf16le')
+}
+
 export async function wslInstallSubSystem () {
-  const cmdRunner = new CmdRunner()
-  await cmdRunner.start()
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
-
-  rl.on('line', async (input) => {
-    if (input.toLowerCase() === 'exit') {
-      await cmdRunner.stop()
-      rl.close()
-      return
-    }
-    try {
-      const result = await cmdRunner.sendCommand(input);
-      console.log('结果:', result)
-    } catch (error) {
-      console.error('错误:', error)
-    }
-  })
-
-  rl.on('close', () => {
-    console.log('交互结束')
-  })
-
   return cmd('wsl --install -d Debian --name DockerDesk --no-launch', 'utf16le')
+}
+
+export async function installWSL (win, data) {
+  const cmdRunner = new WslCmdRunner(win, {encoding: 'utf16le'})
+
+  let command = []
+  command.push("--install")
+  command.push("--distribution")
+  command.push(data.wslDistribution)
+  command.push("--name")
+  command.push(data.name)
+
+  if (data.wslDistribution !== "Custom") {
+    if (!data.startNow) {
+      command.push("--no-launch")
+    }
+  } else {
+    command.push("--location")
+    command.push(data.localImagePath)
+    if (!data.startNow) {
+      command.push("--no-launch")
+    }
+  }
+
+  console.log(command)
+  let result
+  try {
+    if (data.root) {
+      result = await cmdRunner.setupWslUser(command, 'root', data.password)
+    } else {
+      result = cmdRunner.setupWslUser(command, data.username, data.password)
+    }
+    await cmdRunner.stop()
+    return result
+  } catch (error) {
+    return new Promise((resolve, reject) => {
+      reject(error)
+    })
+  }
 }
 
 export async function startSubSystem (name='DockerDesk') {

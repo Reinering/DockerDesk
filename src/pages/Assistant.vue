@@ -102,6 +102,8 @@ const gotoAss2 = () => {
   router.push('/assistant/asslocal')
 }
 
+let notify = ref(null)
+
 const wslStatusBtn = ref(t('assistant.notInstalled'))
 const disabledWslStatusBtn = ref(false)
 const wslStatus = ref('Stopped')
@@ -124,14 +126,39 @@ const onWslStatusBtn = () => {
         return $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: `${t('assistant.upgradeError')}: ${result.error}`
+          message: `${t('assistant.upgradeFail')}: ${result.error}`
         })
       }
     })
   }  else if (wslStatusBtn.value === t('assistant.addSubSystem')) {
-    // window.wslTerminal.installSubSystem().then((result) => {
-    //
-    // })
+    window.wslTerminal.installSubSystem().then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.installSuccess')}`,
+          timeout: 3000
+        })
+      } else {
+        notify.value({
+          type: 'positive',
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.installFail')}: ${result.error}`,
+          timeout: 3000
+        })
+      }
+    })
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('assistant.installing'),
+    })
   } else if (wslStatusBtn.value === t('assistant.start')) {
       let isCall = true
       window.wslTerminal.startSubSystem().then((result) => {
@@ -139,7 +166,7 @@ const onWslStatusBtn = () => {
           $q.notify({
             type: 'negative',
             position: clientConfig.quasar.notify.position,
-            message: `${t('assistant.startError')}: ${result.error}`
+            message: `${t('assistant.startFail')}: ${result.error}`
           })
         }
       })
@@ -167,7 +194,7 @@ const onWslStatusBtn = () => {
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
-          message: `${t('assistant.stopError')}: ${result.error}`
+          message: `${t('assistant.stopFail')}: ${result.error}`
         })
       }
     })

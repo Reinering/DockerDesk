@@ -185,12 +185,12 @@ export class CmdRunner {
   }
 
   // 启动 cmd 进程
-  start() {
+  start(command='cmd.exe') {
     if (this.isRunning) {
-      throw new Error('Cmd 进程已经在运行！')
+      throw new Error('Cmd Running！')
     }
 
-    this.cmd = spawn('cmd.exe')
+    this.cmd = spawn(command)
     this.isRunning = true
 
     // 设置编码
@@ -201,18 +201,18 @@ export class CmdRunner {
     return new Promise((resolve) => {
       // 监听输出
       this.cmd.stdout.on('data', (data) => {
-        console.log(`cmd 输出: ${data}`)
+        console.log(`cmd : ${data}`)
       })
 
       // 监听错误
       this.cmd.stderr.on('data', (data) => {
-        console.error(`cmd 错误: ${data}`)
+        console.error(`cmd error: ${data}`)
       })
 
       // 监听进程关闭
       this.cmd.on('close', (code) => {
         this.isRunning = false
-        console.log(`cmd 进程退出，退出码: ${code}`)
+        console.log(`cmd exit code: ${code}`)
       })
 
       // 确保进程启动
@@ -223,7 +223,7 @@ export class CmdRunner {
   // 发送命令
   sendCommand(command) {
     if (!this.isRunning) {
-      throw new Error('Cmd 进程未启动！请先调用 start 方法。')
+      throw new Error('Cmd: The process has not been started! Please call the start method first')
     }
 
     return new Promise((resolve, reject) => {
@@ -240,7 +240,7 @@ export class CmdRunner {
 
       // 错误处理
       this.cmd.stderr.once('data', (data) => {
-        reject(new Error(`命令执行错误: ${data}`))
+        reject(new Error(`Cmd Error: ${data}`))
       })
     })
   }
@@ -248,14 +248,14 @@ export class CmdRunner {
   // 停止 cmd 进程
   stop() {
     if (!this.isRunning) {
-      return Promise.resolve('Cmd 进程未运行。')
+      return Promise.resolve('Cmd: Process not running')
     }
 
     return new Promise((resolve) => {
       this.cmd.stdin.end() // 结束输入流
       this.cmd.on('close', () => {
         this.isRunning = false
-        resolve('Cmd 进程已停止。')
+        resolve('Cmd Stopped')
       })
     })
   }

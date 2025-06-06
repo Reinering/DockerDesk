@@ -68,6 +68,18 @@
             :style="splitterStyle"
           >
             <q-tab-panel name="subsystem">
+              <q-menu context-menu auto-close>
+<!--                <q-item clickable @click="onAddButtonBar">-->
+<!--                  <q-item-section>-->
+<!--                    {{ t('add') + 'Button Bar' }}-->
+<!--                  </q-item-section>-->
+<!--                </q-item>-->
+<!--                <q-item clickable @click="onEditButtonBar">-->
+<!--                  <q-item-section>-->
+<!--                    {{ t('edit') + 'Button Bar' }}-->
+<!--                  </q-item-section>-->
+<!--                </q-item>-->
+              </q-menu>
               <div class="q-gutter-x-md q-gutter-y-md row justify-center">
                 <VM
                   v-for="(item, index) in vms"
@@ -81,7 +93,7 @@
             <q-tab-panel name="add">
               <div class="q-pa-md row items-center justify-between">
                 <div class="text-h6">{{ t('wsl.wslCreate') }}</div>
-                <q-btn :label="t('wsl.create')" color="primary" />
+                <q-btn :label="t('wsl.create')" color="primary" @click="onCreate" />
               </div>
 
               <q-card :style="cardStyle">
@@ -101,18 +113,18 @@
                         ]"
                       />
 
-                      <q-input
-                        class="q-mb-sm"
-                        v-model="selected"
-                        :label="t('node.serviceName')"
-                        maxlength="20"
-                        outlined
-                        dense
-                        :rules="[
-                          (val) => !!val || t('verifyMessage.dataNotNull'),
-                          (val) => val.length <= 20 || t('verifyMessage.dataLenNotMax') + '20',
-                        ]"
-                      />
+<!--                      <q-input-->
+<!--                        class="q-mb-sm"-->
+<!--                        v-model="selected"-->
+<!--                        :label="t('node.serviceName')"-->
+<!--                        maxlength="20"-->
+<!--                        outlined-->
+<!--                        dense-->
+<!--                        :rules="[-->
+<!--                          (val) => !!val || t('verifyMessage.dataNotNull'),-->
+<!--                          (val) => val.length <= 20 || t('verifyMessage.dataLenNotMax') + '20',-->
+<!--                        ]"-->
+<!--                      />-->
 
                       <q-item tag="label" v-ripple dense>
                         <q-item-section>
@@ -162,7 +174,7 @@
                       </q-select>
 
                       <q-input
-                        v-if="newWSL.wslDistribution === 'custom'"
+                        v-if="newWSL.wslDistribution === 'Custom'"
                         filled
                         bottom-slots
                         v-model="newWSL.localImagePath"
@@ -179,7 +191,7 @@
                         </template>
 
                         <template v-slot:after>
-                          <q-btn round dense flat icon="add_circle_outline" />
+                          <q-btn round dense flat icon="add_circle_outline" @click="onSelect" />
                         </template>
                       </q-input>
 
@@ -188,7 +200,6 @@
                         v-if="!newWSL.root"
                         v-model="newWSL.username"
                         :label="t('wsl.username')"
-                        type="password"
                         maxlength="50"
                         outlined
                         dense
@@ -198,7 +209,6 @@
                         class="q-mb-sm"
                         v-model="newWSL.password"
                         :label="t('wsl.password')"
-                        type="password"
                         maxlength="50"
                         outlined
                         dense
@@ -234,14 +244,17 @@
 <script setup>
 import { inject, reactive, ref, onMounted } from 'vue'
 import VM from 'src/components/VM.vue'
-import { parseWSLListVersion } from 'src/utils/wsl.js'
+import { parseWSLListVersion, parseDistributionList } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
+import { isEmptyStr } from 'src/utils/common.js'
 
 const $q = inject('$q')
 const router = inject('router')
 const route = inject('route')
 const t = inject('t')
 const deviceInfo = inject("deviceInfo")
+
+let notify = ref(null)
 
 const splitterStyle = reactive({
   height:
@@ -279,11 +292,10 @@ const vms = reactive([
   // },
 ])
 
-const selected = ref('')
 const appxList = reactive([
-  { label: 'ubuntu', value: 'ubuntu', desc: 'Ubuntu' },
-  { label: 'debian', value: 'debian', desc: 'Debian' },
-  { label: t('wsl.customImage'), value: 'custom', desc: 'Custom Image' },
+  { label: 'ubuntu', value: 'Ubuntu', desc: 'Ubuntu' },
+  { label: 'debian', value: 'Debian', desc: 'Debian' },
+  { label: t('wsl.customImage'), value: 'Custom', desc: 'Custom Image' },
 ])
 
 const filterFn = (val, update, abort) => {
@@ -304,9 +316,18 @@ const newWSL = reactive({
   startNow: false,
   wslDistribution: null,
   localImagePath: '',
-  username: '',
-  password: '',
+  username: 'user',
+  password: 'user',
 })
+const clearNewWSL = () => {
+  newWSL.name = ''
+  newWSL.root = false
+  newWSL.startNow = false
+  newWSL.wslDistribution = null
+  newWSL.localImagePath = ''
+  newWSL.username = 'user'
+  newWSL.password = 'user'
+}
 
 const updateChild = (data) => {
   vms.forEach((vm) => {
@@ -335,7 +356,6 @@ const changeDebugConsole = (value) => {
         message: `${t('wsl.configModifyFail')}: ${result.error}`
       })
     }
-
   })
 }
 
@@ -371,7 +391,7 @@ const onWslStatusBtn = () => {
 
 const onDelete = (name) => {
   for (let index in vms) {
-    if (vms[index].name === name) {
+    if (vms[index].servername === name) {
       vms.splice(index, 1)
       break
     }
@@ -395,6 +415,89 @@ const getWSLListInterval = setInterval(() => {
     }
   })
 }, 30000)
+
+const onSelect = async() => {
+  const files = await window.myWindowAPI.selectFiles()
+  try {
+    if (files.length === 0) {
+      return
+    }
+  } catch (err) {
+    return
+  }
+
+  newWSL.localImagePath = files[0]
+}
+
+const onCreate = () => {
+  if (isEmptyStr(newWSL.name) || newWSL.name.length > 20) {
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: `${t('wsl.nameNotNull')}`
+    })
+  }
+
+  if (isEmptyStr(newWSL.wslDistribution)) {
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: `${t('wsl.distributionNotNull')}`
+    })
+  }
+
+  if (newWSL.wslDistribution === "Custom" && isEmptyStr(newWSL.localImagePath)) {
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: `${t('wsl.distributionNotNull')}`
+    })
+  }
+
+  window.wslTerminal.installWSL(JSON.stringify(newWSL)).then((result) => {
+    console.log(result)
+    if (result.success) {
+      notify.value({
+        type: 'positive',
+        icon: 'done',
+        spinner: false,
+        message: `${t('assistant.installSuccess')}`,
+        timeout: 3000
+      })
+
+      clearNewWSL()
+    } else {
+      notify.value({
+        type: 'negative',
+        icon: 'done',
+        spinner: false,
+        message: `${t('assistant.installFail')}: ${result.error}`,
+        timeout: 3000
+      })
+    }
+  })
+
+  notify.value = $q.notify({
+    type: 'info',
+    group: false,
+    timeout: 0,
+    spinner: true,
+    position: 'bottom-right',
+    message: t('assistant.installing'),
+  })
+
+  window.wslTerminal.receive((data) => {
+    console.log(data)
+    if (Object.prototype.hasOwnProperty.call(data, 'exitCode') && data['exitCode'] === 0) {
+      notify.value({
+        type: 'positive',
+        icon: 'done',
+        spinner: false,
+        timeout: 3000
+      })
+    }
+  })
+}
 
 const init = () => {
   if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32") {
@@ -431,6 +534,16 @@ const init = () => {
       }
     })
 
+    window.wslTerminal.getDistributionList().then((result) => {
+      if (result.success) {
+        const tmp = appxList[appxList.length - 1]
+        appxList.length = 0
+        parseDistributionList(result.data).forEach((item) => {
+          appxList.push(item)
+        })
+        appxList.push(tmp)
+      }
+    })
   }
 }
 

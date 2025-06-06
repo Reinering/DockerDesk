@@ -70,13 +70,15 @@ export default {
     start: "启动",
     stop: "停止",
 
-
     upgradeSuccess: "升级成功",
-    upgradeError: "升级失败",
+    upgradeFail: "升级失败",
     startSuccess: "启动成功",
-    startError: "启动失败",
+    startFail: "启动失败",
     stopSuccess: "停止成功",
-    stopError: "停止失败",
+    stopFail: "停止失败",
+    installing: "正在安装",
+    installSuccess: "安装成功",
+    installFail: "安装失败",
   },
 
   wsl: {
@@ -128,6 +130,10 @@ export default {
     movingFail: "迁移失败",
     configModifySuccess: "配置修改成功",
     configModifyFail: "配置修改失败",
+
+    nameNotNull: "名称不能为空或超过长度",
+    distributionNotNull: "WSL发行版不能为空",
+    localImageNotNull: "本地镜像文件不能为空"
 
 
   },

@@ -75,11 +75,14 @@ export default {
     stop: "Stop",
 
     upgradeSuccess: "Upgrade Successfully",
-    upgradeError: "Upgrade Error",
+    upgradeFail: "Upgrade Failure",
     startSuccess: "Start Successfully",
-    startError: "Start Error",
+    startFail: "Start Failure",
     stopSuccess: "Stop Successfully",
-    stopError: "Stop Error",
+    stopFail: "Stop Failure",
+    installing: "Installing",
+    installSuccess: "Install Successfully",
+    installFail: "Install Failure",
 
   },
 
@@ -132,6 +135,9 @@ export default {
     configModifySuccess: "Configuration Modification Successful",
     configModifyFail: "Configuration modification Failure",
 
+    nameNotNull: "The name cannot be empty or exceed the length",
+    distributionNotNull: "WSL distribution version cannot be empty",
+    localImageNotNull: "The local image file cannot be empty"
   },
 
   // Node
