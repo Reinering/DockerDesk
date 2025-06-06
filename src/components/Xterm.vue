@@ -29,7 +29,7 @@ defineOptions({
   name: 'Xterm',
 })
 
-import { inject, ref, onMounted, onBeforeUnmount, nextTick, watch, reactive } from 'vue'
+import { inject, ref, onMounted, onBeforeUnmount, nextTick, watch, reactive, onActivated, onDeactivated } from 'vue'
 import { Terminal } from "@xterm/xterm"
 import { FitAddon } from "@xterm/addon-fit"
 import '@xterm/xterm/css/xterm.css'
@@ -318,12 +318,20 @@ onMounted(async () => {
   fitAddon.fit()
   setupResizeObserver()
 
-  window.addEventListener('keydown', handleKeyDown)
+  // window.addEventListener('keydown', handleKeyDown)
 })
 
 onBeforeUnmount(() => {
   destroyTerminal()
 
+  window.removeEventListener('keydown', handleKeyDown)
+})
+
+onActivated(() => {
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onDeactivated(() => {
   window.removeEventListener('keydown', handleKeyDown)
 })
 
