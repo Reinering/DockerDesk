@@ -280,8 +280,8 @@ export class CmdRunner {
 }
 
 
-export function devConsole (text, debug=false) {
+export function devConsole (text, debug=true) {
   if (debug) {
-    console.log()
+    console.log(text)
   }
 }

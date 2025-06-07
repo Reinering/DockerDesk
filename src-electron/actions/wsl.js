@@ -40,7 +40,7 @@ export async function wslInstallSubSystem () {
 }
 
 export async function installWSL (win, data) {
-  const cmdRunner = new WslCmdRunner(win, {encoding: 'utf8'})
+  const cmdRunner = new WslCmdRunner(win, )
 
   let command = []
   command.push("--install")

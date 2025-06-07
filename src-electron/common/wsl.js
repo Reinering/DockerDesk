@@ -13,7 +13,7 @@ export class WslCmdRunner {
   async setupWslUser(command, username, password) {
     // 监听输出并匹配提示
     return new Promise((resolve, reject) => {
-      console.log('🚀 启动 WSL 安装:', 'wsl', command.join(' '))
+      devConsole('🚀 启动 WSL 安装:', 'wsl', command.join(' '))
 
       const wslProcess = spawn('wsl', command, {
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -21,8 +21,8 @@ export class WslCmdRunner {
       })
 
       // 设置编码
-      wslProcess.stdout.setEncoding(this.encoding)
-      wslProcess.stderr.setEncoding(this.encoding)
+      // wslProcess.stdout.setEncoding(this.encoding)
+      // wslProcess.stderr.setEncoding(this.encoding)
 
       let allOutput = ''
       let lastOutput = ''
@@ -32,9 +32,10 @@ export class WslCmdRunner {
 
       // 处理所有输出的通用函数
       const processOutput = (data, source) => {
-        const text = data.toString()
+        lastOutput = data
+        const text = data.toString("utf8")
         allOutput += text
-        lastOutput = text
+
 
         devConsole(`[${source}] ${text.trim()}`, this.debug)
 
@@ -98,7 +99,7 @@ export class WslCmdRunner {
         if (confirmPasswordSent || code === 0) {
           resolve('WSL Installed complete')
         } else {
-          reject(new Error(`WSL exitCode: ${code} ${lastOutput}`))
+          reject(new Error(`WSL exitCode: ${code} ${lastOutput.toString('utf16le')}`))
         }
       })
 
