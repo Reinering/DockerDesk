@@ -37,7 +37,7 @@
             :terminal-id="item.id"
             :data="item.data"
             :ref="(el) => (xtermRefs[item.id] = el)"
-            :style="cardStyle"
+            :style="xtermStyle"
           />
         </q-tab-panel>
       </q-tab-panels>
@@ -118,7 +118,7 @@ const background = reactive({
   height: window.innerHeight - 70 + "px"
 })
 
-const cardStyle = reactive({
+const xtermStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 151 + "px" : window.innerHeight - 70 + "px",
 })
 
@@ -151,15 +151,15 @@ const showCmdBar = () => {
   isShowCmdBar.value = ! isShowCmdBar.value
   if (isShowCmdBar.value) {
     if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 230 - 66 - 5 + "px"
+      xtermStyle.height = window.innerHeight - 230 - 66 - 5 + "px"
     } else {
-      cardStyle.height = window.innerHeight - 222 - 42 - 5 + "px"
+      xtermStyle.height = window.innerHeight - 222 - 42 - 5 + "px"
     }
   } else {
     if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 151 + "px"
+      xtermStyle.height = window.innerHeight - 151 + "px"
     } else {
-      cardStyle.height = window.innerHeight - 70 + "px"
+      xtermStyle.height = window.innerHeight - 70 + "px"
     }
   }
 }
@@ -211,15 +211,15 @@ const checkScreenSize = () => {
 
   if (isShowCmdBar.value) {
     if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 230 - 66 - 5 + "px"
+      xtermStyle.height = window.innerHeight - 230 - 66 - 5 + "px"
     } else {
-      cardStyle.height = window.innerHeight - 222 - 42 - 5 + "px"
+      xtermStyle.height = window.innerHeight - 222 - 42 - 5 + "px"
     }
   } else {
     if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 151 + "px"
+      xtermStyle.height = window.innerHeight - 151 + "px"
     } else {
-      cardStyle.height = window.innerHeight - 70 + "px"
+      xtermStyle.height = window.innerHeight - 70 + "px"
     }
   }
 
@@ -288,6 +288,7 @@ watch(tabs, (newVal, oldVal) => {
   if (tabs.length === 0) {
     isShowCmdBar.value = false
     isShowSettingsDialog.value = false
+    checkScreenSize()
   } else {
     for (let i = 0; i < tabs.length; i++) {
 
@@ -299,6 +300,8 @@ watch(tabs, (newVal, oldVal) => {
 watch(tab, (newVal, oldVal) => {
   if (isEmptyObj(newVal)) {
     isShowSettingsDialog.value = false
+    isShowSettingsDialog.value = false
+    checkScreenSize()
   } else {
     for (let i = 0; i < tabs.length; i++) {
       if (tabs[i].id === newVal) {

@@ -124,8 +124,8 @@
         </q-form>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="primary" @click="submitCmdGroup" />
         <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="closeGroupDialog" />
+        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="primary" @click="submitCmdGroup" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -173,8 +173,8 @@
         </q-form>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="primary" @click="submitCmd" />
         <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="closeCmdDialog" />
+        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="primary" @click="submitCmd" />
       </q-card-actions>
     </q-card>
   </q-dialog>
