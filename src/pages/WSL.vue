@@ -222,29 +222,52 @@
             </q-tab-panel>
 
             <q-tab-panel name="settings">
-              <div>
-                <q-item tag="label" v-ripple dense>
-                  <q-item-section>
-                    <q-item-label>WSL Debug Console</q-item-label>
-                    <q-item-label caption>{{t('wsl.display')}}</q-item-label>
-                  </q-item-section>
-                  <q-item-section avatar>
-                    <q-toggle color="green" v-model="isDebugConsole" @update:model-value="changeDebugConsole"/>
-                  </q-item-section>
-                </q-item>
+              <q-splitter v-model="splitterModel1" :limits="[50, 50]" style="height: 100%">
+                <template v-slot:before>
+                  <q-list class="q-pa-md">
+                    <q-item tag="label" v-ripple dense>
+                      <q-item-section>
+                        <q-item-label>WSL Debug Console</q-item-label>
+                        <q-item-label caption>{{t('wsl.display')}}</q-item-label>
+                      </q-item-section>
+                      <q-item-section avatar>
+                        <q-toggle color="green" v-model="isDebugConsole" @update:model-value="changeDebugConsole"/>
+                      </q-item-section>
+                    </q-item>
 
-              </div>
+                  </q-list>
+                </template>
+                <template v-slot:after>
+                  <q-list class="q-pa-md">
+                    <q-item tag="label" v-ripple dense>
+                      <q-item-section>
+                        <q-item-label>Proxy Settings</q-item-label>
+                      </q-item-section>
+                      <q-item-section avatar>
+                        <q-btn dense round flat color="white" text-color="primary" icon="edit" size="md" @click="onProxyEdit" >
+                          <q-tooltip class="bg-amber text-black shadow-4">
+                            {{t('wsl.edit')}}
+                          </q-tooltip>
+                        </q-btn>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </template>
+              </q-splitter>
             </q-tab-panel>
           </q-tab-panels>
         </template>
       </q-splitter>
     </div>
   </q-page>
+
+  <ProxySettingDialog v-model="showProxySettingsDialog" />
 </template>
 
 <script setup>
 import { inject, reactive, ref, onMounted } from 'vue'
 import VM from 'src/components/VM.vue'
+import ProxySettingDialog from 'components/dialog/ProxySettingDialog.vue'
 import { parseWSLListVersion, parseDistributionList } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
 import { isEmptyStr } from 'src/utils/common.js'
@@ -397,6 +420,11 @@ const onDelete = (name) => {
       break
     }
   }
+}
+
+const showProxySettingsDialog = ref(false)
+const onProxyEdit = () => {
+  showProxySettingsDialog.value = !showProxySettingsDialog.value
 }
 
 const getWSLList = () => {
