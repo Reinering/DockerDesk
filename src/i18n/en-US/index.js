@@ -108,7 +108,7 @@ export default {
     create: "Create",
     wslName: "Name",
     rootPrivilege: "Machine with root privileges",
-    startNow: "Start Now",
+    startNow: "Need to set username/password, please turn on",
 
     wslDistribution: "WSL Distribution",
     customImage: "Custom Image",
@@ -124,6 +124,7 @@ export default {
     stopFail: "Stop Failure",
     restartSuccess: "Restart Successfully",
     restartFail: "Restart Failure",
+    deleteMessage: "Are you sure to delete?",
     deleteSuccess: "Delete Successfully",
     deleteFail: "Delete Failure",
     exporting: "Exporting",

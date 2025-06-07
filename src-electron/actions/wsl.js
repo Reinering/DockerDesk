@@ -49,6 +49,9 @@ export async function installWSL (win, data) {
   command.push("--name")
   command.push(data.name)
 
+  let username = ''
+  let password = ''
+
   if (data.wslDistribution !== "Custom") {
     if (!data.startNow) {
       command.push("--no-launch")
@@ -61,16 +64,17 @@ export async function installWSL (win, data) {
     }
   }
 
-  console.log(command)
-  let result
   try {
-    if (data.root) {
-      result = await cmdRunner.setupWslUser(command, 'root', data.password)
-    } else {
-      result = cmdRunner.setupWslUser(command, data.username, data.password)
+    if (data.startNow) {
+      if (data.root) {
+        username = 'root'
+      } else {
+        username = data.username
+      }
+      password = data.password
     }
-    await cmdRunner.stop()
-    return result
+
+    return await cmdRunner.setupWslUser(command, username, password)
   } catch (error) {
     return new Promise((resolve, reject) => {
       reject(error)

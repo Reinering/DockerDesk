@@ -115,10 +115,10 @@
             icon="more_horiz"
             size="sm"
           >
-            <q-list :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
+            <q-list dense :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
               <q-item clickable v-close-popup size="sm" @click="onDelete">
                 <q-item-section>
-                  <q-icon name="delete" color="teal-9" />
+                  <q-icon name="delete" color="red" />
                   <q-tooltip class="bg-amber text-black shadow-4">
                     {{t('wsl.delete')}}
                   </q-tooltip>
@@ -222,9 +222,9 @@ const templates = [
 ]
 
 const wslStatus = reactive({
-  cpuValue: '',
-  memoryValue: '',
-  diskValue: '',
+  cpuValue: 0,
+  memoryValue: 0,
+  diskValue: 0,
 })
 
 const isStart = ref(false)
@@ -240,11 +240,13 @@ const changeState = (newVal) => {
     isStart.value = true
     isStop.value = false
     isRestart.value = false
+    isMore.value = false
   } else if (newVal === "Stopped") {
     color.value = "red"
     isStart.value = false
     isStop.value = true
     isRestart.value = true
+    isMore.value = false
   } else {
     color.value = "yellow"
     isStart.value = true
@@ -324,24 +326,37 @@ const onRestart = () => {
   emit('update:value', {name: props.data.servername, state: "Stopped"})
 }
 const onDelete = () => {
-  window.wslTerminal.deleteWSL({
-    name: props.data.servername
-  }).then((result) => {
-    if (result.success) {
-      props.onDelete(props.data.name)
+  $q.dialog({
+    title: t('confirm'),
+    message: t('wsl.deleteMessage'),
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk(() => {
+    window.wslTerminal.deleteWSL({
+      name: props.data.servername
+    }).then((result) => {
+      if (result.success) {
+        props.onDelete(props.data.servername)
 
-      $q.notify({
-        type: 'positive',
-        position: clientConfig.quasar.notify.position,
-        message: t('wsl.deleteSuccess')
-      })
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('wsl.deleteFail')}: ${props.data.servername}: ${result.error}`
-      })
-    }
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('wsl.deleteSuccess')
+        })
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('wsl.deleteFail')}: ${props.data.servername}: ${result.error}`
+        })
+      }
+    })
   })
 }
 const onTerminal = () => {
@@ -395,7 +410,7 @@ const onExport = async () => {
       })
     } else {
       notify.value({
-        type: 'positive',
+        type: 'negative',
         icon: 'done',
         spinner: false,
         message: `${t('wsl.exportFail')}: ${props.data.servername}: ${result.error}`,
@@ -437,7 +452,7 @@ const onMove = async () => {
       })
     } else {
       notify.value({
-        type: 'positive',
+        type: 'negative',
         icon: 'done',
         spinner: false,
         message: `${t('wsl.movingFail')}: ${props.data.servername}: ${result.error}`,

@@ -197,7 +197,7 @@
 
                       <q-input
                         class="q-mb-sm"
-                        v-if="!newWSL.root"
+                        v-if="!newWSL.root && newWSL.startNow"
                         v-model="newWSL.username"
                         :label="t('wsl.username')"
                         maxlength="50"
@@ -207,6 +207,7 @@
 
                       <q-input
                         class="q-mb-sm"
+                        v-if="newWSL.startNow"
                         v-model="newWSL.password"
                         :label="t('wsl.password')"
                         maxlength="50"
@@ -398,7 +399,7 @@ const onDelete = (name) => {
   }
 }
 
-const getWSLListInterval = setInterval(() => {
+const getWSLList = () => {
   window.wslTerminal.getWSLList().then((result) => {
     if (result.success) {
       const data = parseWSLListVersion(result.data)
@@ -414,6 +415,10 @@ const getWSLListInterval = setInterval(() => {
       }
     }
   })
+}
+
+const getWSLListInterval = setInterval(() => {
+  getWSLList()
 }, 30000)
 
 const onSelect = async() => {
@@ -462,17 +467,18 @@ const onCreate = () => {
         icon: 'done',
         spinner: false,
         message: `${t('assistant.installSuccess')}`,
-        timeout: 3000
+        timeout: 10000
       })
 
       clearNewWSL()
+      getWSLList()
     } else {
       notify.value({
         type: 'negative',
         icon: 'done',
         spinner: false,
         message: `${t('assistant.installFail')}: ${result.error}`,
-        timeout: 3000
+        timeout: 10000
       })
     }
   })
@@ -484,18 +490,6 @@ const onCreate = () => {
     spinner: true,
     position: 'bottom-right',
     message: t('assistant.installing'),
-  })
-
-  window.wslTerminal.receive((data) => {
-    console.log(data)
-    if (Object.prototype.hasOwnProperty.call(data, 'exitCode') && data['exitCode'] === 0) {
-      notify.value({
-        type: 'positive',
-        icon: 'done',
-        spinner: false,
-        timeout: 3000
-      })
-    }
   })
 }
 
@@ -509,21 +503,7 @@ const init = () => {
           wslStatusBtn.value = t('assistant.installed')
           disabledWslStatusBtn.value = true
 
-          window.wslTerminal.getWSLList().then((result) => {
-            if (result.success) {
-              const data = parseWSLListVersion(result.data)
-
-              for (let index in data) {
-                vms.push({
-                  nodeId: vms.length + 1,
-                  templateId: 1,
-                  servername: data[index].name,
-                  description: data[index].name,
-                  state: data[index].state,
-                })
-              }
-            }
-          })
+          getWSLList()
         } else {
           clearInterval(getWSLListInterval)
           wslStatusBtn.value = t('assistant.needUpgrade')

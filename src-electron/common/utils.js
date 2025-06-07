@@ -278,3 +278,10 @@ export class CmdRunner {
     return results
   }
 }
+
+
+export function devConsole (text, debug=false) {
+  if (debug) {
+    console.log()
+  }
+}

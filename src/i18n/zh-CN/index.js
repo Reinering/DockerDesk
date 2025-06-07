@@ -103,7 +103,7 @@ export default {
     create: "创建",
     wslName: "名称",
     rootPrivilege: "使用Root权限",
-    startNow: "立即启动",
+    startNow: "安装时设置用户名密码，请开启",
 
     wslDistribution: "WSL 发行版",
     distributionName: "",
@@ -120,6 +120,7 @@ export default {
     stopFail: "停止失败",
     restartSuccess: "重启成功",
     restartFail: "重启失败",
+    deleteMessage: "确认删除吗？",
     deleteSuccess: "删除成功",
     deleteFail: "删除失败",
     exporting: "正在导出",
