@@ -65,12 +65,15 @@ export default {
   assistant: {
     local: "Local",
     remote: "Remote",
+    settings: "Settings",
+    install: "Install",
 
     addService: "Add Service",
     installed: "Installed",
     notInstalled: "Not installed",
     needUpgrade: "Need to upgrade",
     addSubSystem: "Add SubSystem",
+    addPackage: "Add Package",
     start: "Start",
     stop: "Stop",
 
@@ -83,6 +86,15 @@ export default {
     installing: "Installing",
     installSuccess: "Install Successfully",
     installFail: "Install Failure",
+    installMessage: "System installation completed, initializing..."
+
+  },
+
+  asslocal: {
+    install: "Install",
+    settings: "Settings",
+    notInstalled: "Not Installed",
+
 
   },
 
@@ -117,6 +129,7 @@ export default {
     password: "Password",
 
     display: "Display",
+    edit: "Edit",
 
     startSuccess: "Start Successfully",
     startFail: "Start Failure",

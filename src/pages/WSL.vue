@@ -265,7 +265,7 @@
 </template>
 
 <script setup>
-import { inject, reactive, ref, onMounted } from 'vue'
+import { inject, reactive, ref, onMounted, onActivated, onDeactivated, onUnmounted } from 'vue'
 import VM from 'src/components/VM.vue'
 import ProxySettingDialog from 'components/dialog/ProxySettingDialog.vue'
 import { parseWSLListVersion, parseDistributionList } from 'src/utils/wsl.js'
@@ -445,9 +445,7 @@ const getWSLList = () => {
   })
 }
 
-const getWSLListInterval = setInterval(() => {
-  getWSLList()
-}, 30000)
+let getWSLListInterval = null
 
 const onSelect = async() => {
   const files = await window.myWindowAPI.selectFiles()
@@ -532,13 +530,18 @@ const init = () => {
           disabledWslStatusBtn.value = true
 
           getWSLList()
+          getWSLListInterval = setInterval(() => {
+            getWSLList()
+          }, 30000)
         } else {
-          clearInterval(getWSLListInterval)
           wslStatusBtn.value = t('assistant.needUpgrade')
+          clearInterval(getWSLListInterval)
+          getWSLListInterval = null
         }
       } else {
-        clearInterval(getWSLListInterval)
         wslStatusBtn.value = t('assistant.notInstalled')
+        clearInterval(getWSLListInterval)
+        getWSLListInterval = null
       }
     })
 
@@ -574,8 +577,28 @@ onMounted(() => {
   }
 
   init()
+})
+
+onActivated(() => {
+  if (getWSLListInterval !== null) {
+    getWSLList()
+
+    getWSLListInterval = setInterval(() => {
+      getWSLList()
+    }, 30000)
+  }
+})
+
+onDeactivated(() => {
+  if (getWSLListInterval !== null) {
+    clearInterval(getWSLListInterval)
+  }
+})
+
+onUnmounted(() => {
 
 })
+
 </script>
 
 <style scoped></style>

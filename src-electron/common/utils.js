@@ -5,6 +5,8 @@ import os from 'node:os'
 import iconv from 'iconv-lite'
 import ini from 'ini'
 
+const dev = true
+
 
 // 获取总内存（单位：字节）
 export const totalMemory = os.totalmem()
@@ -77,6 +79,12 @@ export function isLocalExists(localPath, callback) {
   })
 }
 
+export function devConsole (text, debug=dev) {
+  if (debug) {
+    console.log(text)
+  }
+}
+
 export async function modifyIniConfig(data, file) {
   let configContent
   try {
@@ -132,18 +140,19 @@ export function cmd(command, encoding='cp936') {
   if (command instanceof Array) {
     command = command.join(' ')
   }
-
+  console.log("command", command)
   return new Promise((resolve, reject) => {
     exec(command, { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }, (error, stdout, stderr) => {
-      if (error) {
-        // console.error(`error: ${error}`)
+      if (error && error.code !== 0) {
+        devConsole(`error: ${error.message.toString('utf8')}`)
         return reject(isWindows ? iconv.decode(error.message, encoding) : error.message.toString('utf8'))
       }
       if (stderr && stderr.length > 0) {
-        // console.error(`stderr: ${stderr}`)
+        devConsole(`stderr: ${stderr.toString('utf8')}`)
         return reject(isWindows ? iconv.decode(stderr, encoding) : stderr.toString('utf8'))
       }
-      // console.log(`stdout: ${stdout}.toString('utf8')`)
+
+      devConsole(`stdout: ${stdout.toString('utf8')}`)
       return resolve(isWindows ? iconv.decode(stdout, encoding) : stderr.toString('utf8'))
     })
   })
@@ -280,8 +289,4 @@ export class CmdRunner {
 }
 
 
-export function devConsole (text, debug=true) {
-  if (debug) {
-    console.log(text)
-  }
-}
+

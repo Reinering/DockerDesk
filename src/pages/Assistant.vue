@@ -19,7 +19,7 @@
         <q-card-section />
 
         <q-card-actions class="q-mt-none" align="center">
-          <q-btn :label="t('assistant.addService')" color="primary" size="lg" @click="gotoAss2" />
+          <q-btn color="primary" size="lg" icon="settings" @click="gotoAss2" />
         </q-card-actions>
       </q-card>
 
@@ -35,7 +35,7 @@
         <q-card-section />
 
         <q-card-actions class="q-mt-none" align="center">
-          <q-btn :label="t('assistant.addService')" color="primary" size="lg" @click="gotoAss2" />
+          <q-btn color="primary" icon="settings" size="lg" @click="gotoAss2" />
         </q-card-actions>
       </q-card>
     </div>
@@ -90,6 +90,7 @@
 import { ref, inject, onMounted } from 'vue'
 import { clientConfig } from 'src/common/config.js'
 import { parseWSLListVersion } from 'src/utils/wsl.js'
+import { isEmptyObj } from 'src/utils/common.js'
 
 
 const $q = inject('$q')
@@ -104,10 +105,66 @@ const gotoAss2 = () => {
 
 let notify = ref(null)
 
+const debianSourcesLines = [
+  'deb https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib',
+  'deb-src https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib',
+  'deb https://mirrors.aliyun.com/debian-security/ bookworm-security main',
+  'deb-src https://mirrors.aliyun.com/debian-security/ bookworm-security main',
+  'deb https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib',
+  'deb-src https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib',
+  'deb https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib',
+  'deb-src https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib'
+]
+
+const printfContent = debianSourcesLines.join('\\n') + '\\n'
+
 const wslStatusBtn = ref(t('assistant.notInstalled'))
 const disabledWslStatusBtn = ref(false)
 const wslStatus = ref('Stopped')
 const wslStatusColor = ref('red')
+
+const installWSLPackage = () => {
+  window.wslTerminal.execSWSL([
+    ['-d', "DockerDesk", '--user', "root", '-e', "apt-get update"],
+    ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https ca-certificates"],
+    ['-d', "DockerDesk", '--user', "root", '-e', "mv /etc/apt/sources.list /etc/apt/sources.list.bak"],
+    ['-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c', `"printf '${printfContent}' > /etc/apt/sources.list"`],
+    ['-d', "DockerDesk", '--user', "root", '-e', "apt-get update"],
+    ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y curl"]
+  ]).then((result) => {
+    console.log(result)
+    if (result.success) {
+      notify.value({
+        type: 'positive',
+        group: false,
+        spinner: false,
+        message: `${t('assistant.installSuccess')}`,
+        timeout: 10000
+      })
+
+      wslStatusBtn.value = t('assistant.start')
+    } else {
+      notify.value({
+        type: 'negative',
+        icon: 'done',
+        spinner: false,
+        message: `${t('assistant.installFail')}: ${result.error}`,
+        timeout: 10000
+      })
+    }
+  })
+
+  if (isEmptyObj(notify.value)) {
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('assistant.installing'),
+    })
+  }
+}
 
 const onWslStatusBtn = () => {
   if (wslStatusBtn.value === t('assistant.notInstalled')) {
@@ -133,20 +190,26 @@ const onWslStatusBtn = () => {
   }  else if (wslStatusBtn.value === t('assistant.addSubSystem')) {
     window.wslTerminal.installSubSystem().then((result) => {
       if (result.success) {
+        wslStatusBtn.value === t('assistant.addPackage')
+        wslStatusColor.value = "red"
         notify.value({
-          type: 'positive',
-          icon: 'done',
-          spinner: false,
-          message: `${t('assistant.installSuccess')}`,
-          timeout: 3000
+          type: 'info',
+          group: false,
+          spinner: true,
+          message: `${t('assistant.installMessage')}`,
+          timeout: 0
         })
+
+        installWSLPackage()
+      }else if (wslStatusBtn.value === t('assistant.addPackage')) {
+        installWSLPackage()
       } else {
         notify.value({
-          type: 'positive',
+          type: 'negative',
           icon: 'done',
           spinner: false,
           message: `${t('assistant.installFail')}: ${result.error}`,
-          timeout: 3000
+          timeout: 10000
         })
       }
     })
@@ -218,8 +281,10 @@ const init = () => {
                 if (data[index].name === "DockerDesk") {
                   if (data[index].state === "Stopped") {
                     wslStatusBtn.value = t('assistant.start')
+                    wslStatusColor.value = "red"
                   } else if (data[index].state === "Running") {
                     wslStatusBtn.value = t('assistant.stop')
+                    wslStatusColor.value = "green"
                   }
                   return
                 }
@@ -234,6 +299,7 @@ const init = () => {
         wslStatusBtn.value = t('assistant.notInstalled')
       }
     })
+
   }
 }
 

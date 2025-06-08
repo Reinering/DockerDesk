@@ -61,12 +61,15 @@ export default {
   assistant: {
     local: "本地",
     remote: "远程",
+    settings: "管理服务",
+    install: "安装",
 
     addService: "添加服务",
     installed: "已安装",
     notInstalled: "未安装",
     needUpgrade: "需要升级",
     addSubSystem: "添加子系统",
+    addPackage: "添加模块",
     start: "启动",
     stop: "停止",
 
@@ -79,6 +82,14 @@ export default {
     installing: "正在安装",
     installSuccess: "安装成功",
     installFail: "安装失败",
+    installMessage: "子系统安装完成，正在初始化..."
+  },
+
+  asslocal: {
+    install: "安装",
+    settings: "设置",
+    notInstalled: "Docker未安装",
+
   },
 
   wsl: {
@@ -113,6 +124,7 @@ export default {
     password: "密码",
 
     display: "显示",
+    edit: "编辑",
 
     startSuccess: "启动成功",
     startFail: "启动失败",

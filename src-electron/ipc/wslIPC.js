@@ -1,6 +1,6 @@
-import { ipcMain, dialog } from 'electron'
+import { ipcMain } from 'electron'
 import {
-  modifyWSLDebugConfig,
+  modifyWSLDebugConfig, execSubSystem, execSSubSystem,
   getWSLInfo, getWSLList, wslUpdate,
   wslInstallSubSystem, installWSL, startSubSystem, stopSubSystem, restartSubSystem,
   unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList
@@ -138,5 +138,25 @@ export function registerWSLIpcHandlers(win) {
     }, (error) => {
       return { success: false, error: error }
     })
+  }),
+
+  ipcMain.handle('execWSL', async (event, command) => {
+    return execSubSystem(command).then((data) => {
+      return { success: true, data: data, error: '' }
+    }, (error) => {
+      return { success: false, error: error }
+    })
+  })
+
+  ipcMain.handle('execSWSL', async (event, commands) => {
+    try {
+      return execSSubSystem(commands).then((data) => {
+        return { success: true, data: data, error: '' }
+      }, (error) => {
+        return { success: false, error: error }
+      })
+    } catch (err) {
+      return { success: false, error: err }
+    }
   })
 }
