@@ -117,12 +117,12 @@ export async function unregisterSubSystem (name) {
 
 export async function exportSubSystem (name, distDir) {
   const filename = path.join(distDir, `${name}.tar`)
-  return cmd(`wsl --export ${name} ${filename}`, 'utf16le')
+  return cmd(`wsl --export ${name} "${filename}"`, 'utf16le')
 }
 
 export async function moveSubSystem (name, distDir) {
   const folder = path.join(distDir, `${name}`)
-  return cmd(`wsl --manage ${name} --move ${folder}`, 'utf16le')
+  return cmd(`wsl --manage ${name} --move "${folder}"`, 'utf16le')
 }
 
 export async function execSubSystem (command) {
