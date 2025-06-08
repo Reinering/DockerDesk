@@ -7,7 +7,7 @@
         <div class="q-ma-md row justify-evenly">
           <q-card class="bg-light-blue q-ma-md q-pa-md" style="width: 200px; height: 200px;">
             <div class="column items-center">
-              <q-icon name="img:src/static/png/docker-512x512.png" style="width: 80px; height: 80px;" />
+              <q-icon :name="`img:${dockerIconPath}`" style="width: 80px; height: 80px;" />
               <div class="text-h6">Docker</div>
             </div>
 
@@ -22,7 +22,7 @@
 
           <q-card class="bg-grey-6 q-ma-md q-pa-md"  style="width: 200px; height: 200px;">
             <div class="column items-center">
-              <q-icon name="img:src/static/png/podman-512x512.png" style="width: 80px; height: 80px;" />
+              <q-icon :name="`img:${podmanIconPath}`"  style="width: 80px; height: 80px;" />
               <div class="text-h6">Podman</div>
             </div>
 
@@ -36,35 +36,37 @@
         </div>
       </q-card>
 
-      <q-card>
-        <div class="q-pa-md flex flex-center">
-          <q-knob
-            readonly
-            v-model="cpuValue"
-            show-value
-            size="90px"
-            :thickness="0.22"
-            color="light-blue-9"
-            track-color="cyan-12"
-            class="text-light-blue-9 q-ma-md"
-          >
-            {{ cpuValue }}%
-          </q-knob>
+<!--      <q-card>-->
+<!--        <div class="q-pa-md flex flex-center">-->
+<!--          <q-knob-->
+<!--            readonly-->
+<!--            v-model="cpuValue"-->
+<!--            show-value-->
+<!--            size="90px"-->
+<!--            :thickness="0.22"-->
+<!--            color="light-blue-9"-->
+<!--            track-color="cyan-12"-->
+<!--            class="text-light-blue-9 q-ma-md"-->
+<!--          >-->
+<!--            {{ cpuValue }}%-->
+<!--          </q-knob>-->
 
-          <q-knob
-            readonly
-            v-model="memoryValue"
-            show-value
-            size="90px"
-            :thickness="0.22"
-            color="orange"
-            track-color="orange-3"
-            class="text-orange q-ma-md"
-          >
-            {{ memoryValue }}%
-          </q-knob>
-        </div>
-      </q-card>
+<!--          <q-knob-->
+<!--            readonly-->
+<!--            v-model="memoryValue"-->
+<!--            show-value-->
+<!--            size="90px"-->
+<!--            :thickness="0.22"-->
+<!--            color="orange"-->
+<!--            track-color="orange-3"-->
+<!--            class="text-orange q-ma-md"-->
+<!--          >-->
+<!--            {{ memoryValue }}%-->
+<!--          </q-knob>-->
+<!--        </div>-->
+<!--      </q-card>-->
+
+      <q-btn color="primary" icon="settings" size="lg" @click="gotoNodePanel" />
 
     </div>
   </q-page>
@@ -77,7 +79,9 @@
 import { ref, inject, onMounted, onActivated, onDeactivated, onUnmounted } from 'vue'
 import DockerSettingsDialog from 'components/dialog/DockerSettingsDialog.vue'
 import PodmanSettingsDialog from 'components/dialog/PodmanSettingsDialog.vue'
+import Containers from 'components/Containers.vue'
 import {  QSpinnerGears } from 'quasar'
+import { getResourcePath } from 'src/utils/common.js'
 
 const $q = inject("$q")
 const router = inject("router")
@@ -86,14 +90,20 @@ const t = inject("t")
 const deviceInfo = inject("deviceInfo")
 
 let notify = ref(null)
+const dockerIconPath = getResourcePath('png/docker-512x512.png')
+const podmanIconPath = getResourcePath('png/podman-512x512.png')
+
+const gotoNodePanel = () => {
+  router.push('/node/containers')
+}
 
 const cpuValue = ref(0)
 const memoryValue = ref(0)
 
 const dockerBtn = ref(t('asslocal.install'))
 const podmanBtn = ref(t('asslocal.install'))
-const dockerInfo = ref('')
-const podmanInfo = ref('')
+const dockerInfo = ref(t('asslocal.notInstalled'))
+const podmanInfo = ref(t('asslocal.notInstalled'))
 
 const onInstallDocker = () => {
   if (dockerBtn.value === t('asslocal.install')) {

@@ -184,3 +184,13 @@ export function generateUuid (len = 16, radix = 62) {
 
   return uuid.join('')
 }
+
+export function getResourcePath(filePath) {
+  if (process.env.MODE === 'electron') {
+    if (process.env.NODE_ENV !== 'development') {
+      return filePath
+    } else {
+      return `src/static/${filePath}`
+    }
+  }
+}

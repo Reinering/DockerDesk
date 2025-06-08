@@ -58,6 +58,7 @@
 import { ref, reactive, inject, toRefs } from 'vue'
 import Navigator from 'components/Navigator.vue'
 import ToolBar from 'components/ToolBar.vue'
+import { getResourcePath } from 'src/utils/common.js'
 
 
 const $q = inject("$q")
@@ -83,15 +84,10 @@ if (deviceInfo.platform === 'ios' || deviceInfo.platform === 'Andriod') {
   pageState.behavior = 'default'
 }
 
-const faviconPath = ref('src/static/icons/favicon-128x128.png')
+const faviconPath = getResourcePath("icons/favicon-128x128.png")
 
 if (process.env.MODE === 'electron') {
   pageState.isBarHide = true
-
-  if (process.env.NODE_ENV !== 'development') {
-    faviconPath.value = 'icons/favicon-128x128.png'
-  }
-
 } else {
   pageState.isBarHide = false
 }

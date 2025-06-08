@@ -94,6 +94,7 @@ export default {
     install: "Install",
     settings: "Settings",
     notInstalled: "Not Installed",
+    management: "MG",
 
 
   },

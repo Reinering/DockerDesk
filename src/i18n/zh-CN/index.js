@@ -88,7 +88,8 @@ export default {
   asslocal: {
     install: "安装",
     settings: "设置",
-    notInstalled: "Docker未安装",
+    notInstalled: "未安装",
+    management: "管理",
 
   },
 

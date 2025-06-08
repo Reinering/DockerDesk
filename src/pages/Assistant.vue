@@ -19,7 +19,7 @@
         <q-card-section />
 
         <q-card-actions class="q-mt-none" align="center">
-          <q-btn color="primary" size="lg" icon="settings" @click="gotoAss2" />
+          <q-btn color="primary" size="lg" icon="settings" @click="gotoAssLocal" />
         </q-card-actions>
       </q-card>
 
@@ -35,7 +35,7 @@
         <q-card-section />
 
         <q-card-actions class="q-mt-none" align="center">
-          <q-btn color="primary" icon="settings" size="lg" @click="gotoAss2" />
+          <q-btn color="primary" icon="settings" size="lg" @click="gotoAssRemote" />
         </q-card-actions>
       </q-card>
     </div>
@@ -99,8 +99,12 @@ const route = inject('route')
 const t = inject('t')
 const deviceInfo = inject('deviceInfo')
 
-const gotoAss2 = () => {
+const gotoAssLocal = () => {
   router.push('/assistant/asslocal')
+}
+
+const gotoAssRemote = () => {
+
 }
 
 let notify = ref(null)
