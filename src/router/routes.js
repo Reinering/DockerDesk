@@ -34,7 +34,39 @@ const routes = [
               keepAlive: true,
             }
           },
-        ],
+        ]
+      },
+
+      {
+        path: 'node',
+        name: 'node',
+        component: () => import('layouts/NodeLayout.vue'),
+        children: [
+          { path: 'containers',
+            component: () => import('pages/node/ContainersPage.vue'),
+            meta: {
+              keepAlive: true,
+            }
+          },
+          { path: 'images',
+            component: () => import('pages/node/ImagesPage.vue'),
+            meta: {
+              keepAlive: true,
+            }
+          },
+          { path: 'volumes',
+            component: () => import('pages/node/VolumesPage.vue'),
+            meta: {
+              keepAlive: true,
+            }
+          },
+          { path: 'networks',
+            component: () => import('pages/node/NetworksPage.vue'),
+            meta: {
+              keepAlive: true,
+            }
+          },
+        ]
       },
 
       {
@@ -86,12 +118,6 @@ const routes = [
         }
       },
     ]
-  },
-
-  {
-    path: '/terminal',
-    component: () => import('layouts/TerminalLayout.vue')
-
   },
 
   // Always leave this as last one,
