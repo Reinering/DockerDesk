@@ -93,10 +93,29 @@ export default {
   asslocal: {
     install: "Install",
     settings: "Settings",
+    panel: "Panel",
     notInstalled: "Not Installed",
     management: "MG",
+  },
 
+  panel: {
+    containers: {
+      create: "Create",
+    },
+    container: {
+      run: "Run",
+      stop: "Stop",
+      restart: "Restart",
+      delete: "Delete",
+      terminal: "Terminal",
+      export: "Export",
+      settings: "Settings",
+    },
+    settings: {
+      settings: "Settings",
 
+      fileNotExist: "File does not exist"
+    }
   },
 
   wsl: {

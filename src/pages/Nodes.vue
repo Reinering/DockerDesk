@@ -122,8 +122,8 @@
             </q-form>
           </q-card-section>
           <q-card-actions align="right">
-            <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="addService" />
             <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="closeDialog" />
+            <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="addService" />
           </q-card-actions>
         </q-card>
       </q-dialog>

@@ -11,18 +11,70 @@
       <q-route-tab name="images" icon="crop_square" label="Images" to="images" exact />
       <q-route-tab name="volumes" icon="noise_aware" label="Volumes" to="volumes" exact />
       <q-route-tab name="networks" icon="router" label="Networks" to="networks" exact />
+      <q-route-tab name="settings" icon="settings" label="Settings" :to="toSettings" exact />
     </q-tabs>
-    <router-view />
+
+    <router-view v-slot="{ Component }">
+      <keep-alive >
+        <component :is="Component" />
+      </keep-alive>
+    </router-view>
+
   </q-page>
 </template>
 
 <script setup>
-import { ref, inject, onMounted, onActivated, onDeactivated, onUnmounted } from 'vue'
+import { ref, provide, inject, onMounted, onActivated, onDeactivated, onUnmounted, reactive } from 'vue'
+import { isEmptyObj } from 'src/utils/common.js'
 
-const tab = ref('')
+const $q = inject("$q")
+const router = inject("router")
+const route = inject("route")
+const t = inject("t")
+
+const service = reactive({})
+provide("service", service)
+
+const tab = ref('containers')
+
+const toSettings = ref("dockerSettings")
+
+const changeSettingRouter = () => {
+  if (!isEmptyObj(service)) {
+    if (service.serviceType === "docker") {
+      toSettings.value = "dockerSettings"
+    } else if (service.serviceType === "podman") {
+      toSettings.value = "podmanSettings"
+    }
+  }
+}
+
+console.log("NodeLayout init")
+
+onMounted(() => {
+
+})
+
+onActivated(() => {
+  try {
+    const data = JSON.parse(route.query.data)
+    if (data) {
+      for (const key of Object.keys(data)) {
+        service[key] = data[key]
+      }
+    }
+  } catch (e) {
+    // console.error(e)
+  }
+
+  changeSettingRouter()
+})
+
+onUnmounted(() => {
+
+})
 
 </script>
-
 
 <style scoped>
 

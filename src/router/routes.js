@@ -34,7 +34,7 @@ const routes = [
               keepAlive: true,
             }
           },
-        ]
+        ],
       },
 
       {
@@ -43,30 +43,30 @@ const routes = [
         component: () => import('layouts/NodeLayout.vue'),
         children: [
           { path: 'containers',
+            name: 'containers',
             component: () => import('pages/node/ContainersPage.vue'),
-            meta: {
-              keepAlive: true,
-            }
           },
           { path: 'images',
+            name: 'images',
             component: () => import('pages/node/ImagesPage.vue'),
-            meta: {
-              keepAlive: true,
-            }
           },
           { path: 'volumes',
+            name: 'volumes',
             component: () => import('pages/node/VolumesPage.vue'),
-            meta: {
-              keepAlive: true,
-            }
           },
           { path: 'networks',
+            name: 'networks',
             component: () => import('pages/node/NetworksPage.vue'),
-            meta: {
-              keepAlive: true,
-            }
           },
-        ]
+          { path: 'dockerSettings',
+            name: 'dockerSettings',
+            component: () => import('pages/node/DockerSettings.vue'),
+          },
+          { path: 'podmanSettings',
+            name: 'podmanSettings',
+            component: () => import('pages/node/PodmanSettings.vue'),
+          },
+        ],
       },
 
       {
@@ -109,6 +109,7 @@ const routes = [
           },
         ]
       },
+
       {
         path: 'settings',
         name: 'settings',

@@ -32,6 +32,10 @@ export const clientConfig = {
     logPath: 'logs',
     logFile: 'logging.log',
     level: 'info',      // error, warn, info, verbose, debug, silly
+  },
+
+  dockerRegistryProxy: {
+
   }
 }
 

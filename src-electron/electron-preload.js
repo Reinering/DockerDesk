@@ -420,6 +420,14 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('moveWSL', data)
   },
 
+  execWSL(data) {
+    return ipcRenderer.invoke('execWSL', data)
+  },
+
+  execSWSL(data) {
+    return ipcRenderer.invoke('execSWSL', data)
+  },
+
 })
 
 

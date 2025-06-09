@@ -6,6 +6,8 @@ Images
 
 <script setup>
 
+console.log("Images init")
+
 </script>
 
 <style scoped>

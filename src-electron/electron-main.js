@@ -35,11 +35,15 @@ async function createWindow () {
         currentDir,
         path.join(process.env.QUASAR_ELECTRON_PRELOAD_FOLDER, 'electron-preload' + process.env.QUASAR_ELECTRON_PRELOAD_EXTENSION)
       ),
-      sandbox: false // <-- to be able to import @electron/remote in preload script
+      sandbox: false, // <-- to be able to import @electron/remote in preload script
+      devTools: true,  // build open debug console
     }
   })
 
   enable(mainWindow.webContents)
+
+
+
 
   if (process.env.DEV) {
     await mainWindow.loadURL(process.env.APP_URL)

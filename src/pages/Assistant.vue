@@ -19,7 +19,7 @@
         <q-card-section />
 
         <q-card-actions class="q-mt-none" align="center">
-          <q-btn color="primary" size="lg" icon="settings" @click="gotoAssLocal" />
+          <q-btn color="primary" size="lg" icon="settings" @click="gotoAssLocal" :disable="isAssLocalBtn"/>
         </q-card-actions>
       </q-card>
 
@@ -35,7 +35,7 @@
         <q-card-section />
 
         <q-card-actions class="q-mt-none" align="center">
-          <q-btn color="primary" icon="settings" size="lg" @click="gotoAssRemote" />
+          <q-btn color="primary" icon="settings" size="lg" @click="gotoAssRemote" :disable="isAssRemoteBtn"/>
         </q-card-actions>
       </q-card>
     </div>
@@ -122,6 +122,9 @@ const debianSourcesLines = [
 
 const printfContent = debianSourcesLines.join('\\n') + '\\n'
 
+const isAssLocalBtn = ref(true)
+const isAssRemoteBtn = ref(true)
+
 const wslStatusBtn = ref(t('assistant.notInstalled'))
 const disabledWslStatusBtn = ref(false)
 const wslStatus = ref('Stopped')
@@ -146,6 +149,8 @@ const installWSLPackage = () => {
         timeout: 10000
       })
 
+      isAssLocalBtn.value = false
+      isAssRemoteBtn.value = false
       wslStatusBtn.value = t('assistant.start')
     } else {
       notify.value({
@@ -290,6 +295,9 @@ const init = () => {
                     wslStatusBtn.value = t('assistant.stop')
                     wslStatusColor.value = "green"
                   }
+
+                  isAssLocalBtn.value = false
+                  isAssRemoteBtn.value = false
                   return
                 }
               }

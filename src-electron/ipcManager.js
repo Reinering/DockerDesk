@@ -6,6 +6,7 @@ import { registerSSHIpcHandlers, registerSFTPIpcHandlers } from "./ipc/sshIPC.js
 import { registerDockerIpcHandlers } from "./ipc/dockerIPC.js"
 import { registerPodmanIpcHandlers } from "./ipc/podmanIPC.js"
 import { registerWSLIpcHandlers } from "./ipc/wslIPC.js"
+// import { registerDockerWSLIpcHandlers } from "./ipc/dockerWSLIPC.js"
 
 
 export function registerIpcHandlers(win) {
@@ -25,6 +26,8 @@ export function registerIpcHandlers(win) {
   registerSFTPIpcHandlers(win)
 
   registerWSLIpcHandlers(win)
+
+  // registerDockerWSLIpcHandlers(win)
 
   registerDockerIpcHandlers(win)
 

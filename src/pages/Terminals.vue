@@ -43,7 +43,7 @@
       </q-tab-panels>
     </q-card>
 
-    <CommandBar v-if="isShowCmdBar" :send="submitCmd" fixed-bottom/>
+    <CommandBar v-if="isShowCmdBar" :send="submitCmd"  />
 
     <q-page-sticky position="bottom-right" :offset="fabPos">
       <q-fab
@@ -222,7 +222,6 @@ const checkScreenSize = () => {
       xtermStyle.height = window.innerHeight - 70 + "px"
     }
   }
-
 }
 
 const deleteTab = (id) => {

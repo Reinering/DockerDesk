@@ -10,7 +10,7 @@ import { devConsole } from 'src/common/config'
 
 // 全局前置守卫
 export const beforeEach = (store, to, from) => {
-  // devConsole(to, from)
+  // devConsole("beforeEach", to, from)
 
   const navigatorStore = useNavigatorStore()
 
@@ -24,19 +24,19 @@ export const beforeEach = (store, to, from) => {
 
 // 全局后置守卫
 export const afterEach = (store, to, from) => {
-  // devConsole(to, from)
+  // devConsole("afterEach", to, from)
 }
 
 // 全局解析守卫
 export const beforeResolve = async (store, to, from) => {
-  // devConsole(to, from)
+  // devConsole("beforeResolve", to, from)
 
 
 }
 
 // 路由独享守卫
 export const toMain = (to, from) => {
-  // devConsole(to, from)
+  // devConsole("toMain", to, from)
 
 }
 

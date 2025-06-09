@@ -14,7 +14,7 @@
             <div class="column items-center">
               <div class="text-amber">{{ dockerInfo }}</div>
               <q-card-actions align="center">
-                <q-btn :label="dockerBtn" color="primary" @click="onInstallDocker" />
+                <q-btn :label="dockerBtn" color="primary" @click="onInstallDocker" :disable="isDockerBtn" />
               </q-card-actions>
             </div>
 
@@ -29,44 +29,42 @@
             <div class="column items-center">
               <div class="text-amber">{{ podmanInfo }}</div>
               <q-card-actions align="center">
-                <q-btn :label="podmanBtn" color="primary" @click="onInstallPodman" />
+                <q-btn :label="podmanBtn" color="primary" @click="onInstallPodman" :disable="isPodmanBtn" />
               </q-card-actions>
             </div>
           </q-card>
         </div>
       </q-card>
 
-<!--      <q-card>-->
-<!--        <div class="q-pa-md flex flex-center">-->
-<!--          <q-knob-->
-<!--            readonly-->
-<!--            v-model="cpuValue"-->
-<!--            show-value-->
-<!--            size="90px"-->
-<!--            :thickness="0.22"-->
-<!--            color="light-blue-9"-->
-<!--            track-color="cyan-12"-->
-<!--            class="text-light-blue-9 q-ma-md"-->
-<!--          >-->
-<!--            {{ cpuValue }}%-->
-<!--          </q-knob>-->
+      <q-card class="q-ma-md">
+        <div class="q-pa-md flex flex-center">
+          <q-knob
+            readonly
+            v-model="cpuValue"
+            show-value
+            size="90px"
+            :thickness="0.22"
+            color="light-blue-9"
+            track-color="cyan-12"
+            class="text-light-blue-9 q-ma-md"
+          >
+            {{ cpuValue }}%
+          </q-knob>
 
-<!--          <q-knob-->
-<!--            readonly-->
-<!--            v-model="memoryValue"-->
-<!--            show-value-->
-<!--            size="90px"-->
-<!--            :thickness="0.22"-->
-<!--            color="orange"-->
-<!--            track-color="orange-3"-->
-<!--            class="text-orange q-ma-md"-->
-<!--          >-->
-<!--            {{ memoryValue }}%-->
-<!--          </q-knob>-->
-<!--        </div>-->
-<!--      </q-card>-->
-
-      <q-btn color="primary" icon="settings" size="lg" @click="gotoNodePanel" />
+          <q-knob
+            readonly
+            v-model="memoryValue"
+            show-value
+            size="90px"
+            :thickness="0.22"
+            color="orange"
+            track-color="orange-3"
+            class="text-orange q-ma-md"
+          >
+            {{ memoryValue }}%
+          </q-knob>
+        </div>
+      </q-card>
 
     </div>
   </q-page>
@@ -93,8 +91,13 @@ let notify = ref(null)
 const dockerIconPath = getResourcePath('png/docker-512x512.png')
 const podmanIconPath = getResourcePath('png/podman-512x512.png')
 
-const gotoNodePanel = () => {
-  router.push('/node/containers')
+const gotoNodePanel = (serviceType) => {
+  router.push({path: '/node/containers',
+    query: {data:
+        JSON.stringify(
+          {serviceType: serviceType, connectionType: t('node.localNode')}
+        )}
+  })
 }
 
 const cpuValue = ref(0)
@@ -102,6 +105,8 @@ const memoryValue = ref(0)
 
 const dockerBtn = ref(t('asslocal.install'))
 const podmanBtn = ref(t('asslocal.install'))
+const isDockerBtn = ref(true)
+const isPodmanBtn = ref(true)
 const dockerInfo = ref(t('asslocal.notInstalled'))
 const podmanInfo = ref(t('asslocal.notInstalled'))
 
@@ -139,6 +144,8 @@ const onInstallDocker = () => {
       position: 'bottom-right',
       message: t('assistant.installing'),
     })
+  } else if (podmanBtn.value === t('asslocal.panel')) {
+    gotoNodePanel("docker")
   } else {
     showDockerSettingsDialog.value = !showDockerSettingsDialog.value
   }
@@ -178,6 +185,8 @@ const onInstallPodman = () => {
       position: 'bottom-right',
       message: t('assistant.installing'),
     })
+  } else if (podmanBtn.value === t('asslocal.panel')) {
+    gotoNodePanel("podman")
   } else {
     showPodmanSettingsDialog.value = !showPodmanSettingsDialog.value
   }
@@ -220,8 +229,8 @@ const checkDockerInstall = () => {
 
       if (match) {
         const versionNumber = match[1]
-        dockerInfo.value = `version: ${versionNumber}`
-        dockerBtn.value =t('asslocal.settings')
+        dockerInfo.value = `docker: ${versionNumber}`
+        dockerBtn.value =t('asslocal.panel')
       } else {
         console.log("未找到Docker版本号。")
       }
@@ -229,6 +238,8 @@ const checkDockerInstall = () => {
       dockerBtn.value = t('asslocal.install')
       dockerInfo.value = t('asslocal.notInstalled')
     }
+
+    isDockerBtn.value = false
   })
 }
 
@@ -236,15 +247,14 @@ const checkPodmanInstall = () => {
   window.wslTerminal.execWSL([
     '-d', "DockerDesk", '--user', "root", '-e', "podman -v"
   ]).then((result) => {
-    console.log(result)
     if (result.success && result.data.includes("podman version ")) {
       const versionRegex = /\d+\.\d+\.\d+/
       const match = result.data.match(versionRegex)
 
       if (match) {
         const versionNumber = match[0]
-        podmanInfo.value = `version: ${versionNumber}`
-        podmanBtn.value = t('asslocal.settings')
+        podmanInfo.value = `podman: ${versionNumber}`
+        podmanBtn.value = t('asslocal.panel')
       } else {
         console.log("未找到Podman版本号。")
       }
@@ -252,6 +262,8 @@ const checkPodmanInstall = () => {
       podmanBtn.value = t('asslocal.install')
       podmanInfo.value = t('asslocal.notInstalled')
     }
+
+    isPodmanBtn.value = false
   })
 }
 
@@ -259,27 +271,27 @@ const checkPodmanInstall = () => {
 const init = () => {
   showLoading ()
 
-  checkDockerInstall()
-
-  checkPodmanInstall()
 
   if (deviceInfo.value.platform === "win32") {
-    window.wslTerminal.checkWSLInfo().then((result) => {
-      console.log(result.data)
-    })
+    // window.wslTerminal.checkWSLInfo().then((result) => {
+    //   console.log(result.data)
+    // })
+    //
+    // window.wslTerminal.getWSLList().then((result) => {
+    //   console.log(result.data)
+    // })
 
-    window.wslTerminal.getWSLList().then((result) => {
-      console.log(result.data)
-    })
+    checkDockerInstall()
+
+    checkPodmanInstall()
+
+    getOSInfoInterval = setInterval(() => {
+      window.client.getOSUtilization().then(({cpuUsage, memoryUsage}) => {
+        cpuValue.value = parseInt(cpuUsage)
+        memoryValue.value = parseInt(memoryUsage * 100)
+      })
+    }, 5000)
   }
-
-
-  getOSInfoInterval = setInterval(() => {
-    window.client.getOSUtilization().then(({cpuUsage, memoryUsage}) => {
-      cpuValue.value = parseInt(cpuUsage)
-      memoryValue.value = parseInt(memoryUsage * 100)
-    })
-  }, 5000)
 }
 
 onMounted(() => {

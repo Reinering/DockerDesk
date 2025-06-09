@@ -88,9 +88,30 @@ export default {
   asslocal: {
     install: "安装",
     settings: "设置",
+    panel: "面板",
     notInstalled: "未安装",
     management: "管理",
 
+  },
+
+  panel: {
+    containers: {
+      create: "创建",
+    },
+    container: {
+      run: "运行",
+      stop: "停止",
+      restart: "重启",
+      delete: "删除",
+      terminal: "终端",
+      export: "导出",
+      settings: "设置",
+    },
+    settings: {
+      settings: "设置",
+
+      fileNotExist: "文件不存在"
+    }
   },
 
   wsl: {
