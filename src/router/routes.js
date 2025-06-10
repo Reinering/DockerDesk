@@ -5,9 +5,6 @@ const routes = [
     children: [
       { path: '',
         component: () => import('pages/IndexPage.vue'),
-        meta: {
-          keepAlive: true,
-        }
       },
 
       { path: 'assistant',
@@ -35,6 +32,9 @@ const routes = [
             }
           },
         ],
+        meta: {
+          keepAlive: true,
+        }
       },
 
       {

@@ -19,6 +19,7 @@ export default {
 
   edit: 'Edit',
   add: 'Add',
+  apply: 'Apply',
   update: 'Update',
   delete: 'Delete',
   search: 'Search',
@@ -76,6 +77,7 @@ export default {
     addPackage: "Add Package",
     start: "Start",
     stop: "Stop",
+    bgStart: "Backgroup",
 
     upgradeSuccess: "Upgrade Successfully",
     upgradeFail: "Upgrade Failure",
@@ -113,8 +115,25 @@ export default {
     },
     settings: {
       settings: "Settings",
+      save: "Save",
+      add: "Add",
+      basicSettings: "Basic Settings",
+      registry: "Registry",
+      registryMirrors: "Registry Mirror",
+      registryProxy: "Registry Proxy",
+      proxySetting: "Network Proxy Settings",
+      proxyMode: "Proxy Mode",
+      systemMode: "System",
+      manualMode: "Manual",
+      disableMode: "Disable",
 
-      fileNotExist: "File does not exist"
+      rmDialogTitle: "Add Registry Mirror",
+      rDialogTitle: "Add Registry",
+
+      dnsParseError: "DNS string resolution failed",
+      fileNotExist: "File does not exist",
+      saveSuccess: "Configuration saved successfully",
+      saveFail: "Configuration save failed",
     }
   },
 

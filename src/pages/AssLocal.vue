@@ -69,8 +69,8 @@
     </div>
   </q-page>
 
-  <DockerSettingsDialog v-model="showDockerSettingsDialog" />
-  <PodmanSettingsDialog v-model="showPodmanSettingsDialog"/>
+<!--  <DockerSettingsDialog v-model="showDockerSettingsDialog" />-->
+<!--  <PodmanSettingsDialog v-model="showPodmanSettingsDialog"/>-->
 </template>
 
 <script setup>

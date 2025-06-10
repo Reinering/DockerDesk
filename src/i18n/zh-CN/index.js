@@ -16,6 +16,7 @@ export default {
 
   edit: '编辑',
   add: '添加',
+  apply: '应用',
   update: '更新',
   delete: '删除',
   search: '搜索',
@@ -72,6 +73,7 @@ export default {
     addPackage: "添加模块",
     start: "启动",
     stop: "停止",
+    bgStart: "后台运行",
 
     upgradeSuccess: "升级成功",
     upgradeFail: "升级失败",
@@ -109,8 +111,25 @@ export default {
     },
     settings: {
       settings: "设置",
+      save: "保存",
+      add: "添加",
+      basicSettings: "基本设置",
+      registry: "仓库",
+      registryMirrors: "镜像代理",
+      registryProxy: "镜像代理",
+      proxySetting: "网络代理设置",
+      proxyMode: "代理模式",
+      systemMode: "跟随系统",
+      manualMode: "手动模式",
+      disableMode: "禁用",
 
-      fileNotExist: "文件不存在"
+      rmDialogTitle: "添加镜像代理",
+      rDialogTitle: "添加仓库",
+
+      dnsParseError: "DNS字符串解析失败",
+      fileNotExist: "文件不存在",
+      saveSuccess: "配置保存成功",
+      saveFail: "配置保存失败",
     }
   },
 

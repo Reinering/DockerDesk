@@ -100,7 +100,6 @@ export async function startBGSubSystem (name='DockerDesk') {
   return cmd1(`wsl --distribution ${name} --exec dbus-launch true`, 'utf16le')
 }
 
-
 export async function stopSubSystem (name='DockerDesk') {
   return cmd1(`wsl --terminate ${name}`, 'utf16le')
 }
@@ -154,3 +153,48 @@ export async function execSSubSystem (commands) {
 
   return result
 }
+
+export async function dockerLogin (win, data) {
+  const cmdRunner = new WslCmdRunner(win, )
+
+  let command = []
+  command.push("--install")
+  command.push("----web-download")
+  command.push("--distribution")
+  command.push(data.wslDistribution)
+  command.push("--name")
+  command.push(data.name)
+
+  let username = ''
+  let password = ''
+
+  if (data.wslDistribution !== "Custom") {
+    if (!data.startNow) {
+      command.push("--no-launch")
+    }
+  } else {
+    command.push("--location")
+    command.push(data.localImagePath)
+    if (!data.startNow) {
+      command.push("--no-launch")
+    }
+  }
+
+  try {
+    if (data.startNow) {
+      if (data.root) {
+        username = 'root'
+      } else {
+        username = data.username
+      }
+      password = data.password
+    }
+
+    return await cmdRunner.setupWslUser(command, username, password)
+  } catch (error) {
+    return new Promise((resolve, reject) => {
+      reject(error)
+    })
+  }
+}
+

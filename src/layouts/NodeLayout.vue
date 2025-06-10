@@ -52,10 +52,6 @@ const changeSettingRouter = () => {
 console.log("NodeLayout init")
 
 onMounted(() => {
-
-})
-
-onActivated(() => {
   try {
     const data = JSON.parse(route.query.data)
     if (data) {
@@ -66,7 +62,21 @@ onActivated(() => {
   } catch (e) {
     // console.error(e)
   }
+})
 
+onActivated(() => {
+  console.log("onActivated")
+  try {
+    const data = JSON.parse(route.query.data)
+    if (data) {
+      for (const key of Object.keys(data)) {
+        service[key] = data[key]
+      }
+    }
+  } catch (e) {
+    // console.error(e)
+  }
+  console.log(service)
   changeSettingRouter()
 })
 

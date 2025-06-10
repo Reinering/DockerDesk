@@ -34,9 +34,7 @@ export const clientConfig = {
     level: 'info',      // error, warn, info, verbose, debug, silly
   },
 
-  dockerRegistryProxy: {
-
-  }
+  dockerRegistryProxy: []
 }
 
 

@@ -24,7 +24,7 @@ async function createWindow () {
 
   mainWindow = new BrowserWindow({
     icon: path.resolve(currentDir, 'icons/icon.png'), // tray icon
-    width: 1600,
+    width: 1000,
     height: 800,
     useContentSize: true,
     frame: false, // <-- 添加这里

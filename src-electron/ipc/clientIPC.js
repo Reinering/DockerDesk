@@ -1,8 +1,9 @@
 import { ipcMain, dialog } from 'electron'
 import {
-  getOSInfo, getUtilization, getPodmanInfo, getDockerInfo,
-
+  getOSInfo, getUtilization,
+  getSystemProxy,
 } from '../actions/client.js'
+import { settings } from '../actions/settings.js'
 
 
 
@@ -33,7 +34,6 @@ export function registerClientIpcHandlers(win) {
   })
 
   ipcMain.handle('selectFolders', async (event) => {
-
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory', 'multiSelections'],
     })
@@ -44,20 +44,27 @@ export function registerClientIpcHandlers(win) {
     return null
   })
 
-  ipcMain.handle('checkDockerInfo', async (event) => {
-    return getDockerInfo().then((data) => {
-      return { success: true, data:data, error: '' }
-    }, (error) => {
-      return { success: false, error: error }
-    })
+  ipcMain.handle('getSystemProxy', async (event) => {
+    return getSystemProxy()
   })
 
-  ipcMain.handle('checkPodmanInfo', async (event) => {
-    return getPodmanInfo().then((data) => {
-      return { success: true, data:data, error: '' }
-    }, (error) => {
-      return { success: false, error: error }
-    })
+  ipcMain.handle('getSettings', async (event, field) => {
+    return settings.getByField(field)
+      .then((result) => {
+        if (result.success) {
+          return { success: true, data: {
+            field: result.data[0].field,
+            type: result.data[0].type,
+            value: result.data[0].value,
+            } }
+        } else {
+          return result
+        }
+      })
+  })
+
+  ipcMain.handle('updateByField', async (event, field) => {
+    return settings.updateByField(field)
   })
 
 }

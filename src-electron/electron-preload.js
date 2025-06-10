@@ -439,6 +439,10 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('execSWSL', data)
   },
 
+  dockerLoginWSL(data) {
+    return ipcRenderer.invoke('dockerLoginWSL', data)
+  },
+
 })
 
 

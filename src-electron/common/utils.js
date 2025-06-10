@@ -140,7 +140,7 @@ export function cmd(command, encoding='cp936') {
   if (command instanceof Array) {
     command = command.join(' ')
   }
-  console.log("command", command)
+
   return new Promise((resolve, reject) => {
     exec(command, { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }, (error, stdout, stderr) => {
       if (error && error.code !== 0) {
