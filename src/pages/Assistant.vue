@@ -67,6 +67,7 @@
             <q-space />
 
             <q-btn
+              v-if="showWslStatusBtn"
               :disable="disabledWslStatusBtn"
               color="accent"
               icon="flight_takeoff"
@@ -79,6 +80,28 @@
                 Computing...
               </template>
             </q-btn>
+
+            <q-btn-dropdown
+              v-if="!showWslStatusBtn"
+              split
+              :disable="disabledWslStatusBtn"
+              color="accent"
+              icon="flight_takeoff"
+              :label="wslStatusBtn"
+              style="width: 150px"
+              @click="onWslStatusBtn"
+            >
+              <q-list>
+                <q-item class="bg-purple-4" clickable v-close-popup @click="onBackgroundStart">
+                  <q-item-section avatar>
+                    <q-icon name="play_arrow" color="white" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="text-white" >{{t('assistant.bgStart')}}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </div>
         </q-card-section>
       </q-card>
@@ -129,6 +152,7 @@ const wslStatusBtn = ref(t('assistant.notInstalled'))
 const disabledWslStatusBtn = ref(false)
 const wslStatus = ref('Stopped')
 const wslStatusColor = ref('red')
+const showWslStatusBtn = ref(true)
 
 const installWSLPackage = () => {
   window.wslTerminal.execSWSL([
@@ -137,7 +161,7 @@ const installWSLPackage = () => {
     ['-d', "DockerDesk", '--user', "root", '-e', "mv /etc/apt/sources.list /etc/apt/sources.list.bak"],
     ['-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c', `"printf '${printfContent}' > /etc/apt/sources.list"`],
     ['-d', "DockerDesk", '--user', "root", '-e', "apt-get update"],
-    ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y curl"]
+    ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y curl dbus dbus-x11 "]
   ]).then((result) => {
     console.log(result)
     if (result.success) {
@@ -273,6 +297,29 @@ const onWslStatusBtn = () => {
   }
 }
 
+const onBackgroundStart = () => {
+  if (wslStatusBtn.value === t('assistant.start')) {
+    let isCall = true
+    window.wslTerminal.startBGSubSystem().then((result) => {
+      if (! result.success && isCall) {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('assistant.startFail')}: ${result.error}`
+        })
+      }
+    })
+
+    setTimeout(() => {
+      isCall = false
+    }, 5000)
+
+    wslStatusBtn.value = t('assistant.stop')
+    wslStatus.value = "Running"
+    wslStatusColor.value = "green"
+  }
+}
+
 const init = () => {
   if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32") {
     window.wslTerminal.checkWSLInfo().then((result) => {
@@ -298,6 +345,7 @@ const init = () => {
 
                   isAssLocalBtn.value = false
                   isAssRemoteBtn.value = false
+                  showWslStatusBtn.value = false
                   return
                 }
               }

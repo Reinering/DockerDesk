@@ -60,6 +60,10 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
     return ipcRenderer.invoke('selectFolders')
   },
 
+  getProxy ()  {
+    return ipcRenderer.invoke('getSystemProxy')
+  },
+
 })
 
 
@@ -76,6 +80,9 @@ contextBridge.exposeInMainWorld('client', {
     return ipcRenderer.invoke('getOSUtilization')
   },
 
+  getSettings (field) {
+    return ipcRenderer.invoke('getSettings', field)
+  }
 })
 
 
@@ -378,6 +385,10 @@ contextBridge.exposeInMainWorld("wslTerminal", {
 
   startSubSystem () {
     return ipcRenderer.invoke('startSubSystem')
+  },
+
+  startBGSubSystem () {
+    return ipcRenderer.invoke('startBGSubSystem')
   },
 
   stopSubSystem () {

@@ -68,6 +68,14 @@ export function registerWSLIpcHandlers(win) {
     })
   })
 
+  ipcMain.handle('startBGSubSystem', async (event) => {
+    return startSubSystem().then((data) => {
+      return { success: true, data: data, error: '' }
+    }, (error) => {
+      return { success: false, error: error }
+    })
+  })
+
   ipcMain.handle('stopSubSystem', async (event) => {
     return stopSubSystem().then((data) => {
       return { success: true, data:data, error: '' }
