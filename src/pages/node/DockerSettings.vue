@@ -11,6 +11,7 @@
 
     <q-scroll-area :style="scrollStyle">
 
+<!--      basic-->
       <div class="q-pa-md">
         <q-card class="q-mb-md" flat bordered>
           <q-card-section class="row items-center q-py-sm q-px-md" style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
@@ -40,7 +41,11 @@
               </template>
 
               <template v-slot:after>
-                <q-btn round dense flat :icon="daemonPath.icon" @click="onDaemonPathEdit" />
+                <q-btn round dense flat :icon="daemonPath.icon" @click="onDaemonPathEdit">
+                  <q-tooltip class="bg-amber text-black shadow-4">
+                    {{t('panel.settings.edit')}}
+                  </q-tooltip>
+                </q-btn>
               </template>
             </q-input>
 
@@ -57,13 +62,18 @@
               </template>
 
               <template v-slot:after>
-                <q-btn round dense flat :icon="daemonDNS.icon" @click="onDaemonDNSEdit" />
+                <q-btn round dense flat :icon="daemonDNS.icon" @click="onDaemonDNSEdit">
+                  <q-tooltip class="bg-amber text-black shadow-4">
+                    {{t('panel.settings.edit')}}
+                  </q-tooltip>
+                </q-btn>
               </template>
             </q-input>
           </div>
         </q-card>
       </div>
 
+<!--      registry-mirror-->
       <div class="q-pa-md">
         <q-card class="q-mb-md" flat bordered>
           <q-card-section class="row items-center q-py-sm q-px-md" style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
@@ -80,7 +90,6 @@
             <div class="q-gutter-sm">
               <q-btn color="grey" :label="t('panel.settings.add')" @click="showRMDialog = !showRMDialog" />
             </div>
-
           </q-card-section>
 
           <div class="q-pa-md q-gutter-sm">
@@ -110,6 +119,7 @@
         </q-card>
       </div>
 
+<!--      proxy-->
       <div class="q-pa-md">
         <q-card class="q-mb-md" flat bordered>
           <q-card-section class="row items-center q-py-sm q-px-md" style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
@@ -123,9 +133,18 @@
                 {{t('panel.settings.proxySetting')}}
               </q-btn>
             </div>
-            <div class="col-auto text-grey text-caption q-pt-md">
+
+            <div class="col text-grey text-caption q-pt-md">
               如果有稳定的网络代理，建议使用网络代理更简单
             </div>
+
+            <q-space />
+
+            <q-btn color="grey" :icon="daemonProxies.editIcon" @click="onProxyEdit" >
+              <q-tooltip class="bg-amber text-black shadow-4">
+                {{t('panel.settings.edit')}}
+              </q-tooltip>
+            </q-btn>
           </q-card-section>
 
           <div class="q-pa-md q-gutter-sm">
@@ -159,7 +178,7 @@
 
             <q-input
               v-if="proxyMode !== 'Disable'"
-              :disable="proxyMode !== 'Manual'"
+              :disable="daemonProxies.disable"
               filled
               dense
               bottom-slots
@@ -173,7 +192,7 @@
 
             <q-input
               v-if="proxyMode !== 'Disable'"
-              :disable="proxyMode !== 'Manual'"
+              :disable="daemonProxies.disable"
               filled
               dense
               bottom-slots
@@ -188,7 +207,7 @@
 
             <q-input
               v-if="proxyMode !== 'Disable'"
-              :disable="proxyMode !== 'Manual'"
+              :disable="daemonProxies.disable"
               filled
               dense
               bottom-slots
@@ -200,10 +219,10 @@
               </template>
             </q-input>
           </div>
-
         </q-card>
       </div>
 
+<!--      registry-->
       <div class="q-pa-md">
         <q-card class="q-mb-md" flat bordered>
           <q-card-section class="row items-center q-py-sm q-px-md" style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
@@ -270,6 +289,7 @@
           </div>
         </q-card>
       </div>
+
     </q-scroll-area>
   </q-card>
 
@@ -429,7 +449,20 @@ const daemonProxies = reactive({
   http: '',
   https: '',
   byPass: '',
+  disable: true,
+  editIcon: "edit"
 })
+const onProxyEdit = () => {
+  if (proxyMode.value === "Manual") {
+    daemonProxies.disable = !daemonProxies.disable
+  }
+
+  if (daemonProxies.disable) {
+    daemonProxies.editIcon = "edit"
+  } else {
+    daemonProxies.editIcon = "edit_off"
+  }
+}
 
 const registries = reactive([
   {url: "https://docker.io", username: '', password: '', disable: false, type: "password", editIcon: "edit"},
@@ -524,7 +557,6 @@ const onSave = () => {
     ['-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c', `"echo '${base64Data}' | base64 -d > ${dockerDaemon.path}"`],
     ['-d', "DockerDesk", '--user', "root", '-e', "systemctl restart docker"]
   ]).then((result) => {
-    console.log(result)
     if (result.success) {
       $q.notify({
         type: 'positive',
@@ -536,6 +568,37 @@ const onSave = () => {
         type: 'negative',
         position: clientConfig.quasar.notify.position,
         message: `${t('panel.settings.saveFail')}: ${result.error}`
+      })
+    }
+  })
+
+  let registryList
+  if (registries.length > 0 ) {
+    registryList = JSON.parse(JSON.stringify(registries))
+    for (const item of registryList) {
+      delete item["disable"]
+      delete item["type"]
+      delete item["editIcon"]
+    }
+  }
+  window.client.updateSettings(
+    {
+      field: "docker_registries",
+      value: JSON.stringify(registryList)
+    }
+  ).then((result) => {
+    console.log(result)
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('panel.settings.dbSaveSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.settings.dbSaveFail')}: ${result.error}`
       })
     }
   })
@@ -649,9 +712,9 @@ watch(proxyMode, (newVal, oldVal) => {
       }
     })
   } else {
-    daemonProxies.http = ''
-    daemonProxies.https = ''
-    daemonProxies.byPass = ''
+    // daemonProxies.http = ''
+    // daemonProxies.https = ''
+    // daemonProxies.byPass = ''
   }
 })
 

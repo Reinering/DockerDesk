@@ -117,6 +117,7 @@ export default {
       settings: "Settings",
       save: "Save",
       add: "Add",
+      edit: "Edit",
       basicSettings: "Basic Settings",
       registry: "Registry",
       registryMirrors: "Registry Mirror",
@@ -134,6 +135,8 @@ export default {
       fileNotExist: "File does not exist",
       saveSuccess: "Configuration saved successfully",
       saveFail: "Configuration save failed",
+      dbSaveSuccess: "DataBase saved successfully",
+      dbSaveFail: "DataBase saved failed",
     }
   },
 

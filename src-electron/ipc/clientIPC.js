@@ -6,7 +6,6 @@ import {
 import { settings } from '../actions/settings.js'
 
 
-
 export function registerClientIpcHandlers(win) {
 
   ipcMain.handle('getOSInfo', async (event) => {
@@ -63,8 +62,10 @@ export function registerClientIpcHandlers(win) {
       })
   })
 
-  ipcMain.handle('updateByField', async (event, field) => {
-    return settings.updateByField(field)
-  })
+  ipcMain.handle('updateSettings', async (event, data) => {
 
+    data["modify_time"] = Date.now()
+
+    return settings.updateByField(data)
+  })
 }

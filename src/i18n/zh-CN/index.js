@@ -113,6 +113,7 @@ export default {
       settings: "设置",
       save: "保存",
       add: "添加",
+      edit: "编辑",
       basicSettings: "基本设置",
       registry: "仓库",
       registryMirrors: "镜像代理",
@@ -130,6 +131,8 @@ export default {
       fileNotExist: "文件不存在",
       saveSuccess: "配置保存成功",
       saveFail: "配置保存失败",
+      dbSaveSuccess: "数据库保存成功",
+      dbSaveFail: "数据库保存失败",
     }
   },
 

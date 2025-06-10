@@ -3,8 +3,6 @@ import { shell } from 'electron'
 import si from 'systeminformation'
 import { cmd, cmd1, totalMemory, platform, arch } from '../common/utils.js'
 import { listRegistry } from './reg.js'
-import { db } from '../database/manager.js'
-
 
 
 export function getOSInfo () {

@@ -82,6 +82,10 @@ contextBridge.exposeInMainWorld('client', {
 
   getSettings (field) {
     return ipcRenderer.invoke('getSettings', field)
+  },
+
+  updateSettings (data) {
+    return ipcRenderer.invoke('updateSettings', data)
   }
 })
 

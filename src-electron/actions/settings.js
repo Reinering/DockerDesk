@@ -14,9 +14,9 @@ export const settings = {
       })
   },
 
-  updateByField: async (field) => {
+  updateByField: async (data) => {
     return db('settings')
-      .where('field', '=', field)
+      .where('field', '=', data.field)
       .select('*').then(
         rows => {
           return { success: true, data: rows }
