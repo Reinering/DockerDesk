@@ -198,7 +198,7 @@
 import { inject, onMounted, onActivated, reactive, ref, watch } from 'vue'
 import { usePreCmdsStore } from 'stores/precmds.js'
 import { clientConfig } from 'src/common/config.js'
-import { deepClone } from 'src/utils/common.js'
+import { deepClone, isEmptyObj } from 'src/utils/common.js'
 
 const props = defineProps({
   send: {
@@ -605,7 +605,8 @@ onMounted(() => {
     getPreCmds()
   } else {
     if (Object.keys(preCmdsStore.preCmds).length > 0) {
-      for (let key in Object.keys(preCmdsStore.preCmds)) {
+      for (const key of Object.keys(preCmdsStore.preCmds)) {
+
         cmds[key] = preCmdsStore.preCmds[key]
       }
     } else {
