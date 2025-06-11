@@ -57,6 +57,13 @@ export default {
     dataNotNull: "必填数据不能为空",
     dataLenNotMax: "数据长度不能超过:",
     dataLenNotMin: "数据长度不能超过:",
+
+    invalidRepositoryName: "无效的名称",
+    repositoryNameSlash: "名称斜杠错误",
+    repositoryNameDoubleSlash: "名称双斜杠错误",
+    invalidImageTag: "无效标签",
+    tagStartChar: "标签起始字符错误",
+    tagDoubleDot: "多个.",
   },
 
   assistant: {
@@ -97,6 +104,14 @@ export default {
   },
 
   panel: {
+    tabs: {
+      containers: "容器",
+      images: "映像",
+      volumes: "卷",
+      networks: "网络",
+      settings: "设置",
+    },
+
     containers: {
       create: "创建",
     },
@@ -108,6 +123,72 @@ export default {
       terminal: "终端",
       export: "导出",
       settings: "设置",
+    },
+    images: {
+      title: "映像管理",
+      create: "创建",
+
+      image: "映像",
+      repository: "映像",
+      tag: "标签",
+      imageId: "映像ID",
+      created: "创建时间",
+      size: "大小",
+      action: "操作",
+
+      edit: "编辑",
+      copy: "复制",
+      reTag: "新标签",
+      delete: "删除",
+      export: "导出",
+      import: "导入",
+      createContainer: "创建容器",
+
+      push: "推送",
+      pull: "拉取",
+      refresh: "刷新",
+      batchDelete: "批量删除",
+
+      editImageTitle: "编辑映像",
+      retagImageTitle: "重新标签映像",
+      oldRepository: "原名称",
+      oldTag: "原标志",
+      newRepository: "新名称",
+      newTag: "新标志",
+
+      getImagesError: "获取映像列表失败",
+      pulling: "正在拉取镜像...",
+      pullSuccess: "镜像拉取成功",
+      pullFail: "镜像拉取失败",
+      deleting: "正在删除",
+      deleteSuccess: "镜像删除成功",
+      deleteFail: "镜像删除失败",
+      unmodified: "未修改",
+      editImageSuccess: "编辑成功",
+      editImageFail: "编辑失败",
+      pathIncludeSpace: "不支持空格路径",
+      exporting: "正在导出",
+      exportSuccess: "导出成功",
+      exportFail: "导出失败",
+      importing: "正在导入",
+      importSuccess: "导入成功",
+      importFail: "导入失败",
+
+      deleteMessage: "确认删除吗？",
+
+      pullDialog: {
+        name: "名称",
+        description: "描述",
+        stars: "星",
+        official: "官方",
+        action: "操作",
+
+        pull: "拉取",
+      }
+    },
+    volumes: {},
+    networks: {
+      title: "网络管理"
     },
     settings: {
       settings: "设置",

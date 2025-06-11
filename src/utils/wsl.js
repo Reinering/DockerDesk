@@ -33,3 +33,47 @@ export function parseDistributionList(data) {
     return { label, value, desc }
   })
 }
+
+export const parseDockerImages = (input) => {
+  // 按行分割并移除表头
+  const lines = input.trim().split('\n').slice(1)
+
+  let id = 0
+  return lines.map(line => {
+    // 使用正则表达式匹配字段，处理 CREATED 字段的完整性
+    const match = line.match(/(\S+)\s+(\S+)\s+(\S+)\s+(.+?)\s+(\S+)$/)
+    if (!match) return null // 如果解析失败，返回 null
+
+    const [, repository, tag, imageId, created, size] = match
+    id += 1
+
+    return {
+      id,
+      repository,
+      tag,
+      imageId,
+      created,
+      size
+    }
+  }).filter(item => item !== null) // 过滤掉无效行
+}
+
+export const parsePullDockerImages = (input) => {
+  // 按行分割并移除表头
+  const lines = input.trim().split('\n').slice(1)
+
+  return lines.map(line => {
+    // 使用正则表达式匹配字段，优化处理 DESCRIPTION 和 OFFICIAL
+    const match = line.match(/(\S+(?:\/\S+)*)\s+(.+?)\s+(\d+)\s*(\[?\w*\]?)?$/)
+    if (!match) return null; // 如果解析失败，返回 null
+
+    const [, name, description, stars, official = ''] = match
+
+    return {
+      name,
+      description: description.trim(),
+      stars: Number(stars),
+      official: official.replace(/[[\]]/g, '')
+    }
+  }).filter(item => item !== null) // 过滤掉无效行
+}

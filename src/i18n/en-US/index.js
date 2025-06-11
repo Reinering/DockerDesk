@@ -61,6 +61,13 @@ export default {
     dataNotNull: "Not Null",
     dataLenNotMax: "The data length cannot exceed:",
     dataLenNotMin: "The data length cannot be less than:",
+
+    invalidRepositoryName: "Invalid repository name",
+    repositoryNameSlash: "Repository name slash",
+    repositoryNameDoubleSlash: "Double slash in repository name",
+    invalidImageTag: "Invalid image tag",
+    tagStartChar: "Tag start character",
+    tagDoubleDot: "Tag double dot",
   },
 
   assistant: {
@@ -101,6 +108,13 @@ export default {
   },
 
   panel: {
+    tabs: {
+      containers: "Containers",
+      images: "Images",
+      volumes: "Volumes",
+      networks: "Networks",
+      settings: "Settings",
+    },
     containers: {
       create: "Create",
     },
@@ -112,6 +126,70 @@ export default {
       terminal: "Terminal",
       export: "Export",
       settings: "Settings",
+    },
+    images: {
+      title: "Images Management",
+      create: "Create",
+
+      image: "Image",
+      repository: "REPOSITORY",
+      tag: "TAG",
+      imageId: "IMAGE ID",
+      created: "CREATED",
+      size: "SIZE",
+      action: "ACTIONS",
+
+      edit: "Edit",
+      copy: "Copy",
+      reTag: "Retag",
+      delete: "Delete",
+      export: "Export",
+      import: "Import",
+      createContainer: "Create Container",
+
+      push: "Push",
+      pull: "Pull",
+      refresh: "Refresh",
+      batchDelete: "Batch Delete",
+
+      editImageTitle: "Edit Image",
+      retagImageTitle: "Retag Image",
+      oldRepository: "Old Repository",
+      oldTag: "Old Tag",
+      newRepository: "New Repository",
+      newTag: "New Tag",
+
+      getImagesError: "Failed to get image list",
+      pulling: "Pulling image...",
+      pullSuccess: "Image pull successful",
+      pullFail: "Image pull failed",
+      deleting: "Deleting",
+      deleteSuccess: "Image deleted successfully",
+      deleteFail: "Image deleted failed",
+      unmodified: "Unmodified",
+      editImageSuccess: "Edit successfully",
+      editImageFail: "Edit failed",
+      pathIncludeSpace: "Paths with spaces are not supported",
+      exporting: "exporting",
+      exportSuccess: "Export successfully",
+      exportFail: "Export failed",
+      importing: "importing",
+      importSuccess: "Import successfully",
+      importFail: "Import failed",
+
+      pullDialog: {
+        name: "Name",
+        description: "Description",
+        stars: "Stars",
+        official: "Official",
+        action: "Action",
+
+        pull: "Pull",
+      }
+    },
+    volumes: {},
+    networks: {
+      title: "Network Management"
     },
     settings: {
       settings: "Settings",

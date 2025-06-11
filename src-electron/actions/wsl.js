@@ -142,7 +142,7 @@ export async function execSubSystem (command) {
 
 export async function execSSubSystem (commands) {
   let result
-
+  console.log(commands)
   for (const command of commands) {
     result = await cmd(`wsl ${command.join(' ')}`, 'utf8').then((data) => {
       return data

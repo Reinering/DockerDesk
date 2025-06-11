@@ -7,11 +7,11 @@
       active-color="purple"
       class="text-teal shadow-2"
     >
-      <q-route-tab name="containers" icon="border_all" label="Containers" to="containers" exact />
-      <q-route-tab name="images" icon="crop_square" label="Images" to="images" exact />
-      <q-route-tab name="volumes" icon="noise_aware" label="Volumes" to="volumes" exact />
-      <q-route-tab name="networks" icon="router" label="Networks" to="networks" exact />
-      <q-route-tab name="settings" icon="settings" label="Settings" :to="toSettings" exact />
+      <q-route-tab name="containers" icon="border_all" :label="t('panel.tabs.containers')" to="containers" exact />
+      <q-route-tab name="images" icon="crop_square" :label="t('panel.tabs.images')" to="images" exact />
+      <q-route-tab name="volumes" icon="noise_aware" :label="t('panel.tabs.volumes')" to="volumes" exact />
+      <q-route-tab name="networks" icon="router" :label="t('panel.tabs.networks')" to="networks" exact />
+      <q-route-tab name="settings" icon="settings" :label="t('panel.tabs.settings')" :to="toSettings" exact />
     </q-tabs>
 
     <router-view v-slot="{ Component }">
