@@ -189,7 +189,27 @@ export default {
     },
     volumes: {},
     networks: {
-      title: "Network Management"
+      title: "Network Management",
+
+      create: "Create",
+      refresh: "Refresh",
+
+      driver: "Driver",
+      subnet: "Subnet",
+      gateway: "Gateway",
+      containers: "Containers",
+
+      true: "On",
+      false: "Off",
+
+      bind: "Bind",
+      unbind: "Unbind",
+
+      createNetworkTitle: "Create Network",
+      bingContainerTitle: "Bind Container",
+
+      getNetworksError: "Failed to get network list",
+      getNetworkInfoError: "Failed to get network details",
     },
     settings: {
       settings: "Settings",

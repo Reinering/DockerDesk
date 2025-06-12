@@ -188,7 +188,29 @@ export default {
     },
     volumes: {},
     networks: {
-      title: "网络管理"
+      title: "网络管理",
+
+      create: "创建",
+      refresh: "刷新",
+
+      driver: "驱动",
+      subnet: "子网",
+      gateway: "网关",
+      containers: "容器",
+
+      true: "启用",
+      false: "禁用",
+
+      bind: "绑定",
+      unbind: "解绑",
+
+      createNetworkTitle: "创建网络",
+      bingContainerTitle: "绑定容器",
+
+
+      getNetworksError: "获取网络列表失败",
+      getNetworkInfoError: "获取网络详细信息失败",
+
     },
     settings: {
       settings: "设置",

@@ -65,7 +65,7 @@ export const parsePullDockerImages = (input) => {
   return lines.map(line => {
     // 使用正则表达式匹配字段，优化处理 DESCRIPTION 和 OFFICIAL
     const match = line.match(/(\S+(?:\/\S+)*)\s+(.+?)\s+(\d+)\s*(\[?\w*\]?)?$/)
-    if (!match) return null; // 如果解析失败，返回 null
+    if (!match) return null // 如果解析失败，返回 null
 
     const [, name, description, stars, official = ''] = match
 
@@ -76,4 +76,23 @@ export const parsePullDockerImages = (input) => {
       official: official.replace(/[[\]]/g, '')
     }
   }).filter(item => item !== null) // 过滤掉无效行
+}
+
+export const parseDockerNetwork = (str) => {
+  // 按行分割，去除空行
+  const lines = str.split('\n').filter(line => line.trim())
+  // 定义表头，NETWORK ID 作为一列
+  const headers = ['network_id', 'name', 'driver', 'scope']
+
+  // 处理数据行，转换为对象数组
+  return lines.slice(1).map(line => {
+    // 按多个空格分割，确保正确分隔字段
+    const values = line.trim().split(/\s+/).filter(Boolean)
+    const obj = {}
+    headers.forEach((header, index) => {
+      // 映射值到字段，超出字段数的值忽略，缺失的值用空字符串
+      obj[header] = index < values.length ? values[index] : ''
+    })
+    return obj
+  })
 }
