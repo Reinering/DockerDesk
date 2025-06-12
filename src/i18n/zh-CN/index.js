@@ -186,7 +186,15 @@ export default {
         pull: "拉取",
       }
     },
-    volumes: {},
+    volumes: {
+      title: "卷管理",
+
+      volumeName: "名称",
+      driver: "驱动",
+      action: "操作",
+
+      getVolumesError: "获取卷列表失败",
+    },
     networks: {
       title: "网络管理",
 

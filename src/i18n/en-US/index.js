@@ -187,7 +187,15 @@ export default {
         pull: "Pull",
       }
     },
-    volumes: {},
+    volumes: {
+      title: "Volume",
+
+      volumeName: "Volume Name",
+      driver: "Driver",
+      action: "Action",
+
+      getVolumesError: "Failed to get volume list",
+    },
     networks: {
       title: "Network Management",
 

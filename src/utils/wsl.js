@@ -96,3 +96,61 @@ export const parseDockerNetwork = (str) => {
     return obj
   })
 }
+
+export const parseDockerVolume = (input) => {
+  // 按行分割并去除首行（表头）
+  const lines = input.trim().split('\n').slice(1)
+
+  // 将每行转换为对象
+  const result = lines.map(line => {
+    // 按多个空格分割（考虑到可能有不定数量的空格）
+    const [driver, volumeName] = line.trim().split(/\s+/)
+    return { driver, volumeName }
+  })
+
+  return result
+}
+
+export const parseDockerContainer = (input) => {
+  // 按行分割并去除首行（表头）
+  const lines = input.trim().split('\n').slice(1)
+
+  // 将每行转换为对象
+  const result = lines.map(line => {
+    // 按两个或更多空格分割
+    const parts = line.trim().split(/\s{2,}/)
+
+    // 确保字段存在，默认空字符串
+    const containerId = parts[0] || ''
+    const image = parts[1] || ''
+    const command = parts[2] || ''
+    const created = parts[3] || ''
+    const status = parts[4] || ''
+
+    // 处理 PORTS 和 NAMES
+    let ports = ''
+    let names = ''
+
+    // 如果 parts 长度为 6，说明 PORTS 为空，NAMES 在 parts[5]
+    if (parts.length === 6) {
+      ports = ''
+      names = parts[5] || ''
+    } else if (parts.length >= 7) {
+      // 如果 parts 长度 >= 7，PORTS 在 parts[5]，NAMES 在 parts[6]
+      ports = parts[5] || ''
+      names = parts[6] || ''
+    }
+
+    return {
+      containerId,
+      image,
+      command,
+      created,
+      status,
+      ports,
+      names
+    }
+  })
+
+  return result
+}
