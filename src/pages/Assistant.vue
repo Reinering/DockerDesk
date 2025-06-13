@@ -224,6 +224,7 @@ const onWslStatusBtn = () => {
       if (result.success) {
         wslStatusBtn.value === t('assistant.addPackage')
         wslStatusColor.value = "red"
+        wslStatus.value = 'Stopped'
         notify.value({
           type: 'info',
           group: false,
@@ -337,9 +338,11 @@ const init = () => {
                   if (data[index].state === "Stopped") {
                     wslStatusBtn.value = t('assistant.start')
                     wslStatusColor.value = "red"
+                    wslStatus.value = "Stopped"
                   } else if (data[index].state === "Running") {
                     wslStatusBtn.value = t('assistant.stop')
                     wslStatusColor.value = "green"
+                    wslStatus.value = "Running"
                   }
 
                   isAssLocalBtn.value = false
