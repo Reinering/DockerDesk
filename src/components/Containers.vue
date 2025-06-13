@@ -22,7 +22,7 @@
 
     <q-scroll-area :style="scrollStyle">
       <div class="q-gutter-x-md q-gutter-y-md row justify-center">
-        <component :is="'Container' + item.templateId" v-for="(item, index) in containerDatas" :key="index" :data="item" :style="containerStyles[item.templateId]"/>
+        <component :is="'Container' + item.templateId" v-for="(item, index) in containerDatas" :key="index" :data="item" />
       </div>
     </q-scroll-area>
 
@@ -63,21 +63,6 @@ const t = inject("t")
 const cardStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 183 + "px" : window.innerHeight - 149 + "px",
 })
-
-const containerStyles = [
-  {
-    backgroundColor: "#A2D0EF",
-    width: "150px",
-    height: "100px",
-    margin: "20px"
-  },
-  {
-    backgroundColor: "#A2D9CE",
-    width: "200px",
-    height: "200px",
-    margin: "20px"
-  }
-]
 
 const containerDatas = [
   {

@@ -91,15 +91,20 @@ export default {
     installing: "正在安装",
     installSuccess: "安装成功",
     installFail: "安装失败",
-    installMessage: "子系统安装完成，正在初始化..."
+    installMessage: "子系统安装完成，正在初始化...",
+    uninstalling: "正在卸载...",
+    uninstallSuccess: "卸载成功",
+    uninstallFail: "卸载失败",
   },
 
   asslocal: {
     install: "安装",
+    reinstall: "重新安装",
     settings: "设置",
     panel: "面板",
     notInstalled: "未安装",
     management: "管理",
+
 
   },
 
@@ -114,15 +119,61 @@ export default {
 
     containers: {
       create: "创建",
+
+      file: "文件",
+      folder: "目录",
+
+      inputHint1: "选择compose文件所在目录(必选)",
+      inputHint2: "选择compose文件(非必选)",
+
+      hintNote: "注意: 这里仅支持{0}方式， 若使用{1}命令跳转到\"映像\"页面",
+      hintError: "错误: docker-compose未安装, 请在引导页面进行重新安装",
+
+      pathIncludeSpace: "不支持空格路径",
+
+      composing: "Composing",
+      composeSuccess: "Compose Successfully",
+      composeFail: "Compose Failed",
     },
     container: {
       run: "运行",
       stop: "停止",
       restart: "重启",
+      detail: "详情",
       delete: "删除",
+      log: "日志",
       terminal: "终端",
-      export: "导出",
+      pack: "打包成镜像",
       settings: "设置",
+
+      packImageTitle: "容器打包成镜像",
+      repository: "名称",
+      tag: "标志",
+
+      createTitle: "创建容器",
+
+      starting: "正在启动",
+      startSuccess: "启动成功",
+      startFail: "启动失败",
+      stopSuccess: "停止成功",
+      stopFail: "停止失败",
+      restarting: "正在重启",
+      restartSuccess: "重启成功",
+      restartFail: "重启失败",
+      deleteMessage: "确认删除吗？",
+      forceDelete: "需要强制删除?",
+      deleteSuccess: "删除成功",
+      deleteFail: "删除失败",
+      exporting: "正在导出",
+      exportSuccess: "导出成功",
+      exportFail: "导出失败",
+      packMessage: "确认将容器打包成镜像？",
+      packing: "正在打包",
+      packSuccess: "打包成功",
+      packFail: "打包失败",
+      configModifySuccess: "配置修改成功",
+      configModifyFail: "配置修改失败",
+
     },
     images: {
       title: "映像管理",
@@ -393,7 +444,11 @@ export default {
   },
 
   container: {
-
+    start: "运行",
+    stop: "停止",
+    restart: "重启",
+    detail: "详情",
+    more: "更多",
 
   },
 

@@ -95,12 +95,16 @@ export default {
     installing: "Installing",
     installSuccess: "Install Successfully",
     installFail: "Install Failure",
-    installMessage: "System installation completed, initializing..."
+    installMessage: "System installation completed, initializing...",
+    uninstalling: "Uninstalling",
+    uninstallSuccess: "Uninstall Successfully",
+    uninstallFail: "Uninstall Failure",
 
   },
 
   asslocal: {
     install: "Install",
+    reinstall: "Reinstall",
     settings: "Settings",
     panel: "Panel",
     notInstalled: "Not Installed",
@@ -117,15 +121,56 @@ export default {
     },
     containers: {
       create: "Create",
+
+      file: "File",
+      folder: "Folder",
+
+      inputHint1: "Select the directory where the compose file is located(Required)",
+      inputHint2: "Select the compose file(Optional)",
+
+      hintNote: "Note: Only {0} is supported here. If you use the {1} command, you will be redirected to the \"Images\" page.",
+      hintError: "Error: {0} is not installed, please reinstall it on the Assistant page",
+
+      pathIncludeSpace: "Paths with spaces are not supported",
     },
     container: {
       run: "Run",
       stop: "Stop",
       restart: "Restart",
+      detail: "Detail",
       delete: "Delete",
+      log: "Log",
       terminal: "Terminal",
-      export: "Export",
+      pack: "Package into image",
       settings: "Settings",
+
+      packImageTitle: "Container packaging into images",
+      repository: "Repository",
+      tag: "Tag",
+
+      createTitle: "Create Container",
+
+      starting: "Starting",
+      startSuccess: "Start Successfully",
+      startFail: "Start Failure",
+      stopSuccess: "Stop Successfully",
+      stopFail: "Stop Failure",
+      restarting: "Restarting",
+      restartSuccess: "Restart Successfully",
+      restartFail: "Restart Failure",
+      deleteMessage: "Are you sure to delete?",
+      forceDelete: "Need to force delete?",
+      deleteSuccess: "Delete Successfully",
+      deleteFail: "Delete Failure",
+      exporting: "Exporting",
+      exportSuccess: "Export Successfully",
+      exportFail: "Export Failure",
+      packMessage: "Are you sure to package the container into an image?",
+      packing: "Packing",
+      packSuccess: "Pack Successfully",
+      packFail: "Pack Failure",
+      configModifySuccess: "Configuration Modification Successful",
+      configModifyFail: "Configuration modification Failure",
     },
     images: {
       title: "Images Management",

@@ -195,7 +195,6 @@ export function getResourcePath(filePath) {
   }
 }
 
-
 export function firstUpper(word) {
   return word.charAt(0).toUpperCase()
     + word.slice(1)
@@ -205,15 +204,19 @@ export function firstLower(word) {
     + word.slice(1)
 }
 
-
 export function encodeToBase64(data) {
   const jsonString = JSON.stringify(data)
   // 处理中文等Unicode字符
-  const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+  const base64Data = btoa(unescape(encodeURIComponent(jsonString)))
   return base64Data
 }
 
 export function decodeFromBase64(base64String) {
   const jsonString = decodeURIComponent(escape(atob(base64String)))
   return JSON.parse(jsonString)
+}
+
+
+export function format(str, ...args) {
+  return str.replace(/\{(\d+)\}/g, (match, index) => args[index] || match)
 }

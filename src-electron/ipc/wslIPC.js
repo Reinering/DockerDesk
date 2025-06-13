@@ -3,7 +3,7 @@ import {
   modifyWSLDebugConfig, execSubSystem, execSSubSystem,
   getWSLInfo, getWSLList, wslUpdate,
   wslInstallSubSystem, installWSL, startSubSystem, stopSubSystem, restartSubSystem,
-  unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList, dockerLogin,
+  unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList, dockerLogin, startBGSubSystem
 
 } from 'app/src-electron/actions/wsl.js'
 
@@ -69,7 +69,7 @@ export function registerWSLIpcHandlers(win) {
   })
 
   ipcMain.handle('startBGSubSystem', async (event) => {
-    return startSubSystem().then((data) => {
+    return startBGSubSystem().then((data) => {
       return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }

@@ -19,19 +19,30 @@
     <!--      </q-list>-->
     <!--    </q-card-section>-->
 
+    <q-separator />
+
     <q-scroll-area :style="scrollStyle">
-      <div class="q-gutter-x-md q-gutter-y-md row justify-center">
-        <component :is="'Container' + item.templateId" v-for="(item, index) in containerDatas" :key="index" :data="item" />
+      <div class="q-gutter-x-md q-gutter-y-md q-pa-md row justify-center">
+        <component
+          :is="'Container' + item.templateId"
+          v-for="(item, index) in containerDatas"
+          :key="index"
+          :data="item"
+          :update="updateChildData"
+          :delete="deleteChild"
+        />
       </div>
     </q-scroll-area>
 
   </q-card>
 
-  <ContainerDialog v-model="ShowContainerDialog" :onClose="onShowContainerDialog"/>
+  <CreateContainerDialog v-model="showCreateContainerDialog" :onClose="onShowContainerDialog"/>
 </template>
 
 
 <script setup>
+import { isEmptyObj } from 'src/utils/common.js'
+
 defineOptions({
 
   components: {
@@ -40,9 +51,11 @@ defineOptions({
   }
 })
 
-import { inject, onActivated, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { inject, onMounted, onUnmounted, onActivated, onDeactivated, reactive, ref } from 'vue'
 import Container from 'components/Container.vue'
-import ContainerDialog from 'components/dialog/ContainerDialog.vue'
+import CreateContainerDialog from 'components/dialog/CreateContainerDialog.vue'
+import { parseDockerContainer } from 'src/utils/wsl.js'
+import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
 const router = inject("router")
@@ -50,6 +63,11 @@ const route = inject("route")
 const t = inject("t")
 
 const service = inject("service")
+const serviceCmd = ref('')
+
+let getContainerListInterval = null
+
+const search = ref('')
 
 const cardStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 150 + "px" : window.innerHeight - 149 + "px",
@@ -58,102 +76,95 @@ const scrollStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 183 - 55 + "px" : window.innerHeight - 149 - 122 + "px",
 })
 
-
-const ShowContainerDialog = ref(false)
+const showCreateContainerDialog = ref(false)
 const onShowContainerDialog = () => {
-  ShowContainerDialog.value = !ShowContainerDialog.value
+  showCreateContainerDialog.value = !showCreateContainerDialog.value
 }
 
-const containerDatas = [
-  {
-    templateId: 1,
-    nodeId: 1,
-    servername: "Node 1",
-    description: "This is a node",
-    state: "offline"
-  },
-  {
-    templateId: 1,
-    nodeId: 2,
-    servername: "Node 2",
-    description: "This is a node",
-    state: "online"
-  },
-  {
-    templateId: 1,
-    nodeId: 3,
-    servername: "Node 2",
-    description: "This is a node",
-    state: "online"
-  },
-  {
-    templateId: 1,
-    nodeId: 4,
-    servername: "Node 2",
-    description: "This is a node",
-    state: "online"
-  },
-  {
-    templateId: 1,
-    nodeId: 4,
-    servername: "Node 2",
-    description: "This is a node",
-    state: "online"
-  },
-  {
-    templateId: 1,
-    nodeId: 5,
-    servername: "Node 2",
-    description: "This is a node",
-    state: "online"
-  },
-  {
-    templateId: 1,
-    servername: "Node 2",
-    description: "This is a node",
-    state: "online"
-  },
-  {
-    templateId: 1,
-    nodeId: 6,
-    servername: "Node 2",
-    description: "This is a node",
-    state: "online"
-  },
-  {
-    templateId: 1,
-    nodeId: 7,
-    servername: "Node 2",
-    description: "This is a node",
-    state: "online"
+const containerDatas = reactive([
+  // {
+  //   templateId: 1,
+  //   nodeId: 1,
+  //   servername: "Node 1",
+  //   description: "This is a node",
+  // },
+])
+
+
+
+
+
+
+
+const updateChildData = (nodeId, field, value) => {
+  for (const item of containerDatas) {
+    if (item["nodeId"] === nodeId) {
+      if (field === "names") {
+        item["servername"] = value
+      }
+
+      item["data"][field] = value
+      break
+    }
   }
-]
+}
 
-const data = { id: 'mails', label: 'Mails', icon: 'check', data: service}
+const deleteChild = (nodeId) => {
+  for (let i=0; i < containerDatas.length; i++) {
+    if (containerDatas[i]["nodeId"] === nodeId) {
+      containerDatas.splice(i, 1)
 
+      break
+    }
+  }
+}
 
-const search = ref('')
+const getContainerList = () => {
+  window.wslTerminal.execWSL([
+    '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} ps -a`
+  ]).then((result) => {
+    if (result.success) {
+      containerDatas.length = 0
+      const items = parseDockerContainer(result.data)
+      for (let i=0; i < items.length; i++) {
+        containerDatas.push({
+          nodeId: i,
+          templateId: 0,
+          servername: items[i]["names"],
+          description: '',
+          data: items[i],
+          serviceCmd: serviceCmd.value
+        })
+      }
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.networks.getNetworksError')}: ${result.error}`,
+      })
+    }
+  })
+}
 
-console.log("props.data", data)
+const init = async () => {
+  await setTimeout(() => {}, 500)
 
-const init = () => {
-  if (data.connectionType === t('node.remoteNode') && data.serviceType === "Docker" && data.protocol === 'SSH') {
-    window.dockerTerminal.connect({
-      uuid: data.id,
-      connID: data.id
-    }).then((result) => {
-      console.log(result)
+  serviceCmd.value = service.serviceType
+  if (isEmptyObj(serviceCmd.value)) {
+    return
+  }
 
-    })
+  getContainerList()
 
-
-  } else if (data.connectionType === t('node.remoteNode') && data.serviceType === "Podman" && data.protocol === 'SSH') {
-
+  if (getContainerListInterval === null) {
+    getContainerListInterval = setInterval(() => {
+      getContainerList()
+    }, 30000)
   }
 }
 
 const checkScreenSize = () => {
-  console.log('check screenSize', window.innerHeight)
+  // console.log('check screenSize', window.innerHeight)
 
   if (process.env.MODE === 'electron') {
     cardStyle.height = window.innerHeight - 150 + "px"
@@ -170,9 +181,24 @@ onMounted(() => {
   window.addEventListener('resize', checkScreenSize)
 })
 
+onActivated(() => {
+  if (getContainerListInterval === null) {
+    getContainerListInterval = setInterval(() => {
+      getContainerList()
+    }, 30000)
+  }
+})
+
+onDeactivated(() => {
+  if (getContainerListInterval !== null) {
+    clearInterval(getContainerListInterval)
+    getContainerListInterval = null
+  }
+})
 
 
 onUnmounted(() => {
+
   window.removeEventListener('resize', checkScreenSize)
 })
 
