@@ -377,13 +377,13 @@ const deleteImage = (row) => {
       }
     })
 
-    notify.value({
-      type: 'positive',
+    notify.value = $q.notify({
+      type: 'info',
       group: false,
-      icon: 'done',
-      spinner: false,
-      message: `${t('panel.images.deleting')}`,
-      timeout: 10000
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('panel.images.deleting'),
     })
   })
 }
@@ -707,7 +707,7 @@ onMounted(() => {
 })
 
 onActivated(() => {
-
+  onRefresh()
 })
 
 onDeactivated(() => {
