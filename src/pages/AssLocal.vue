@@ -112,8 +112,10 @@ const podmanInfo = ref(t('asslocal.notInstalled'))
 
 const onInstallDocker = () => {
   if (dockerBtn.value === t('asslocal.install')) {
-    window.wslTerminal.execWSL(['-d', "DockerDesk", '--user', "root", '-e', "bash", "-c", "\"curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun systemctl enable --now docker >/dev/null 2>&1\""])
-      .then((result) => {
+    window.wslTerminal.execSWSL([
+      ['-d', "DockerDesk", '--user', "root", '-e', "bash", "-c", "\"curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun systemctl enable --now docker >/dev/null 2>&1\""],
+      ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y docker-compose"]
+    ]).then((result) => {
         console.log(result)
         if (result.success) {
           notify.value({
@@ -153,7 +155,7 @@ const onInstallDocker = () => {
 
 const onInstallPodman = () => {
   if (podmanBtn.value === t('asslocal.install')) {
-    window.wslTerminal.execWSL(['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get -qq -y install podman"])
+    window.wslTerminal.execWSL(['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get -qq -y install podman podman-compose"])
       .then((result) => {
         console.log(result)
         if (result.success) {
