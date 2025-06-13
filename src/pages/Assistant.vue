@@ -5,7 +5,8 @@
     <div class="q-pa-md row q-gutter-md justify-evenly">
       <q-card class="bg-blue-grey-6" style="width: 40%; height: 250px">
         <q-card-section align="center">
-          <div class="text-h5">{{t('assistant.local')}} Docker/Podman</div>
+          <div class="text-h5">{{t('assistant.local')}}</div>
+          <div class="text-h5 text-brown-8">Docker/Podman</div>
         </q-card-section>
 
         <q-separator />
@@ -16,8 +17,6 @@
 
         <q-card-section />
 
-        <q-card-section />
-
         <q-card-actions class="q-mt-none" align="center">
           <q-btn color="primary" size="lg" icon="settings" @click="gotoAssLocal" :disable="isAssLocalBtn"/>
         </q-card-actions>
@@ -25,13 +24,13 @@
 
       <q-card class="bg-blue-grey-6" style="width: 40%; height: 250px">
         <q-card-section align="center">
-          <div class="text-h5">{{t('assistant.remote')}} Docker/Podman</div>
+          <div class="text-h5">{{t('assistant.remote')}}</div>
+          <div class="text-h5 text-brown-8">Docker/Podman</div>
         </q-card-section>
 
         <q-separator />
 
         <q-card-section class="q-pt-none" />
-        <q-card-section />
         <q-card-section />
 
         <q-card-actions class="q-mt-none" align="center">
