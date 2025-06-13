@@ -36,7 +36,7 @@
 
   </q-card>
 
-  <CreateContainerDialog v-model="showCreateContainerDialog" :onClose="onShowContainerDialog"/>
+  <CreateContainerDialog v-if="showCreateContainerDialog" v-model="showCreateContainerDialog" :onClose="onShowContainerDialog"/>
 </template>
 
 

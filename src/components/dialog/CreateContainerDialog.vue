@@ -4,7 +4,7 @@
 
       <q-card-section>
         <q-item-label class="text-h6">{{t('panel.container.createTitle')}}</q-item-label>
-        <q-item-label class="text-deep-orange-9" caption lines="1" >{{t('panel.containers.hintNote')}}</q-item-label>
+        <q-item-label class="text-deep-orange-9" caption lines="1" >{{hintNote}}</q-item-label>
         <q-item-label class="text-pink" caption lines="1" >{{hintMessage}}</q-item-label>
       </q-card-section>
 
@@ -61,7 +61,7 @@ const props = defineProps({
 })
 
 import { inject, ref, onMounted, onUnmounted, reactive } from 'vue'
-import { isEmptyObj, format, firstLower } from 'src/utils/common.js'
+import { isEmptyObj, firstLower } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
@@ -78,7 +78,6 @@ const hintNote = ref('')
 const hintMessage = ref('')
 
 const isOK = ref(false)
-
 
 const composeFile = reactive({
   folderPath: '',
@@ -189,19 +188,19 @@ const init = async () => {
     return
   }
 
-  window.wslTerminal.execWSL([
+  await window.wslTerminal.execWSL([
     '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} -v`
   ]).then((result) => {
     console.log(result)
     if (result.success) {
       hintMessage.value = result.data
     } else {
-      hintMessage.value = format(t('panel.containers.hintError'), serviceCmd.value)
+      hintMessage.value = t('panel.containers.hintError', [serviceCmd.value])
       isOK.value= true
     }
   })
 
-  hintNote.value = format(t('panel.containers.hintNote'), serviceCmd.value, service.serviceType)
+  hintNote.value = t('panel.containers.hintNote', [serviceCmd.value, service.serviceType])
 }
 
 onMounted(() => {
