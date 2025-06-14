@@ -68,6 +68,8 @@ export default {
     invalidImageTag: "Invalid image tag",
     tagStartChar: "Tag start character",
     tagDoubleDot: "Tag double dot",
+
+    portRange: "port range (1-65535)",
   },
 
   assistant: {
@@ -113,12 +115,58 @@ export default {
 
   panel: {
     tabs: {
+      create: "Create",
       containers: "Containers",
       images: "Images",
       volumes: "Volumes",
       networks: "Networks",
+      logs: "Logs",
       settings: "Settings",
     },
+
+    create: {
+      title: "Create Container",
+
+      create: "Create",
+      image: "Image",
+
+      basic: "Basic",
+      containerName: "Container Name",
+      nameLabel: "If it is empty, it will be automatically generated.",
+
+      runtime: "Runtime",
+      mode: "Mode",
+      bgRun: "Background",
+      itRun: "Interactive",
+      rmRun: "Automatically delete after stopping",
+
+      environment: "Environment",
+      envFileMode: "Reading from a file",
+      envManualMode: "Manual",
+      envFile: "ENV variable files",
+      envFileLabel: "Select the local ENV variable file",
+      envKeyValue: "ENV variable(Key/Value)",
+      envKey: "Key",
+      envValue: "Value",
+
+      volumes: "Volume",
+
+      networks: "Network",
+
+      ports: "Ports",
+      randomMapping: "Random Mapping",
+      manualMapping: "Manual Mapping",
+      exposeContainer: "Expose Container Port",
+      portMapping: "Port Mapping(host:container)",
+      new: "New",
+      hostPort: "Host Port",
+      containerPort: "Container Port",
+
+      resources: "Resources",
+
+      permissions: "Permissions",
+    },
+
     containers: {
       create: "Create",
 
@@ -133,6 +181,7 @@ export default {
 
       pathIncludeSpace: "Paths with spaces are not supported",
     },
+
     container: {
       run: "Run",
       stop: "Stop",
@@ -172,6 +221,7 @@ export default {
       configModifySuccess: "Configuration Modification Successful",
       configModifyFail: "Configuration modification Failure",
     },
+
     images: {
       title: "Images Management",
       create: "Create",
@@ -190,6 +240,7 @@ export default {
       delete: "Delete",
       export: "Export",
       import: "Import",
+      createImage: "Create Image",
       createContainer: "Create Container",
 
       push: "Push",
@@ -222,6 +273,10 @@ export default {
       importSuccess: "Import successfully",
       importFail: "Import failed",
 
+      inputHint1: "Select the directory where the Dockerfile is located(Required)",
+      inputHint2: "Select the Dockerfile(Optional)",
+      hintNote: "Note: This is the DockerFile file or directory where you choose to build the image",
+
       pullDialog: {
         name: "Name",
         description: "Description",
@@ -232,6 +287,7 @@ export default {
         pull: "Pull",
       }
     },
+
     volumes: {
       title: "Volume",
 
@@ -241,6 +297,7 @@ export default {
 
       getVolumesError: "Failed to get volume list",
     },
+
     networks: {
       title: "Network Management",
 
@@ -264,6 +321,7 @@ export default {
       getNetworksError: "Failed to get network list",
       getNetworkInfoError: "Failed to get network details",
     },
+
     settings: {
       settings: "Settings",
       save: "Save",

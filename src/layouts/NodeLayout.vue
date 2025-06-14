@@ -7,10 +7,12 @@
       active-color="purple"
       class="text-teal shadow-2"
     >
+      <q-route-tab v-if="isShowCreate" name="create" icon="create" :label="t('panel.tabs.create')" to="create" exact />
       <q-route-tab name="containers" icon="border_all" :label="t('panel.tabs.containers')" to="containers" exact />
       <q-route-tab name="images" icon="crop_square" :label="t('panel.tabs.images')" to="images" exact />
       <q-route-tab name="volumes" icon="noise_aware" :label="t('panel.tabs.volumes')" to="volumes" exact />
       <q-route-tab name="networks" icon="router" :label="t('panel.tabs.networks')" to="networks" exact />
+      <q-route-tab name="logs" icon="output" :label="t('panel.tabs.logs')" to="logs" exact />
       <q-route-tab name="settings" icon="settings" :label="t('panel.tabs.settings')" :to="toSettings" exact />
     </q-tabs>
 
@@ -39,6 +41,8 @@ const tab = ref('containers')
 
 const toSettings = ref("dockerSettings")
 
+const isShowCreate = ref(true)
+
 const changeSettingRouter = () => {
   if (!isEmptyObj(service)) {
     if (service.serviceType === "docker") {
@@ -50,6 +54,11 @@ const changeSettingRouter = () => {
 }
 
 console.log("NodeLayout init")
+
+const showCreatePage = () => {
+  isShowCreate.value = true
+}
+provide("showCreatePage", showCreatePage)
 
 onMounted(() => {
   try {

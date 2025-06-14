@@ -64,6 +64,8 @@ export default {
     invalidImageTag: "无效标签",
     tagStartChar: "标签起始字符错误",
     tagDoubleDot: "多个.",
+
+    portRange: "端口范围内(1-65535)",
   },
 
   assistant: {
@@ -110,11 +112,56 @@ export default {
 
   panel: {
     tabs: {
+      create: "创建",
       containers: "容器",
       images: "映像",
       volumes: "卷",
       networks: "网络",
+      logs: "日志",
       settings: "设置",
+    },
+
+    create: {
+      title: "创建容器",
+
+      create: "创建",
+      image: "映像",
+
+      basic: "基本设置",
+      containerName: "容器名称",
+      nameLabel: "为空时，会自动生成",
+
+      runtime: "运行时",
+      mode: "模式",
+      bgRun: "后台",
+      itRun: "交互",
+      rmRun: "停止后自动删除",
+
+      environment: "环境变量",
+      envFileMode: "从文件读取",
+      envManualMode: "手动",
+      envFile: "环境变量文件",
+      envFileLabel: "选择本地环境变量文件",
+      envKeyValue: "环境变量(键/值)",
+      envKey: "键",
+      envValue: "值",
+
+      volumes: "卷",
+
+      networks: "网络",
+
+      ports: "端口映射",
+      randomMapping: "随机映射",
+      manualMapping: "手动映射",
+      exposeContainer: "暴露容器端口",
+      portMapping: "映射(宿主机:容器)",
+      new: "新增",
+      hostPort: "宿主机端口",
+      containerPort: "容器端口",
+
+      resources: "资源",
+
+      permissions: "权限",
     },
 
     containers: {
@@ -127,7 +174,7 @@ export default {
       inputHint2: "选择compose文件(非必选)",
 
       hintNote: "注意: 这里仅支持{0}方式， 若使用{1}命令跳转到\"映像\"页面",
-      hintError: "错误: docker-compose未安装, 请在引导页面进行重新安装",
+      hintError: "错误: {0}未安装, 请在引导页面进行重新安装",
 
       pathIncludeSpace: "不支持空格路径",
 
@@ -135,6 +182,7 @@ export default {
       composeSuccess: "Compose Successfully",
       composeFail: "Compose Failed",
     },
+
     container: {
       run: "运行",
       stop: "停止",
@@ -175,6 +223,7 @@ export default {
       configModifyFail: "配置修改失败",
 
     },
+
     images: {
       title: "映像管理",
       create: "创建",
@@ -193,6 +242,7 @@ export default {
       delete: "删除",
       export: "导出",
       import: "导入",
+      createImage: "创建映像",
       createContainer: "创建容器",
 
       push: "推送",
@@ -225,6 +275,10 @@ export default {
       importSuccess: "导入成功",
       importFail: "导入失败",
 
+      inputHint1: "选择Dockerfile文件所在目录(必选)",
+      inputHint2: "选择Dockerfile文件(非必选)",
+      hintNote: "注意: 这里是选择构建映像的DockerFile文件或目录",
+
       deleteMessage: "确认删除吗？",
 
       pullDialog: {
@@ -237,6 +291,7 @@ export default {
         pull: "拉取",
       }
     },
+
     volumes: {
       title: "卷管理",
 
@@ -246,6 +301,7 @@ export default {
 
       getVolumesError: "获取卷列表失败",
     },
+
     networks: {
       title: "网络管理",
 
@@ -271,6 +327,7 @@ export default {
       getNetworkInfoError: "获取网络详细信息失败",
 
     },
+
     settings: {
       settings: "设置",
       save: "保存",

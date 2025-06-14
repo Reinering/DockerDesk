@@ -218,5 +218,6 @@ export function decodeFromBase64(base64String) {
 
 
 export function format(str, ...args) {
+  console.log("mark", str)
   return str.replace(/\{(\d+)\}/g, (match, index) => args[index] || match)
 }
