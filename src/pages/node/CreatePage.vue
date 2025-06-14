@@ -99,14 +99,6 @@
         :label="t('panel.create.ports')"
         header-class="text-grey-6 text-body1 bg-grey-2"
       >
-        <template v-slot:header>
-          <q-item-section>
-            {{t('panel.create.ports')}}
-          </q-item-section>
-
-
-        </template>
-
         <q-item class="bg-grey-2" dense>
           <q-item-section class="text-body2">{{ t('panel.create.mode') }}</q-item-section>
 
@@ -354,6 +346,194 @@
         :label="t('panel.create.volumes')"
         header-class="text-grey-6 text-body1 bg-grey-2"
       >
+<!--        mapping-->
+        <q-list>
+          <q-item class="bg-grey-2" dense >
+            <q-item-section class="text-body2">{{ t('panel.create.volumeMapping') }}</q-item-section>
+
+            <q-item-section side>
+              <q-btn icon="add_circle_outline" size="xs" padding="xs" color="blue" @click.stop="onAddVolumeMapping">
+                <q-tooltip class="bg-amber text-black shadow-4">
+                  {{ t('panel.create.new') }}
+                </q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            v-for="(item, index) in composition.volumes.volumeMappings"
+            :key="index"
+            dense
+            class="bg-grey-2"
+          >
+            <q-item-section class="text-body2">{{ t('panel.create.volumeMapping1') }}</q-item-section>
+
+            <q-item-section top side>
+              <q-input
+                class="text-body1"
+                outlined
+                dense
+                v-model="item.host"
+                :label="t('panel.create.hostVolume')"
+                style="width: 150px"
+              />
+            </q-item-section>
+
+            <q-item-section top side>
+              <q-input
+                class="text-body1"
+                outlined
+                dense
+                v-model="item.container"
+                :label="t('panel.create.containerVolume')"
+                style="width: 200px"
+              />
+            </q-item-section>
+
+            <q-select
+              class="bg-grey-3"
+              color="blue"
+              bg-color="cyan-14"
+              v-model="item.volumeFileMode"
+              :options="volumeFileModes"
+              filled
+              dense
+              borderless
+              emit-value
+              transition-show="flip-up"
+              transition-hide="flip-down"
+              style="min-width: 70px"
+            >
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps">
+                  <q-item-section>
+                    <q-item-label>{{ scope.opt.label }}</q-item-label>
+                    <q-item-label caption>{{ scope.opt.desc }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+
+            <q-item-section top side>
+              <q-btn dense flat icon="delete" color="red" @click="onDeleteVolumeMapping(index)">
+                <q-tooltip class="bg-amber text-black shadow-4">
+                  {{t('delete')}}
+                </q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </q-item>
+        </q-list>
+<!--        mount-->
+        <q-list>
+          <q-item class="bg-grey-2" dense >
+            <q-item-section class="text-body2">{{ t('panel.create.mount') }}</q-item-section>
+
+            <q-item-section side>
+              <q-btn icon="add_circle_outline" size="xs" padding="xs" color="blue" @click.stop="onAddMount">
+                <q-tooltip class="bg-amber text-black shadow-4">
+                  {{ t('panel.create.new') }}
+                </q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            v-for="(item, index) in composition.volumes.mounts"
+            :key="index"
+            dense
+            class="bg-grey-2"
+          >
+            <q-item-section class="text-body2">{{ t('panel.create.volumeMapping1') }}</q-item-section>
+
+            <q-item-section top side>
+              <q-input
+                class="text-body1"
+                outlined
+                dense
+                v-model="item.host"
+                :label="t('panel.create.hostVolume')"
+                style="width: 150px"
+              />
+            </q-item-section>
+
+            <q-item-section top side>
+              <q-input
+                class="text-body1"
+                outlined
+                dense
+                v-model="item.container"
+                :label="t('panel.create.containerVolume')"
+                style="width: 200px"
+              />
+            </q-item-section>
+
+            <q-select
+              class="bg-grey-3"
+              color="blue"
+              bg-color="cyan-14"
+              v-model="item.mountMode"
+              :options="mountModes"
+              filled
+              dense
+              borderless
+              emit-value
+              transition-show="flip-up"
+              transition-hide="flip-down"
+              style="min-width: 70px"
+            />
+
+            <q-item-section top side>
+              <q-btn dense flat icon="delete" color="red" @click="onDeleteMount(index)">
+                <q-tooltip class="bg-amber text-black shadow-4">
+                  {{t('delete')}}
+                </q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-list>
+          <q-item class="bg-grey-2" dense >
+            <q-item-section class="text-body2">{{ t('panel.create.temporary') }}</q-item-section>
+
+            <q-item-section side>
+              <q-btn icon="add_circle_outline" size="xs" padding="xs" color="blue" @click.stop="onAddTmpfs">
+                <q-tooltip class="bg-amber text-black shadow-4">
+                  {{ t('panel.create.new') }}
+                </q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </q-item>
+<!--          tmpfs-->
+          <q-item
+            v-for="(item, index) in composition.volumes.tmpfs"
+            :key="index"
+            dense
+            class="bg-grey-2"
+          >
+            <q-item-section class="text-body2">tmpfs</q-item-section>
+
+            <q-item-section top side>
+              <q-input
+                class="text-body1"
+                outlined
+                dense
+                v-model="composition.volumes.tmpfs[index]"
+                :label="t('panel.create.containerVolume')"
+                style="width: 200px"
+              />
+            </q-item-section>
+
+
+            <q-item-section top side>
+              <q-btn dense flat icon="delete" color="red" @click="onDeleteTmpfs(index)">
+                <q-tooltip class="bg-amber text-black shadow-4">
+                  {{t('delete')}}
+                </q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </q-item>
+        </q-list>
 
       </q-expansion-item>
     </div>
@@ -367,7 +547,38 @@
         :label="t('panel.create.networks')"
         header-class="text-grey-6 text-body1 bg-grey-2"
       >
+        <template v-slot:header>
+          <q-item-section>
+            {{t('panel.create.networks')}}
+          </q-item-section>
 
+          <q-item-section side>
+            <q-btn icon="add_circle_outline" size="xs" padding="xs" color="blue" @click.stop="onNewNetwork">
+              <q-tooltip class="bg-amber text-black shadow-4">
+                {{ t('panel.create.new') }}
+              </q-tooltip>
+            </q-btn>
+          </q-item-section>
+        </template>
+
+        <q-item class="bg-grey-2" dense >
+          <q-item-section class="text-body2">{{ t('panel.create.temporary') }}</q-item-section>
+
+          <q-select
+            class="bg-grey-3"
+            color="blue"
+            bg-color="cyan-14"
+            v-model="item.mountMode"
+            :options="mountModes"
+            filled
+            dense
+            borderless
+            emit-value
+            transition-show="flip-up"
+            transition-hide="flip-down"
+            style="min-width: 70px"
+          />
+        </q-item>
       </q-expansion-item>
     </div>
 
@@ -425,6 +636,17 @@ const envModes = [
   { label: t('panel.create.envManualMode'), value: 'manual', desc: 'Manual' },
 ]
 
+const volumeFileModes = [
+  { label: t('panel.create.rw'), value: 'rw', desc: 'RW' },
+  { label: t('panel.create.ro'), value: 'ro', desc: 'RO' },
+]
+
+const mountModes = [
+  { label: "bind", value: 'bind', desc: 'bind' },
+  { label: "volume", value: 'volume', desc: 'volume' },
+  { label: "tmpfs", value: 'tmpfs', desc: 'tmpfs' },
+]
+
 const composition = ref({
   image: '',
 
@@ -441,6 +663,17 @@ const composition = ref({
   environments: {
     envFile: '',
     evns: []
+  },
+
+  volumes: {
+    volumeMappings: [],
+    mounts: [],
+    tmpfs: [],
+    workDir: ''
+  },
+
+  networks: {
+
   }
 
 })
@@ -460,11 +693,34 @@ const defaultComposition = {
   image: '',
   containerName: '',
   runtime: 'bg',
+  portMappingMode: '',
   ports: [],
+  envMode: '',
   environments: {
     envFile: '',
     evns: []
-  }
+  },
+  volumes: {
+    volumeMappings: [],
+    mounts: [],
+    tmpfs: [],
+    workDir: ''
+  },
+  networks:{
+
+  },
+}
+
+const volumeMappingDefault = {
+  host: null,
+  container: null,
+  volumeFileMode: 'rw'
+}
+
+const mountDefault = {
+  host: null,
+  container: null,
+  mountMode: 'bind'
 }
 
 const onAddNewPortMap = () => {
@@ -493,6 +749,34 @@ const onSelectEnvFile = async () => {
 
 const onDeleteENV = (index) => {
   composition.value.environments.evns.splice(index, 1)
+}
+
+const onAddVolumeMapping = () => {
+  composition.value.volumes.volumeMappings.push(JSON.parse(JSON.stringify(volumeMappingDefault)))
+}
+
+const onDeleteVolumeMapping = (index) => {
+  composition.value.volumes.volumeMappings.splice(index, 1)
+}
+
+const onAddMount = () => {
+  composition.value.volumes.mounts.push(JSON.parse(JSON.stringify(mountDefault)))
+}
+
+const onDeleteMount = (index) => {
+  composition.value.volumes.mounts.splice(index, 1)
+}
+
+const onAddTmpfs = () => {
+  composition.value.volumes.tmpfs.push('')
+}
+
+const onDeleteTmpfs = (index) => {
+  composition.value.volumes.tmpfs.splice(index, 1)
+}
+
+const onNewNetwork = () => {
+
 }
 
 

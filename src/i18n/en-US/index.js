@@ -149,7 +149,14 @@ export default {
       envKey: "Key",
       envValue: "Value",
 
-      volumes: "Volume",
+      volumes: "Volumes",
+      rw: "Read/Write",
+      ro: "Read Only",
+      volumeMapping: "Volume Mapping",
+      volumeMapping1: "Host:Container",
+      hostVolume: "Host Folder/File",
+      containerVolume: "Container Folder/File",
+      temporary: "Temporary file system",
 
       networks: "Network",
 

@@ -147,6 +147,15 @@ export default {
       envValue: "值",
 
       volumes: "卷",
+      rw: "读写",
+      ro: "只读",
+      volumeMapping: "卷映射",
+      volumeMapping1: "宿主机:容器",
+      hostVolume: "宿主机目录/文件",
+      containerVolume: "容器目录/文件",
+      mount: "挂载",
+      temporary: "临时文件系统",
+
 
       networks: "网络",
 
