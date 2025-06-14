@@ -166,7 +166,7 @@ const onCreate = () => {
     }
 
     composeFile.folderPath  = ''
-    composeFile.folderPath  = ''
+    composeFile.filePath  = ''
   })
 
   notify.value = $q.notify({
