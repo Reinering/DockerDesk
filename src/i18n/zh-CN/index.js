@@ -130,12 +130,21 @@ export default {
       basic: "基本设置",
       containerName: "容器名称",
       nameLabel: "为空时，会自动生成",
+      cmd: "覆盖镜像默认CMD",
+      entrypoint: "覆盖镜像默认入口点",
 
       runtime: "运行时",
+      runtime1: "指定容器运行时",
       mode: "模式",
       bgRun: "后台",
       itRun: "交互",
       rmRun: "停止后自动删除",
+      restartPolicy: "容器重启策略",
+      no: "不重启",
+      always: "总是重启",
+      onFailure: "失败时重启",
+      unlessStopped: "除非手动停止，否则总是重启",
+      maxRetries: "最大重启次数",
 
       environment: "环境变量",
       envFileMode: "从文件读取",
@@ -155,14 +164,23 @@ export default {
       containerVolume: "容器目录/文件",
       mount: "挂载",
       temporary: "临时文件系统",
-
+      workDir: "工作目录",
+      workDir1: "指定容器内工作目录",
 
       networks: "网络",
+      hostname: "主机名",
+      staticIP: "静态IP",
+      staticIP1: "指定静态IP",
+      containerHostname: "容器主机名",
+      containerHostname1: "指定容器主机名",
+      containerHost: "容器Host",
+      containerHostMapping: "Host映射",
+      macAddress: "指定容器MAC Address",
 
       ports: "端口映射",
-      randomMapping: "随机映射",
+      randomMapping: "随机映射(与其他冲突)",
       manualMapping: "手动映射",
-      exposeContainer: "暴露容器端口",
+      exposeContainer: "暴露容器端口(不映射)",
       portMapping: "映射(宿主机:容器)",
       new: "新增",
       hostPort: "宿主机端口",
@@ -170,7 +188,15 @@ export default {
 
       resources: "资源",
 
-      permissions: "权限",
+      security: "安全",
+      privileged: "容器Root权限",
+      enable: "启用",
+      user: "用户或UID",
+      user1: "指定容器的用户或UID",
+
+      loggingAndMonitoring: "日志与监控",
+
+      paramsError: "参数错误"
     },
 
     containers: {
@@ -331,7 +357,7 @@ export default {
       createNetworkTitle: "创建网络",
       bingContainerTitle: "绑定容器",
 
-
+      getNetworksSuccess: "已获取网络列表",
       getNetworksError: "获取网络列表失败",
       getNetworkInfoError: "获取网络详细信息失败",
 
@@ -613,7 +639,11 @@ export default {
       auto: "自动模式",
       light: "浅色模式",
       dark: "深色模式",
-    }
+    },
+    mode: {
+      normal: "普通模式",
+      professional: "专业模式",
+    },
   },
 
   // db

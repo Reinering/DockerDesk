@@ -2,7 +2,14 @@
   <q-card :style="cardStyle">
     <q-card-section>
       <div class="q-gutter-sm row items-center justify-between">
-        <div class="text-h6">{{ t('panel.networks.title') }}</div>
+        <q-field
+          dense
+          standout
+        >
+          <template v-slot:control>
+            <div class="self-center full-width no-outline" tabindex="0">{{t('panel.networks.title')}}</div>
+          </template>
+        </q-field>
         <q-space />
         <div class="q-gutter-sm">
           <q-btn

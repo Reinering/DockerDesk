@@ -38,10 +38,21 @@
           <q-space />
           <div class="q-gutter-sm">
             <q-btn
+              icon="add_task"
+              size="xs"
+              padding="xs"
+              color="pink"
+              @click="showCreateImageDialog = !showCreateImageDialog"
+            >
+              <q-tooltip class="bg-amber text-black shadow-4">
+                {{ t('panel.images.createImage') }}
+              </q-tooltip>
+            </q-btn>
+            <q-btn
               icon="import_export"
               size="xs"
               padding="xs"
-              color="deep-purple"
+              color="blue"
               @click="onImportImage"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
@@ -59,12 +70,24 @@
                 {{ t('panel.images.pull') }}
               </q-tooltip>
             </q-btn>
-            <q-btn icon="delete" size="xs" padding="xs" color="red" @click="onDeleteBatch">
+            <q-btn
+              icon="delete"
+              size="xs"
+              padding="xs"
+              color="red"
+              @click="onDeleteBatch"
+            >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{ t('panel.images.batchDelete') }}
               </q-tooltip>
             </q-btn>
-            <q-btn icon="refresh" size="xs" padding="xs" color="green" @click="onRefresh">
+            <q-btn
+              icon="refresh"
+              size="xs"
+              padding="xs"
+              color="green"
+              @click="onRefresh"
+            >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{ t('panel.images.refresh') }}
               </q-tooltip>
@@ -132,7 +155,7 @@
             color="green"
             dense
             flat
-            @click="connectPanel(props.row)"
+            @click="onCreateContainer(props.row)"
           >
             <q-tooltip class="bg-amber text-black shadow-4">
               {{t('panel.images.createContainer')}}
@@ -197,8 +220,6 @@
         </div>
       </div>
 
-
-
       <q-card-actions align="right">
         <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="showEditImageDialog = !showEditImageDialog" />
         <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onEditImage" />
@@ -207,11 +228,25 @@
   </q-dialog>
 
   <ImagePullDialog
+    v-if="showPullDialog"
     v-model="showPullDialog"
     :rows="pullList"
     :search="onImageSearch"
     :pull="onImagePull"
     style="width: 60%; height: 70%"
+  />
+
+  <CreateImageDialog
+    v-if="showCreateImageDialog"
+    v-model="showCreateImageDialog"
+    :onClose="onShowCreateImageDialog"
+  />
+
+  <CreateContainerDialog1
+    v-if="showCreateContainerDialog"
+    v-model="showCreateContainerDialog"
+    :data="containerData"
+    :onClose="onShowCreateContainerDialog"
   />
 
 </template>
@@ -220,6 +255,8 @@
 
 import { inject, reactive, ref, onMounted, onUnmounted, onActivated, onDeactivated, watch } from 'vue'
 import ImagePullDialog from 'components/dialog/ImagePullDialog.vue'
+import CreateImageDialog from 'components/dialog/CreateImageDialog.vue'
+import CreateContainerDialog1 from 'components/dialog/CreateContainerDialog1.vue'
 import { parseDockerImages, parsePullDockerImages } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
 import { firstLower, isEmptyObj } from 'src/utils/common.js'
@@ -231,6 +268,8 @@ const t = inject("t")
 
 const service = inject("service")
 const serviceCmd = ref('')
+
+const showCreatePage = inject("showCreatePage")
 
 let notify = ref(null)
 
@@ -281,6 +320,11 @@ const newTag = reactive({
   imageId: ''
 })
 const isEdit = ref(true)
+
+const showCreateContainerDialog = ref(false)
+const containerData = ref(null)
+
+const showCreateImageDialog = ref(false)
 
 const onImageSearch = (text) => {
   window.wslTerminal.execWSL(
@@ -660,6 +704,29 @@ const onDeleteBatch = async () => {
 
 const onRefresh = () => {
   getImageList()
+}
+
+const onShowCreateImageDialog = () => {
+  showCreateImageDialog.value = !showCreateImageDialog.value
+}
+
+const onShowCreateContainerDialog = () => {
+  showCreateContainerDialog.value = !showCreateContainerDialog.value
+}
+
+const onCreateContainer = (row) => {
+  console.log(row)
+
+  // if (showCreateContainerDialog.value) {
+  //   containerData.value = null
+  // } else {
+  //   containerData.value = row
+  // }
+  //
+  // onShowCreateContainerDialog()
+
+  showCreatePage()
+  router.push({path: "/node/create", query: {data: JSON.stringify(row)}})
 }
 
 const getImageList = () => {

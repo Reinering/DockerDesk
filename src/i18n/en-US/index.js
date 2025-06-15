@@ -133,12 +133,21 @@ export default {
       basic: "Basic",
       containerName: "Container Name",
       nameLabel: "If it is empty, it will be automatically generated.",
+      cmd: "Overwrite the default CMD of the image",
+      entrypoint: "Overwrite the default entrypoint of the image",
 
       runtime: "Runtime",
+      runtime1: "Specify the Container Runtime",
       mode: "Mode",
       bgRun: "Background",
       itRun: "Interactive",
       rmRun: "Automatically delete after stopping",
+      restartPolicy: "Container Restart Policy",
+      no: "Do not restart",
+      always: "Always restart",
+      onFailure: "Restart on failure",
+      unlessStopped: "Always restart unless stopped manually",
+      maxRetries: "Max Retries",
 
       environment: "Environment",
       envFileMode: "Reading from a file",
@@ -157,13 +166,23 @@ export default {
       hostVolume: "Host Folder/File",
       containerVolume: "Container Folder/File",
       temporary: "Temporary file system",
+      workDir: "WorkDir",
+      workDir1: "Specify the working directory in the container",
 
       networks: "Network",
+      hostname: "Hostname",
+      staticIP: "Static IP",
+      staticIP1: "Specify a static IP",
+      containerHostname: "Container Hostname",
+      containerHostname1: "Specify the Container Hostname",
+      containerHost: "Container Host",
+      containerHostMapping: "Host Mapping",
+      macAddress: "Specify the Container MAC Address",
 
       ports: "Ports",
-      randomMapping: "Random Mapping",
+      randomMapping: "Random Mapping(Conflict with other)",
       manualMapping: "Manual Mapping",
-      exposeContainer: "Expose Container Port",
+      exposeContainer: "Expose Container Port(not mapping)",
       portMapping: "Port Mapping(host:container)",
       new: "New",
       hostPort: "Host Port",
@@ -171,7 +190,15 @@ export default {
 
       resources: "Resources",
 
-      permissions: "Permissions",
+      security: "Security",
+      privileged: "Container Root privileged",
+      enable: "Enable",
+      user: "user or UID",
+      user1: "Specify the container user or UID",
+
+      loggingAndMonitoring: "Logging and Monitoring",
+
+      paramsError: "Param Error"
     },
 
     containers: {
@@ -325,6 +352,7 @@ export default {
       createNetworkTitle: "Create Network",
       bingContainerTitle: "Bind Container",
 
+      getNetworksSuccess: "Obtained network list",
       getNetworksError: "Failed to get network list",
       getNetworkInfoError: "Failed to get network details",
     },
@@ -591,7 +619,11 @@ export default {
       auto: "Auto",
       light: "Light",
       dark: "Dark",
-    }
+    },
+    mode: {
+      normal: "Normal",
+      professional: "Professional",
+    },
   },
 
   // db
