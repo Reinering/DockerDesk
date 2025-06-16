@@ -79,7 +79,7 @@ provide("service", service)
 
 const toSettings = ref("dockerSettings")
 
-const isShowCreate = ref(true)
+const isShowCreate = ref(false)
 
 const changeSettingRouter = () => {
   if (!isEmptyObj(service)) {

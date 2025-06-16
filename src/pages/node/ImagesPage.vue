@@ -234,13 +234,6 @@
     :onClose="onShowCreateImageDialog"
   />
 
-  <CreateContainerDialog1
-    v-if="showCreateContainerDialog"
-    v-model="showCreateContainerDialog"
-    :data="containerData"
-    :onClose="onShowCreateContainerDialog"
-  />
-
 </template>
 
 <script setup>
@@ -248,7 +241,6 @@
 import { inject, reactive, ref, onMounted, onUnmounted, onActivated, onDeactivated, watch } from 'vue'
 import ImagePullDialog from 'components/dialog/ImagePullDialog.vue'
 import CreateImageDialog from 'components/dialog/CreateImageDialog.vue'
-import CreateContainerDialog1 from 'components/dialog/CreateContainerDialog1.vue'
 import { parseDockerImages, parsePullDockerImages } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
 import { firstLower, isEmptyObj } from 'src/utils/common.js'

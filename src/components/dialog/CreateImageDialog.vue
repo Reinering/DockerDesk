@@ -1,11 +1,11 @@
 <template>
   <q-dialog persistent>
-    <q-card style="min-width: 70%">
+    <q-card style="min-width: 60%">
 
       <q-card-section>
-        <q-item-label class="text-h6">{{t('panel.container.createTitle')}}</q-item-label>
+        <q-item-label class="text-h6">{{t('panel.images.createImage')}}</q-item-label>
         <q-item-label class="text-deep-orange-9" caption lines="1" >{{hintNote}}</q-item-label>
-        <q-item-label class="text-pink" caption lines="1" >{{hintMessage}}</q-item-label>
+<!--        <q-item-label class="text-pink" caption lines="1" >{{hintMessage}}</q-item-label>-->
       </q-card-section>
 
       <q-card-section>
@@ -13,15 +13,15 @@
           <q-input
             filled
             bottom-slots
-            v-model="composeFile.folderPath"
-            :label="t('panel.containers.inputHint1')"
+            v-model="DockerFile.folderPath"
+            :label="t('panel.images.inputHint1')"
             dense
           >
             <template v-slot:append>
               <q-icon
-                v-if="composeFile.folderPath !== ''"
+                v-if="DockerFile.folderPath !== ''"
                 name="close"
-                @click="composeFile.folderPath = ''"
+                @click="DockerFile.folderPath = ''"
                 class="cursor-pointer"
               />
             </template>
@@ -34,14 +34,46 @@
           <q-file
             dense
             filled
-            v-model="composeFile.filePath"
-            :label="t('panel.containers.inputHint2')"
+            v-model="DockerFile.filePath"
+            :label="t('panel.images.inputHint2')"
           >
-            <template v-if="composeFile.filePath" v-slot:append>
-              <q-icon name="cancel" @click.stop.prevent="composeFile.filePath = null" class="cursor-pointer" />
+            <template v-if="DockerFile.filePath" v-slot:append>
+              <q-icon name="cancel" @click.stop.prevent="DockerFile.filePath = null" class="cursor-pointer" />
             </template>
           </q-file>
         </q-form>
+
+        <div class="row q-pa-md q-gutter-sm">
+          <q-input
+            dense
+            filled
+            v-model="newRepository.repository"
+            :label="t('panel.images.newRepository')"
+            :rules="[
+              val => !!val || t('verifyMessage.dataNotNull'),
+              val => val.length <= 255 || t('verifyMessage.dataLenNotMax') + '255',
+              val => /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*$/.test(val) || t('verifyMessage.invalidRepositoryName'),
+              val => !val.startsWith('/') && !val.endsWith('/') || t('verifyMessage.repositoryNameSlash'),
+              val => !val.includes('//') || t('verifyMessage.repositoryNameDoubleSlash')
+            ]"
+          />
+          <q-input
+            dense
+            filled
+            v-model="newRepository.tag"
+            :label="t('panel.images.newTag')"
+            :rules="[
+              val => !!val || t('verifyMessage.dataNotNull'),
+              val => val.length <= 128 || t('verifyMessage.dataLenNotMax') + '128',
+              val => /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(val) || t('verifyMessage.invalidImageTag'),
+              val => !val.startsWith('.') && !val.startsWith('-') || t('verifyMessage.tagStartChar'),
+              val => !val.includes('..') || t('verifyMessage.tagDoubleDot')
+            ]"
+          />
+        </div>
+      </q-card-section>
+      <q-card-section>
+
       </q-card-section>
 
       <q-card-actions align="right">
@@ -61,7 +93,7 @@ const props = defineProps({
 })
 
 import { inject, ref, onMounted, onUnmounted, reactive } from 'vue'
-import { isEmptyObj, firstLower } from 'src/utils/common.js'
+import { isEmptyObj, isEmptyStr, format, firstLower } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
@@ -79,32 +111,16 @@ const hintMessage = ref('')
 
 const isOK = ref(false)
 
-const composeFile = reactive({
+const DockerFile = reactive({
   folderPath: null,
   filePath: null
 })
 
-const onSelectFile = async () => {
+const newRepository = reactive({
+  repository: '',
+  tag: 'latest',
+})
 
-  const files = await window.myWindowAPI.selectFiles()
-  try {
-    if (files.length === 0) {
-      return
-    }
-  } catch (err) {
-    return
-  }
-
-  if (files[0].indexOf(' ') !== -1) {
-    return $q.notify({
-      type: 'negative',
-      position: clientConfig.quasar.notify.position,
-      message: `${t('panel.containers.pathIncludeSpace')}`
-    })
-  }
-
-  composeFile.filePath = files[0]
-}
 
 const onSelectFolder = async () => {
   const folders = await window.myWindowAPI.selectFolders()
@@ -123,11 +139,11 @@ const onSelectFolder = async () => {
     })
   }
 
-  composeFile.folderPath = folders[0]
+  DockerFile.folderPath = folders[0]
 }
 
 const onCreate = () => {
-  if (composeFile.folderPath === '') {
+  if (DockerFile.folderPath === '' || newRepository.repository === '' || newRepository.tag === '') {
     return $q.notify({
       type: 'negative',
       position: clientConfig.quasar.notify.position,
@@ -136,10 +152,10 @@ const onCreate = () => {
   }
 
   let cmd = ''
-  if (isEmptyObj(composeFile.filePath)) {
-    cmd = `bash -c "cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} up -d"`
+  if (isEmptyObj(DockerFile.filePath)) {
+    cmd = `bash -c "cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build -t ${newRepository.repository}:${newRepository.tag} ."`
   } else {
-    cmd = `bash -c "cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} -f ${composeFile.filePath.name} up -d"`
+    cmd = `bash -c "cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build -f ${DockerFile.filePath.name} -t ${newRepository.repository}:${newRepository.tag} ."`
   }
 
   router.push({
@@ -160,8 +176,10 @@ const onCreate = () => {
     }
   })
 
-  composeFile.folderPath  = null
-  composeFile.filePath  = null
+  DockerFile.folderPath  = null
+  DockerFile.filePath  = null
+  newRepository.repository = ''
+  newRepository.tag = 'latest'
 
   props.onClose()
 
@@ -183,10 +201,11 @@ const onCreate = () => {
   //       type: 'negative',
   //       icon: 'done',
   //       spinner: false,
-  //       message: `${t('panel.container.composeFail')}`,
+  //       message: `${t('panel.container.composeFail')}: ${result.error}`,
   //       timeout: 10000
   //     })
   //   }
+  //
   // })
   //
   // notify.value = $q.notify({
@@ -203,24 +222,11 @@ const onCreate = () => {
 const init = async () => {
   await setTimeout(() => {}, 500)
 
-  serviceCmd.value = `${service.serviceType}-compose`
+  serviceCmd.value = service.serviceType
   if (isEmptyObj(serviceCmd.value)) {
+    isOK.value = true
     return
   }
-
-  await window.wslTerminal.execWSL([
-    '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} -v`
-  ]).then((result) => {
-    console.log(result)
-    if (result.success) {
-      hintMessage.value = result.data
-    } else {
-      hintMessage.value = t('panel.containers.hintError', [serviceCmd.value])
-      isOK.value= true
-    }
-  })
-
-  hintNote.value = t('panel.containers.hintNote', [serviceCmd.value, service.serviceType])
 }
 
 onMounted(() => {

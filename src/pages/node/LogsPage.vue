@@ -60,7 +60,7 @@ const cardStyle = reactive({
 })
 
 const xtermStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 151 + "px" : window.innerHeight - 70 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 151 - 45 + "px" : window.innerHeight - 70 + "px",
 })
 
 const tab = ref('')
@@ -91,8 +91,8 @@ const handleKeyDown = (event) => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 182 + "px"
-    xtermStyle.height = window.innerHeight - 151 + "px"
+    cardStyle.height = window.innerHeight - 150 + "px"
+    xtermStyle.height = window.innerHeight - 151 - 45 + "px"
   } else {
     cardStyle.height = window.innerHeight - 149 + "px"
     xtermStyle.height = window.innerHeight - 70 + "px"

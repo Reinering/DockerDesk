@@ -1457,7 +1457,7 @@ const onCreateContainer = () => {
     })
   }
 
-  const command = generateCmd().join(' ')
+  const command = `"${generateCmd().join(' ')}"`
   console.log(command)
 
   router.push({

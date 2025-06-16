@@ -2,7 +2,6 @@
 
   <div ref="xtermRef" :id="'xterm-container-' + terminalId">
     <q-menu
-      v-if="showMenu"
       context-menu
       auto-close
     >
@@ -13,12 +12,12 @@
           </q-item-section>
         </q-item>
         <q-separator />
-        <q-item clickable @click="onPasteButton">
+        <q-item v-if="showMenu" clickable @click="onPasteButton">
           <q-item-section>
             {{ t('paste') }}
           </q-item-section>
         </q-item>
-        <q-item clickable @click="onSelectPasteButton">
+        <q-item v-if="showMenu" clickable @click="onSelectPasteButton">
           <q-item-section>
             {{ t('selectPaste') }}
           </q-item-section>
@@ -125,7 +124,8 @@ const initTerminal = () => {
     if (Object.hasOwnProperty.call(props.data, "command")) {
       window.terminal.execTerminal({
         uuid: props.terminalId,
-        cmd: `wsl -d ${props.data.serviceName} --user ${props.data.user} -e "${props.data.command}"`,
+        // cmd: `wsl -d ${props.data.serviceName} --user ${props.data.user} -e ${props.data.command}`,
+        cmd: ['wsl', '-d', props.data.serviceName, "--user", props.data.user, '-e', props.data.command],
       }).then((result) => {
         if (result.success === false) {
 

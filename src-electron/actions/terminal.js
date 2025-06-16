@@ -23,6 +23,7 @@ export class Terminal {
 
   // 启动终端
   start() {
+    console.log("cmd", this.cmd)
     this.ptyProcess = pty.spawn(this.shell, this.cmd, this.options)
 
     // 处理输出
