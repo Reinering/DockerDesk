@@ -360,13 +360,13 @@ const onDelete = () => {
   })
 }
 const onTerminal = () => {
-  window.wslTerminal.termimalWSL({
-    name: props.data.servername
-  }).then((result) => {
-    if (result.success) {
-
-    }
-  })
+  // window.wslTerminal.termimalWSL({
+  //   name: props.data.servername
+  // }).then((result) => {
+  //   if (result.success) {
+  //
+  //   }
+  // })
 
   let item
 

@@ -145,7 +145,7 @@ const debianSourcesLines = [
 const printfContent = debianSourcesLines.join('\\n') + '\\n'
 
 const isAssLocalBtn = ref(true)
-const isAssRemoteBtn = ref(true)
+const isAssRemoteBtn = ref(false)
 
 const wslStatusBtn = ref(t('assistant.notInstalled'))
 const disabledWslStatusBtn = ref(false)
@@ -173,7 +173,6 @@ const installWSLPackage = () => {
       })
 
       isAssLocalBtn.value = false
-      isAssRemoteBtn.value = false
       wslStatusBtn.value = t('assistant.start')
     } else {
       notify.value({
@@ -258,12 +257,14 @@ const onWslStatusBtn = () => {
   } else if (wslStatusBtn.value === t('assistant.start')) {
       let isCall = true
       window.wslTerminal.startSubSystem().then((result) => {
-        if (! result.success && isCall) {
+        if (!result.success && isCall) {
           $q.notify({
             type: 'negative',
             position: clientConfig.quasar.notify.position,
             message: `${t('assistant.startFail')}: ${result.error}`
           })
+        } else {
+          isAssLocalBtn.value = false
         }
       })
 
@@ -307,6 +308,8 @@ const onBackgroundStart = () => {
           position: clientConfig.quasar.notify.position,
           message: `${t('assistant.startFail')}: ${result.error}`
         })
+      } else {
+        isAssLocalBtn.value = false
       }
     })
 
@@ -339,14 +342,14 @@ const init = () => {
                     wslStatusBtn.value = t('assistant.start')
                     wslStatusColor.value = "red"
                     wslStatus.value = "Stopped"
+                    isAssLocalBtn.value = true
                   } else if (data[index].state === "Running") {
                     wslStatusBtn.value = t('assistant.stop')
                     wslStatusColor.value = "green"
                     wslStatus.value = "Running"
+                    isAssLocalBtn.value = false
                   }
 
-                  isAssLocalBtn.value = false
-                  isAssRemoteBtn.value = false
                   showWslStatusBtn.value = false
                   return
                 }
