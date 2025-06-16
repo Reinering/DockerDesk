@@ -68,6 +68,11 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
 
 
 contextBridge.exposeInMainWorld('client', {
+
+  openUrlOnBrowser(url) {
+    return ipcRenderer.send('openUrlOnBrowser', url)
+  },
+
   openDownloadFolder () {
     return ipcRenderer.invoke('openDownloadFolder')
   },
@@ -171,6 +176,10 @@ contextBridge.exposeInMainWorld('terminal', {
     return ipcRenderer.invoke('createWSLTerminal', data)
   },
 
+  execWSLTerminal (data) {
+    return ipcRenderer.invoke('execWSLTerminal', data)
+  },
+
   closeTerminal (uuid) {
     return ipcRenderer.invoke('closeTerminal', uuid)
   },
@@ -185,6 +194,10 @@ contextBridge.exposeInMainWorld('terminal', {
 
   receive (callback) {
     return ipcRenderer.on('terminalReceive', (event, data) => callback(data))
+  },
+
+  execTerminal (data) {
+    return ipcRenderer.invoke('execTerminal', data)
   }
 })
 

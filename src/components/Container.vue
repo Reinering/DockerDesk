@@ -94,24 +94,6 @@
               </q-item-section>
             </q-item>
 
-<!--            <q-item clickable v-close-popup size="sm" @click="onLog">-->
-<!--              <q-item-section>-->
-<!--                <q-icon name="output" :color="templates[props.data.templateId].btn.color" />-->
-<!--                <q-tooltip class="bg-amber text-black shadow-4">-->
-<!--                  {{t('panel.container.log')}}-->
-<!--                </q-tooltip>-->
-<!--              </q-item-section>-->
-<!--            </q-item>-->
-
-            <q-item clickable v-close-popup size="sm" @click="onTerminal">
-              <q-item-section>
-                <q-icon name="terminal" :color="templates[props.data.templateId].btn.color" />
-                <q-tooltip class="bg-amber text-black shadow-4">
-                  {{t('panel.container.terminal')}}
-                </q-tooltip>
-              </q-item-section>
-            </q-item>
-
             <q-item clickable v-close-popup size="sm" @click="showPackImageDialog = !showPackImageDialog">
               <q-item-section>
                 <q-icon name="archive" :color="templates[props.data.templateId].btn.color" />
@@ -143,11 +125,19 @@
         label="Open Web"
         dropdown-icon="change_history"
         size="sm"
+        @click="openFirstPort"
       >
         <q-list dense :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
-          <q-item clickable v-close-popup size="sm" @click="onItemClick">
+          <q-item
+            v-for="(item, index) in ports"
+            :key="index"
+            clickable
+            v-close-popup
+            size="sm"
+            @click="openCurrentPort(item)"
+          >
             <q-item-section>
-              <q-item-label class="text-pink">80</q-item-label>
+              <q-item-label class="text-pink">{{item}}</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
@@ -208,8 +198,6 @@
 
 
 <script setup>
-import { parseDockerContainer } from 'src/utils/wsl.js'
-
 defineOptions({
   name: 'Container',
 })
@@ -237,8 +225,9 @@ const props = defineProps({
 
 import { inject, reactive, ref, watch, onMounted, onUnmounted } from 'vue'
 import ContainerSetting from "./ContainerSetting.vue"
+import { parseDockerContainer, getExPortsByContainer } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
-import { isEmptyObj } from 'src/utils/common.js'
+import { isEmptyObj, isEmptyStr } from 'src/utils/common.js'
 
 const $q = inject("$q")
 const router = inject("router")
@@ -301,9 +290,9 @@ const stateColor = ref('')
 const isStart = ref(false)
 const isStop = ref(false)
 const isRestart = ref(false)
-const isDetail = ref(false)
 const isMore = ref(false)
 const isOpenWeb = ref(false)
+const ports = reactive([])
 
 const onStart = async () => {
   if (isEmptyObj(props.data)) {
@@ -468,8 +457,6 @@ const onDelete = () => {
     })
   })
 }
-const onLog = () => {}
-const onTerminal = () => {}
 const onPack = () => {
   if (isEmptyObj(props.data)) {
     return
@@ -523,6 +510,14 @@ const onPack = () => {
 }
 const onSettings = () => {}
 
+const openFirstPort = () => {
+  window.client.openUrlOnBrowser(`http://localhost:${ports[0]}`)
+}
+
+const openCurrentPort = (port) => {
+  window.client.openUrlOnBrowser(`http://localhost:${port}`)
+}
+
 
 
 const containerStateMonitor = (time=60000, interval=5000) => {
@@ -550,7 +545,6 @@ const getContainerState = () => {
     if (result.success) {
       const item = parseDockerContainer(result.data)[0]
       Object.keys(item).forEach((key) => {
-        // containerData[key] = items[key]
         props.update(props.data.nodeId, key, item[key])
       })
     }
@@ -565,6 +559,11 @@ const changeState = (newVal) => {
     isStop.value = false
     isRestart.value = false
     isMore.value = false
+    if (ports.length > 0) {
+      isOpenWeb.value = false
+    } else {
+      isOpenWeb.value = true
+    }
   } else if (newVal === "offline") {
     stateColor.value = "red"
 
@@ -572,6 +571,7 @@ const changeState = (newVal) => {
     isStop.value = true
     isRestart.value = true
     isMore.value = true
+    isOpenWeb.value = true
   } else {
     stateColor.value = "yellow"
 
@@ -579,6 +579,7 @@ const changeState = (newVal) => {
     isStop.value = true
     isRestart.value = true
     isMore.value = true
+    isOpenWeb.value = true
   }
 }
 
@@ -586,6 +587,16 @@ changeState(state)
 
 const init = () => {
   if (!isEmptyObj(props.data["data"])) {
+
+    if (!isEmptyStr(props.data["data"]["ports"])) {
+      ports.length = 0
+      for (const item of getExPortsByContainer(props.data["data"]["ports"])) {
+        if (item.port.indexOf('-') === -1 && item.protocol === "tcp") {
+          ports.push(item.port)
+        }
+      }
+    }
+
     if (props.data["data"]["status"].indexOf("Up") !== -1) {
       state.value = "online"
     } else {
@@ -601,6 +612,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (monitorInterval !== null) {
     clearInterval(monitorInterval)
+    monitorInterval = null
   }
 })
 

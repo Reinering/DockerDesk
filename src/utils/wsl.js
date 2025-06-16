@@ -154,3 +154,88 @@ export const parseDockerContainer = (input) => {
 
   return result
 }
+
+function parseExPorts(ports) {
+  // 按协议分开处理
+  const tcpPorts = ports
+    .filter(p => p.protocol === 'tcp')
+    .map(p => parseInt(p.port, 10))
+    .sort((a, b) => a - b)
+  const udpPorts = ports
+    .filter(p => p.protocol === 'udp')
+    .map(p => parseInt(p.port, 10))
+    .sort((a, b) => a - b)
+
+  // 合并连续端口的函数
+  const mergePorts = (portNumbers) => {
+    if (portNumbers.length === 0) return []
+    const ranges = []
+    let start = portNumbers[0]
+    let prev = start
+
+    for (let i = 1; i <= portNumbers.length; i++) {
+      const current = portNumbers[i]
+      if (current !== prev + 1 || i === portNumbers.length) {
+        if (start === prev) {
+          ranges.push(start.toString())
+        } else {
+          ranges.push(`${start}-${prev}`)
+        }
+        start = current
+      }
+      prev = current
+    }
+    return ranges
+  }
+
+  // 合并 TCP 和 UDP 端口
+  const tcpRanges = mergePorts(tcpPorts)
+  const udpRanges = mergePorts(udpPorts)
+
+  // 合并结果并保留协议信息
+  const result = []
+  tcpRanges.forEach(port => result.push({ port, protocol: 'tcp' }))
+  udpRanges.forEach(port => result.push({ port, protocol: 'udp' }))
+
+  return result
+}
+
+export function getExPortsByContainer(mapping) {
+  const externalPorts = []
+  // 按逗号分割多个端口映射
+  const ports = mapping.split(',').map(p => p.trim())
+
+  ports.forEach(port => {
+    // 仅匹配 0.0.0.0:XXXX->YYYY/tcp 或 0.0.0.0:XXXX->YYYY/udp
+    const mappedMatch = port.match(/^0\.0\.0\.0:(\d+)->\d+\/(tcp|udp)$/)
+    if (mappedMatch) {
+      externalPorts.push({ port: mappedMatch[1], protocol: mappedMatch[2] })
+    }
+    // 忽略直接暴露的端口（如 80/tcp, 5000/tcp）和范围（如 6883-6999/tcp）
+  })
+
+  // 合并连续端口
+  return parseExPorts(externalPorts)
+}
+
+export function getExPortsByContainers(mappings) {
+  const result = mappings.map(mapping => {
+    const externalPorts = []
+    // 按逗号分割多个端口映射
+    const ports = mapping.split(',').map(p => p.trim())
+
+    ports.forEach(port => {
+      // 仅匹配 0.0.0.0:XXXX->YYYY/tcp 或 0.0.0.0:XXXX->YYYY/udp
+      const mappedMatch = port.match(/^0\.0\.0\.0:(\d+)->\d+\/(tcp|udp)$/)
+      if (mappedMatch) {
+        externalPorts.push({ port: mappedMatch[1], protocol: mappedMatch[2] })
+      }
+      // 忽略直接暴露的端口（如 80/tcp, 5000/tcp）和范围（如 6883-6999/tcp）
+    })
+
+    // 合并连续端口
+    return parseExPorts(externalPorts)
+  })
+
+  return result
+}

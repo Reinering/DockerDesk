@@ -82,6 +82,16 @@ export function registerTerminalIpcHandlers(win) {
     }
   })
 
+  ipcMain.handle('execTerminal', async (event, {uuid, cmd}) => {
+    try {
+      const term = new Terminal(uuid, win, cmd).start()
+
+      terminals.set(uuid, term)
+      return { success: true, error: '' }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
 
 }
 

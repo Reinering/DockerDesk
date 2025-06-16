@@ -1,7 +1,11 @@
 <template>
 
   <div ref="xtermRef" :id="'xterm-container-' + terminalId">
-    <q-menu context-menu auto-close>
+    <q-menu
+      v-if="showMenu"
+      context-menu
+      auto-close
+    >
       <q-list>
         <q-item clickable @click="onCopyButton">
           <q-item-section>
@@ -29,12 +33,6 @@ defineOptions({
   name: 'Xterm',
 })
 
-import { inject, ref, onMounted, onBeforeUnmount, nextTick, watch, reactive, onActivated, onDeactivated } from 'vue'
-import { Terminal } from "@xterm/xterm"
-import { FitAddon } from "@xterm/addon-fit"
-import '@xterm/xterm/css/xterm.css'
-import { clientConfig } from 'src/common/config.js'
-
 const props = defineProps({
   terminalId: {
     type: String,
@@ -45,6 +43,13 @@ const props = defineProps({
     default: () => {},
   }
 })
+
+import { inject, ref, onMounted, onBeforeUnmount, nextTick, watch, reactive, onActivated, onDeactivated } from 'vue'
+import { Terminal } from "@xterm/xterm"
+import { FitAddon } from "@xterm/addon-fit"
+import '@xterm/xterm/css/xterm.css'
+import { clientConfig } from 'src/common/config.js'
+
 
 const t = inject('t')
 const $q = inject('$q')
@@ -63,9 +68,17 @@ const xtermConfig = reactive({
   fontFamily: 'Consolas, "Courier New", monospace', // 设置字体
   fontSize: 16, // 设置字体大小
   fontWeight: 'normal', // 可选：字体粗细（normal, bold, 100-900）
+  disableStdin: false // 禁止输入
 })
 
+const showMenu = ref(true)
+
 const initTerminal = () => {
+  if (Object.hasOwnProperty.call(props.data, "disableStdin")) {
+    xtermConfig.disableStdin = props.data["disableStdin"]
+    showMenu.value = false
+  }
+
   term = new Terminal(xtermConfig)
   fitAddon = new FitAddon()
   term.loadAddon(fitAddon)
@@ -109,13 +122,11 @@ const initTerminal = () => {
       }
     )
   } else if (props.data.serviceType === 'WSL') {
-    window.terminal.createWSLTerminal({
-      uuid: props.terminalId,
-      name: props.data.serviceName,
-      user: 'root',
-
-    })
-      .then((result) => {
+    if (Object.hasOwnProperty.call(props.data, "command")) {
+      window.terminal.execTerminal({
+        uuid: props.terminalId,
+        cmd: `wsl -d ${props.data.serviceName} --user ${props.data.user} -e "${props.data.command}"`,
+      }).then((result) => {
         if (result.success === false) {
 
           $q.notify({
@@ -132,6 +143,31 @@ const initTerminal = () => {
           })
         }
       })
+    } else {
+      window.terminal.createWSLTerminal({
+        uuid: props.terminalId,
+        name: props.data.serviceName,
+        user: 'root',
+      }).then((result) => {
+        if (result.success === false) {
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('xterm.termInitError') + ': ' + result.error
+          })
+        } else {
+          term.onData((data) => {
+            sendTerminal({
+              uuid: props.terminalId,
+              data: data,
+            })
+          })
+        }
+      })
+    }
+
+
 
     window.terminal.receive(
       (result) => {

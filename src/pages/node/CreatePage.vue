@@ -1,6 +1,6 @@
 <template>
   <q-scroll-area  class="q-pa-md" :style="scrollStyle">
-    <div class="row items-center justify-between">
+    <div class="q-gutter-x-sm row items-center justify-between">
       <q-field
         dense
         standout
@@ -9,7 +9,8 @@
           <div class="self-center full-width no-outline" tabindex="0">{{firstUpper(service.serviceType) + t('panel.create.title')}}</div>
         </template>
       </q-field>
-
+      <q-space />
+      <q-btn color="red" :label="t('panel.create.clear')" @click="onClearContainer"/>
       <q-btn color="blue" :label="t('panel.create.create')" @click="onCreateContainer"/>
     </div>
 
@@ -22,6 +23,7 @@
           filled
           dense
           readonly
+          input-class="text-right"
           v-model="composition.image"
         />
       </q-item>
@@ -49,6 +51,7 @@
               outlined
               clearable
               dense
+              input-class="text-right"
               v-model="composition.containerName"
               :label="t('panel.create.nameLabel')"
             />
@@ -68,6 +71,7 @@
               class="text-body1"
               outlined
               dense
+              input-class="text-right"
               v-model="composition.runtime.cmd"
               :label="t('panel.create.cmd')"
               style="width: 300px"
@@ -87,6 +91,7 @@
               class="text-body1"
               outlined
               dense
+              input-class="text-right"
               v-model="composition.runtime.entrypoint"
               :label="t('panel.create.entrypoint')"
               style="width: 300px"
@@ -441,6 +446,7 @@
             filled
             dense
             bottom-slots
+            input-class="text-right"
             v-model="composition.environments.envFile"
             :label="t('panel.create.envFileLabel')"
             style="min-width: 300px"
@@ -476,6 +482,7 @@
                 class="text-body1"
                 outlined
                 dense
+                input-class="text-right"
                 v-model="item.key"
                 :label="t('panel.create.envKey')"
                 style="width: 150px"
@@ -487,6 +494,7 @@
                 class="text-body1"
                 outlined
                 dense
+                input-class="text-right"
                 v-model="item.value"
                 :label="t('panel.create.envValue')"
                 style="width: 200px"
@@ -544,6 +552,7 @@
                 class="text-body1"
                 outlined
                 dense
+                input-class="text-right"
                 v-model="item.host"
                 :label="t('panel.create.hostVolume')"
                 style="width: 150px"
@@ -555,6 +564,7 @@
                 class="text-body1"
                 outlined
                 dense
+                input-class="text-right"
                 v-model="item.container"
                 :label="t('panel.create.containerVolume')"
                 style="width: 200px"
@@ -622,6 +632,7 @@
                 class="text-body1"
                 outlined
                 dense
+                input-class="text-right"
                 v-model="item.host"
                 :label="t('panel.create.hostVolume')"
                 style="width: 150px"
@@ -633,6 +644,7 @@
                 class="text-body1"
                 outlined
                 dense
+                input-class="text-right"
                 v-model="item.container"
                 :label="t('panel.create.containerVolume')"
                 style="width: 200px"
@@ -691,6 +703,7 @@
                 class="text-body1"
                 outlined
                 dense
+                input-class="text-right"
                 v-model="composition.volumes.tmpfs[index]"
                 :label="t('panel.create.containerVolume')"
                 style="width: 200px"
@@ -718,6 +731,7 @@
               clearable
               outlined
               dense
+              input-class="text-right"
               v-model="composition.volumes.workDir"
               :label="t('panel.create.workDir1')"
               style="width: 300px"
@@ -786,6 +800,7 @@
               class="text-body1"
               outlined
               dense
+              input-class="text-right"
               v-model="composition.networks.staticIP"
               :label="t('panel.create.staticIP')"
               hint="#.#.#.#"
@@ -803,6 +818,7 @@
               class="text-body1"
               outlined
               dense
+              input-class="text-right"
               v-model="composition.networks.dns"
               label="DNSs"
               hint="#.#.#.#,#.#.#.#"
@@ -820,6 +836,7 @@
               class="text-body1"
               outlined
               dense
+              input-class="text-right"
               v-model="composition.networks.hostname"
               :label="t('panel.create.containerHostname')"
               style="width: 200px"
@@ -854,6 +871,7 @@
                 class="text-body1"
                 outlined
                 dense
+                input-class="text-right"
                 v-model="item.hostname"
                 :label="t('panel.create.hostname')"
                 style="width: 150px"
@@ -936,6 +954,7 @@
               class="text-body1"
               outlined
               dense
+              input-class="text-right"
               v-model="composition.security.user"
               :label="t('panel.create.user1')"
               style="width: 200px"
@@ -999,6 +1018,7 @@
 
 import { inject, onMounted, onUnmounted, reactive, ref, watch, onActivated, onDeactivated } from 'vue'
 import { useConfigStore } from 'stores/config.js'
+import { useComponentsStore } from 'stores/components.js'
 import { firstUpper, isEmptyObj, isEmptyStr, firstLower } from 'src/utils/common.js'
 import { parseDockerNetwork } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
@@ -1009,6 +1029,7 @@ const route = inject("route")
 const t = inject("t")
 
 const configStore = useConfigStore()
+const componentsStore = useComponentsStore()
 
 const service = inject("service")
 const serviceCmd = ref('')
@@ -1258,7 +1279,8 @@ const onRefreshNetwork = () => {
 }
 
 const onToNetworks = () => {
-  router.push("/node/networks")
+  router.push({path: "networks", query: {tab: 'networks'}})
+
 }
 
 const onAddHostMapping = () => {
@@ -1269,7 +1291,9 @@ const onDeleteHostMapping = (index) => {
   composition.value.networks.host.splice(index, 1)
 }
 
-
+const onClearContainer = () => {
+  composition.value = JSON.parse(JSON.stringify(defaultComposition))
+}
 
 
 const generateCmd = () => {
@@ -1436,7 +1460,27 @@ const onCreateContainer = () => {
   const command = generateCmd().join(' ')
   console.log(command)
 
+  router.push({
+    path: 'logs',
+    query: {
+      tab: "logs",
+      data: JSON.stringify({
+        label: "DockerDesk",
+        icon: 'terminal',
+        data: {
+          serviceName: "DockerDesk",
+          serviceType: 'WSL',
+          user: 'root',
+          disableStdin: true,
+          command
+        }
+      })
+    }
+  })
 
+  setTimeout(() => {
+    componentsStore.refreshContainers()
+  }, 10000)
 }
 
 const getNetworkList = async () => {
@@ -1469,7 +1513,6 @@ const getNetworkList = async () => {
 const routeParam = () => {
   try {
     const data = JSON.parse(route.query.data)
-
     if (data) {
       let name = data.repository
       if (data.repository === "<none>") {
@@ -1486,7 +1529,7 @@ const routeParam = () => {
 }
 
 const init = () => {
-  composition.value = defaultComposition
+  composition.value = JSON.parse(JSON.stringify(defaultComposition))
 
 }
 

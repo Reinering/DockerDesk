@@ -54,6 +54,7 @@ defineOptions({
 import { inject, onMounted, onUnmounted, onActivated, onDeactivated, reactive, ref } from 'vue'
 import Container from 'components/Container.vue'
 import CreateContainerDialog from 'components/dialog/CreateContainerDialog.vue'
+import { useComponentsStore } from 'stores/components.js'
 import { parseDockerContainer } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
 
@@ -64,6 +65,8 @@ const t = inject("t")
 
 const service = inject("service")
 const serviceCmd = ref('')
+
+const componentsStore = useComponentsStore()
 
 let getContainerListInterval = null
 
@@ -91,11 +94,6 @@ const containerDatas = reactive([
 ])
 
 
-
-
-
-
-
 const updateChildData = (nodeId, field, value) => {
   for (const item of containerDatas) {
     if (item["nodeId"] === nodeId) {
@@ -120,6 +118,11 @@ const deleteChild = (nodeId) => {
 }
 
 const getContainerList = () => {
+  if (getContainerListInterval !== null) {
+    clearInterval(getContainerListInterval)
+    getContainerListInterval = null
+  }
+
   window.wslTerminal.execWSL([
     '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} ps -a`
   ]).then((result) => {
@@ -144,7 +147,13 @@ const getContainerList = () => {
       })
     }
   })
+
+  getContainerListInterval = setInterval(() => {
+    getContainerList()
+  }, 30000)
 }
+
+componentsStore.refreshContainers = getContainerList
 
 const init = async () => {
   await setTimeout(() => {}, 500)

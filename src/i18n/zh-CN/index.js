@@ -125,6 +125,7 @@ export default {
       title: "创建容器",
 
       create: "创建",
+      clear: "清除",
       image: "映像",
 
       basic: "基本设置",

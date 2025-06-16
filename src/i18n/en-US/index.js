@@ -128,6 +128,7 @@ export default {
       title: "Create Container",
 
       create: "Create",
+      clear: "Clear",
       image: "Image",
 
       basic: "Basic",

@@ -1,19 +1,59 @@
 <template>
   <q-page>
     <q-tabs
-      v-model="tab"
       no-caps
       inline-label
       active-color="purple"
       class="text-teal shadow-2"
     >
-      <q-route-tab v-if="isShowCreate" name="create" icon="create" :label="t('panel.tabs.create')" to="create" exact />
-      <q-route-tab name="containers" icon="border_all" :label="t('panel.tabs.containers')" to="containers" exact />
-      <q-route-tab name="images" icon="crop_square" :label="t('panel.tabs.images')" to="images" exact />
-      <q-route-tab name="volumes" icon="noise_aware" :label="t('panel.tabs.volumes')" to="volumes" exact />
-      <q-route-tab name="networks" icon="router" :label="t('panel.tabs.networks')" to="networks" exact />
-      <q-route-tab name="logs" icon="output" :label="t('panel.tabs.logs')" to="logs" exact />
-      <q-route-tab name="settings" icon="settings" :label="t('panel.tabs.settings')" :to="toSettings" exact />
+      <q-route-tab
+        v-if="isShowCreate"
+        name="create"
+        icon="create"
+        :label="t('panel.tabs.create')"
+        :to="{ path: '/node/create', query: { tab: 'create' } }"
+      />
+      <q-route-tab
+        name="containers"
+        icon="border_all"
+        :label="t('panel.tabs.containers')"
+        :to="{ path: 'containers', query: { tab: 'containers' } }"
+        exact
+      />
+      <q-route-tab
+        name="images"
+        icon="crop_square"
+        :label="t('panel.tabs.images')"
+        :to="{ path: 'images', query: { tab: 'images' } }"
+        exact
+      />
+      <q-route-tab
+        name="volumes"
+        icon="noise_aware"
+        :label="t('panel.tabs.volumes')"
+        :to="{ path: 'volumes', query: { tab: 'volumes' } }"
+        exact
+      />
+      <q-route-tab
+        name="networks"
+        icon="router"
+        :label="t('panel.tabs.networks')"
+        :to="{ path: 'networks', query: { tab: 'networks' } }"
+        exact
+      />
+      <q-route-tab
+        name="logs"
+        icon="output"
+        :label="t('panel.tabs.logs')"
+        :to="{ path: 'logs', query: { tab: 'logs' } }"
+      />
+      <q-route-tab
+        name="settings"
+        icon="settings"
+        :label="t('panel.tabs.settings')"
+        :to="{ path: toSettings, query: { tab: toSettings } }"
+        exact
+      />
     </q-tabs>
 
     <router-view v-slot="{ Component }">
@@ -36,8 +76,6 @@ const t = inject("t")
 
 const service = reactive({})
 provide("service", service)
-
-const tab = ref('containers')
 
 const toSettings = ref("dockerSettings")
 

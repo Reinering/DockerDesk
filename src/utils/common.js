@@ -216,8 +216,47 @@ export function decodeFromBase64(base64String) {
   return JSON.parse(jsonString)
 }
 
-
 export function format(str, ...args) {
   console.log("mark", str)
   return str.replace(/\{(\d+)\}/g, (match, index) => args[index] || match)
+}
+
+
+class Refresher {
+  constructor(refreshCallback, interval = 5000) {
+    this.refreshCallback = refreshCallback // 刷新回调函数
+    this.interval = interval // 被动刷新间隔（毫秒）
+    this.timer = null // 定时器引用
+    this.startPassiveRefresh() // 启动被动刷新
+  }
+
+  // 启动或重启被动刷新
+  startPassiveRefresh() {
+    this.clearTimer(); // 清除现有定时器
+    this.timer = setInterval(() => {
+      this.refreshCallback()
+      console.log('被动刷新执行')
+    }, this.interval)
+  }
+
+  // 主动刷新
+  activeRefresh() {
+    this.refreshCallback() // 执行刷新
+    this.startPassiveRefresh() // 重置被动刷新定时器
+    console.log('主动刷新执行，被动刷新定时器已重置')
+  }
+
+  // 清除定时器
+  clearTimer() {
+    if (this.timer) {
+      clearInterval(this.timer)
+      this.timer = null
+    }
+  }
+
+  // 停止所有刷新
+  stop() {
+    this.clearTimer()
+    console.log('刷新器已停止')
+  }
 }

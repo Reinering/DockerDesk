@@ -1,13 +1,5 @@
 <template>
   <q-card :style="cardStyle">
-<!--    <q-card-section>-->
-<!--      <div class="row items-center justify-between">-->
-<!--        <div class="text-h6">{{t('panel.images.title')}}</div>-->
-<!--      </div>-->
-<!--    </q-card-section>-->
-
-<!--    <q-separator />-->
-
     <q-card-section>
       <q-table
         class="images-table"
@@ -726,7 +718,7 @@ const onCreateContainer = (row) => {
   // onShowCreateContainerDialog()
 
   showCreatePage()
-  router.push({path: "/node/create", query: {data: JSON.stringify(row)}})
+  router.push({path: "create", query: {tab: 'create', data: JSON.stringify(row)}})
 }
 
 const getImageList = () => {

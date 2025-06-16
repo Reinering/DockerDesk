@@ -1,4 +1,4 @@
-import { ipcMain, dialog } from 'electron'
+import { ipcMain, dialog, shell } from 'electron'
 import {
   getOSInfo, getUtilization,
   getSystemProxy,
@@ -7,6 +7,10 @@ import { settings } from '../actions/settings.js'
 
 
 export function registerClientIpcHandlers(win) {
+
+  ipcMain.on('openUrlOnBrowser', async (event, url) => {
+    shell.openExternal(url)
+  })
 
   ipcMain.handle('getOSInfo', async (event) => {
     return getOSInfo()
