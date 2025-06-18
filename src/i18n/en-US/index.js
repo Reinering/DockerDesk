@@ -215,6 +215,12 @@ export default {
       hintError: "Error: {0} is not installed, please reinstall it on the Assistant page",
 
       pathIncludeSpace: "Paths with spaces are not supported",
+
+      composing: "Composing",
+      composeSuccess: "Compose Successfully",
+      composeFail: "Compose Failed",
+
+      getContainersError: "Failed to obtain container list",
     },
 
     container: {
@@ -336,13 +342,19 @@ export default {
     networks: {
       title: "Network Management",
 
+      optional: "(Optional)",
+
       create: "Create",
       refresh: "Refresh",
+      delete: "Delete",
 
       driver: "Driver",
       subnet: "Subnet",
       gateway: "Gateway",
       containers: "Containers",
+      onlineContainers: "Online Container",
+
+      name: "Network Name",
 
       true: "On",
       false: "Off",
@@ -352,10 +364,28 @@ export default {
 
       createNetworkTitle: "Create Network",
       bingContainerTitle: "Bind Container",
+      containerList: "Container List",
+
+      deleteNetworkMessage: "Confirm to delete the network？",
+      deleteNetworkError: "Before deleting the network, please unbind all containers?",
+      unbindMessage: "Confirm to unbind the container？",
 
       getNetworksSuccess: "Obtained network list",
       getNetworksError: "Failed to get network list",
       getNetworkInfoError: "Failed to get network details",
+
+      networkBindSuccess: "Binding container successfully",
+      networkBindFail: "Failed to bind container",
+      networkUnbindSuccess: "Unbinding container successfully",
+      networkUnbindFail: "Failed to unbind container",
+
+      createNetworkSuccess: "Network created successfully",
+      createNetworkFail: "Failed to create network",
+
+      deleteNetworkSuccess: "Delete network successfully",
+      deleteNetworkFail: "Failed to delete network",
+
+      paramsError: "Param Error"
     },
 
     settings: {
@@ -375,6 +405,10 @@ export default {
 
       rmDialogTitle: "Add Registry Mirror",
       rDialogTitle: "Add Registry",
+      srDialogTitle: "Add Search Registry",
+
+      searchRegistry: "Search Registry",
+      searchRegistry1: "Default Search Registry",
 
       dnsParseError: "DNS string resolution failed",
       fileNotExist: "File does not exist",

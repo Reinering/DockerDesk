@@ -43,6 +43,24 @@
         :label="`${item.name} - ${item.network_id}`"
         header-class="text-primary"
       >
+        <template v-slot:header>
+          <q-item-section avatar>
+            <q-icon name="account_tree"/>
+          </q-item-section>
+
+          <q-item-section>
+            {{`${item.name} - ${item.network_id}`}}
+          </q-item-section>
+
+          <q-item-section side>
+            <q-btn type="submit" icon="delete" size="xs" padding="xs" color="red" @click.stop="onDeleteNetwork(item)">
+              <q-tooltip class="bg-amber text-black shadow-4">
+                {{ t('panel.networks.delete') }}
+              </q-tooltip>
+            </q-btn>
+          </q-item-section>
+        </template>
+
         <q-card>
           <q-card-section>
             <q-item tag="label" v-ripple dense>
@@ -89,11 +107,11 @@
                 </q-item-section>
 
                 <q-item-section>
-                  {{t('panel.networks.containers')}}
+                  {{t('panel.networks.onlineContainers')}}
                 </q-item-section>
 
                 <q-item-section side>
-                  <q-btn icon="add_circle_outline" size="xs" padding="xs" color="blue" @click.stop="showBindNetworkDialog = !showBindNetworkDialog">
+                  <q-btn icon="add_circle_outline" size="xs" padding="xs" color="blue" @click.stop="onShowBindNetworkDialog(item)">
                     <q-tooltip class="bg-amber text-black shadow-4">
                       {{ t('panel.networks.bind') }}
                     </q-tooltip>
@@ -118,7 +136,7 @@
                     </q-item-section>
 
                     <q-item-section side>
-                      <q-btn type="submit" icon="delete_forever" size="xs" padding="xs" color="red" @click.stop="onUnbindNetwork(item1.name, item.network_id)">
+                      <q-btn type="submit" icon="delete_forever" size="xs" padding="xs" color="red" @click.stop="onUnbindNetwork(item1.name, item)">
                         <q-tooltip class="bg-amber text-black shadow-4">
                           {{ t('panel.networks.unbind') }}
                         </q-tooltip>
@@ -168,18 +186,72 @@
   </q-card>
 
   <q-dialog v-model="showCreateNetworkDialog">
-    <q-card class="q-gutter-sm" style="min-width: 60%; height: 330px;" >
+    <q-card class="q-gutter-sm" style="min-width: 40%; height: 330px;" >
       <q-card-section>
-        <div class="text-h6">{{t('panel.networks.createNetworkTitle')}}</div>
+        <div class="text-h6">{{t('panel.networks.createNetworkTitle')}} - Bridge</div>
       </q-card-section>
+
+      <q-form class="q-ma-md q-gutter-md">
+        <q-input
+          class="text-body1"
+          filled
+          dense
+          :label="t('panel.networks.name')"
+          v-model="newNetwork.name"
+        />
+        <q-input
+          class="text-body1"
+          filled
+          dense
+          :label="t('panel.networks.subnet')+t('panel.networks.optional')"
+          v-model="newNetwork.subnet"
+        />
+        <q-input
+          class="text-body1"
+          filled
+          dense
+          :label="t('panel.networks.gateway')+t('panel.networks.optional')"
+          v-model="newNetwork.gateway"
+        />
+      </q-form>
+
+      <q-card-actions align="right">
+        <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="showCreateNetworkDialog = !showCreateNetworkDialog" />
+        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onCreateNetwork" />
+      </q-card-actions>
     </q-card>
   </q-dialog>
 
   <q-dialog v-model="showBindNetworkDialog">
-    <q-card class="q-gutter-sm" style="min-width: 60%; height: 330px;" >
-      <q-card-section>
-        <div class="text-h6">{{t('panel.networks.bingContainerTitle')}}</div>
-      </q-card-section>
+    <q-card class="q-gutter-sm" style="min-width: 60%; height: 450px;" >
+      <div class="text-h6">{{t('panel.networks.bingContainerTitle')}}</div>
+      <q-item-label class="text-pink" caption lines="1" >Network: {{`${selectedNetwork.name} - ${selectedNetwork.network_id}`}}</q-item-label>
+
+      <q-scroll-area style="height: 300px;">
+        <q-list tag="label" v-ripple>
+          <q-item-label header>{{t(`panel.networks.containerList`)}}</q-item-label>
+
+          <q-item
+            v-for="(item, index) in containerDatas"
+            :key="index"
+            tag="label"
+            v-ripple
+          >
+            <q-item-section side top>
+              <q-checkbox v-model="item['selected']" color="teal" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>{{`${item.names} - ${item.containerId}`}}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-scroll-area>
+
+      <q-card-actions align="right">
+        <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="showBindNetworkDialog = !showBindNetworkDialog" />
+        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onBindNetwork" />
+      </q-card-actions>
     </q-card>
   </q-dialog>
 
@@ -187,8 +259,8 @@
 
 <script setup>
 import { inject, onActivated, onDeactivated, onMounted, onUnmounted, reactive, ref } from 'vue'
-import { isEmptyObj } from 'src/utils/common.js'
-import { parseDockerNetwork } from 'src/utils/wsl.js'
+import { isEmptyObj, isEmptyStr } from 'src/utils/common.js'
+import { parseDockerContainer, parseDockerNetwork, parsePodmanContainer } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
 
 const $q = inject('$q')
@@ -210,26 +282,99 @@ const cardStyle = reactive({
 // containers ['id', 'name', 'mac', 'ipv4', 'ipv6']
 const rows = reactive([])
 
+const newNetwork = ref({
+  name: '',
+  subnet: '',
+  gateway: ''
+})
 const showCreateNetworkDialog = ref(false)
+const onCreateNetwork = () => {
+  if (isEmptyStr(newNetwork.value.name)) {
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: `${t('panel.networks.paramsError')}`,
+    })
+  }
+  let command = []
+
+  if (!isEmptyStr(newNetwork.value.subnet)) {
+    command.push("--subnet")
+    command.push(newNetwork.value.subnet)
+  }
+
+  if (!isEmptyStr(newNetwork.value.gateway)) {
+    command.push("--gateway")
+    command.push(newNetwork.value.gateway)
+  }
+
+  command.push(newNetwork.value.name)
+
+  window.wslTerminal.execWSL(
+    [ '-d', 'DockerDesk', '--user', 'root', '-e', "bash", '-c', `"${serviceCmd.value} network create ${command.join(' ')}"` ]
+  ).then((result) => {
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.networks.networkBindSuccess')}`,
+      })
+
+      showCreateNetworkDialog.value = false
+      getNetworkList()
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.networks.networkBindFail')}: ${result.error}`
+      })
+    }
+  })
+
+}
 
 const showBindNetworkDialog = ref(false)
+const containerDatas = reactive([])
+const selectedNetwork = ref(null)
 
-const onCreateNetwork = () => {
+const onShowBindNetworkDialog = (item) => {
+  selectedNetwork.value = item
 
+  getContainerList()
+
+  showBindNetworkDialog.value = true
 }
 
-const onRefresh = () => {
-  getNetworkList()
+const onBindNetwork = async () => {
+  for (const item of containerDatas) {
+    if (item["selected"] === true) {
+      await window.wslTerminal.execWSL(
+        [ '-d', 'DockerDesk', '--user', 'root', '-e', "bash", '-c', `"${serviceCmd.value} network connect ${selectedNetwork.value.network_id} ${item.containerId}"` ]
+      ).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.networks.networkBindSuccess')}`,
+          })
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.networks.networkBindFail')}: ${result.error}`
+          })
+        }
+      })
+    }
+  }
+  getNetworkDetail(selectedNetwork.value)
+  showBindNetworkDialog.value = false
 }
 
-const onBindNetwork = () => {
-
-}
-
-const onUnbindNetwork = (name, network_id) => {
+const onUnbindNetwork = (name, network) => {
   $q.dialog({
     title: t('confirm'),
-    message: t('panel.images.deleteMessage'),
+    message: t('panel.networks.unbindMessage'),
     ok: {
       push: true
     },
@@ -239,7 +384,117 @@ const onUnbindNetwork = (name, network_id) => {
     },
     persistent: true
   }).onOk(async () => {
+    window.wslTerminal.execWSL(
+      [ '-d', 'DockerDesk', '--user', 'root', '-e', "bash", '-c', `"${serviceCmd.value} network disconnect ${network.network_id} ${name}"` ]
+    ).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.networks.networkUnbindSuccess')}`,
+        })
 
+        getNetworkDetail(network)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.networks.networkUnbindFail')}: ${result.error}`
+        })
+      }
+    })
+  })
+}
+
+const onRefresh = () => {
+  getNetworkList()
+}
+
+const onDeleteNetwork = (item) => {
+  if (item.containers.length > 0) {
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: `${t('panel.networks.networkBindFail')}`
+    })
+  }
+
+  $q.dialog({
+    title: t('confirm'),
+    message: t('panel.networks.deleteNetworkMessage'),
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk(async () => {
+    window.wslTerminal.execWSL(
+      ['-d', 'DockerDesk', '--user', 'root', '-e', "bash", '-c', `"${serviceCmd.value} network rm ${item.network_id}"`]
+    ).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.networks.deleteNetworkSuccess')}`,
+        })
+
+        for (let i=0; i < rows.length; i++) {
+          if (rows[i].name === item.name) {
+            rows.splice(i, 1)
+
+            break
+          }
+        }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.networks.deleteNetworkFail')}: ${result.error}`
+        })
+      }
+    })
+  })
+}
+
+const getContainerList = () => {
+  window.wslTerminal.execWSL([
+    '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} ps -a`
+  ]).then((result) => {
+    if (result.success) {
+      containerDatas.length = 0
+
+      if (serviceCmd.value === "docker") {
+        const containerNames = []
+        for (const it of selectedNetwork.value["containers"]) {
+          containerNames.push(it["name"])
+        }
+
+        const items = parseDockerContainer(result.data)
+        containerDatas.length = 0
+        for (const item of items) {
+          if (containerNames.indexOf(item["names"]) === -1) {
+            item["selected"] = false
+            containerDatas.push(item)
+          }
+        }
+      } else if (serviceCmd.value === "podman") {
+        const items = parsePodmanContainer(result.data)
+        containerDatas.length = 0
+        for (const item of items) {
+          item["selected"] = false
+          containerDatas.push(item)
+        }
+    }
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.containers.getContainersError')}: ${result.error}`,
+      })
+    }
   })
 }
 
@@ -256,28 +511,45 @@ const getNetworkDetail = async (row) => {
     .then((result) => {
       if (result.success) {
         const data = JSON.parse(result.data)
-        if (data[0]['IPAM']['Config']) {
-          row.subnet = data[0]['IPAM']['Config'][0]['Subnet']
-          row.gateway = data[0]['IPAM']['Config'][0]['Gateway']
-        } else {
-          row.subnet = ''
-          row.gateway = ''
+        if (serviceCmd.value ==="docker") {
+          if (data[0]['IPAM']['Config']) {
+            row.subnet = data[0]['IPAM']['Config'][0]['Subnet']
+            row.gateway = data[0]['IPAM']['Config'][0]['Gateway']
+          } else {
+            row.subnet = ''
+            row.gateway = ''
+          }
+
+          row.ipv6 = data[0]['EnableIPv6']
+
+          const tmpList = []
+          Object.keys(data[0]['Containers']).forEach((item) => {
+            tmpList.push({
+              id: item.slice(0, 12),
+              name: data[0]['Containers'][item]['Name'],
+              mac: data[0]['Containers'][item]['MacAddress'],
+              ipv4: data[0]['Containers'][item]['IPv4Address'],
+              ipv6: data[0]['Containers'][item]['IPv6Address'],
+            })
+          })
+
+          row['containers'] = tmpList
+        } else if (serviceCmd.value ==="podman") {
+          if (data[0]['subnets']) {
+            row.subnet = data[0]['subnets'][0]['subnet']
+            row.gateway = data[0]['subnets'][0]['gateway']
+          } else {
+            row.subnet = ''
+            row.gateway = ''
+          }
+
+          row.ipv6 = data[0]['ipv6_enabled']
+
+          const tmpList = []
+
+          row['containers'] = tmpList
         }
 
-        row.ipv6 = data[0]['EnableIPv6']
-
-        const tmpList = []
-        Object.keys(data[0]['Containers']).forEach((item) => {
-          tmpList.push({
-            id: item.slice(0, 12),
-            name: data[0]['Containers'][item]['Name'],
-            mac: data[0]['Containers'][item]['MacAddress'],
-            ipv4: data[0]['Containers'][item]['IPv4Address'],
-            ipv6: data[0]['Containers'][item]['IPv6Address'],
-          })
-        })
-
-        row['containers'] = tmpList
       } else {
         $q.notify({
           type: 'negative',

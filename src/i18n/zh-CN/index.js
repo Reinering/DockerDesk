@@ -217,6 +217,8 @@ export default {
       composing: "Composing",
       composeSuccess: "Compose Successfully",
       composeFail: "Compose Failed",
+
+      getContainersError: "获取容器列表失败",
     },
 
     container: {
@@ -341,13 +343,19 @@ export default {
     networks: {
       title: "网络管理",
 
+      optional: "(非必需)",
+
       create: "创建",
       refresh: "刷新",
+      delete: "删除",
 
       driver: "驱动",
       subnet: "子网",
       gateway: "网关",
       containers: "容器",
+      onlineContainers: "在线容器",
+
+      name: "网络名称",
 
       true: "启用",
       false: "禁用",
@@ -357,10 +365,29 @@ export default {
 
       createNetworkTitle: "创建网络",
       bingContainerTitle: "绑定容器",
+      containerList: "容器列表",
+
+      deleteNetworkMessage: "确认删除该网络？",
+      deleteNetworkError: "删除网络前，请先解绑所有容器？",
+      unbindMessage: "确认解绑该容器？",
+
 
       getNetworksSuccess: "已获取网络列表",
       getNetworksError: "获取网络列表失败",
       getNetworkInfoError: "获取网络详细信息失败",
+
+      networkBindSuccess: "绑定容器成功",
+      networkBindFail: "绑定容器失败",
+      networkUnbindSuccess: "解绑容器成功",
+      networkUnbindFail: "解绑容器失败",
+
+      createNetworkSuccess: "创建网络成功",
+      createNetworkFail: "创建网络失败",
+
+      deleteNetworkSuccess: "删除网络成功",
+      deleteNetworkFail: "删除网络失败",
+
+      paramsError: "参数错误"
 
     },
 
@@ -381,6 +408,10 @@ export default {
 
       rmDialogTitle: "添加镜像代理",
       rDialogTitle: "添加仓库",
+      srDialogTitle: "添加搜索仓库",
+
+      searchRegistry: "搜索仓库",
+      searchRegistry1: "默认搜索仓库",
 
       dnsParseError: "DNS字符串解析失败",
       fileNotExist: "文件不存在",
