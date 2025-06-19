@@ -58,6 +58,33 @@ export const parseDockerImages = (input) => {
   }).filter(item => item !== null) // 过滤掉无效行
 }
 
+export function parsePodmanImages(input) {
+  // 按行分割并移除空行
+  const lines = input.trim().split('\n').filter(line => line.trim() !== '')
+
+  // 移除表头（第一行）
+  const dataLines = lines.slice(1)
+
+  let id = 0
+  // 将每行解析为对象
+  const result = dataLines.map(line => {
+    // 按多个空格分割，并清理每部分
+    const parts = line.trim().split(/\s{2,}/)
+    id += 1
+
+    return {
+      id,
+      repository: parts[0],
+      tag: parts[1],
+      imageId: parts[2],
+      created: parts[3],
+      size: parts[4]
+    }
+  })
+
+  return result
+}
+
 export const parsePullDockerImages = (input) => {
   // 按行分割并移除表头
   const lines = input.trim().split('\n').slice(1)
@@ -76,6 +103,23 @@ export const parsePullDockerImages = (input) => {
       official: official.replace(/[[\]]/g, '')
     }
   }).filter(item => item !== null) // 过滤掉无效行
+}
+
+export const parsePullPodmanImages = (input) => {
+  const lines = input.trim().split('\n').filter(line => line.trim())
+
+  lines.shift()
+
+  return lines.map(line => {
+    // Split by multiple spaces, assuming at least 2 spaces separate columns
+    const [name, ...descriptionParts] = line.split(/\s{2,}/)
+    return {
+      name: name.trim(),
+      description: descriptionParts.join(' ').trim(),
+      stars: '',
+      official: ''
+    }
+  })
 }
 
 export const parseDockerNetwork = (str) => {
@@ -112,6 +156,50 @@ export const parseDockerVolume = (input) => {
 }
 
 export const parseDockerContainer = (input) => {
+  // 按行分割并去除首行（表头）
+  const lines = input.trim().split('\n').slice(1)
+
+  // 将每行转换为对象
+  const result = lines.map(line => {
+    // 按两个或更多空格分割
+    const parts = line.trim().split(/\s{2,}/)
+
+    // 确保字段存在，默认空字符串
+    const containerId = parts[0] || ''
+    const image = parts[1] || ''
+    const command = parts[2] || ''
+    const created = parts[3] || ''
+    const status = parts[4] || ''
+
+    // 处理 PORTS 和 NAMES
+    let ports = ''
+    let names = ''
+
+    // 如果 parts 长度为 6，说明 PORTS 为空，NAMES 在 parts[5]
+    if (parts.length === 6) {
+      ports = ''
+      names = parts[5] || ''
+    } else if (parts.length >= 7) {
+      // 如果 parts 长度 >= 7，PORTS 在 parts[5]，NAMES 在 parts[6]
+      ports = parts[5] || ''
+      names = parts[6] || ''
+    }
+
+    return {
+      containerId,
+      image,
+      command,
+      created,
+      status,
+      ports,
+      names
+    }
+  })
+
+  return result
+}
+
+export const parsePodmanContainer = (input) => {
   // 按行分割并去除首行（表头）
   const lines = input.trim().split('\n').slice(1)
 

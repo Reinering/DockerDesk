@@ -25,7 +25,6 @@
                 {{t('panel.settings.basicSettings')}}
               </q-btn>
             </div>
-<!--            <q-btn color="blue" label="save"/>-->
           </q-card-section>
 
           <div class="q-pa-md q-gutter-sm">
@@ -629,11 +628,11 @@ const init = async () => {
         }
         if(Object.prototype.hasOwnProperty.call(data, "registry-mirrors")) {
           const secure = data["registry-mirrors"]
-          registryMirrors.concat(secure)
+          registryMirrors.push(...secure)
         }
         if(Object.prototype.hasOwnProperty.call(data, "insecure-registries")) {
           const insecure = data["insecure-registries"]
-          registryMirrors.concat(insecure)
+          registryMirrors.push(...insecure)
         }
         if(Object.prototype.hasOwnProperty.call(data, "proxies")) {
           const proxies = data["proxies"]

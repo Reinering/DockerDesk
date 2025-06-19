@@ -67,9 +67,17 @@ export function registerClientIpcHandlers(win) {
   })
 
   ipcMain.handle('updateSettings', async (event, data) => {
+    if (data instanceof Array) {
+      let result
+      for (const item of data) {
+        item["modify_time"] = Date.now()
+        result = settings.updateByField(item)
+      }
+      return result
+    } else {
+      data["modify_time"] = Date.now()
 
-    data["modify_time"] = Date.now()
-
-    return settings.updateByField(data)
+      return settings.updateByField(data)
+    }
   })
 }

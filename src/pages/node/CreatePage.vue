@@ -1457,7 +1457,7 @@ const onCreateContainer = () => {
     })
   }
 
-  const command = `"${generateCmd().join(' ')}"`
+  const command = `bash -c "${generateCmd().join(' ')}"`
   console.log(command)
 
   router.push({
@@ -1521,6 +1521,7 @@ const routeParam = () => {
         name += `:${data.tag}`
       }
 
+      composition.value = JSON.parse(JSON.stringify(defaultComposition))
       composition.value.image = name
     }
   } catch (e) {

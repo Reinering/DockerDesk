@@ -93,6 +93,7 @@ const props = defineProps({
 })
 
 import { inject, ref, onMounted, onUnmounted, reactive } from 'vue'
+import { usePodmanStore } from 'src/stores/podman.js'
 import { isEmptyObj, isEmptyStr, format, firstLower } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 
@@ -100,6 +101,8 @@ const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
+
+const podmanStore = usePodmanStore()
 
 const service = inject("service")
 const serviceCmd = ref('')
@@ -151,11 +154,21 @@ const onCreate = () => {
     })
   }
 
+  let file = ''
+  if (!isEmptyObj(DockerFile.filePath)) {
+    file = `-f ${DockerFile.filePath.name}`
+  }
+
   let cmd = ''
-  if (isEmptyObj(DockerFile.filePath)) {
-    cmd = `bash -c "cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build -t ${newRepository.repository}:${newRepository.tag} ."`
+  if (serviceCmd.value === "docker") {
+    cmd = `bash -c "cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build ${file} -t ${newRepository.repository}:${newRepository.tag} ."`
   } else {
-    cmd = `bash -c "cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build -f ${DockerFile.filePath.name} -t ${newRepository.repository}:${newRepository.tag} ."`
+    let env = ''
+    if (podmanStore.getENV.length > 0) {
+      env = `export ${podmanStore.getENV.join(' && ')}`
+    }
+
+    cmd = `bash -c "${env} cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build ${file} -t ${newRepository.repository}:${newRepository.tag} ."`
   }
 
   router.push({

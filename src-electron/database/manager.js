@@ -117,6 +117,20 @@ async function initDB() {
           mark: "docker registry mirror",
           delete_flags: 0
         },
+        {
+          field: "web_proxy",
+          type: "json",
+          value: '',
+          mark: "web proxy",
+          delete_flags: 0
+        },
+        {
+          field: "podman_proxy_mode",
+          type: "string",
+          value: '',
+          mark: "disable / system / manual",
+          delete_flags: 0
+        },
       ])
     }
 

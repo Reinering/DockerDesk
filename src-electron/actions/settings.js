@@ -17,7 +17,7 @@ export const settings = {
   updateByField: async (data) => {
     return db('settings')
       .where('field', '=', data.field)
-      .select('*').then(
+      .update(data).then(
         rows => {
           return { success: true, data: rows }
         }).catch(error => {

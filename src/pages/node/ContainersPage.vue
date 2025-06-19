@@ -55,7 +55,7 @@ import { inject, onMounted, onUnmounted, onActivated, onDeactivated, reactive, r
 import Container from 'components/Container.vue'
 import CreateContainerDialog from 'components/dialog/CreateContainerDialog.vue'
 import { useComponentsStore } from 'stores/components.js'
-import { parseDockerContainer } from 'src/utils/wsl.js'
+import { parseDockerContainer, parsePodmanContainer } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
@@ -93,7 +93,6 @@ const containerDatas = reactive([
   // },
 ])
 
-
 const updateChildData = (nodeId, field, value) => {
   for (const item of containerDatas) {
     if (item["nodeId"] === nodeId) {
@@ -128,22 +127,37 @@ const getContainerList = () => {
   ]).then((result) => {
     if (result.success) {
       containerDatas.length = 0
-      const items = parseDockerContainer(result.data)
-      for (let i=0; i < items.length; i++) {
-        containerDatas.push({
-          nodeId: i,
-          templateId: 0,
-          servername: items[i]["names"],
-          description: '',
-          data: items[i],
-          serviceCmd: serviceCmd.value
-        })
+
+      if (serviceCmd.value === "docker") {
+        const items = parseDockerContainer(result.data)
+        for (let i=0; i < items.length; i++) {
+          containerDatas.push({
+            nodeId: i,
+            templateId: 0,
+            servername: items[i]["names"],
+            description: '',
+            data: items[i],
+            serviceCmd: serviceCmd.value
+          })
+        }
+      } else if (serviceCmd.value === "podman") {
+        const items = parsePodmanContainer(result.data)
+        for (let i=0; i < items.length; i++) {
+          containerDatas.push({
+            nodeId: i,
+            templateId: 0,
+            servername: items[i]["names"],
+            description: '',
+            data: items[i],
+            serviceCmd: serviceCmd.value
+          })
+        }
       }
     } else {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: `${t('panel.networks.getNetworksError')}: ${result.error}`,
+        message: `${t('panel.containers.getContainersError')}: ${result.error}`,
       })
     }
   })
@@ -204,7 +218,6 @@ onDeactivated(() => {
     getContainerListInterval = null
   }
 })
-
 
 onUnmounted(() => {
 

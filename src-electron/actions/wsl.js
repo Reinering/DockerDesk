@@ -2,6 +2,7 @@ import { cmd, cmd1, CmdRunner, modifyIniConfig, } from 'app/src-electron/common/
 import { WslCmdRunner } from 'app/src-electron/common/wsl.js'
 import readline from 'readline'
 import path from 'path'
+import { parse, stringify } from 'smol-toml'
 
 
 const homeDir = process.env.HOME || process.env.USERPROFILE
@@ -198,3 +199,7 @@ export async function dockerLogin (win, data) {
   }
 }
 
+export async function readPodmanConf(commands) {
+  const configContent = await execSubSystem(commands)
+  return parse(configContent)
+}

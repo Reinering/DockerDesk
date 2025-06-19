@@ -335,6 +335,9 @@ export default {
       volumeName: "Volume Name",
       driver: "Driver",
       action: "Action",
+      create: "Create",
+
+      clearVolumes: "Clean up unused volumes",
 
       getVolumesError: "Failed to get volume list",
     },
@@ -390,6 +393,8 @@ export default {
 
     settings: {
       settings: "Settings",
+      otherSettings: "Other Settings",
+      envSettings: "Environment variable Settings",
       save: "Save",
       add: "Add",
       edit: "Edit",
@@ -416,6 +421,8 @@ export default {
       saveFail: "Configuration save failed",
       dbSaveSuccess: "DataBase saved successfully",
       dbSaveFail: "DataBase saved failed",
+      proxySaveSuccess: "Proxy saved successfully",
+      proxySaveFail: "Proxy saved failed",
     }
   },
 

@@ -160,7 +160,7 @@ const installWSLPackage = () => {
     ['-d', "DockerDesk", '--user', "root", '-e', "mv /etc/apt/sources.list /etc/apt/sources.list.bak"],
     ['-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c', `"printf '${printfContent}' > /etc/apt/sources.list"`],
     ['-d', "DockerDesk", '--user', "root", '-e', "apt-get update"],
-    ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y curl dbus dbus-x11 "]
+    ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y curl dbus dbus-x11 git "]
   ]).then((result) => {
     console.log(result)
     if (result.success) {

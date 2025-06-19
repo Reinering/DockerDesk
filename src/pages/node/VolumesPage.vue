@@ -1,16 +1,5 @@
 <template>
   <q-card :style="cardStyle">
-<!--    <q-card-section>-->
-<!--      <div class="q-gutter-sm row items-center justify-between">-->
-<!--        <div class="text-h6">{{t('panel.networks.title')}}</div>-->
-<!--        <q-space />-->
-<!--        <q-btn :label="t('panel.networks.create')" color="primary" @click="showDialog = true" />-->
-<!--        <q-btn :label="t('panel.networks.create')" color="primary" @click="showDialog = true" />-->
-<!--      </div>-->
-<!--    </q-card-section>-->
-
-<!--    <q-separator />-->
-
     <q-card-section>
       <q-table
         class="images-table"
@@ -41,25 +30,25 @@
           <q-space />
           <div class="q-gutter-sm">
             <q-btn
-              icon="import_export"
-              size="xs"
-              padding="xs"
-              color="deep-purple"
-              @click="onImportImage"
-            >
-              <q-tooltip class="bg-amber text-black shadow-4">
-                {{ t('panel.images.import') }}
-              </q-tooltip>
-            </q-btn>
-            <q-btn
-              icon="download"
+              icon="auto_delete"
               size="xs"
               padding="xs"
               color="deep-purple"
               @click="showPullDialog = !showPullDialog"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
-                {{ t('panel.images.pull') }}
+                {{ t('panel.volumes.clearVolumes') }}
+              </q-tooltip>
+            </q-btn>
+            <q-btn
+              icon="create"
+              size="xs"
+              padding="xs"
+              color="deep-purple"
+              @click="onImportImage"
+            >
+              <q-tooltip class="bg-amber text-black shadow-4">
+                {{ t('panel.volumes.create') }}
               </q-tooltip>
             </q-btn>
             <q-btn icon="delete" size="xs" padding="xs" color="red" @click="onDeleteBatch">

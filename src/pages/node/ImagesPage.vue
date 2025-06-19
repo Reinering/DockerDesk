@@ -241,7 +241,8 @@
 import { inject, reactive, ref, onMounted, onUnmounted, onActivated, onDeactivated, watch } from 'vue'
 import ImagePullDialog from 'components/dialog/ImagePullDialog.vue'
 import CreateImageDialog from 'components/dialog/CreateImageDialog.vue'
-import { parseDockerImages, parsePullDockerImages } from 'src/utils/wsl.js'
+import { usePodmanStore } from 'src/stores/podman.js'
+import { parseDockerImages, parsePullDockerImages, parsePodmanImages, parsePullPodmanImages } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
 import { firstLower, isEmptyObj } from 'src/utils/common.js'
 
@@ -249,6 +250,8 @@ const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
+
+const podmanStore = usePodmanStore()
 
 const service = inject("service")
 const serviceCmd = ref('')
@@ -305,18 +308,32 @@ const newTag = reactive({
 })
 const isEdit = ref(true)
 
-const showCreateContainerDialog = ref(false)
-const containerData = ref(null)
-
 const showCreateImageDialog = ref(false)
 
 const onImageSearch = (text) => {
-  window.wslTerminal.execWSL(
-    ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
-  ).then((result) => {
-    console.log(result)
+  let command
+  if (serviceCmd.value === "docker") {
+    command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
+  } else if (serviceCmd.value === "podman") {
+    const env = podmanStore.getENV
+
+    if (env.length > 0) {
+      command = ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"export ${env.join(' && ')} ${serviceCmd.value} search ${text}"`]
+    } else {
+      command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
+    }
+  }
+
+  pullList.length = 0
+  window.wslTerminal.execWSL(command).then((result) => {
     if (result.success) {
-      const data = parsePullDockerImages(result.data)
+      let data
+      if (serviceCmd.value === "podman") {
+        data = parsePullPodmanImages(result.data)
+      } else {
+        data = parsePullDockerImages(result.data)
+      }
+
       if (data.length > 0) {
         pullList.push(...data)
       }
@@ -325,9 +342,21 @@ const onImageSearch = (text) => {
 }
 
 const onImagePull = (name) => {
-  window.wslTerminal.execWSL(
-    ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} pull ${name}`]
-  ).then((result) => {
+  let command
+  if (serviceCmd.value === "docker") {
+    command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} pull ${name}`]
+  } else {
+    let env = ''
+    if (podmanStore.getENV.length > 0) {
+      env = `export ${podmanStore.getENV.join(' && ')}`
+    }
+
+    command = ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"${env} ${serviceCmd.value} pull ${name} 2>&1"`]
+
+  }
+
+  window.wslTerminal.execWSL(command).then((result) => {
+    console.log("pull", result)
     if (result.success) {
       notify.value({
         type: 'positive',
@@ -344,7 +373,7 @@ const onImagePull = (name) => {
         type: 'negative',
         icon: 'done',
         spinner: false,
-        message: `${t('panel.images.pullSuccess')}: ${result.error}`,
+        message: `${t('panel.images.pullFail')}: ${result.error}`,
         timeout: 10000
       })
     }
@@ -694,24 +723,13 @@ const onShowCreateImageDialog = () => {
   showCreateImageDialog.value = !showCreateImageDialog.value
 }
 
-const onShowCreateContainerDialog = () => {
-  showCreateContainerDialog.value = !showCreateContainerDialog.value
-}
-
 const onCreateContainer = (row) => {
   console.log(row)
-
-  // if (showCreateContainerDialog.value) {
-  //   containerData.value = null
-  // } else {
-  //   containerData.value = row
-  // }
-  //
-  // onShowCreateContainerDialog()
 
   showCreatePage()
   router.push({path: "create", query: {tab: 'create', data: JSON.stringify(row)}})
 }
+
 
 const getImageList = () => {
   window.wslTerminal.execWSL(
@@ -719,10 +737,18 @@ const getImageList = () => {
   ).then((result) => {
     if (result.success) {
       rows.length = 0
-      const data = parseDockerImages(result.data)
-      if (data.length > 0)  {
-        rows.push(...data)
+      if (serviceCmd.value === "docker") {
+        const data = parseDockerImages(result.data)
+        if (data.length > 0)  {
+          rows.push(...data)
+        }
+      } else if (serviceCmd.value === "podman") {
+        const data = parsePodmanImages(result.data)
+        if (data.length > 0)  {
+          rows.push(...data)
+        }
       }
+
     } else {
       $q.notify({
         type: 'negative',

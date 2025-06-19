@@ -3,8 +3,8 @@ import {
   modifyWSLDebugConfig, execSubSystem, execSSubSystem,
   getWSLInfo, getWSLList, wslUpdate,
   wslInstallSubSystem, installWSL, startSubSystem, stopSubSystem, restartSubSystem,
-  unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList, dockerLogin, startBGSubSystem
-
+  unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList, dockerLogin, startBGSubSystem,
+  readPodmanConf,
 } from 'app/src-electron/actions/wsl.js'
 
 
@@ -171,6 +171,18 @@ export function registerWSLIpcHandlers(win) {
   ipcMain.handle('dockerLoginWSL', async (event, commands) => {
     try {
       return dockerLogin(commands).then((data) => {
+        return { success: true, data: data, error: '' }
+      }, (error) => {
+        return { success: false, error: error }
+      })
+    } catch (err) {
+      return { success: false, error: err }
+    }
+  })
+
+  ipcMain.handle('readPodmanConfWSL', async (event, commands) => {
+    try {
+      return readPodmanConf(commands).then((data) => {
         return { success: true, data: data, error: '' }
       }, (error) => {
         return { success: false, error: error }

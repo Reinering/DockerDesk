@@ -52,6 +52,8 @@
 </template>
 
 <script setup>
+import { isEmptyObj } from 'src/utils/common.js'
+
 const props = defineProps({
   rows: {
     type: Object,
@@ -73,14 +75,17 @@ const props = defineProps({
 })
 
 
-import { inject, ref } from 'vue'
+import { inject, ref, onMounted } from 'vue'
 
 const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
 
-const visibleColumns = ['name', 'description', 'stars', 'official', 'actions']
+const service = inject("service")
+const serviceCmd = ref('')
+
+const visibleColumns = ref(['name', 'description', 'stars', 'official', 'actions'])
 const columns = [
   { name: 'name', label: t('panel.images.pullDialog.name'), align: 'left', field: 'name' },
   { name: 'description', label: t('panel.images.pullDialog.description'), align: 'left', field: 'description' },
@@ -106,6 +111,22 @@ const onPull = (row) => {
     props.pull(row.name)
   }
 }
+
+
+const init = () => {
+  serviceCmd.value = service.serviceType
+  if (isEmptyObj(serviceCmd.value)) {
+    return
+  }
+
+  if (serviceCmd.value === "podman") {
+    visibleColumns.value = ['name', 'description', 'actions']
+  }
+}
+
+onMounted(() => {
+  init()
+})
 
 </script>
 

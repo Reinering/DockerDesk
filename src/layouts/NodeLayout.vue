@@ -67,12 +67,15 @@
 
 <script setup>
 import { ref, provide, inject, onMounted, onActivated, onDeactivated, onUnmounted, reactive } from 'vue'
-import { isEmptyObj } from 'src/utils/common.js'
+import { usePodmanStore } from 'src/stores/podman.js'
+import { firstUpper, isEmptyObj, isEmptyStr } from 'src/utils/common.js'
 
 const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
+
+const podmanStore = usePodmanStore()
 
 const service = reactive({})
 provide("service", service)
@@ -98,6 +101,62 @@ const showCreatePage = () => {
 }
 provide("showCreatePage", showCreatePage)
 
+
+
+
+const initDocker = () => {
+
+}
+
+const initPodman = () => {
+
+  // init env
+  window.client.getSettings("podman_proxy_mode").then((result) => {
+    if (result.success) {
+      podmanStore.mode = firstUpper(result.data.value)
+
+      if (result.data.value === "manual") {
+        window.client.getSettings("web_proxy").then((result) => {
+          if (result.success) {
+            if (isEmptyStr(result.data.value)) {
+              return
+            }
+
+            const data = JSON.parse(result.data.value)
+
+            if (result.data.value) {
+              podmanStore.proxies.httpProxy = data.http_proxy
+              podmanStore.proxies.httpsProxy = data.https_proxy
+              podmanStore.proxies.noProxy = data.no_proxy
+            }
+          }
+        })
+      } else if (result.data.value === "system") {
+        window.myWindowAPI.getProxy().then((result) => {
+          if (!isEmptyObj(result)) {
+            podmanStore.proxies.httpProxy = result.http
+            podmanStore.proxies.httpsProxy = result.https
+            podmanStore.proxies.noProxy = result.byPass
+          }
+        })
+      }
+    }
+  })
+
+
+}
+
+
+const init = () => {
+  if (!isEmptyObj(service)) {
+    if (service.serviceType === "docker") {
+      initDocker()
+    } else if (service.serviceType === "podman") {
+      initPodman()
+    }
+  }
+}
+
 onMounted(() => {
   try {
     const data = JSON.parse(route.query.data)
@@ -109,6 +168,11 @@ onMounted(() => {
   } catch (e) {
     // console.error(e)
   }
+
+  changeSettingRouter()
+
+  init()
+
 })
 
 onActivated(() => {
@@ -125,6 +189,8 @@ onActivated(() => {
   }
   console.log(service)
   changeSettingRouter()
+
+  init()
 })
 
 onUnmounted(() => {

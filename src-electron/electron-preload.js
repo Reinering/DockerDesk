@@ -460,6 +460,10 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('dockerLoginWSL', data)
   },
 
+  readPodmanConfWSL(data) {
+    return ipcRenderer.invoke('readPodmanConfWSL', data)
+  }
+
 })
 
 

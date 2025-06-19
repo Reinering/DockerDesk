@@ -336,6 +336,9 @@ export default {
       volumeName: "名称",
       driver: "驱动",
       action: "操作",
+      create: "创建",
+
+      clearVolumes: "清理无用的卷",
 
       getVolumesError: "获取卷列表失败",
     },
@@ -393,6 +396,8 @@ export default {
 
     settings: {
       settings: "设置",
+      otherSettings: "其他设置",
+      envSettings: "环境变量设置",
       save: "保存",
       add: "添加",
       edit: "编辑",
@@ -419,6 +424,8 @@ export default {
       saveFail: "配置保存失败",
       dbSaveSuccess: "数据库保存成功",
       dbSaveFail: "数据库保存失败",
+      proxySaveSuccess: "代理保存成功",
+      proxySaveFail: "代理保存失败",
     }
   },
 
