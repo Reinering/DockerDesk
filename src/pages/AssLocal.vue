@@ -344,6 +344,14 @@ const showLoading = () => {
   }, 2000)
 }
 
+const getOSInfo = () => {
+  window.client.getOSUtilization().then(({cpuUsage, memoryUsage}) => {
+    console.log("getOSUtilization")
+    cpuValue.value = parseInt(cpuUsage)
+    memoryValue.value = parseInt(memoryUsage * 100)
+  })
+}
+
 let getOSInfoInterval = null
 
 const checkDockerInstall = () => {
@@ -410,10 +418,7 @@ const init = () => {
     checkPodmanInstall()
 
     getOSInfoInterval = setInterval(() => {
-      window.client.getOSUtilization().then(({cpuUsage, memoryUsage}) => {
-        cpuValue.value = parseInt(cpuUsage)
-        memoryValue.value = parseInt(memoryUsage * 100)
-      })
+      getOSInfo()
     }, 10000)
   }
 }
@@ -423,12 +428,9 @@ onMounted(() => {
 })
 
 onActivated(() => {
-  if (getOSInfoInterval !== null) {
+  if (getOSInfoInterval === null) {
     getOSInfoInterval = setInterval(() => {
-      window.client.getOSUtilization().then(({cpuUsage, memoryUsage}) => {
-        cpuValue.value = parseInt(cpuUsage)
-        memoryValue.value = parseInt(memoryUsage * 100)
-      })
+      getOSInfo()
     }, 10000)
   }
 })
@@ -441,7 +443,10 @@ onDeactivated(() => {
 })
 
 onUnmounted(() => {
-
+  if (getOSInfoInterval !== null) {
+    clearInterval(getOSInfoInterval)
+    getOSInfoInterval = null
+  }
 })
 
 
