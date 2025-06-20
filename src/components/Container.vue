@@ -76,7 +76,7 @@
           size="sm"
         >
           <q-list dense :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
-            <q-item clickable v-close-popup size="sm" @click="onDetail">
+            <q-item clickable v-close-popup size="sm" @click="onShowContainerDetailDialog">
               <q-item-section>
                 <q-icon name="info" color="blue" />
                 <q-tooltip class="bg-amber text-black shadow-4">
@@ -103,14 +103,15 @@
               </q-item-section>
             </q-item>
 
-            <q-item clickable v-close-popup size="sm" @click="onSettings">
+            <q-item clickable v-close-popup size="sm" @click="props.toLog(props.data['data']['names'])">
               <q-item-section>
-                <q-icon name="settings" :color="templates[props.data.templateId].btn.color" />
+                <q-icon name="screenshot_monitor" :color="templates[props.data.templateId].btn.color" />
                 <q-tooltip class="bg-amber text-black shadow-4">
-                  {{t('panel.container.settings')}}
+                  {{t('panel.container.log')}}
                 </q-tooltip>
               </q-item-section>
             </q-item>
+            
           </q-list>
 
         </q-btn-dropdown>
@@ -194,10 +195,19 @@
   <q-dialog v-model="isClick">
     <ContainerSetting />
   </q-dialog>
+
+  <ContainerDetailDialog
+    v-if="showContainerDetailDialog"
+    v-model="showContainerDetailDialog"
+    :data="props.data"
+    :onClose="onShowContainerDetailDialog"
+  />
 </template>
 
 
 <script setup>
+import ContainerDetailDialog from 'components/dialog/ContainerDetailDialog.vue'
+
 defineOptions({
   name: 'Container',
 })
@@ -218,6 +228,10 @@ const props = defineProps({
     default: () => {}
   },
   delete: {
+    type: Function,
+    default: () => {}
+  },
+  toLog: {
     type: Function,
     default: () => {}
   }
@@ -293,6 +307,11 @@ const isRestart = ref(false)
 const isMore = ref(false)
 const isOpenWeb = ref(false)
 const ports = reactive([])
+
+const showContainerDetailDialog = ref(false)
+const onShowContainerDetailDialog = () => {
+  showContainerDetailDialog.value = !showContainerDetailDialog.value
+}
 
 const onStart = async () => {
   if (isEmptyObj(props.data)) {
@@ -508,7 +527,9 @@ const onPack = () => {
     message: t('panel.container.packing'),
   })
 }
-const onSettings = () => {}
+const onTolog = () => {
+
+}
 
 const openFirstPort = () => {
   window.client.openUrlOnBrowser(`http://localhost:${ports[0]}`)

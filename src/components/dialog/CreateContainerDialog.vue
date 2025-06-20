@@ -61,6 +61,7 @@ const props = defineProps({
 })
 
 import { inject, ref, onMounted, onUnmounted, reactive } from 'vue'
+import { usePodmanStore } from 'src/stores/podman.js'
 import { isEmptyObj, firstLower } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 
@@ -68,6 +69,8 @@ const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
+
+const podmanStore = usePodmanStore()
 
 const service = inject("service")
 const serviceCmd = ref('')
@@ -135,11 +138,21 @@ const onCreate = () => {
     })
   }
 
+  let file = ''
+  if (!isEmptyObj(composeFile.filePath)) {
+    file = `-f ${composeFile.filePath.name}`
+  }
+
   let cmd = ''
-  if (isEmptyObj(composeFile.filePath)) {
-    cmd = `bash -c "cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} up -d"`
+  if (serviceCmd.value === "docker-compose") {
+    cmd = `bash -c "cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} ${file} up -d"`
   } else {
-    cmd = `bash -c "cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} -f ${composeFile.filePath.name} up -d"`
+    let env = ''
+    if (podmanStore.getENV.length > 0) {
+      env = `export ${podmanStore.getENV.join(' && ')}`
+    }
+
+    cmd = `bash -c "${env}  cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} ${file} up -d"`
   }
 
   router.push({

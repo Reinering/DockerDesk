@@ -76,29 +76,6 @@ const isShowSettingsDialog = ref(false)
 const fsData = ref({})
 
 
-// 按键发送命令
-const numberKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-const handleKeyDown = (event) => {
-  // 标签页切换，快捷键 alt + 数字键
-  if (event.altKey) {
-    if (numberKeys.includes(event.key)) {
-      if (parseInt(event.key) <= tabs.length) {
-        tab.value = tabs[parseInt(event.key) - 1].id
-      }
-    }
-  }
-}
-
-const checkScreenSize = () => {
-  if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 150 + "px"
-    xtermStyle.height = window.innerHeight - 151 - 45 + "px"
-  } else {
-    cardStyle.height = window.innerHeight - 149 + "px"
-    xtermStyle.height = window.innerHeight - 70 + "px"
-  }
-}
-
 const deleteTab = (id) => {
   $q.dialog({
     title: t('confirm'),
@@ -130,6 +107,29 @@ const deleteTab = (id) => {
   })
 }
 
+// 按键发送命令
+const numberKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+const handleKeyDown = (event) => {
+  // 标签页切换，快捷键 alt + 数字键
+  if (event.altKey) {
+    if (numberKeys.includes(event.key)) {
+      if (parseInt(event.key) <= tabs.length) {
+        tab.value = tabs[parseInt(event.key) - 1].id
+      }
+    }
+  }
+}
+
+const checkScreenSize = () => {
+  if (process.env.MODE === 'electron') {
+    cardStyle.height = window.innerHeight - 150 + "px"
+    xtermStyle.height = window.innerHeight - 151 - 45 + "px"
+  } else {
+    cardStyle.height = window.innerHeight - 149 + "px"
+    xtermStyle.height = window.innerHeight - 70 + "px"
+  }
+}
+
 onMounted(() => {
   window.addEventListener('resize', checkScreenSize)
   window.addEventListener('keydown', handleKeyDown)
@@ -138,18 +138,35 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreenSize)
   window.removeEventListener('keydown', handleKeyDown)
+
+
+  // 关闭所有后台terminal
+  for (let i = 0; i < tabs.length; i++) {
+    if (tabs[i].data.connectionType === t('node.remoteNode') && tabs[i].data.protocol === 'SSH') {
+      window.sshTerminal.closeSSHTerminal(tabs[i].id)
+    } else {
+      window.terminal.closeTerminal(tabs[i].id)
+    }
+
+    tabs.splice(i, 1)
+    if (tabs.length === 0) break
+    tab.value = tabs[0].id
+    return
+  }
+
 })
 
 onActivated(() => {
   try {
-    const data = JSON.parse(route.query.data).data
+    const data = JSON.parse(route.query.data)
+
     if (data) {
       const uuid = generateUuid()
       tabs.push({
         id: uuid,
-        label: data.serviceName,
-        icon: 'terminal',
-        data: data
+        label: data.label,
+        icon: data.icon,
+        data: data.data
       })
       tab.value = uuid
     }

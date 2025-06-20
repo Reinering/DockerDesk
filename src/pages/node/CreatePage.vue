@@ -1019,6 +1019,7 @@
 import { inject, onMounted, onUnmounted, reactive, ref, watch, onActivated, onDeactivated } from 'vue'
 import { useConfigStore } from 'stores/config.js'
 import { useComponentsStore } from 'stores/components.js'
+import { usePodmanStore } from 'src/stores/podman.js'
 import { firstUpper, isEmptyObj, isEmptyStr, firstLower } from 'src/utils/common.js'
 import { parseDockerNetwork } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
@@ -1030,6 +1031,7 @@ const t = inject("t")
 
 const configStore = useConfigStore()
 const componentsStore = useComponentsStore()
+const podmanStore = usePodmanStore()
 
 const service = inject("service")
 const serviceCmd = ref('')
@@ -1457,7 +1459,17 @@ const onCreateContainer = () => {
     })
   }
 
-  const command = `bash -c "${generateCmd().join(' ')}"`
+  let command
+  if (serviceCmd.value === "docker") {
+    command = `bash -c "${generateCmd().join(' ')}"`
+  } else {
+    let env
+    if (podmanStore.getENV.length > 0) {
+      env = `export ${podmanStore.getENV.join(' && ')}`
+    }
+    command = `bash -c "${env}  ${generateCmd().join(' ')}"`
+  }
+
   console.log(command)
 
   router.push({

@@ -30,6 +30,7 @@
           :data="item"
           :update="updateChildData"
           :delete="deleteChild"
+          :toLog="toLog"
         />
       </div>
     </q-scroll-area>
@@ -41,8 +42,6 @@
 
 
 <script setup>
-import { isEmptyObj } from 'src/utils/common.js'
-
 defineOptions({
 
   components: {
@@ -57,16 +56,17 @@ import CreateContainerDialog from 'components/dialog/CreateContainerDialog.vue'
 import { useComponentsStore } from 'stores/components.js'
 import { parseDockerContainer, parsePodmanContainer } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
+import { isEmptyObj } from 'src/utils/common.js'
 
 const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
 
+const componentsStore = useComponentsStore()
+
 const service = inject("service")
 const serviceCmd = ref('')
-
-const componentsStore = useComponentsStore()
 
 let getContainerListInterval = null
 
@@ -93,6 +93,7 @@ const containerDatas = reactive([
   // },
 ])
 
+
 const updateChildData = (nodeId, field, value) => {
   for (const item of containerDatas) {
     if (item["nodeId"] === nodeId) {
@@ -114,6 +115,28 @@ const deleteChild = (nodeId) => {
       break
     }
   }
+}
+
+const toLog = (name) => {
+  const command = `${serviceCmd.value} logs  ${name}`
+
+  router.push({
+    path: 'logs',
+    query: {
+      tab: "logs",
+      data: JSON.stringify({
+        label: name,
+        icon: 'terminal',
+        data: {
+          serviceName: "DockerDesk",
+          serviceType: 'WSL',
+          user: 'root',
+          disableStdin: true,
+          command
+        }
+      })
+    }
+  })
 }
 
 const getContainerList = () => {
@@ -157,7 +180,7 @@ const getContainerList = () => {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: `${t('panel.containers.getContainersError')}: ${result.error}`,
+        message: `${t('panel.networks.getNetworksError')}: ${result.error}`,
       })
     }
   })
