@@ -6,6 +6,8 @@ export const nodes = {
     // delete_flags: 0: normal, 1: deleted
     return db('nodes')
       .where('delete_flags', '=', '0')
+      .andWhere('id', '!=', '11111111')
+      .andWhere('id', '!=', '11111112')
       .select('*').then(
         rows => {
           return rows

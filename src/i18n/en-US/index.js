@@ -72,6 +72,15 @@ export default {
     portRange: "port range (1-65535)",
   },
 
+  index: {
+    editShortcuts: "Edit Shortcut",
+
+    deleteMessage: "Confirm deletion?？",
+
+    deleteSuccess: "Deleted successfully",
+    deleteFail: "Deletion failed",
+  },
+
   assistant: {
     local: "Local",
     remote: "Remote",
@@ -247,16 +256,21 @@ export default {
       network: "Network",
       link: "Link",
 
+      image: "Image",
+      createTime: "Create Time",
+      status: "Status",
+      selfStart: "Self-Start",
+      command: "Command",
+
       externalPort: "External Port",
       internalPort: "Internal Port",
       protocol: "Protocol",
       action: "Action",
+      send: "Send to Home Page",
 
       localPath: "Local Path",
       containerPath: "Container Path",
       type: "Type",
-
-
 
       starting: "Starting",
       startSuccess: "Start Successfully",
@@ -279,6 +293,9 @@ export default {
       packFail: "Pack Failure",
       configModifySuccess: "Configuration Modification Successful",
       configModifyFail: "Configuration modification Failure",
+
+      sendSuccess: "Send successfully",
+      sendFail: "Send failed",
     },
 
     images: {

@@ -527,9 +527,6 @@ const onPack = () => {
     message: t('panel.container.packing'),
   })
 }
-const onTolog = () => {
-
-}
 
 const openFirstPort = () => {
   window.client.openUrlOnBrowser(`http://localhost:${ports[0]}`)

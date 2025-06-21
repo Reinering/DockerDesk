@@ -91,7 +91,23 @@ contextBridge.exposeInMainWorld('client', {
 
   updateSettings (data) {
     return ipcRenderer.invoke('updateSettings', data)
-  }
+  },
+
+  cmdRunnerStart (data) {
+    return ipcRenderer.invoke('cmdRunnerStart', data)
+  },
+
+  cmdRunnerExec (data) {
+    return ipcRenderer.invoke('cmdRunnerExec', data)
+  },
+
+  cmdRunnerStop (data) {
+    return ipcRenderer.invoke('cmdRunnerStop', data)
+  },
+
+  cmdRunnerReceive (callback) {
+    return ipcRenderer.on('cmdRunnerReceive', (event, data) => callback(data))
+  },
 })
 
 
@@ -492,6 +508,26 @@ contextBridge.exposeInMainWorld("podmanTerminal", {
 
   checkPodmanInfo() {
     return ipcRenderer.invoke('checkPodmanInfo')
+  },
+
+})
+
+contextBridge.exposeInMainWorld('shortcuts', {
+
+  getShortcutss () {
+    return ipcRenderer.invoke('getShortcutss')
+  },
+
+  addShortcuts (data) {
+    return ipcRenderer.invoke('addShortcuts', data)
+  },
+
+  editShortcuts (data) {
+    return ipcRenderer.invoke('editShortcuts', data)
+  },
+
+  deleteShortcuts (data) {
+    return ipcRenderer.invoke('deleteShortcuts', data)
   },
 
 })

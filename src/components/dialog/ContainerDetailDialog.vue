@@ -34,7 +34,7 @@
                 <q-list>
                   <q-item>
                     <q-item-section>
-                      <q-item-label >image</q-item-label>
+                      <q-item-label >{{t('panel.container.image')}}</q-item-label>
                     </q-item-section>
 
                     <q-item-section>
@@ -43,7 +43,7 @@
                   </q-item>
                   <q-item>
                     <q-item-section>
-                      <q-item-label >创建时间</q-item-label>
+                      <q-item-label >{{t('panel.container.createTime')}}</q-item-label>
                     </q-item-section>
 
                     <q-item-section>
@@ -52,7 +52,7 @@
                   </q-item>
                   <q-item>
                     <q-item-section>
-                      <q-item-label >状态</q-item-label>
+                      <q-item-label >{{t('panel.container.status')}}</q-item-label>
                     </q-item-section>
 
                     <q-item-section>
@@ -62,7 +62,7 @@
 
                   <q-item>
                     <q-item-section>
-                      <q-item-label >自启动</q-item-label>
+                      <q-item-label >{{t('panel.container.selfStart')}}</q-item-label>
                     </q-item-section>
 
                     <q-item-section>
@@ -72,7 +72,7 @@
 
                   <q-item>
                     <q-item-section>
-                      <q-item-label >命令</q-item-label>
+                      <q-item-label >{{t('panel.container.command')}}</q-item-label>
                     </q-item-section>
 
                     <q-item-section>
@@ -101,7 +101,6 @@
 
               <q-tab-panel name="port">
                 <q-table
-
                   :rows="ports"
                   :columns="columns_ports"
                   row-key="id"
@@ -111,7 +110,21 @@
                   flat
                   bordered
                   hide-bottom
-                />
+                >
+                  <template v-slot:body-cell-actions="props">
+                    <q-btn
+                      icon="send"
+                      color="purple-14"
+                      dense
+                      flat
+                      @click="onSendHome(props.row)"
+                    >
+                      <q-tooltip class="bg-amber text-black shadow-4">
+                        {{t('panel.container.send')}}
+                      </q-tooltip>
+                    </q-btn>
+                  </template>
+                </q-table>
               </q-tab-panel>
 
               <q-tab-panel name="network">
@@ -207,13 +220,15 @@
 
       <q-card-actions align="right">
         <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="onClose" />
-        <q-btn :disable="isOK" :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onCreate" />
+        <q-btn :disable="isOK" :label="t('ok')" class="q-mt-md" type="submit" color="blue" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup>
+import { clientConfig } from 'src/common/config.js'
+
 const props = defineProps({
   data: {
     type: Object,
@@ -303,7 +318,7 @@ const ports = ref([])
 const volumes = ref([])
 const networks = reactive({})
 
-const visibleColumns_ports = ['external', 'internal', 'protocol']
+const visibleColumns_ports = ['external', 'internal', 'protocol', 'actions']
 const columns_ports = [
   { name: 'id', label: 'ID', align: 'left', field: 'id' },
   { name: 'external', label: t('panel.container.externalPort'), sortOrder: 'ad', sortable: true, align: 'left', field: 'external' },
@@ -320,6 +335,37 @@ const columns_vol = [
   { name: 'type', label: t('panel.container.type'), align: 'left', field: 'type' },
   { name: 'actions', label: t('panel.images.action'), align: 'center' }
 ]
+
+const onSendHome = (row) => {
+  console.log("onSendHome")
+  let data = {}
+  if (serviceCmd.value === "docker") {
+    data["node_id"] = '11111111'
+  } else {
+    data["node_id"] = '22222222'
+  }
+
+  data["name"] = props.data.names
+  data["url"] = `http://localhost:${row.external}`
+
+  window.shortcuts.addShortcuts(JSON.stringify(data))
+    .then((result) => {
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.container.sendSuccess')}`,
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.container.sendFail')}`
+      })
+    }
+  })
+
+}
 
 
 const getContainerUsage = () => {

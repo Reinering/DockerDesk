@@ -4,7 +4,11 @@ import {
   getSystemProxy,
 } from '../actions/client.js'
 import { settings } from '../actions/settings.js'
+import { CmdRunner } from '../common/utils.js'
+import { interference } from 'app/src-electron/common/encrypt.js'
 
+
+export  const CmdRunners = new Map()
 
 export function registerClientIpcHandlers(win) {
 
@@ -80,4 +84,62 @@ export function registerClientIpcHandlers(win) {
       return settings.updateByField(data)
     }
   })
+
+  ipcMain.handle('cmdRunnerStart', async (event, {uuid, cmd, options}) => {
+    try {
+      if (CmdRunners.has(uuid)) {
+        const cmdRunner = CmdRunners.get(uuid)
+        cmdRunner.stop()
+        CmdRunners.delete(uuid)
+      }
+
+      console.log(uuid, cmd, options)
+
+      const cmdRunner = new CmdRunner(win, uuid)
+      cmdRunner.start(cmd, options)
+
+      CmdRunners.set(uuid, cmdRunner)
+      return { success: true, error: '' }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('cmdRunnerExec', async (event, {uuid, cmd}) => {
+    try {
+      if (CmdRunners.has(uuid)) {
+        const cmdRunner = CmdRunners.get(uuid)
+
+        let command = cmd
+        if (cmd instanceof Array) {
+          command = cmd.join(' ')
+        }
+
+        cmdRunner.sendCommand(command)
+      }
+
+      return { success: true, error: '' }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('cmdRunnerStop', async (event, {uuid}) => {
+    try{
+      if (CmdRunners.has(uuid)) {
+        const cmdRunner = CmdRunners.get(uuid)
+        cmdRunner.stop()
+        CmdRunners.delete(uuid)
+        return { success: true, error: '' }
+      } else {
+        return { success: false, error: "cmdRunner close error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+
+  })
+
+
+
 }

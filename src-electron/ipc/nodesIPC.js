@@ -31,7 +31,6 @@ export function registerNodesIpcHandlers(win) {
           })
           return data
         } catch (error) {
-          log.error(error)
           return { success: false, error: error.message }
         }
       }

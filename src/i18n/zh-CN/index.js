@@ -68,6 +68,15 @@ export default {
     portRange: "端口范围内(1-65535)",
   },
 
+  index: {
+    editShortcuts: "编辑快捷方式",
+
+    deleteMessage: "确认删除？",
+
+    deleteSuccess: "删除成功",
+    deleteFail: "删除失败",
+  },
+
   assistant: {
     local: "本地",
     remote: "远程",
@@ -245,10 +254,17 @@ export default {
       network: "网络",
       link: "链接",
 
+      image: "镜像",
+      createTime: "创建时间",
+      status: "状态",
+      selfStart: "自启动",
+      command: "命令",
+
       externalPort: "本地端口",
       internalPort: "容器端口",
       protocol: "协议",
       action: "操作",
+      send: "发送到首页",
 
       localPath: "本地路径",
       containerPath: "容器路径",
@@ -275,6 +291,9 @@ export default {
       packFail: "打包失败",
       configModifySuccess: "配置修改成功",
       configModifyFail: "配置修改失败",
+
+      sendSuccess: "发送成功",
+      sendFail: "发送失败",
 
     },
 
