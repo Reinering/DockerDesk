@@ -545,8 +545,8 @@ const getNetworkDetail = async (row) => {
 
           row.ipv6 = data[0]['ipv6_enabled']
 
+          // podman 4.x.x 不支持containers  5.x.x 支持
           const tmpList = []
-
           row['containers'] = tmpList
         }
 

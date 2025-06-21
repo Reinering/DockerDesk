@@ -5,8 +5,9 @@ import os from 'node:os'
 import iconv from 'iconv-lite'
 import ini from 'ini'
 
-const dev = true
 
+
+const dev = true
 
 // 获取总内存（单位：字节）
 export const totalMemory = os.totalmem()
@@ -186,20 +187,28 @@ export function cmdSync(command) {
 }
 
 
+
 export class CmdRunner {
-  constructor(options = {}) {
+  constructor(win, uuid, options = {}) {
     this.encoding = options.encoding || 'utf8' // 默认编码
+    this.win = win || null
+    this.uuid = uuid || null
     this.cmd = null // 保存 cmd 进程
     this.isRunning = false // 进程状态
   }
 
   // 启动 cmd 进程
-  start(command='cmd.exe') {
+  start(command='cmd.exe', options=[]) {
     if (this.isRunning) {
       throw new Error('Cmd Running！')
     }
 
-    this.cmd = spawn(command)
+    devConsole(`'🚀 启动 WSL:', ${command}, ${options.join(' ')}`)
+
+    this.cmd = spawn(command, options, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: false
+    })
     this.isRunning = true
 
     // 设置编码
@@ -210,18 +219,36 @@ export class CmdRunner {
     return new Promise((resolve) => {
       // 监听输出
       this.cmd.stdout.on('data', (data) => {
-        console.log(`cmd : ${data}`)
+        devConsole(`cmd : ${data}`)
+        this.win.webContents.send("cmdRunnerReceive",
+          JSON.stringify({
+            type: "stdout",
+            uuid: this.uuid,
+            data: data
+          }))
       })
 
       // 监听错误
       this.cmd.stderr.on('data', (data) => {
-        console.error(`cmd error: ${data}`)
+        devConsole(`cmd error: ${data}`)
+        this.win.webContents.send("cmdRunnerReceive",
+          JSON.stringify({
+            type: "stderr",
+            uuid: this.uuid,
+            data: data
+          }))
       })
 
       // 监听进程关闭
       this.cmd.on('close', (code) => {
         this.isRunning = false
-        console.log(`cmd exit code: ${code}`)
+        devConsole(`cmd exit code: ${code}`)
+        this.win.webContents.send("cmdRunnerReceive",
+          JSON.stringify({
+            type: "close",
+            uuid: this.uuid,
+            code: code
+          }))
       })
 
       // 确保进程启动
@@ -230,7 +257,7 @@ export class CmdRunner {
   }
 
   // 发送命令
-  sendCommand(command) {
+  sendCommand1(command) {
     if (!this.isRunning) {
       throw new Error('Cmd: The process has not been started! Please call the start method first')
     }
@@ -252,6 +279,16 @@ export class CmdRunner {
         reject(new Error(`Cmd Error: ${data}`))
       })
     })
+  }
+
+  // 发送命令
+  sendCommand(command) {
+    if (!this.isRunning) {
+      throw new Error('Cmd: The process has not been started! Please call the start method first')
+    }
+
+    // 发送命令并添加换行符
+    this.cmd.stdin.write(`${command}\n`)
   }
 
   // 停止 cmd 进程
@@ -278,7 +315,7 @@ export class CmdRunner {
     const results = []
     for (const command of commands) {
       try {
-        const result = await this.sendCommand(command)
+        const result = await this.sendCommand1(command)
         results.push({ command, result })
       } catch (error) {
         results.push({ command, error: error.message })

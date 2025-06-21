@@ -240,6 +240,24 @@ export default {
 
       createTitle: "Create Container",
 
+      info: "Info",
+      env: "ENV",
+      port: "Port",
+      volume: "Volume",
+      network: "Network",
+      link: "Link",
+
+      externalPort: "External Port",
+      internalPort: "Internal Port",
+      protocol: "Protocol",
+      action: "Action",
+
+      localPath: "Local Path",
+      containerPath: "Container Path",
+      type: "Type",
+
+
+
       starting: "Starting",
       startSuccess: "Start Successfully",
       startFail: "Start Failure",

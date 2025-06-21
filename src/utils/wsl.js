@@ -327,3 +327,110 @@ export function getExPortsByContainers(mappings) {
 
   return result
 }
+
+export function parseContainerUsage(input) {
+  // 辅助函数：分离数值和单位
+  const splitValueUnit = (str) => {
+    const match = str.match(/^([\d.]+)(.*)$/)
+    return match ? { value: parseFloat(match[1]), unit: match[2] || '' } : { value: 0, unit: '' }
+  }
+
+  // 按行分割，并去掉表头
+  const lines = input.trim().split('\n').slice(1)
+
+  // 解析每一行并转换为对象
+  const containers = lines.map(line => {
+    // 去掉多余空格并按空格分割
+    const values = line.trim().split(/\s+/)
+
+    return {
+      containerId: values[0], // CONTAINER ID
+      name: values[1], // NAME
+      cpu: splitValueUnit(values[2]), // CPU % (e.g., 0.00%)
+      memoryUsage: splitValueUnit(values[3]), // MEM USAGE (e.g., 5.848MiB)
+      memoryLimit: splitValueUnit(values[5]), // MEM LIMIT (e.g., 31.31GiB)
+      memoryPercent: splitValueUnit(values[6]), // MEM % (e.g., 0.02%)
+      netIO: {
+        input: splitValueUnit(values[7]), // NET I/O 输入 (e.g., 6.3kB)
+        output: splitValueUnit(values[9]) // NET I/O 输出 (e.g., 2.95kB)
+      },
+      blockIO: {
+        input: splitValueUnit(values[10]), // BLOCK I/O 输入 (e.g., 0B)
+        output: splitValueUnit(values[12]) // BLOCK I/O 输出 (e.g., 4.1kB)
+      },
+      pids: parseInt(values[13]) // PIDS
+    }
+  })
+
+  return containers
+}
+
+function mergeConsecutivePorts(ports) {
+  // 按协议分开处理
+  const tcpPorts = ports
+    .filter(p => p.protocol === 'tcp')
+    .map(p => ({ external: parseInt(p.port, 10), internal: parseInt(p.internalPort, 10) }))
+    .sort((a, b) => a.external - b.external)
+  const udpPorts = ports
+    .filter(p => p.protocol === 'udp')
+    .map(p => ({ external: parseInt(p.port, 10), internal: parseInt(p.internalPort, 10) }))
+    .sort((a, b) => a.external - b.external)
+
+  // 合并连续端口的函数
+  const mergePorts = (portObjects) => {
+    if (portObjects.length === 0) return []
+    const ranges = []
+    let start = portObjects[0].external
+    let prev = start;
+    let startInternal = portObjects[0].internal
+
+    for (let i = 1; i <= portObjects.length; i++) {
+      const current = portObjects[i]?.external
+      const currentInternal = portObjects[i]?.internal
+      if (current !== prev + 1 || i === portObjects.length || currentInternal !== prev + 1) {
+        if (start === prev) {
+          ranges.push({ external: start.toString(), internal: startInternal.toString() })
+        } else {
+          ranges.push({ external: `${start}-${prev}`, internal: `${startInternal}-${portObjects[i-1].internal}` })
+        }
+        start = current
+        startInternal = currentInternal
+      }
+      prev = current
+    }
+    return ranges
+  };
+
+  // 合并 TCP 和 UDP 端口
+  const tcpRanges = mergePorts(tcpPorts)
+  const udpRanges = mergePorts(udpPorts)
+
+  // 合并结果并保留协议信息
+  const result = []
+  tcpRanges.forEach(port => result.push({ external: port.external, internal: port.internal, protocol: 'tcp' }))
+  udpRanges.forEach(port => result.push({ external: port.external, internal: port.internal, protocol: 'udp' }))
+
+  return result
+}
+
+export function getPortsByContainer(mappings) {
+  const result = mappings.map(mapping => {
+    const externalPorts = []
+    // 按逗号分割多个端口映射
+    const ports = mapping.split(',').map(p => p.trim())
+
+    ports.forEach(port => {
+      // 匹配 0.0.0.0:XXXX->YYYY/tcp 或 0.0.0.0:XXXX->YYYY/udp
+      const mappedMatch = port.match(/^0\.0\.0\.0:(\d+)->(\d+)\/(tcp|udp)$/)
+      if (mappedMatch) {
+        externalPorts.push({ port: mappedMatch[1], internalPort: mappedMatch[2], protocol: mappedMatch[3] })
+      }
+      // 忽略直接暴露的端口（如 80/tcp, 5000/tcp）和范围（如 6883-6999/tcp）
+    })
+
+    // 合并连续端口
+    return mergeConsecutivePorts(externalPorts)
+  })
+
+  return result
+}

@@ -238,6 +238,22 @@ export default {
 
       createTitle: "创建容器",
 
+      info: "信息",
+      env: "环境变量",
+      port: "端口",
+      volume: "卷",
+      network: "网络",
+      link: "链接",
+
+      externalPort: "本地端口",
+      internalPort: "容器端口",
+      protocol: "协议",
+      action: "操作",
+
+      localPath: "本地路径",
+      containerPath: "容器路径",
+      type: "类型",
+
       starting: "正在启动",
       startSuccess: "启动成功",
       startFail: "启动失败",

@@ -111,7 +111,7 @@
                 </q-tooltip>
               </q-item-section>
             </q-item>
-            
+
           </q-list>
 
         </q-btn-dropdown>
@@ -199,7 +199,7 @@
   <ContainerDetailDialog
     v-if="showContainerDetailDialog"
     v-model="showContainerDetailDialog"
-    :data="props.data"
+    :data="props.data['data']"
     :onClose="onShowContainerDetailDialog"
   />
 </template>
