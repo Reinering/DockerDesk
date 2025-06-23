@@ -24,8 +24,8 @@ export const nodes = {
       .where('delete_flags', '=', '0')
       .andWhere('id', '=', id)
       .select('*').then(
-      rows => {
-        return rows
+      row => {
+        return row
       }, (error) => {
         return { success: false, error: error }
       })

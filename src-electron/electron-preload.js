@@ -128,6 +128,10 @@ contextBridge.exposeInMainWorld('nodes', {
     return ipcRenderer.invoke('getNodes')
   },
 
+  getNode (id) {
+    return ipcRenderer.invoke('getNode', id)
+  },
+
   async addNode (data) {
     return await ipcRenderer.invoke('addNode', data)
   },

@@ -6,7 +6,7 @@
   >
     <q-card style="width: 60%; max-width: 90vw;">
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">{{ t('index.editShortcuts') }}</div>
+        <div class="text-h6 ">{{ t('index.editShortcuts') }}</div>
         <q-space />
 <!--        <q-btn-->
 <!--          icon="close"-->
@@ -15,6 +15,7 @@
 <!--          dense-->
 <!--          v-close-popup-->
 <!--        />-->
+        <div class="text-caption text-deep-purple">{{ nodeName }}</div>
       </q-card-section>
 
       <q-card-section>
@@ -129,8 +130,8 @@
             <div class="text-subtitle2 q-mb-sm text-grey-7">{{t('index.color')}}</div>
             <div class="row q-gutter-xs">
               <q-btn
-                v-for="color in colors"
-                :key="color"
+                v-for="(color, index) in colors"
+                :key="index"
                 round
                 size="sm"
                 :style="{ backgroundColor: color, width: '32px', height: '32px' }"
@@ -217,6 +218,8 @@ const selectedLocalIcon = ref('')
 const onlineText = ref('Ca')
 const isShowOnlineIcon = ref(false)
 const selectedOnlineIcon = ref('')
+
+const nodeName = ref('')
 
 const colors = [
   '#FF5722', '#FF9800', '#FFC107', '#4CAF50',
@@ -323,7 +326,14 @@ const init = () => {
     addIcon.value = null
   }
 
+  window.nodes.getNode(props.data.nodeId).then((result) => {
+    if (result.success) {
+      nodeName.value = result.data.serviceName
+    }
+  })
+
   isOK.value = false
+
 }
 
 onMounted(() => {

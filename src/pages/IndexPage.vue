@@ -124,7 +124,7 @@ const onEdit = () => {
 
 const onEditShortcuts = (id) => {
   for (let i=0; i <= shortcutsData.length; i++) {
-    if (shortcutsData[i].nodeId === id) {
+    if (shortcutsData[i].id === id) {
       editShortcuts.value = JSON.parse(JSON.stringify(shortcutsData[i]))
 
       break
@@ -185,7 +185,7 @@ const getShortcutsList = () => {
       result.data.forEach(item => {
         shortcutsData.push({
           id: item.id,
-          nodeId: item.id,
+          nodeId: item.nodeId,
           templateId: 0,
           websiteName: item.websiteName,
           website: item.website,

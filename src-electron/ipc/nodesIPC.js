@@ -8,7 +8,7 @@ import log from 'electron-log'
 export function registerNodesIpcHandlers(win) {
 
   // nodes
-  ipcMain.handle('getNodes', () => {
+  ipcMain.handle('getNodes', (event) => {
     return nodes.getNodes().then((result) => {
       if (result instanceof Array) {
         try {
@@ -35,6 +35,26 @@ export function registerNodesIpcHandlers(win) {
         }
       }
       return result
+    })
+  })
+
+  ipcMain.handle('getNode', async (event, id) => {
+    return nodes.getNodeByID(id).then((result) => {
+      if (result instanceof Array && result.length > 0 ) {
+        const data = {
+          id: result[0].id,
+          serviceName: result[0].name,
+          serviceType: result[0].service_type,
+          connectionType: result[0].connect_type,
+          protocol: result[0].protocol,
+          address: result[0].address,
+          port: result[0].port
+        }
+
+        return { success: true, data: data }
+      } else {
+        return result[0]
+      }
     })
   })
 
@@ -130,7 +150,5 @@ export function registerNodesIpcHandlers(win) {
       return { success: false, error: error.message }
     }
   })
-
-
 
 }
