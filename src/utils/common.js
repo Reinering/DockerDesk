@@ -260,3 +260,4 @@ class Refresher {
     console.log('刷新器已停止')
   }
 }
+

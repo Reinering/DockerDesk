@@ -340,13 +340,17 @@ const onSendHome = (row) => {
   console.log("onSendHome")
   let data = {}
   if (serviceCmd.value === "docker") {
-    data["node_id"] = '11111111'
+    data["nodeId"] = '11111111'
   } else {
-    data["node_id"] = '22222222'
+    data["nodeId"] = '22222222'
   }
 
-  data["name"] = props.data.names
-  data["url"] = `http://localhost:${row.external}`
+  data["websiteName"] = props.data.names
+  data["website"] = `http://localhost:${row.external}`
+  data["iconText"] = props.data.names.slice(0,1).toUpperCase()
+  data["iconColor"] = 'teal'
+  data["fontSize"] = '24'
+
 
   window.shortcuts.addShortcuts(JSON.stringify(data))
     .then((result) => {

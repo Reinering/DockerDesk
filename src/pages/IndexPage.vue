@@ -1,6 +1,6 @@
 <template>
   <q-layout container :style="background" class="shadow-2 rounded-borders">
-    <q-page class="flex flex-center" padding>
+    <q-page class="flex flex-center" padding @dblclick="onDBClick">
   <!--    <img-->
   <!--      alt="Quasar logo"-->
   <!--      src="~assets/quasar-logo-vertical.svg"-->
@@ -19,7 +19,7 @@
         </q-card-section>
       </q-card>
 
-      <div class="flex flex-center ">
+      <div class="flex flex-center q-gutter-x-md">
         <Shortcuts
           v-for="(item, index) in shortcutsData"
           :key="index"
@@ -38,32 +38,22 @@
         </q-item>
       </q-menu>
 
-<!--      <q-dialog-->
-<!--        v-if="showEditShortcutsDialog"-->
-<!--        v-model="showEditShortcutsDialog"-->
-<!--      >-->
-<!--        <q-card style="min-width: 80%">-->
-<!--          <q-card-section>-->
-<!--            <div class="text-subtitle1 text-weight-bold" >{{t('index.editShortcuts')}}</div>-->
-<!--          </q-card-section>-->
-
-<!--          <q-separator />-->
-<!--        </q-card>-->
-<!--      </q-dialog>-->
-
-      <EditShortcutsDialog
-        v-if="showEditShortcutsDialog"
-        v-model="showEditShortcutsDialog"
-      />
-
     </q-page>
+
+    <EditShortcutsDialog
+      v-if="showEditShortcutsDialog"
+      v-model="showEditShortcutsDialog"
+      :data="editShortcuts"
+      :onUpdate="onUpdate"
+      :onClose="onClose"
+    />
   </q-layout>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, onActivated, onDeactivated, inject, reactive } from 'vue'
+import EditShortcutsDialog from 'src/components/dialog/EditShortcutsDialog.vue'
 import Shortcuts from 'src/components/Shortcuts.vue'
-import EditShortcutsDialog from 'components/dialog/EditShortcutsDialog.vue'
 import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
@@ -90,6 +80,10 @@ const editShortcuts = ref({
 })
 const showEditShortcutsDialog = ref(false)
 
+const onClose = () => {
+  showEditShortcutsDialog.value = !showEditShortcutsDialog.value
+}
+
 const shortcutsData = reactive([
   {
     nodeId: 0,
@@ -101,6 +95,18 @@ const shortcutsData = reactive([
   }
 ])
 
+const onDBClick = () => {
+  if (!isEdit.value) {
+    return
+  }
+
+  isEdit.value = false
+  editBtnHint.value = 'edit'
+
+  for (const item of shortcutsData) {
+    item.isShowOverlay = false
+  }
+}
 
 const onEdit = () => {
   isEdit.value = !isEdit.value
@@ -143,10 +149,8 @@ const onDeleteShortcuts = (id) => {
   }).onOk(async () => {
     for (let i=0; i <= shortcutsData.length; i++) {
       if (shortcutsData[i].nodeId === id) {
-        console.log("mark")
         window.shortcuts.deleteShortcuts(id)
           .then((result) => {
-            console.log(result)
             if (result.success) {
               $q.notify({
                 type: 'positive',
@@ -170,26 +174,37 @@ const onDeleteShortcuts = (id) => {
   })
 }
 
-const init = () => {
+const onUpdate = () => {
+  getShortcutsList()
+}
 
+const getShortcutsList = () => {
   window.shortcuts.getShortcutss().then((result) => {
     if (result.success) {
       shortcutsData.length = 0
       result.data.forEach(item => {
         shortcutsData.push({
+          id: item.id,
           nodeId: item.id,
           templateId: 0,
-          name: item.name,
-          label: item.name,
-          icon: '',
-          isShowOverlay: false,
-          url: item.url
+          websiteName: item.websiteName,
+          website: item.website,
+          iconText: item.iconText,
+          iconColor: item.iconColor,
+          icon: item.icon,
+          fontSize: item.fontSize,
+          isShowOverlay: isEdit.value,
         })
       })
     } else {
       console.log("get shortcuts error")
     }
   })
+}
+
+const init = () => {
+
+  getShortcutsList()
 
 }
 

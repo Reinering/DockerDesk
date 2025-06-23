@@ -9,6 +9,25 @@ export function registerShortcutsIpcHandlers(win) {
     try {
       return shortcuts.getShortcutss()
         .then((result) => {
+          if (result instanceof Array) {
+            const data = []
+
+            result.forEach(node => {
+              data.push({
+                id: node.id,
+                nodeId: node.node_id,
+                websiteName: node.name,
+                website: node.url,
+                iconText: node.label,
+                iconColor: node.color,
+                icon: node.icon,
+                fontSize: node.font_size
+              })
+            })
+
+            return { success: true, data: data }
+          }
+
           return { success: true, data: result }
         })
     } catch (error) {
@@ -22,9 +41,16 @@ export function registerShortcutsIpcHandlers(win) {
       const res = JSON.parse(data)
       const value = {
         id: generateUuid(),
-        node_id: res.node_id,
-        name: res.name,
-        url: res.url,
+        node_id: res.nodeId,
+        name: res.websiteName,
+        url: res.website,
+        label: res.iconText,
+        color: res.iconColor,
+        font_size: res.fontSize,
+        create_time: Date.now(),
+        modify_time: null,
+        delete_time: null,
+        delete_flags: 0,
       }
 
       return shortcuts.addShortcuts(value)
@@ -42,9 +68,16 @@ export function registerShortcutsIpcHandlers(win) {
       const res = JSON.parse(data)
       const value = {
         id: res.id,
-        node_id: res.node_id,
-        name: res.name,
-        url: res.url,
+        node_id: res.nodeId,
+        name: res.websiteName,
+        url: res.website,
+        label: res.iconText,
+        color: res.iconColor,
+        icon: res.icon,
+        font_size: res.fontSize,
+        modify_time: Date.now(),
+        delete_time: null,
+        delete_flags: 0,
       }
 
       return shortcuts.updateShortcuts(value).then((result) => {
@@ -58,7 +91,7 @@ export function registerShortcutsIpcHandlers(win) {
   })
 
   ipcMain.handle('deleteShortcuts', async (event, id) => {
-    return await shortcuts.deleteShortcutsByID(id)
+    return await shortcuts.delShortcutsByID(id)
   })
 
 

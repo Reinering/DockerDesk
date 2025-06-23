@@ -157,6 +157,23 @@ async function initDB() {
     }
 
 
+    tableExists = await db.schema.hasTable('shortcuts')
+    if (!tableExists) {
+      await db.schema.createTableIfNotExists('shortcuts', function(table) {
+        table.text('id').notNullable() // 主键，文本类型，非空
+        table.text('node_id').notNullable() //
+        table.text('name').notNullable() //
+        table.text('url').notNullable() //
+        table.text('label') //
+        table.text('color') //
+        table.binary('icon') //
+        table.timestamp('create_time').notNullable() // 创建时间戳，非空
+        table.timestamp('modify_time') // 修改时间戳，可空
+        table.timestamp('delete_time') // 删除时间戳，可空
+        table.integer('delete_flags').notNullable() // 删除标志，整数类型，非空
+      })
+    }
+
     console.log('Table created and database initialized successfully!')
   } catch (error) {
     console.error('Error initializing database:', error)

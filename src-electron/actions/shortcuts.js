@@ -42,4 +42,17 @@ export const shortcuts = {
       return { success: false, error: error }
     })
   },
+
+  delShortcutsByID: async (id) => {
+    return await db('shortcuts').where('id', '=', id).update(
+      {
+        delete_time: Date.now(),
+        delete_flags: 1,
+      }
+    ).then((result) => {
+      return { success: true, error: '' }
+    }).catch(error => {
+      return { success: false, error: error }
+    })
+  },
 }

@@ -1,17 +1,22 @@
 <template>
-  <div class="btn-wrapper q-pa-sm">
+  <div class="btn-wrapper q-pa-sm" style="max-width: 148px; height: 148px">
     <div class="content">
       <q-btn
         size="24px"
         round
-        color="teal"
-        icon="map"
-        label=""
+        push
+        glossy
         @click="onOpenUrl"
-        class="main-btn"
-      />
+        class="main-btn shadow-14"
+        :style="btnStyle"
+      >
+        <div :style="textStyle">{{ shortcutsData.iconText }}</div>
+        <img v-if="isShowImg" :src="shortcutsData.icon" alt="logo" style="width: 48px; height: 48px;"/>
+      </q-btn>
 
-      <div class="text-center label-text">{{props.data.name}}</div>
+      <div class="text-center text-body2" style="word-break: break-all; white-space: normal;">
+        {{ shortcutsData.websiteName }}
+      </div>
     </div>
 
     <div
@@ -47,13 +52,16 @@ const props = defineProps({
   data: {
     type: Object,
     default: () => ({
+      id: 0,
       nodeId: 0,
       templateId: 0,
-      name: '',
-      label: '',
-      icon: '',
-      isShowOverlay: true,
-      url: ''
+      websiteName: '',
+      website: '',
+      iconText: '',
+      iconColor: '',
+      icon: null,
+      fontSize: '',
+      isShowOverlay: false,
     }),
   },
   onEdit: {
@@ -66,28 +74,73 @@ const props = defineProps({
   }
 })
 
-import { inject, reactive, watch } from 'vue'
+import { ref, inject, reactive, watch, onMounted, onUnmounted } from 'vue'
+import { isEmptyObj, isEmptyStr } from 'src/utils/common.js'
 
 const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
 
+const btnStyle = ref('')
+const textStyle = ref('')
+
+const isShowImg = ref(false)
+
+const shortcutsData = ref({
+  id: 0,
+  nodeId: 0,
+  templateId: 0,
+  websiteName: '',
+  website: '',
+  iconText: '',
+  iconColor: '',
+  icon: null,
+  fontSize: '',
+})
+
 const onOpenUrl = () => {
-  window.client.openUrlOnBrowser(props.data.url)
+  window.client.openUrlOnBrowser(props.data.website)
 }
 
 const onEdit = () => {
-  props.onEdit(props.data.nodeId)
+  props.onEdit(props.data.id)
 }
 
 const onDelete = () => {
-  props.onDelete(props.data.nodeId)
+  props.onDelete(props.data.id)
 }
 
 
-watch(props.data.isShowOverlay, (newVal, oldVal) => {
+const init = () => {
+  shortcutsData.value = JSON.parse(JSON.stringify(props.data))
+  if (isEmptyObj(shortcutsData.value.icon)) {
+    btnStyle.value = {
+      backgroundColor: props.data.iconColor
+    }
 
+    textStyle.value = {
+      fontSize: shortcutsData.value.fontSize + 'px'
+    }
+  } else if (!isEmptyObj(shortcutsData.value.icon)) {
+    // shortcutsData.value.icon = `img:${props.data.icon}`
+    shortcutsData.value.icon = `${props.data.icon}`
+      shortcutsData.value.iconText = ''
+    isShowImg.value = true
+  }
+}
+
+onMounted(() => {
+  init()
+})
+
+onUnmounted(() => {
+
+})
+
+
+watch(() => props.data, (newVal, oldVal) => {
+  init()
 })
 
 </script>
@@ -116,6 +169,8 @@ watch(props.data.isShowOverlay, (newVal, oldVal) => {
 .main-btn {
   margin-bottom: 8px;
   transition: transform 0.2s ease;
+  width: 72px;
+  height: 72px;
 }
 
 .main-btn:hover {

@@ -70,11 +70,25 @@ export default {
 
   index: {
     editShortcuts: "编辑快捷方式",
+    websiteUrl: "网站地址",
+    websiteName: "网站名称",
+    selectIcon: "选择图标",
+    solidColor: "纯色图标",
+    localIcon: "本地图标",
+    getOnline: "在线获取",
+    iconText: "图标文字",
+    fontSize: "字体大小",
+    color: "颜色",
+
+
 
     deleteMessage: "确认删除？",
+    inputUrlMessage: "请输入ICON的URL",
 
     deleteSuccess: "删除成功",
     deleteFail: "删除失败",
+    editSuccess: "更新成功",
+    editFail: "更新失败",
   },
 
   assistant: {

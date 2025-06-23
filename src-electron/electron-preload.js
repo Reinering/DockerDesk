@@ -77,6 +77,18 @@ contextBridge.exposeInMainWorld('client', {
     return ipcRenderer.invoke('openDownloadFolder')
   },
 
+  readFile () {
+    return ipcRenderer.invoke('readFile')
+  },
+
+  readFileIcon () {
+    return ipcRenderer.invoke('readFileIcon')
+  },
+
+  readFileIconByUrl (data) {
+    return ipcRenderer.invoke('readFileIconByUrl', data)
+  },
+
   getOSInfo () {
     return ipcRenderer.invoke('getOSInfo')
   },

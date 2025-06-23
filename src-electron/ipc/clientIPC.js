@@ -1,10 +1,13 @@
 import { ipcMain, dialog, shell } from 'electron'
+import * as fs from 'fs'
+import path from 'path'
 import {
   getOSInfo, getUtilization,
   getSystemProxy,
 } from '../actions/client.js'
 import { settings } from '../actions/settings.js'
 import { CmdRunner } from '../common/utils.js'
+import Crypto from 'crypto.js'
 import { interference } from 'app/src-electron/common/encrypt.js'
 
 
@@ -49,6 +52,56 @@ export function registerClientIpcHandlers(win) {
       return result.filePaths // 返回文件路径
     }
     return null
+  })
+
+  ipcMain.handle('readFile', async (event) => {
+
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [
+        // { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    })
+
+    if (!result.canceled) {
+      try {
+        const data = await fs.readFileSync(result.filePaths[0])
+        return Crypto.base64encode(data.buffer)
+      } catch (error) {
+        return null
+      }
+    }
+    return null
+  })
+
+  ipcMain.handle('readFileIcon', async (event) => {
+
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [
+        { name: 'Images', extensions: ['ico'] },
+        // { name: 'All Files', extensions: ['*'] }
+      ]
+    })
+
+    if (!result.canceled) {
+      try {
+        const data = await fs.readFileSync(result.filePaths[0]).buffer
+        const base64 = `data:image/x-icon;base64,${Buffer.from(data).toString('base64')}`
+        return base64
+      } catch (error) {
+        return null
+      }
+    }
+    return null
+  })
+
+  ipcMain.handle('readFileIconByUrl', async (event, url) => {
+    const response = await fetch(url)
+    const arrayBuffer = await response.arrayBuffer()
+    const base64 = `data:image/x-icon;base64,${Buffer.from(arrayBuffer).toString('base64')}`
+    return base64
   })
 
   ipcMain.handle('getSystemProxy', async (event) => {

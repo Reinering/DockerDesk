@@ -74,11 +74,23 @@ export default {
 
   index: {
     editShortcuts: "Edit Shortcut",
+    websiteUrl: "Website Url",
+    websiteName: "Website Name",
+    selectIcon: "Choice Icon",
+    solidColor: "Solid color",
+    localIcon: "Local Icon",
+    getOnline: "Get it online",
+    iconText: "Icon Text",
+    fontSize: "Font Size",
+    color: "Color",
 
     deleteMessage: "Confirm deletion?？",
+    inputUrlMessage: "Please enter the URL of the ICON",
 
     deleteSuccess: "Deleted successfully",
     deleteFail: "Deletion failed",
+    editSuccess: "Update successfully",
+    editFail: "Update failed",
   },
 
   assistant: {
