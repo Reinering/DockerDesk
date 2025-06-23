@@ -17,7 +17,7 @@
             size="xs"
             padding="xs"
             color="deep-purple"
-            @click="showCreateNetworkDialog = !showCreateNetworkDialog"
+            @click="onShowCreateNetworkDialog"
           >
             <q-tooltip class="bg-amber text-black shadow-4">
               {{ t('panel.networks.create') }}
@@ -186,7 +186,7 @@
   </q-card>
 
   <q-dialog v-model="showCreateNetworkDialog">
-    <q-card class="q-gutter-sm" style="min-width: 40%; height: 330px;" >
+    <q-card class="q-gutter-sm" style="min-width: 40%; height: 380px;" >
       <q-card-section>
         <div class="text-h6">{{t('panel.networks.createNetworkTitle')}} - Bridge</div>
       </q-card-section>
@@ -205,6 +205,7 @@
           dense
           :label="t('panel.networks.subnet')+t('panel.networks.optional')"
           v-model="newNetwork.subnet"
+          hint="Mask: #.#.#.#/#"
         />
         <q-input
           class="text-body1"
@@ -212,6 +213,7 @@
           dense
           :label="t('panel.networks.gateway')+t('panel.networks.optional')"
           v-model="newNetwork.gateway"
+          hint="Mask: #.#.#.#"
         />
       </q-form>
 
@@ -288,6 +290,15 @@ const newNetwork = ref({
   gateway: ''
 })
 const showCreateNetworkDialog = ref(false)
+
+const onShowCreateNetworkDialog = () => {
+  showCreateNetworkDialog.value = !showCreateNetworkDialog.value
+
+  newNetwork.value.name = ''
+  newNetwork.value.subnet = ''
+  newNetwork.value.gateway = ''
+}
+
 const onCreateNetwork = () => {
   if (isEmptyStr(newNetwork.value.name)) {
     return $q.notify({
@@ -317,7 +328,7 @@ const onCreateNetwork = () => {
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
-        message: `${t('panel.networks.networkBindSuccess')}`,
+        message: `${t('panel.networks.createNetworkSuccess')}`,
       })
 
       showCreateNetworkDialog.value = false
@@ -326,7 +337,7 @@ const onCreateNetwork = () => {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: `${t('panel.networks.networkBindFail')}: ${result.error}`
+        message: `${t('panel.networks.createNetworkFail')}: ${result.error}`
       })
     }
   })

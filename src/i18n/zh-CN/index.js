@@ -361,6 +361,8 @@ export default {
       importing: "正在导入",
       importSuccess: "导入成功",
       importFail: "导入失败",
+      searchSuccess: "搜索成功",
+      searchFail: "搜索失败",
 
       inputHint1: "选择Dockerfile文件所在目录(必选)",
       inputHint2: "选择Dockerfile文件(非必选)",

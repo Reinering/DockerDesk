@@ -769,7 +769,16 @@
             transition-show="flip-up"
             transition-hide="flip-down"
             style="min-width: 200px"
-          />
+          >
+            <template v-slot:option="scope">
+              <q-item v-bind="scope.itemProps">
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.label }}</q-item-label>
+                  <q-item-label caption>{{ scope.opt.desc }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
           <q-item-section top side>
             <div class="row">
@@ -1510,7 +1519,11 @@ const getNetworkList = async () => {
         const data = parseDockerNetwork(result.data)
 
         data.forEach(item => {
-          networks.push(`${item.name} - ${item.network_id}`)
+          networks.push({
+            label: item.name,
+            value: item.network_id,
+            desc: item.network_id
+          })
         })
       } else {
         $q.notify({

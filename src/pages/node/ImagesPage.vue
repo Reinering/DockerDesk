@@ -337,7 +337,19 @@ const onImageSearch = (text) => {
       if (data.length > 0) {
         pullList.push(...data)
       }
-    } else {}
+
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.images.searchSuccess')}`,
+      })
+    } else {
+      return $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: t('panel.images.searchFail')
+      })
+    }
   })
 }
 

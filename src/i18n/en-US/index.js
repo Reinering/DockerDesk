@@ -360,6 +360,8 @@ export default {
       importing: "importing",
       importSuccess: "Import successfully",
       importFail: "Import failed",
+      searchSuccess: "Search successfully",
+      searchFail: "Search failed",
 
       inputHint1: "Select the directory where the Dockerfile is located(Required)",
       inputHint2: "Select the Dockerfile(Optional)",

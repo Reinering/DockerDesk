@@ -148,7 +148,7 @@ const onDeleteShortcuts = (id) => {
     persistent: true
   }).onOk(async () => {
     for (let i=0; i <= shortcutsData.length; i++) {
-      if (shortcutsData[i].nodeId === id) {
+      if (shortcutsData[i].id === id) {
         window.shortcuts.deleteShortcuts(id)
           .then((result) => {
             if (result.success) {
