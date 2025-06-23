@@ -26,7 +26,8 @@ export function registerNodesIpcHandlers(win) {
               authType: node.auth_type,
               password: (node.password !== null && node.password.length > 0) ? interference : '',
               key: (node.key !== null && node.key.length > 0) ? interference : '',
-              mark: node.mark
+              mark: node.mark,
+              // deleteFlags: result[0].delete_flags,
             })
           })
           return data
@@ -48,7 +49,8 @@ export function registerNodesIpcHandlers(win) {
           connectionType: result[0].connect_type,
           protocol: result[0].protocol,
           address: result[0].address,
-          port: result[0].port
+          port: result[0].port,
+          // deleteFlags: result[0].delete_flags,
         }
 
         return { success: true, data: data }
@@ -151,4 +153,14 @@ export function registerNodesIpcHandlers(win) {
     }
   })
 
+  ipcMain.handle('updateNode', async (event, data) => {
+    try {
+      const value = JSON.parse(data)
+
+      return await nodes.updateNode(value)
+    } catch (error) {
+      log.error(error)
+      return { success: false, error: error.message }
+    }
+  })
 }

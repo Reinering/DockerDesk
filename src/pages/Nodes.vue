@@ -150,6 +150,7 @@
         >
           <template v-slot:body-cell-actions="props">
             <q-btn
+              v-if="props.row.id !== '11111111' && props.row.id !== '11111112'"
               icon="edit"
               color="primary"
               dense
@@ -161,6 +162,7 @@
               </q-tooltip>
             </q-btn>
             <q-btn
+              v-if="props.row.id !== '11111111' && props.row.id !== '11111112'"
               icon="delete"
               color="negative"
               dense
@@ -171,7 +173,6 @@
                 {{t('delete')}}
               </q-tooltip>
             </q-btn>
-<!--            v-if="props.row.connectionType === t('node.remoteNode')"-->
             <q-btn
               icon="link"
               color="blue"
@@ -240,10 +241,10 @@ const background = reactive({
 })
 
 const services = reactive([
-  { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker'},
-  { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
-  { id: '111121', serviceName: '本地 Podman', connectionType: '本地节点', serviceType: 'Podman'},
-  { id: '111122', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', protocol: 'ssh', address: '192.168.1.100', port: 8080 },
+  // { id: '111111', serviceName: '本地 Docker', connectionType: '本地节点', serviceType: 'Docker'},
+  // { id: '111112', serviceName: '远程 Docker', connectionType: '远程节点', serviceType: 'Docker', protocol: 'ssh', address: 'localhost', port: 2375 },
+  // { id: '111121', serviceName: '本地 Podman', connectionType: '本地节点', serviceType: 'Podman'},
+  // { id: '111122', serviceName: '远程 Podman', connectionType: '远程节点', serviceType: 'Podman', protocol: 'ssh', address: '192.168.1.100', port: 8080 },
 ])
 
 const newService = reactive({
@@ -578,6 +579,7 @@ const connectTerminal = (row) => {
     persistent: true
   }).onOk(() => {
     let item
+    let data = JSON.parse(JSON.stringify(row))
     if (row.connectionType === t('node.remoteNode')) {
       if (!row.address || !row.port || !row.username || !row.password) {
         return $q.notify({
@@ -608,7 +610,7 @@ const connectTerminal = (row) => {
       }
     }
 
-    return changeNavigatorGoto(router, item[0], item[1], {data: row})
+    return changeNavigatorGoto(router, item[0], item[1], {data: data})
   }).onOk(() => {
     // console.log('>>>> second OK catcher')
   }).onCancel(() => {
@@ -669,7 +671,6 @@ const connectPanel = (row) => {
     } else {
       return
     }
-
 
     return changeNavigatorGoto(router, item[0], item[1], {data: row})
   }).onOk(() => {

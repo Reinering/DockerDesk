@@ -74,22 +74,22 @@ async function initDB() {
         table.text('mark') // 备注，文本类型，可空
       })
 
-      await db('settings').insert([
+      await db('nodes').insert([
         {
-          id: 11111111,
+          id: "11111111",
           name: "wsl_docker",
           service_type: "Docker",
           connect_type: "local",
           create_time: Date.now(),
-          delete_flags: 0
+          delete_flags: 1
         },
         {
-          id: 11111112,
+          id: "11111112",
           name: "wsl_podman",
           service_type: "Podman",
           connect_type: "local",
           create_time: Date.now(),
-          delete_flags: 0
+          delete_flags: 1
         },
       ])
     }
@@ -155,7 +155,6 @@ async function initDB() {
         },
       ])
     }
-
 
     tableExists = await db.schema.hasTable('shortcuts')
     if (!tableExists) {

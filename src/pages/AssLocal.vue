@@ -165,6 +165,18 @@ const onInstallDocker = () => {
           })
 
           checkDockerInstall()
+
+          window.nodes.updateNode(JSON.stringify({
+            id: '11111111',
+            delete_flags: 2
+          })).then((result) => {
+            console.log(result)
+            if (result.success) {
+
+            } else {
+
+            }
+          })
         } else {
           notify.value({
             type: 'negative',
@@ -206,6 +218,18 @@ const onInstallPodman = () => {
           })
 
           checkPodmanInstall()
+
+          window.nodes.updateNode(JSON.stringify({
+            id: '11111112',
+            delete_flags: 2
+          })).then((result) => {
+            console.log(result)
+            if (result.success) {
+
+            } else {
+
+            }
+          })
         } else {
           notify.value({
             type: 'negative',

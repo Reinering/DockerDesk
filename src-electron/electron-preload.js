@@ -142,6 +142,10 @@ contextBridge.exposeInMainWorld('nodes', {
 
   async editNode (data) {
     return await ipcRenderer.invoke('editNode', data)
+  },
+
+  async updateNode (data) {
+    return await ipcRenderer.invoke('updateNode', data)
   }
 
 })

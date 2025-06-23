@@ -3,11 +3,9 @@ import { db } from '../database/manager.js'
 
 export const nodes = {
   getNodes:  async () => {
-    // delete_flags: 0: normal, 1: deleted
+    // delete_flags: 0: normal, 1: deleted 2: readonly
     return db('nodes')
-      .where('delete_flags', '=', '0')
-      .andWhere('id', '!=', '11111111')
-      .andWhere('id', '!=', '11111112')
+      .where('delete_flags', '!=', '1')
       .select('*').then(
         rows => {
           return rows
@@ -21,7 +19,7 @@ export const nodes = {
 
   getNodeByID:  async (id) => {
     return await db('nodes')
-      .where('delete_flags', '=', '0')
+      .where('delete_flags', '!=', '1')
       .andWhere('id', '=', id)
       .select('*').then(
       row => {
@@ -52,7 +50,9 @@ export const nodes = {
   },
 
   delNodeByID: async (id) => {
-    return await db('nodes').where('id', '=', id).update(
+    return await db('nodes').where('id', '=', id)
+      .andWhere('delete_flags', '=', '0')
+      .update(
       {
         delete_time: Date.now(),
         delete_flags: 1,

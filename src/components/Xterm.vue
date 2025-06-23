@@ -120,12 +120,34 @@ const initTerminal = () => {
         }
       }
     )
-  } else if (props.data.serviceType === 'WSL') {
+  } else if (props.data.serviceType === 'WSL' || props.data.serviceName === "wsl_docker" || props.data.serviceName === "wsl_podman") {
     if (Object.hasOwnProperty.call(props.data, "command")) {
       window.terminal.execTerminal({
         uuid: props.terminalId,
         // cmd: `wsl -d ${props.data.serviceName} --user ${props.data.user} -e ${props.data.command}`,
         cmd: ['wsl', '-d', props.data.serviceName, "--user", props.data.user, '-e', props.data.command],
+      }).then((result) => {
+        if (result.success === false) {
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('xterm.termInitError') + ': ' + result.error
+          })
+        } else {
+          term.onData((data) => {
+            sendTerminal({
+              uuid: props.terminalId,
+              data: data,
+            })
+          })
+        }
+      })
+    } else if (props.data.serviceName === "wsl_docker" || props.data.serviceName === "wsl_podman") {
+      window.terminal.createWSLTerminal({
+        uuid: props.terminalId,
+        name: "DockerDesk",
+        user: 'root',
       }).then((result) => {
         if (result.success === false) {
 
