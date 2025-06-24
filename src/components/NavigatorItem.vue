@@ -4,10 +4,10 @@
     :content-inset-level="0.5"
     :icon="props.item.icon"
     :label="t(props.item.label)"
-    v-if="props.item.children.length > 0"
+    v-if="children.length > 0"
   >
     <NavigatorItem
-      v-for="( child ) in props.item.children"
+      v-for="( child ) in children"
       :key="child.id"
       :item="child"
       :prefixRoute="prefixRoute === '' ? props.item.route : prefixRoute + '/' + props.item.route"
@@ -23,7 +23,7 @@
     :active="props.item.state"
     active-class="text-pink"
     @click="changeNavigatorGoto(props.item, props.prefixRoute)"
-    v-else
+    v-else-if="isShow"
   >
     <q-item-section avatar >
       <q-icon :name="props.item.icon" />
@@ -39,8 +39,9 @@
 
 <script setup>
 
-import { inject } from "vue"
+import { ref, reactive, inject, onMounted, onUnmounted } from "vue"
 import NavigatorItem from "./NavigatorItem.vue"
+import { useConfigStore } from 'stores/config.js'
 
 
 const props = defineProps({
@@ -56,6 +57,7 @@ const props = defineProps({
       label: '',
       icon: '',
       route: '',
+      mode: '',
       state: false,
       children: []
     })
@@ -68,8 +70,39 @@ const props = defineProps({
 })
 
 const t = inject("t")  // i18
-
 const changeNavigatorGoto = inject("changeNavigatorGoto")
+const configStore = useConfigStore()
+
+const isShow = ref(true)
+
+if (props.item.mode === '' || props.item.mode === configStore.userMode) {
+  isShow.value = true
+} else {
+  isShow.value = false
+}
+
+const children = reactive([])
+
+
+const init = () => {
+  for (const child of props.item.children) {
+    if (child.mode === '' || child.mode === configStore.userMode) {
+      children.push(child)
+    }
+  }
+
+  console.log(props.item.name)
+  console.log(children)
+}
+
+onMounted(() => {
+  init()
+})
+
+onUnmounted(() => {
+
+})
+
 
 </script>
 

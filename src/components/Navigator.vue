@@ -7,14 +7,17 @@
     name: 'Home',
     label: ’home,
     icon: "home",
+    mode: '',
     route: '', // 相对路径
     state: false,
+
     // click: null,
     children: [
       {
         name: 'Main',
         label: ’main,
         icon: "main",
+        mode: '',
         route: '', // 相对路径
         state: false,
         children: []
@@ -63,6 +66,7 @@ const naviItems = reactive([
     label: 'navigator.home',
     icon: "home",
     route: '',
+    mode: '',
     state: false,
     children: []
   },
@@ -72,6 +76,7 @@ const naviItems = reactive([
     label: 'navigator.assistant',
     icon: "assistant_direction",
     route: 'assistant',
+    mode: 'normal',
     state: false,
     children: []
   },
@@ -80,6 +85,7 @@ const naviItems = reactive([
     label: 'navigator.wsl',
     icon: "view_module",
     route: 'wsl',
+    mode: 'professional',
     state: false,
     children: []
   },
@@ -89,6 +95,7 @@ const naviItems = reactive([
     label: 'navigator.nodes',
     icon: "hub",
     route: 'nodes',
+    mode: 'professional',
     state: false,
     children: []
   },
@@ -98,13 +105,15 @@ const naviItems = reactive([
     label: 'navigator.nodesMg',
     icon: "dialpad",
     route: 'nodesMg',
+    mode: 'professional',
     state: false,
     children: [
       {
-        name: 'Docker',
-        label: 'navigator.dockerNode',
+        name: 'panel',
+        label: 'navigator.nodePanel',
         icon: "grain",
-        route: 'dockerNode',
+        route: 'panel',
+        mode: 'professional',
         state: false,
         children: []
       },
@@ -113,6 +122,7 @@ const naviItems = reactive([
         label: 'navigator.terminal',
         icon: "terminal",
         route: 'terminal',
+        mode: 'professional',
         state: false,
         children: []
       },
@@ -121,6 +131,7 @@ const naviItems = reactive([
         label: "边缘节点列表",
         icon: "commit",
         route: 'edge_nodes',
+        mode: '',
         state: false,
         children: []
       },
@@ -132,6 +143,7 @@ const naviItems = reactive([
     label: 'navigator.settings',
     icon: "settings",
     route: 'settings',
+    mode: '',
     state: false,
     children: []
   }
