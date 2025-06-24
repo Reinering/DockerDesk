@@ -216,7 +216,7 @@ const onWslStatusBtn = () => {
         // wslStatusBtn.value = true
         setTimeout(() => {
           init()
-        }, 10000)
+        }, 15000)
       } else {
         return notify.value({
           type: 'negative',

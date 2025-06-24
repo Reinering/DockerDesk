@@ -43,8 +43,8 @@ export function registerWSLIpcHandlers(win) {
     })
   })
 
-  ipcMain.handle('upgradeWSL', async (event, encoding) => {
-    return wslUpdate(encoding).then((data) => {
+  ipcMain.handle('upgradeWSL', async (event) => {
+    return wslUpdate().then((data) => {
       return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }

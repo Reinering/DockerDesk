@@ -432,8 +432,8 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('installSubSystem')
   },
 
-  upgradeWSL (encoding='utf8') {
-    return ipcRenderer.invoke('upgradeWSL', encoding)
+  upgradeWSL () {
+    return ipcRenderer.invoke('upgradeWSL')
   },
 
   startSubSystem () {
