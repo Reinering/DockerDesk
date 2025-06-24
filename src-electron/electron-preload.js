@@ -416,8 +416,8 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('modifyWSLDebugConfig', data)
   },
 
-  checkWSLInfo() {
-    return ipcRenderer.invoke('checkWSLInfo')
+  checkWSLInfo(encoding="utf16le") {
+    return ipcRenderer.invoke('checkWSLInfo', encoding)
   },
 
   getWSLList () {
@@ -432,8 +432,8 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('installSubSystem')
   },
 
-  upgradeWSL () {
-    return ipcRenderer.invoke('upgradeWSL')
+  upgradeWSL (encoding='utf8') {
+    return ipcRenderer.invoke('upgradeWSL', encoding)
   },
 
   startSubSystem () {

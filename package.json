@@ -6,6 +6,7 @@
   "author": "Reiner New <nbxlhc@hotmail.com>",
   "type": "module",
   "private": true,
+  "requireAdmin": true,
   "scripts": {
     "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{js,cjs,mjs,vue}\"",
     "format": "prettier --write \"**/*.{js,vue,css,html,md,json}\" --ignore-path .gitignore",
@@ -50,6 +51,7 @@
     "smol-toml": "^1.3.4",
     "ssh2": "^1.16.0",
     "ssh2-sftp-client": "^12.0.0",
+    "sudo-prompt": "^9.2.1",
     "systeminformation": "^5.27.1",
     "vue": "^3.5.13",
     "vue-i18n": "^11.1.3",

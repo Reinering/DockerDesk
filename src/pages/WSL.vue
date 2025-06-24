@@ -383,8 +383,6 @@ const changeDebugConsole = (value) => {
   })
 }
 
-const wslStatusColor = ref('red')
-const wslStatus = ref('Stopped')
 const wslStatusBtn = ref(t('assistant.notInstalled'))
 const disabledWslStatusBtn = ref(false)
 
@@ -394,21 +392,35 @@ const onWslStatusBtn = () => {
   } else if (wslStatusBtn.value === t('assistant.needUpgrade')) {
     window.wslTerminal.upgradeWSL().then((result) => {
       if (result.success) {
-        $q.notify({
+        notify.value({
           type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: t('assistant.upgradeSuccess')
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.upgradeSuccess')}`,
+          timeout: 10000
         })
 
-        wslStatusBtn.value = t('assistant.installed')
-        disabledWslStatusBtn.value = true
+        setTimeout(() => {
+          init()
+        }, 10000)
       } else {
-        return $q.notify({
+        return notify.value({
           type: 'negative',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('assistant.upgradeError')}: ${result.error}`
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.upgradeFail')}: ${result.error}`,
+          timeout: 10000
         })
       }
+    })
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('assistant.updating'),
     })
   }
 }
@@ -486,7 +498,6 @@ const onCreate = () => {
   }
 
   window.wslTerminal.installWSL(JSON.stringify(newWSL)).then((result) => {
-    console.log(result)
     if (result.success) {
       notify.value({
         type: 'positive',
@@ -533,26 +544,30 @@ const init = () => {
           getWSLListInterval = setInterval(() => {
             getWSLList()
           }, 30000)
+
+          window.wslTerminal.getDistributionList().then((result) => {
+            if (result.success) {
+              const tmp = appxList[appxList.length - 1]
+              appxList.length = 0
+              parseDistributionList(result.data).forEach((item) => {
+                appxList.push(item)
+              })
+              appxList.push(tmp)
+            }
+          })
         } else {
           wslStatusBtn.value = t('assistant.needUpgrade')
           clearInterval(getWSLListInterval)
           getWSLListInterval = null
         }
       } else {
-        wslStatusBtn.value = t('assistant.notInstalled')
-        clearInterval(getWSLListInterval)
-        getWSLListInterval = null
-      }
-    })
-
-    window.wslTerminal.getDistributionList().then((result) => {
-      if (result.success) {
-        const tmp = appxList[appxList.length - 1]
-        appxList.length = 0
-        parseDistributionList(result.data).forEach((item) => {
-          appxList.push(item)
+        window.wslTerminal.checkWSLInfo('utf8').then((result) => {
+          if (!result.success && result.error.indexOf("Command failed: wsl -v") !== -1) {
+            wslStatusBtn.value = t('assistant.needUpgrade')
+          } else {
+            wslStatusBtn.value = t('assistant.notInstalled')
+          }
         })
-        appxList.push(tmp)
       }
     })
   }

@@ -56,7 +56,7 @@
 
         <q-card-section>
           <q-chip shaquare color="orange" text-color="white" icon="star">
-            建议: WSL2
+            {{wslVersionHint}}
           </q-chip>
         </q-card-section>
 
@@ -147,10 +147,11 @@ const printfContent = debianSourcesLines.join('\\n') + '\\n'
 const isAssLocalBtn = ref(true)
 const isAssRemoteBtn = ref(false)
 
+const wslVersionHint = ref('')
 const wslStatusBtn = ref(t('assistant.notInstalled'))
 const disabledWslStatusBtn = ref(false)
 const wslStatus = ref('Stopped')
-const wslStatusColor = ref('red')
+const wslStatusColor = ref('orange')
 const showWslStatusBtn = ref(true)
 
 const installWSLPackage = () => {
@@ -203,20 +204,37 @@ const onWslStatusBtn = () => {
   } else if (wslStatusBtn.value === t('assistant.needUpgrade')) {
     window.wslTerminal.upgradeWSL().then((result) => {
       if (result.success) {
-        $q.notify({
+        notify.value({
           type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: t('assistant.upgradeSuccess')
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.upgradeSuccess')}`,
+          timeout: 10000
         })
 
-        wslStatusBtn.value = t('assistant.installed')
+        // wslStatusBtn.value = t('assistant.rebootSystem')
+        // wslStatusBtn.value = true
+        setTimeout(() => {
+          init()
+        }, 10000)
       } else {
-        return $q.notify({
+        return notify.value({
           type: 'negative',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('assistant.upgradeFail')}: ${result.error}`
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.upgradeFail')}: ${result.error}`,
+          timeout: 10000
         })
       }
+    })
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('assistant.updating'),
     })
   }  else if (wslStatusBtn.value === t('assistant.addSubSystem')) {
     window.wslTerminal.installSubSystem().then((result) => {
@@ -330,6 +348,7 @@ const init = () => {
         const line = result.data.split('\r\n')[0]
 
         if (line.indexOf('WSL') !== -1) {
+          wslVersionHint.value = t('assistant.wslVersionHint1')
           wslStatusBtn.value = t('assistant.installed')
 
           window.wslTerminal.getWSLList().then((result) => {
@@ -355,13 +374,23 @@ const init = () => {
                 }
               }
               wslStatusBtn.value = t('assistant.addSubSystem')
+            } else {
+              wslStatusBtn.value = t('assistant.addSubSystem')
             }
           })
         } else {
           wslStatusBtn.value = t('assistant.needUpgrade')
+          wslVersionHint.value = t('assistant.wslVersionHint')
         }
       } else {
-        wslStatusBtn.value = t('assistant.notInstalled')
+        window.wslTerminal.checkWSLInfo('utf8').then((result) => {
+          if (!result.success && result.error.indexOf("Command failed: wsl -v") !== -1) {
+            wslStatusBtn.value = t('assistant.needUpgrade')
+            wslVersionHint.value = t('assistant.wslVersionHint')
+          } else {
+            wslStatusBtn.value = t('assistant.notInstalled')
+          }
+        })
       }
     })
 

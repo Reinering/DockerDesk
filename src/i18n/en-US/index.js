@@ -52,6 +52,7 @@ export default {
     wsl: "WSL",
     nodes: "Nodes",
     nodesMg: "Nodes Management",
+    nodePanel: "Node Panel",
     dockerNode: "Docker Node",
     terminal: "Terminal Node",
     settings: "Settings"
@@ -103,12 +104,17 @@ export default {
     installed: "Installed",
     notInstalled: "Not installed",
     needUpgrade: "Need to upgrade",
+    rebootSystem: "Restart the system",
     addSubSystem: "Add SubSystem",
     addPackage: "Add Package",
     start: "Start",
     stop: "Stop",
     bgStart: "Backgroup",
 
+    wslVersionHint: "Version: WSL1, Suggestions: WSL2",
+    wslVersionHint1: "Suggestions: WSL2",
+
+    updating: "Upgrading...",
     upgradeSuccess: "Upgrade Successfully",
     upgradeFail: "Upgrade Failure",
     startSuccess: "Start Successfully",
@@ -508,6 +514,9 @@ export default {
     display: "Display",
     edit: "Edit",
 
+    updating: "Upgrading...",
+    upgradeSuccess: "Upgrade Successfully",
+    upgradeFail: "Upgrade Failure",
     startSuccess: "Start Successfully",
     startFail: "Start Failure",
     stopSuccess: "Stop Successfully",

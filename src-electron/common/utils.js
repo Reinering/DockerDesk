@@ -4,6 +4,7 @@ import readline from 'readline'
 import os from 'node:os'
 import iconv from 'iconv-lite'
 import ini from 'ini'
+import * as sudo from 'sudo-prompt'
 
 
 
@@ -117,13 +118,20 @@ export async function modifyIniConfig(data, file) {
 
 
 // 执行 CMD 命令
-export function cmd1(command, encoding='cp936') {
+export function cmd1(command, encoding='cp936', isAdmin=false) {
   if (command instanceof Array) {
     command = command.join(' ')
   }
   console.log(command)
+
+  const options = { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }
+  if (isAdmin) {
+    options["sudo"] = true
+    options["admin"] = true
+  }
+
   return new Promise((resolve, reject) => {
-    exec(command, { cwd: process.cwd(), windowsHide: true, encoding: 'binary' }, (error, stdout, stderr) => {
+    exec(command, options, (error, stdout, stderr) => {
       if (error) {
         return reject(isWindows ? error.message.toString(encoding) : error.message.toString('utf8'))
       }
@@ -137,13 +145,51 @@ export function cmd1(command, encoding='cp936') {
 
 
 // 执行 CMD 命令
-export function cmd(command, encoding='cp936') {
+export function cmd(command, encoding='cp936', isAdmin=false) {
   if (command instanceof Array) {
     command = command.join(' ')
   }
+
+  const options = { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }
+  if (isAdmin) {
+    options["sudo"] = true
+    options["admin"] = true
+  }
+
   console.log(command)
   return new Promise((resolve, reject) => {
-    exec(command, { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }, (error, stdout, stderr) => {
+    exec(command, options, (error, stdout, stderr) => {
+      if (error && error.code !== 0) {
+        devConsole(`error: ${error.message.toString('utf8')}`)
+        return reject(isWindows ? iconv.decode(error.message, encoding) : error.message.toString('utf8'))
+      }
+      if (stderr && stderr.length > 0) {
+        devConsole(`stderr: ${stderr.toString('utf8')}`)
+        return reject(isWindows ? iconv.decode(stderr, encoding) : stderr.toString('utf8'))
+      }
+
+      devConsole(`stdout: ${stdout.toString('utf8')}`)
+      return resolve(isWindows ? iconv.decode(stdout, encoding) : stderr.toString('utf8'))
+    })
+  })
+}
+
+
+// 执行 CMD 命令
+export function cmdAdmin(command, encoding='cp936', isAdmin=false) {
+  if (command instanceof Array) {
+    command = command.join(' ')
+  }
+
+  const options = { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }
+  if (isAdmin) {
+    options["sudo"] = true
+    options["admin"] = true
+  }
+
+  console.log(command)
+  return new Promise((resolve, reject) => {
+    sudo.exec(command, options, (error, stdout, stderr) => {
       if (error && error.code !== 0) {
         devConsole(`error: ${error.message.toString('utf8')}`)
         return reject(isWindows ? iconv.decode(error.message, encoding) : error.message.toString('utf8'))
@@ -163,9 +209,7 @@ export function cmd(command, encoding='cp936') {
 export function cmdSpawn(command, encoding='cp936') {
 
 
-
 }
-
 
 
 export function cmdSync(command) {
@@ -185,7 +229,6 @@ export function cmdSync(command) {
     }
   })
 }
-
 
 
 export class CmdRunner {

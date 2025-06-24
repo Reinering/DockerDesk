@@ -19,8 +19,8 @@ export function registerWSLIpcHandlers(win) {
     })
   })
 
-  ipcMain.handle('checkWSLInfo', async (event) => {
-    return getWSLInfo().then((data) => {
+  ipcMain.handle('checkWSLInfo', async (event, encoding) => {
+    return getWSLInfo(encoding).then((data) => {
       return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }
@@ -43,8 +43,8 @@ export function registerWSLIpcHandlers(win) {
     })
   })
 
-  ipcMain.handle('upgradeWSL', async (event) => {
-    return wslUpdate().then((data) => {
+  ipcMain.handle('upgradeWSL', async (event, encoding) => {
+    return wslUpdate(encoding).then((data) => {
       return { success: true, data: data, error: '' }
     }, (error) => {
       return { success: false, error: error }

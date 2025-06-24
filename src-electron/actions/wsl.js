@@ -1,4 +1,4 @@
-import { cmd, cmd1, CmdRunner, modifyIniConfig, } from 'app/src-electron/common/utils.js'
+import { cmd, cmd1, cmdAdmin,  CmdRunner, modifyIniConfig, } from 'app/src-electron/common/utils.js'
 import { WslCmdRunner } from 'app/src-electron/common/wsl.js'
 import readline from 'readline'
 import path from 'path'
@@ -20,16 +20,16 @@ export async function modifyWSLDebugConfig (data) {
   })
 }
 
-export async function getWSLInfo () {
-  return cmd('wsl -v', 'utf16le')
+export async function getWSLInfo (encoding='utf16le') {
+  return cmd('wsl -v', encoding)
 }
 
 export async function getWSLList () {
   return cmd('wsl -l -v', 'utf16le')
 }
 
-export async function wslUpdate () {
-  return cmd('wsl --update --web-download', 'utf16le')
+export async function wslUpdate (encoding='utf16le') {
+  return cmdAdmin('wsl --update --web-download', encoding)
 }
 
 export async function getDistributionList () {
