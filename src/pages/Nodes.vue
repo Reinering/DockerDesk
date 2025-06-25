@@ -214,7 +214,7 @@ import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive, co
 import { deepClone, isEmptyObj, findNaviItemByName } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 import { useNavigatorStore } from 'stores/navigator.js'
-import { changeNavigatorGoto } from "src/utils/router.js"
+import { changeNavigatorGoto, changeNaviGotoPanel } from "src/utils/router.js"
 
 const name = 'node'
 
@@ -635,32 +635,10 @@ const connectPanel = (row) => {
     persistent: true
   }).onOk(() => {
     let item
-    // if (row.connectionType === t('node.remoteNode')) {
-    //   if (!row.address || !row.port || !row.username || !row.password) {
-    //     return $q.notify({
-    //       type: 'negative',
-    //       position: clientConfig.quasar.notify.position,
-    //       message: t('node.connectError')
-    //     })
-    //   }
-    //   // docker | podman
-    //   if (row.serviceType === "Docker" || row.serviceType === "Podman") {
-    //     item = findNaviItemByName(navigatorStore.naviItems, "Docker")
-    //     if (isEmptyObj(item)) {
-    //       return $q.notify({
-    //         type: 'negative',
-    //         position: clientConfig.quasar.notify.position,
-    //         message: t('node.connectError1')
-    //       })
-    //     }
-    //   }
-    // } else {
-    //   return
-    // }
 
     // docker | podman
     if (row.serviceType === "Docker" || row.serviceType === "Podman") {
-      item = findNaviItemByName(navigatorStore.naviItems, "Docker")
+      item = findNaviItemByName(navigatorStore.naviItems, "Panel")
       if (isEmptyObj(item)) {
         return $q.notify({
           type: 'negative',

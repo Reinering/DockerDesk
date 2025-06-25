@@ -90,9 +90,6 @@ const init = () => {
       children.push(child)
     }
   }
-
-  console.log(props.item.name)
-  console.log(children)
 }
 
 onMounted(() => {

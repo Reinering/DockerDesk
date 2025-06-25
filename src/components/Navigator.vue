@@ -91,7 +91,7 @@ const naviItems = reactive([
   },
 
   {
-    name: 'nodes',
+    name: 'Nodes',
     label: 'navigator.nodes',
     icon: "hub",
     route: 'nodes',
@@ -101,7 +101,7 @@ const naviItems = reactive([
   },
 
   {
-    name: 'nodesMg',
+    name: 'NodesMg',
     label: 'navigator.nodesMg',
     icon: "dialpad",
     route: 'nodesMg',
@@ -109,7 +109,7 @@ const naviItems = reactive([
     state: false,
     children: [
       {
-        name: 'panel',
+        name: 'Panel',
         label: 'navigator.nodePanel',
         icon: "grain",
         route: 'panel',
