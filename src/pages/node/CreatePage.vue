@@ -1521,7 +1521,7 @@ const getNetworkList = async () => {
         data.forEach(item => {
           networks.push({
             label: item.name,
-            value: item.network_id,
+            value: item.name,
             desc: item.network_id
           })
         })
