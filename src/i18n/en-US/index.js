@@ -109,7 +109,7 @@ export default {
     addPackage: "Add Package",
     start: "Start",
     stop: "Stop",
-    bgStart: "Backgroup",
+    bgStart: "Background Start",
 
     wslVersionHint: "Version: WSL1, Suggestions: WSL2",
     wslVersionHint1: "Suggestions: WSL2",
@@ -494,6 +494,7 @@ export default {
     run: "Run",
     stop: "Stop",
     restart: "Restart",
+    bgStart: "Background Start",
     delete: "Delete",
     terminal: "Terminal",
     export: "Export",

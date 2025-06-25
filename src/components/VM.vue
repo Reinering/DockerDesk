@@ -115,7 +115,17 @@
             icon="more_horiz"
             size="sm"
           >
+
             <q-list dense :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
+              <q-item clickable v-close-popup size="sm" @click="onBackgroundStart">
+                <q-item-section>
+                  <q-icon name="play_arrow" color="amber" />
+                  <q-tooltip class="bg-amber text-black shadow-4">
+                    {{t('wsl.bgStart')}}
+                  </q-tooltip>
+                </q-item-section>
+              </q-item>
+
               <q-item clickable v-close-popup size="sm" @click="onDelete">
                 <q-item-section>
                   <q-icon name="delete" color="red" />
@@ -324,6 +334,26 @@ const onRestart = () => {
   })
 
   emit('update:value', {name: props.data.servername, state: "Stopped"})
+}
+const onBackgroundStart = () => {
+  let isCall = true
+  window.wslTerminal.startBGSubSystem().then((result) => {
+    if (! result.success && isCall) {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.startFail')}: ${props.data.servername}: ${result.error}`
+      })
+
+      emit('update:value', {name: props.data.servername, state: "Stopped"})
+    }
+  })
+
+  setTimeout(() => {
+    isCall = false
+  }, 5000)
+
+  emit('update:value', {name: props.data.servername, state: "Running"})
 }
 const onDelete = () => {
   $q.dialog({

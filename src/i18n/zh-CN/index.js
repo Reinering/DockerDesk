@@ -497,6 +497,7 @@ export default {
     run: "运行",
     stop: "停止",
     restart: "重启",
+    bgStart: "后台运行",
     delete: "删除",
     terminal: "终端",
     export: "导出",
