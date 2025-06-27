@@ -532,6 +532,7 @@ contextBridge.exposeInMainWorld("podmanTerminal", {
 
 })
 
+
 contextBridge.exposeInMainWorld('shortcuts', {
 
   getShortcutss () {
@@ -548,6 +549,30 @@ contextBridge.exposeInMainWorld('shortcuts', {
 
   deleteShortcuts (data) {
     return ipcRenderer.invoke('deleteShortcuts', data)
+  },
+
+})
+
+
+contextBridge.exposeInMainWorld('containerTerminal', {
+  connect (data) {
+    return ipcRenderer.invoke('containerSSHConnect', data)
+  },
+
+  close (data) {
+    return ipcRenderer.invoke('containerSSHClose', data)
+  },
+
+  receiveState (callback) {
+    return ipcRenderer.on('containerSSHState', (event, data) => callback(data))
+  },
+
+  exec (data) {
+    return ipcRenderer.invoke('containerSSHExec', data)
+  },
+
+  execs (data) {
+    return ipcRenderer.invoke('containerSSHExecs', data)
   },
 
 })

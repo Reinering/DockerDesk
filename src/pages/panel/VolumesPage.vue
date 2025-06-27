@@ -141,7 +141,7 @@
 <script setup>
 
 import { inject, onActivated, onDeactivated, onMounted, onUnmounted, reactive, ref } from 'vue'
-import { isEmptyObj } from 'src/utils/common.js'
+import { firstLower, isEmptyObj } from 'src/utils/common.js'
 import { parseDockerVolume } from 'src/utils/wsl.js'
 import { clientConfig } from 'src/common/config.js'
 
@@ -153,14 +153,19 @@ const t = inject("t")
 const service = inject("service")
 const serviceCmd = ref('')
 
+const connectState = inject('connectState')
+const dockerInfo = inject('dockerInfo')
+const podmanInfo = inject('podmanInfo')
+const wslInfo = inject('wslInfo')
+
 let notify = ref(null)
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 150 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 150 - 48 + "px" : window.innerHeight - 149 - 48 + "px",
 })
 
 const tableStyle = reactive({
-  height: window.innerHeight - 182 + "px",
+  height: window.innerHeight - 182 - 48 + "px",
 })
 const visibleColumns = ['volumeName', 'driver', 'actions']
 const columns = [
@@ -178,23 +183,58 @@ const pagination = ref({
 const rows = reactive([])
 
 const getVolumeList = () => {
-  window.wslTerminal.execWSL(
-    ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} volume ls`]
-  ).then((result) => {
-    if (result.success) {
-      rows.length = 0
-      const data = parseDockerVolume(result.data)
-      if (data.length > 0)  {
-        rows.push(...data)
-      }
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('panel.networks.getVolumesError')}: ${result.error}`
-      })
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
-  })
+
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} volume ls`
+    }).then((result) => {
+      if (result.success) {
+        rows.length = 0
+        const data = parseDockerVolume(result.data)
+        if (data.length > 0)  {
+          rows.push(...data)
+        }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.networks.getVolumesError')}: ${result.error}`
+        })
+      }
+    })
+  } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    window.wslTerminal.execWSL(
+      ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} volume ls`]
+    ).then((result) => {
+      if (result.success) {
+        rows.length = 0
+        const data = parseDockerVolume(result.data)
+        if (data.length > 0)  {
+          rows.push(...data)
+        }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.networks.getVolumesError')}: ${result.error}`
+        })
+      }
+    })
+  }
 }
 
 const init = () => {
@@ -203,19 +243,20 @@ const init = () => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 182 + "px"
-    tableStyle.height = window.innerHeight - 182 + "px"
+    cardStyle.height = window.innerHeight - 182 - 48 + "px"
+    tableStyle.height = window.innerHeight - 182 - 48 + "px"
   } else {
-    cardStyle.height = window.innerHeight - 149 + "px"
-    tableStyle.height = window.innerHeight - 182 + "px"
+    cardStyle.height = window.innerHeight - 149 - 48 + "px"
+    tableStyle.height = window.innerHeight - 182 - 48 + "px"
   }
 }
 
 onMounted(() => {
-  serviceCmd.value = service.serviceType
+  serviceCmd.value = firstLower(service.serviceType)
   if (isEmptyObj(serviceCmd.value)) {
     return
   }
+
   init()
 
   window.addEventListener('resize', checkScreenSize)

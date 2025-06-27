@@ -58,8 +58,8 @@ export class SSHClient {
             })
 
             stream.on('close', () => {
-              this.conn.end()
-              resolve({ status: 'closed' })
+              // this.conn.end()
+              // resolve({ status: 'closed' })
             })
           })
 
@@ -85,10 +85,10 @@ export class SSHClient {
 
         stream
           .on('data', (data) => {
-            stdout += data; // 收集 STDOUT
+            stdout += data // 收集 STDOUT
           })
           .stderr.on('data', (data) => {
-          stderr += data; // 收集 STDERR
+          stderr += data // 收集 STDERR
         })
           .on('close', (code, signal) => {
             console.log(`Command "${command}" finished with code ${code}, signal ${signal}`)
@@ -527,5 +527,181 @@ export class SFTPClient {
 }
 
 
+export class SSH2Client {
+  constructor(uuid, win, config) {
+    this.config = config
+    this.uuid = uuid
+    this.win = win
+    this.conn = new Client()
+    this.stream = null
+    this.isSudo = true
+    this.status = 'disconnected'       // connecting | connected | disconnected |
+  }
 
+  // 连接到 SSH 服务器
+  async connect() {
+    if (this.status === 'connected') {
+      return
+    } else {
+      this.status = 'connecting'
+    }
+    return new Promise((resolve, reject) => {
+      this.conn
+        .on('ready', async () => {
+          this.status = 'connected'
+          console.log("ssh connected")
+      }).on('end', () => {
 
+      }).on('error', (err) => {
+        reject(err)
+      }).on('close', () => {
+        this.sendDisconnected()
+      }).connect(this.config)
+
+      resolve()
+    })
+  }
+
+  reconnect() {
+    return new Promise((resolve, reject) => {
+      this.conn
+        .on('ready', async () => {
+          this.status = 'connected'
+          console.log('ssh connected')
+        }).on('error', (err) => {
+        reject(err)
+      }).on('close', () => {
+        this.sendDisconnected()
+      }).connect(this.config)
+
+      resolve()
+    })
+  }
+
+  sendDisconnected() {
+    this.status = 'disconnected'
+    this.win.webContents.send("containerSSHState",
+      JSON.stringify({
+        uuid: this.uuid,
+        data: "Terminal disconnected"
+      }))
+  }
+
+  // 清理连接
+  disconnect() {
+    if (this.stream) {
+      this.stream.end()
+    }
+    if (this.conn) {
+      this.conn.end()
+    }
+
+    this.status = 'Disconnected'
+  }
+
+  exec(command) {
+    return new Promise((resolve, reject) => {
+      this.conn.exec(command, (err, stream) => {
+        if (err) return reject(err)
+
+        let stdout = ''
+        let stderr = ''
+
+        stream.on('close', (code, signal) => {
+          resolve({ stdout, stderr, code, signal });
+        }).on('data', (data) => {
+          stdout += data
+        }).stderr.on('data', (data) => {
+          stderr += data
+        })
+      })
+    })
+  }
+
+  async checkPermissions() {
+    if (this.isSudo !== null) {
+      return
+    }
+
+    try {
+      // 检查是否为 root 用户
+      const whoami = await this.exec('whoami');
+      if (whoami.stdout.trim() === 'root') {
+        this.isSudo = false
+      }
+
+      // 检查无密码 sudo
+      const sudoTest = await this.exec('sudo -n true 2>/dev/null && echo "success"')
+      if (sudoTest.stdout.includes('success')) {
+        this.isSudo = true
+      }
+
+      // 检查 sudo 权限
+      const sudoList = await this.exec('sudo -l 2>/dev/null | head -1');
+      if (sudoList.stdout.includes('User') || sudoList.stderr.includes('password')) {
+        this.isSudo = true
+      } else {
+        this.isSudo = false
+      }
+    } catch (error) {
+      this.isSudo = false
+    }
+  }
+
+  async execCmd(cmd) {
+    if (this.status !== 'connected') {
+      await this.reconnect()
+    }
+
+    let command = cmd
+    if (this.isSudo) {
+      command = `sudo -E ${cmd}`
+    }
+
+    console.log(command)
+
+    return new Promise((resolve, reject) => {
+      this.conn.exec(
+        `export PATH=/usr/local/bin:$PATH && ${command}`,
+        {
+          pty: true,
+        },
+        (err, stream) => {
+        if (err) return reject(err)
+
+        let stdout = ''
+        let stderr = ''
+        let sudoPromptDetected = false
+
+        stream.on('data', (data) => {
+          const dataStr = data.toString()
+          stdout += dataStr
+
+          console.log("stdout", dataStr)
+
+          // 检测 sudo 提示
+          if (!sudoPromptDetected && this.isSudo && /password for.*:|sudo.*password|Password:|[sudo]/i.test(dataStr)) {
+            sudoPromptDetected = true
+            stdout = ''
+            stream.stdin.write(`${this.config.password}\n`)
+            console.log("sudo Mark")
+          }
+        })
+
+        stream.stderr.on('data', (data) => {
+          console.log("stderr", data.toString())
+          stderr += data.toString() // 收集 STDERR
+        })
+
+        stream.on('close', (code) => {
+          if (code !== 0 || stderr) {
+            reject(`Command failed with code ${code}: ${stderr || stdout}`)
+          } else {
+            resolve(stdout)
+          }
+        })
+      })
+    })
+  }
+
+}

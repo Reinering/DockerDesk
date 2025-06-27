@@ -80,6 +80,7 @@ async function initDB() {
           name: "wsl_docker",
           service_type: "Docker",
           connect_type: "local",
+          address: 'DockerDesk',
           create_time: Date.now(),
           delete_flags: 1
         },
@@ -88,6 +89,7 @@ async function initDB() {
           name: "wsl_podman",
           service_type: "Podman",
           connect_type: "local",
+          address: 'DockerDesk',
           create_time: Date.now(),
           delete_flags: 1
         },

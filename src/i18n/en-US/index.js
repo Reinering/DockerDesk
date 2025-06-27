@@ -556,6 +556,7 @@ export default {
     serviceName: "Service Name",
     serviceType: "Service Type",
     connectionType: "Link Type",
+    wslsubName: "WSL SubSystem Name",
     protocol: "Protocol",
     address: "Address",
     port: "Port",
@@ -626,6 +627,20 @@ export default {
     connectError: "Required connection parameters are missing",
     deleteMessage: "Are you sure to delete?"
   },
+
+  nodePanel: {
+
+    connectError: "Remote connection failed",
+    connectClose: "Remote connection closed",
+
+    wslNotInstall: "WSL not installed",
+    wslNeedUpgrade: "WSL need to upgrade",
+    wslSubNotStart: "WSL subsystem not started",
+    wslSubNotFound: "WSL subsystem not found",
+    dockerNotInstall: "Docker not installed",
+    podmanNotInstall: "Podman not installed",
+  },
+
 
   terminal: {
     globalSettingsTitle: "Terminal Node Global Settings",

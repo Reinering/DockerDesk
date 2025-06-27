@@ -29,6 +29,15 @@
                 outlined
                 dense
               />
+              <q-input
+                class="q-mb-sm"
+                v-if="newService.connectionType === t('node.localNode')"
+                v-model="newService.subSystem"
+                :label="t('node.wslsubName')"
+                maxlength="30"
+                outlined
+                dense
+              />
               <q-select
                 class="q-mb-sm"
                 color="blue"
@@ -252,6 +261,7 @@ const newService = reactive({
   serviceName: '',
   connectionType: '',
   serviceType: '',
+  subSystem: '',
   protocol: '',
   address: '',
   port: '',
@@ -367,6 +377,8 @@ const addService = () => {
     const data = deepClone(newService)
     if (data.connectionType === t('node.localNode')) {
       data.connectionType = "local"
+      data.address = data.subSystem
+      delete data.subSystem
     } else if (data.connectionType === t('node.remoteNode')) {
       data.connectionType = "remote"
     }
@@ -459,6 +471,11 @@ const showEdit = (row) => {
   newService.password = row.password
   newService.key = row.key
   newService.mark = row.mark
+
+  if (newService.connectionType === t('node.localNode')) {
+    newService.subSystem = row.address
+    newService.address = ''
+  }
 
   if (newService.key) {
     labelKey.value = t('node.keyFileHint')

@@ -41,6 +41,7 @@
               </q-tooltip>
             </q-btn>
             <q-btn
+              v-if="service.connectionType === t('node.localNode')"
               icon="import_export"
               size="xs"
               padding="xs"
@@ -122,6 +123,7 @@
             </q-tooltip>
           </q-btn>
           <q-btn
+            v-if="service.connectionType === t('node.localNode')"
             icon="save_alt"
             color="blue"
             dense
@@ -261,11 +263,11 @@ const showCreatePage = inject("showCreatePage")
 let notify = ref(null)
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 150 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 150 - 48 + "px" : window.innerHeight - 149 + "px",
 })
 
 const tableStyle = reactive({
-  height: window.innerHeight - 182 + "px",
+  height: window.innerHeight - 182 - 48 + "px",
 })
 const visibleColumns = ['repository', 'tag', 'imageId', 'created', 'size', 'port', 'actions']
 const columns = [
@@ -290,6 +292,11 @@ const getSelectedString = () => {
 
 const showPullDialog = ref(false)
 
+const connectState = inject('connectState')
+const dockerInfo = inject('dockerInfo')
+const podmanInfo = inject('podmanInfo')
+const wslInfo = inject('wslInfo')
+
 const rows = reactive([])
 const selected = ref([])
 
@@ -311,84 +318,171 @@ const isEdit = ref(true)
 const showCreateImageDialog = ref(false)
 
 const onImageSearch = (text) => {
-  let command
-  if (serviceCmd.value === "docker") {
-    command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
-  } else if (serviceCmd.value === "podman") {
-    const env = podmanStore.getENV
-
-    if (env.length > 0) {
-      command = ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"export ${env.join(' && ')} ${serviceCmd.value} search ${text}"`]
-    } else {
-      command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
-  }
 
-  pullList.length = 0
-  window.wslTerminal.execWSL(command).then((result) => {
-    if (result.success) {
-      let data
-      if (serviceCmd.value === "podman") {
-        data = parsePullPodmanImages(result.data)
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} search ${text}`
+    }).then((result) => {
+      if (result.success) {
+        let data
+        if (serviceCmd.value === "podman") {
+          data = parsePullPodmanImages(result.data)
+        } else {
+          data = parsePullDockerImages(result.data)
+        }
+
+        if (data.length > 0) {
+          pullList.push(...data)
+        }
+
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.images.searchSuccess')}`,
+        })
       } else {
-        data = parsePullDockerImages(result.data)
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `t('panel.images.searchFail'): ${result.error}`
+        })
       }
-
-      if (data.length > 0) {
-        pullList.push(...data)
-      }
-
-      $q.notify({
-        type: 'positive',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('panel.images.searchSuccess')}`,
-      })
-    } else {
-      return $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: t('panel.images.searchFail')
-      })
+    })
+  } else {
+    if (!wslInfo.enable) {
+      return
     }
-  })
+
+    let command
+    if (serviceCmd.value === "docker") {
+      command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
+    } else if (serviceCmd.value === "podman") {
+      const env = podmanStore.getENV
+
+      if (env.length > 0) {
+        command = ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"export ${env.join(' && ')} ${serviceCmd.value} search ${text}"`]
+      } else {
+        command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
+      }
+    }
+
+    pullList.length = 0
+    window.wslTerminal.execWSL(command).then((result) => {
+      if (result.success) {
+        let data
+        if (serviceCmd.value === "podman") {
+          data = parsePullPodmanImages(result.data)
+        } else {
+          data = parsePullDockerImages(result.data)
+        }
+
+        if (data.length > 0) {
+          pullList.push(...data)
+        }
+
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.images.searchSuccess')}`,
+        })
+      } else {
+        return $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.images.searchFail')}: ${result.error}`
+        })
+      }
+    })
+  }
 }
 
 const onImagePull = (name) => {
-  let command
-  if (serviceCmd.value === "docker") {
-    command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} pull ${name}`]
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
+
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} pull ${name}`
+    }).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.images.pullSuccess')}`,
+          timeout: 10000
+        })
+
+        getImageList()
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.images.pullFail')}: ${result.error}`,
+          timeout: 10000
+        })
+      }
+    })
   } else {
-    let env = ''
-    if (podmanStore.getENV.length > 0) {
-      env = `export ${podmanStore.getENV.join(' && ')}`
+    if (!wslInfo.enable) {
+      return
     }
 
-    command = ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"${env} ${serviceCmd.value} pull ${name} 2>&1"`]
-
-  }
-
-  window.wslTerminal.execWSL(command).then((result) => {
-    if (result.success) {
-      notify.value({
-        type: 'positive',
-        group: false,
-        icon: 'done',
-        spinner: false,
-        message: `${t('panel.images.pullSuccess')}`,
-        timeout: 10000
-      })
-
-      getImageList()
+    let command
+    if (serviceCmd.value === "docker") {
+      command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} pull ${name}`]
     } else {
-      notify.value({
-        type: 'negative',
-        icon: 'done',
-        spinner: false,
-        message: `${t('panel.images.pullFail')}: ${result.error}`,
-        timeout: 10000
-      })
+      let env = ''
+      if (podmanStore.getENV.length > 0) {
+        env = `export ${podmanStore.getENV.join(' && ')}`
+      }
+
+      command = ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"${env} ${serviceCmd.value} pull ${name} 2>&1"`]
     }
-  })
+
+    window.wslTerminal.execWSL(command).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.images.pullSuccess')}`,
+          timeout: 10000
+        })
+
+        getImageList()
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.images.pullFail')}: ${result.error}`,
+          timeout: 10000
+        })
+      }
+    })
+  }
 
   notify.value = $q.notify({
     type: 'info',
@@ -420,30 +514,72 @@ const deleteImage = (row) => {
     },
     persistent: true
   }).onOk(() => {
-    window.wslTerminal.execWSL(
-      ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${name}`]
-    ).then((result) => {
-      if (result.success) {
-        notify.value({
-          type: 'positive',
-          group: false,
-          icon: 'done',
-          spinner: false,
-          message: `${t('panel.images.deleteSuccess')}: ${name}`,
-          timeout: 10000
-        })
-
-        onRefresh()
-      } else {
-        notify.value({
-          type: 'negative',
-          icon: 'done',
-          spinner: false,
-          message: `${t('panel.images.deleteFail')}: ${name}: ${result.error}`,
-          timeout: 10000
-        })
+    if (service.connectionType === t('node.remoteNode')) {
+      if (!connectState.value) {
+        return
       }
-    })
+
+      if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+        return
+      } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+        return
+      }
+
+      window.containerTerminal.exec({
+        connID: service.id,
+        command: `${serviceCmd.value} rmi ${name}`
+      }).then((result) => {
+        if (result.success) {
+          notify.value({
+            type: 'positive',
+            group: false,
+            icon: 'done',
+            spinner: false,
+            message: `${t('panel.images.deleteSuccess')}: ${name}`,
+            timeout: 10000
+          })
+
+          onRefresh()
+        } else {
+          notify.value({
+            type: 'negative',
+            icon: 'done',
+            spinner: false,
+            message: `${t('panel.images.deleteFail')}: ${name}: ${result.error}`,
+            timeout: 10000
+          })
+        }
+      })
+    } else {
+      if (!wslInfo.enable) {
+        return
+      }
+
+      window.wslTerminal.execWSL(
+        ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${name}`]
+      ).then((result) => {
+        if (result.success) {
+          notify.value({
+            type: 'positive',
+            group: false,
+            icon: 'done',
+            spinner: false,
+            message: `${t('panel.images.deleteSuccess')}: ${name}`,
+            timeout: 10000
+          })
+
+          onRefresh()
+        } else {
+          notify.value({
+            type: 'negative',
+            icon: 'done',
+            spinner: false,
+            message: `${t('panel.images.deleteFail')}: ${name}: ${result.error}`,
+            timeout: 10000
+          })
+        }
+      })
+    }
 
     notify.value = $q.notify({
       type: 'info',
@@ -492,72 +628,144 @@ const onEditImage = () => {
   }
 
   const commands = []
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
 
-  let newName = newTag.repository
-  if (newTag.tag !== "<none>" && newTag.tag !== '') {
-    newName += `:${newTag.tag}`
-  }
-  commands.push(['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} tag ${newTag.imageId} ${newName}`],)
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
 
-  let oldName = oldTag.repository
-  if (oldTag.repository !== "<none>" && newTag.tag !== "<none>" && oldTag.tag !== '') {
-    oldName += `:${oldTag.tag}`
-    commands.push(['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${oldName}`])
-  }
+    let newName = newTag.repository
+    if (newTag.tag !== "<none>" && newTag.tag !== '') {
+      newName += `:${newTag.tag}`
+    }
+    commands.push([`${serviceCmd.value} tag ${newTag.imageId} ${newName}`],)
 
-  if (isEdit.value) {
-    window.wslTerminal.execSWSL(commands).then((result) => {
-      if (result.success) {
-        $q.notify({
-          type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('panel.images.editImageSuccess')}`,
-        })
+    let oldName = oldTag.repository
+    if (oldTag.repository !== "<none>" && newTag.tag !== "<none>" && oldTag.tag !== '') {
+      oldName += `:${oldTag.tag}`
+      commands.push([`${serviceCmd.value} rmi ${oldName}`])
+    }
 
-        showEditImageDialog.value = false
-        getImageList()
-      } else {
-        $q.notify({
-          type: 'negative',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('panel.images.editImageFail')}`
-        })
+    if (isEdit.value) {
+      window.containerTerminal.execs({
+        connID: service.id,
+        command: commands
+      }).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.images.editImageSuccess')}`,
+          })
+
+          showEditImageDialog.value = false
+          getImageList()
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.images.editImageFail')}`
+          })
+        }
+      })
+    } else {
+      if (!wslInfo.enable) {
+        return
       }
-    })
-    //
-    // notify.value = $q.notify({
-    //   type: 'info',
-    //   group: false,
-    //   timeout: 0,
-    //   spinner: true,
-    //   position: 'bottom-right',
-    //   message: t('panel.images.exporting'),
-    // })
+
+      window.containerTerminal.exec({
+        connID: service.id,
+        command: `${serviceCmd.value} tag ${newTag.imageId} ${newName}`
+      }).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.images.editImageSuccess')}`,
+          })
+
+          showEditImageDialog.value = false
+          getImageList()
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.images.editImageFail')}`
+          })
+        }
+      })
+    }
   } else {
-    window.wslTerminal.execWSL(
-      ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} tag ${newTag.imageId} ${newName}`]
-    ).then((result) => {
-      if (result.success) {
-        $q.notify({
-          type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('panel.images.editImageSuccess')}`,
-        })
+    let newName = newTag.repository
+    if (newTag.tag !== "<none>" && newTag.tag !== '') {
+      newName += `:${newTag.tag}`
+    }
+    commands.push(['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} tag ${newTag.imageId} ${newName}`],)
 
-        showEditImageDialog.value = false
-        getImageList()
-      } else {
-        $q.notify({
-          type: 'negative',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('panel.images.editImageFail')}`
-        })
-      }
-    })
+    let oldName = oldTag.repository
+    if (oldTag.repository !== "<none>" && newTag.tag !== "<none>" && oldTag.tag !== '') {
+      oldName += `:${oldTag.tag}`
+      commands.push(['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${oldName}`])
+    }
+
+    if (isEdit.value) {
+      window.wslTerminal.execSWSL(commands).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.images.editImageSuccess')}`,
+          })
+
+          showEditImageDialog.value = false
+          getImageList()
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.images.editImageFail')}`
+          })
+        }
+      })
+    } else {
+      window.wslTerminal.execWSL(
+        ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} tag ${newTag.imageId} ${newName}`]
+      ).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.images.editImageSuccess')}`,
+          })
+
+          showEditImageDialog.value = false
+          getImageList()
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.images.editImageFail')}`
+          })
+        }
+      })
+    }
   }
 }
 
 const onExportImage = async (row) => {
+  if (service.connectionType === t('node.remoteNode')) {
+    return
+  }
+
+  if (!wslInfo.enable) {
+    return
+  }
+
   const folders = await window.myWindowAPI.selectFolders()
   try {
     if (folders.length === 0) {
@@ -616,6 +824,14 @@ const onExportImage = async (row) => {
 }
 
 const loadImage = async (file) => {
+  if (service.connectionType === t('node.remoteNode')) {
+    return
+  }
+
+  if (!wslInfo.enable) {
+    return
+  }
+
   await window.wslTerminal.execWSL([
     '-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c',
     `"${serviceCmd.value} load < "/mnt/${firstLower(file).replace(':', '').replace(/\\/g, '/')}""`
@@ -639,6 +855,14 @@ const loadImage = async (file) => {
 }
 
 const onImportImage = async () => {
+  if (service.connectionType === t('node.remoteNode')) {
+    return
+  }
+
+  if (!wslInfo.enable) {
+    return
+  }
+
   const files = await window.myWindowAPI.selectFiles()
   try {
     if (files.length === 0) {
@@ -701,23 +925,58 @@ const onDeleteBatch = async () => {
           name += `:${item.tag}`
         }
 
-        await window.wslTerminal.execWSL(
-          ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${name}`]
-        ).then((result) => {
-          if (result.success) {
-            $q.notify({
-              type: 'positive',
-              position: clientConfig.quasar.notify.position,
-              message: `${t('panel.images.deleteSuccess')}: ${name}`,
-            })
-          } else {
-            $q.notify({
-              type: 'negative',
-              position: clientConfig.quasar.notify.position,
-              message: `${t('panel.images.deleteFail')}: ${name}: ${result.error}`
-            })
+        if (service.connectionType === t('node.remoteNode')) {
+          if (!connectState.value) {
+            return
           }
-        })
+
+          if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+            return
+          } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+            return
+          }
+
+          window.containerTerminal.exec({
+            connID: service.id,
+            command: `${serviceCmd.value} rmi ${name}`
+          }).then((result) => {
+            if (result.success) {
+              $q.notify({
+                type: 'positive',
+                position: clientConfig.quasar.notify.position,
+                message: `${t('panel.images.deleteSuccess')}: ${name}`,
+              })
+            } else {
+              $q.notify({
+                type: 'negative',
+                position: clientConfig.quasar.notify.position,
+                message: `${t('panel.images.deleteFail')}: ${name}: ${result.error}`
+              })
+            }
+          })
+        } else {
+          if (!wslInfo.enable) {
+            return
+          }
+
+          await window.wslTerminal.execWSL(
+            ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${name}`]
+          ).then((result) => {
+            if (result.success) {
+              $q.notify({
+                type: 'positive',
+                position: clientConfig.quasar.notify.position,
+                message: `${t('panel.images.deleteSuccess')}: ${name}`,
+              })
+            } else {
+              $q.notify({
+                type: 'negative',
+                position: clientConfig.quasar.notify.position,
+                message: `${t('panel.images.deleteFail')}: ${name}: ${result.error}`
+              })
+            }
+          })
+        }
       }
 
       selected.value.length = 0
@@ -743,49 +1002,91 @@ const onCreateContainer = (row) => {
 
 
 const getImageList = () => {
-  window.wslTerminal.execWSL(
-    ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} images`]
-  ).then((result) => {
-    if (result.success) {
-      rows.length = 0
-      if (serviceCmd.value === "docker") {
-        const data = parseDockerImages(result.data)
-        if (data.length > 0)  {
-          rows.push(...data)
-        }
-      } else if (serviceCmd.value === "podman") {
-        const data = parsePodmanImages(result.data)
-        if (data.length > 0)  {
-          rows.push(...data)
-        }
-      }
-
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('panel.images.getImagesError')}: ${result.error}`
-      })
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
-  })
+
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} images`
+    }).then((result) => {
+      if (result.success) {
+        rows.length = 0
+        if (serviceCmd.value === "docker") {
+          const data = parseDockerImages(result.data)
+          if (data.length > 0)  {
+            rows.push(...data)
+          }
+        } else if (serviceCmd.value === "podman") {
+          const data = parsePodmanImages(result.data)
+          if (data.length > 0)  {
+            rows.push(...data)
+          }
+        }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.images.getImagesError')}: ${result.error}`
+        })
+      }
+    })
+  } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    window.wslTerminal.execWSL(
+      ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} images`]
+    ).then((result) => {
+      if (result.success) {
+        rows.length = 0
+        if (serviceCmd.value === "docker") {
+          const data = parseDockerImages(result.data)
+          if (data.length > 0)  {
+            rows.push(...data)
+          }
+        } else if (serviceCmd.value === "podman") {
+          const data = parsePodmanImages(result.data)
+          if (data.length > 0)  {
+            rows.push(...data)
+          }
+        }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.images.getImagesError')}: ${result.error}`
+        })
+      }
+      })
+  }
 }
 
 const init = () => {
   getImageList()
+
 }
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 182 + "px"
-    tableStyle.height = window.innerHeight - 182 + "px"
+    cardStyle.height = window.innerHeight - 182 - 48 + "px"
+    tableStyle.height = window.innerHeight - 182 - 48 + "px"
   } else {
-    cardStyle.height = window.innerHeight - 149 + "px"
-    tableStyle.height = window.innerHeight - 182 + "px"
+    cardStyle.height = window.innerHeight - 149 - 48 + "px"
+    tableStyle.height = window.innerHeight - 182 - 48 + "px"
   }
 }
 
 onMounted(() => {
-  serviceCmd.value = service.serviceType
+  serviceCmd.value = firstLower(service.serviceType)
   if (isEmptyObj(serviceCmd.value)) {
     return
   }

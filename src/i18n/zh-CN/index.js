@@ -562,6 +562,7 @@ export default {
     serviceName: "服务名称",
     serviceType: "服务类型",
     connectionType: "连接类型",
+    wslsubName: "WSL子系统名称",
     protocol: "协议",
     address: "地址",
     port: "端口",
@@ -640,6 +641,19 @@ export default {
     detail: "详情",
     more: "更多",
 
+  },
+
+  nodePanel: {
+
+    connectError: "远程连接失败",
+    connectClose: "远程连接关闭",
+
+    wslNotInstall: "WSL未安装",
+    wslNeedUpgrade: "WSL需要升级",
+    wslSubNotStart: "WSL子系统未启动",
+    wslSubNotFound: "WSL子系统未找到",
+    dockerNotInstall: "Docker未安装",
+    podmanNotInstall: "Podman未安装",
   },
 
   terminal: {

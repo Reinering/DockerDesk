@@ -1,10 +1,7 @@
 <template>
-<!--  <q-layout view="lHh Lpr lFf" container :style="background" class="shadow-2 rounded-borders">-->
-<!--    -->
-<!--  </q-layout>-->
-
-  <q-page q-pa-md>
+  <q-page>
     <q-tabs
+      no-caps
       inline-label
       switch-indicator
       indicator-color="primary"
@@ -22,18 +19,18 @@
       />
     </q-tabs>
 
-    <q-separator />
-
-    <q-tab-panels v-model="tab" animated style="height: 100%" keep-alive >
+    <q-tab-panels v-model="tab" animated style="height: 100%" keep-alive>
       <q-tab-panel
         v-for="item in tabs"
         :key="item.id"
         :name="item.id"
+        class="q-pa-none"
       >
-        <Containers
-          :container-id="item.id"
-          :data="item.data"
-        />
+        <router-view v-slot="{ Component }">
+          <keep-alive >
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
       </q-tab-panel>
     </q-tab-panels>
 
@@ -67,7 +64,6 @@ defineOptions({
 
 import { inject, onMounted, onActivated, reactive, ref, nextTick, watch, onUnmounted } from 'vue'
 import rtab from 'components/RTab.vue'
-import Containers from 'src/components/Containers.vue'
 import { useNavigatorStore } from 'stores/navigator.js'
 import { generateUuid, isEmptyObj } from 'src/utils/common.js'
 
@@ -98,16 +94,9 @@ const moveFab = (ev) => {
 const tab = ref('')
 
 const tabs = reactive([
-  { id: 'mails', label: 'Mails', icon: 'check', data: {}},
-  // { id: 'alarms', label: 'Alarms', icon: 'unfold_less', data: {}},
-  // { id: 'movies', label: 'Movies', icon: 'movie', data: {}},
+  // { id: 'mails', label: 'Mails', icon: 'check', data: {}},
 ])
 
-
-const checkScreenSize = () => {
-  console.log('check screenSize', window.innerHeight, background.height)
-
-}
 
 const deleteTab = (id) => {
   $q.dialog({
@@ -137,6 +126,16 @@ const deleteTab = (id) => {
   })
 }
 
+
+
+
+
+
+const checkScreenSize = () => {
+  console.log('check screenSize', window.innerHeight, background.height)
+
+}
+
 onMounted(() => {
   window.addEventListener('resize', checkScreenSize)
 
@@ -146,10 +145,17 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreenSize)
 })
 
-onActivated(() => {
+const addTab = () => {
   try {
     const data = JSON.parse(route.query.data).data
     if (data) {
+      for (const item of tabs) {
+        if (item.label === data.serviceName) {
+          tab.value = item.id
+          return
+        }
+      }
+
       const uuid = generateUuid()
       tabs.push({
         id: uuid,
@@ -162,6 +168,11 @@ onActivated(() => {
   } catch (e) {
     // console.error(e)
   }
+}
+
+onActivated(() => {
+  addTab()
+
 })
 
 watch(tabs, (newVal, oldVal) => {

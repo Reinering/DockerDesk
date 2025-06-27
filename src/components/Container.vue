@@ -248,6 +248,9 @@ const router = inject("router")
 const route = inject("route")
 const t = inject("t")
 
+const service = inject("service")
+const connectState = inject('connectState')
+
 let notify = ref(null)
 let monitorInterval = null
 
@@ -318,30 +321,62 @@ const onStart = async () => {
     return
   }
 
-  window.wslTerminal.execWSL([
-    '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} start ${props.data["data"]["names"]}`
-  ]).then((result) => {
-    if (result.success) {
-      notify.value({
-        type: 'positive',
-        group: false,
-        icon: 'done',
-        spinner: false,
-        message: `${t('panel.container.startSuccess')}`,
-        timeout: 10000
-      })
-
-      containerStateMonitor()
-    } else {
-      notify.value({
-        type: 'negative',
-        icon: 'done',
-        spinner: false,
-        message: `${t('panel.container.startFail')}`,
-        timeout: 10000
-      })
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
-  })
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${props.data.serviceCmd} start ${props.data["data"]["names"]}`
+    }).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.startSuccess')}`,
+          timeout: 10000
+        })
+
+        containerStateMonitor()
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.startFail')}`,
+          timeout: 10000
+        })
+      }
+    })
+  } else {
+    window.wslTerminal.execWSL([
+      '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} start ${props.data["data"]["names"]}`
+    ]).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.startSuccess')}`,
+          timeout: 10000
+        })
+
+        containerStateMonitor()
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.startFail')}`,
+          timeout: 10000
+        })
+      }
+    })
+  }
 
   notify.value = $q.notify({
     type: 'info',
@@ -357,59 +392,122 @@ const onStop = () => {
     return
   }
 
-  window.wslTerminal.execWSL([
-    '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} stop ${props.data["data"]["names"]}`
-  ]).then((result) => {
-    if (result.success) {
-      $q.notify({
-        type: 'positive',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('panel.container.stopSuccess')}`,
-      })
-
-      if (monitorInterval !== null) {
-        clearInterval(monitorInterval)
-        monitorInterval = null
-      }
-      getContainerState()
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('panel.container.stopFail')}`
-      })
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
-  })
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${props.data.serviceCmd} stop ${props.data["data"]["names"]}`
+    }).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.stopSuccess')}`,
+        })
+
+        if (monitorInterval !== null) {
+          clearInterval(monitorInterval)
+          monitorInterval = null
+        }
+        getContainerState()
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.stopFail')}`
+        })
+      }
+    })
+  } else {
+    window.wslTerminal.execWSL([
+      '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} stop ${props.data["data"]["names"]}`
+    ]).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.stopSuccess')}`,
+        })
+
+        if (monitorInterval !== null) {
+          clearInterval(monitorInterval)
+          monitorInterval = null
+        }
+        getContainerState()
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.stopFail')}`
+        })
+      }
+    })
+  }
 }
 const onRestart = () => {
   if (isEmptyObj(props.data)) {
     return
   }
 
-  window.wslTerminal.execWSL([
-    '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} restart ${props.data["data"]["names"]}`
-  ]).then((result) => {
-    if (result.success) {
-      notify.value({
-        type: 'positive',
-        group: false,
-        icon: 'done',
-        spinner: false,
-        message: `${t('panel.container.restartSuccess')}`,
-        timeout: 10000
-      })
-
-      containerStateMonitor()
-    } else {
-      notify.value({
-        type: 'negative',
-        icon: 'done',
-        spinner: false,
-        message: `${t('panel.container.restartFail')}`,
-        timeout: 10000
-      })
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
-  })
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${props.data.serviceCmd} restart ${props.data["data"]["names"]}`
+    }).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.restartSuccess')}`,
+          timeout: 10000
+        })
+
+        containerStateMonitor()
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.restartFail')}`,
+          timeout: 10000
+        })
+      }
+    })
+  } else {
+    window.wslTerminal.execWSL([
+      '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} restart ${props.data["data"]["names"]}`
+    ]).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.restartSuccess')}`,
+          timeout: 10000
+        })
+
+        containerStateMonitor()
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.restartFail')}`,
+          timeout: 10000
+        })
+      }
+    })
+  }
 
   notify.value = $q.notify({
     type: 'info',
@@ -451,29 +549,60 @@ const onDelete = () => {
       force = '-f'
     }
 
-    window.wslTerminal.execWSL([
-      '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} rm ${force} ${props.data["data"]["names"]}`
-    ]).then((result) => {
-      if (result.success) {
-        $q.notify({
-          type: 'positive',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('panel.container.deleteSuccess')}`,
-        })
-
-        props.delete(props.data.nodeId)
-        if (monitorInterval !== null) {
-          clearInterval(monitorInterval)
-          monitorInterval = null
-        }
-      } else {
-        $q.notify({
-          type: 'negative',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('panel.container.deleteFail')}`
-        })
+    if (service.connectionType === t('node.remoteNode')) {
+      if (!connectState.value) {
+        return
       }
-    })
+
+      window.containerTerminal.exec({
+        connID: service.id,
+        command: `${props.data.serviceCmd} rm ${force} ${props.data["data"]["names"]}`
+      }).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.container.deleteSuccess')}`,
+          })
+
+          props.delete(props.data.nodeId)
+          if (monitorInterval !== null) {
+            clearInterval(monitorInterval)
+            monitorInterval = null
+          }
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.container.deleteFail')}`
+          })
+        }
+      })
+    } else {
+      window.wslTerminal.execWSL([
+        '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} rm ${force} ${props.data["data"]["names"]}`
+      ]).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.container.deleteSuccess')}`,
+          })
+
+          props.delete(props.data.nodeId)
+          if (monitorInterval !== null) {
+            clearInterval(monitorInterval)
+            monitorInterval = null
+          }
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.container.deleteFail')}`
+          })
+        }
+      })
+    }
   })
 }
 const onPack = () => {
@@ -490,33 +619,68 @@ const onPack = () => {
     })
   }
 
-  window.wslTerminal.execWSL([
-    '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} commit ${props.data["data"]["names"]} ${newTag.repository}:${newTag.tag}`
-  ]).then((result) => {
-    if (result.success) {
-      notify.value({
-        type: 'positive',
-        group: false,
-        icon: 'done',
-        spinner: false,
-        message: `${t('panel.container.packSuccess')}`,
-        timeout: 10000
-      })
-
-      showPackImageDialog.value = false
-    } else {
-      notify.value({
-        type: 'negative',
-        icon: 'done',
-        spinner: false,
-        message: `${t('panel.container.packFail')}`,
-        timeout: 10000
-      })
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
 
-    newTag.repository = ''
-    newTag.tag = ''
-  })
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${props.data.serviceCmd} commit ${props.data["data"]["names"]} ${newTag.repository}:${newTag.tag}`
+    }).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.packSuccess')}`,
+          timeout: 10000
+        })
+
+        showPackImageDialog.value = false
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.packFail')}`,
+          timeout: 10000
+        })
+      }
+
+      newTag.repository = ''
+      newTag.tag = ''
+    })
+  } else {
+    window.wslTerminal.execWSL([
+      '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} commit ${props.data["data"]["names"]} ${newTag.repository}:${newTag.tag}`
+    ]).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.packSuccess')}`,
+          timeout: 10000
+        })
+
+        showPackImageDialog.value = false
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('panel.container.packFail')}`,
+          timeout: 10000
+        })
+      }
+
+      newTag.repository = ''
+      newTag.tag = ''
+    })
+  }
 
   notify.value = $q.notify({
     type: 'info',
@@ -529,11 +693,19 @@ const onPack = () => {
 }
 
 const openFirstPort = () => {
-  window.client.openUrlOnBrowser(`http://localhost:${ports[0]}`)
+  if (service.connectionType === t('node.remoteNode')) {
+    window.client.openUrlOnBrowser(`http://${service.address}:${ports[0]}`)
+  } else {
+    window.client.openUrlOnBrowser(`http://localhost:${ports[0]}`)
+  }
 }
 
 const openCurrentPort = (port) => {
-  window.client.openUrlOnBrowser(`http://localhost:${port}`)
+  if (service.connectionType === t('node.remoteNode')) {
+    window.client.openUrlOnBrowser(`http://${service.address}:${port}`)
+  } else {
+    window.client.openUrlOnBrowser(`http://localhost:${port}`)
+  }
 }
 
 
@@ -557,16 +729,34 @@ const containerStateMonitor = (time=60000, interval=5000) => {
 }
 
 const getContainerState = () => {
-  window.wslTerminal.execWSL([
-    '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} ps -a --filter "name=${props.data["data"]["names"]}"`
-  ]).then((result) => {
-    if (result.success) {
-      const item = parseDockerContainer(result.data)[0]
-      Object.keys(item).forEach((key) => {
-        props.update(props.data.nodeId, key, item[key])
-      })
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
-  })
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${props.data.serviceCmd} ps -a --filter "name=${props.data["data"]["names"]}"`
+    }).then((result) => {
+      if (result.success) {
+        const item = parseDockerContainer(result.data)[0]
+        Object.keys(item).forEach((key) => {
+          props.update(props.data.nodeId, key, item[key])
+        })
+      }
+    })
+  } else {
+    window.wslTerminal.execWSL([
+      '-d', "DockerDesk", '--user', "root", '-e', `${props.data.serviceCmd} ps -a --filter "name=${props.data["data"]["names"]}"`
+    ]).then((result) => {
+      if (result.success) {
+        const item = parseDockerContainer(result.data)[0]
+        Object.keys(item).forEach((key) => {
+          props.update(props.data.nodeId, key, item[key])
+        })
+      }
+    })
+  }
 }
 
 const changeState = (newVal) => {
@@ -605,7 +795,6 @@ changeState(state)
 
 const init = () => {
   if (!isEmptyObj(props.data["data"])) {
-
     if (!isEmptyStr(props.data["data"]["ports"])) {
       ports.length = 0
       for (const item of getExPortsByContainer(props.data["data"]["ports"])) {

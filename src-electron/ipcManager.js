@@ -3,18 +3,14 @@ import { registerNodesIpcHandlers } from "./ipc/nodesIPC.js"
 import { registerPreCmdsIpcHandlers } from "./ipc/preCmdsIPC.js"
 import { registerTerminalIpcHandlers } from "./ipc/terminalIPC.js"
 import { registerSSHIpcHandlers, registerSFTPIpcHandlers } from "./ipc/sshIPC.js"
-import { registerDockerIpcHandlers } from "./ipc/dockerIPC.js"
-import { registerPodmanIpcHandlers } from "./ipc/podmanIPC.js"
 import { registerWSLIpcHandlers } from "./ipc/wslIPC.js"
 import { registerShortcutsIpcHandlers } from "./ipc/shortcutsIPC.js"
-// import { registerDockerWSLIpcHandlers } from "./ipc/dockerWSLIPC.js"
+import { registerContainerIpcHandlers } from "./ipc/containerIPC.js"
 
 
 export function registerIpcHandlers(win) {
 
   registerClientIpcHandlers(win)
-
-  // registerDBIpcHandlers(win)
 
   registerNodesIpcHandlers(win)
 
@@ -28,13 +24,9 @@ export function registerIpcHandlers(win) {
 
   registerWSLIpcHandlers(win)
 
-  // registerDockerWSLIpcHandlers(win)
-
-  registerDockerIpcHandlers(win)
-
-  registerPodmanIpcHandlers(win)
-
   registerShortcutsIpcHandlers(win)
+
+  registerContainerIpcHandlers(win)
 
 }
 
