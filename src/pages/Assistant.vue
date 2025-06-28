@@ -342,6 +342,12 @@ const onBackgroundStart = () => {
   }
 }
 
+const checkSubSystem = async () => {
+  window.wslTerminal.checkSubSystem().then((result) => {
+    console.log(result)
+  })
+}
+
 const init = () => {
   if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32") {
     window.wslTerminal.checkWSLInfo().then((result) => {
@@ -371,6 +377,7 @@ const init = () => {
                   }
 
                   showWslStatusBtn.value = false
+                  checkSubSystem()
                   return
                 }
               }

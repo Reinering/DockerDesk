@@ -4,7 +4,7 @@ import {
   getWSLInfo, getWSLList, wslUpdate,
   wslInstallSubSystem, installWSL, startSubSystem, stopSubSystem, restartSubSystem,
   unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList, dockerLogin, startBGSubSystem,
-  readPodmanConf,
+  readPodmanConf, checkSubSystem
 } from 'app/src-electron/actions/wsl.js'
 
 
@@ -78,6 +78,14 @@ export function registerWSLIpcHandlers(win) {
 
   ipcMain.handle('stopSubSystem', async (event) => {
     return stopSubSystem().then((data) => {
+      return { success: true, data:data, error: '' }
+    }, (error) => {
+      return { success: false, error: error }
+    })
+  })
+
+  ipcMain.handle('checkSubSystem', async (event) => {
+    return checkSubSystem().then((data) => {
       return { success: true, data:data, error: '' }
     }, (error) => {
       return { success: false, error: error }

@@ -1,5 +1,6 @@
 import { cmd, cmd1, cmdAdmin,  CmdRunner, modifyIniConfig, } from 'app/src-electron/common/utils.js'
 import { WslCmdRunner } from 'app/src-electron/common/wsl.js'
+import { nodes } from '../actions/nodes.js'
 import readline from 'readline'
 import path from 'path'
 import { parse, stringify } from 'smol-toml'
@@ -103,6 +104,58 @@ export async function startBGSubSystem (name='DockerDesk') {
 
 export async function stopSubSystem (name='DockerDesk') {
   return cmd1(`wsl --terminate ${name}`, 'utf16le')
+}
+
+export async function checkSubSystem (name='DockerDesk') {
+  let isError = false
+  let res = ''
+  await nodes.getNodeByID('11111111').then((result) => {
+    if (result instanceof Array && result.length > 0 ) {
+      if (result[0].delete_flags === 1 || result[0].delete_flags === 0) {
+        nodes.updateNode({
+          id: "11111111",
+          delete_flags: 2
+        }).then((result) => {
+          if (!result.success) {
+            isError = true
+            res = result.error
+          }
+        })
+      }
+    } else {
+      isError = true
+      res = result.error
+    }
+  })
+
+  if (!isError) {
+    await nodes.getNodeByID('11111112').then((result) => {
+      if (result instanceof Array && result.length > 0 ) {
+        if (result[0].delete_flags === 1 || result[0].delete_flags === 0) {
+          nodes.updateNode({
+            id: "11111112",
+            delete_flags: 2
+          }).then((result) => {
+            if (!result.success) {
+              isError = true
+              res = result.error
+            }
+          })
+        }
+      } else {
+        isError = true
+        res = result.error
+      }
+    })
+  }
+
+  return new Promise((resolve, reject) => {
+    if (isError) {
+      reject(res)
+    } else {
+      resolve(res)
+    }
+  })
 }
 
 export async function restartSubSystem (name='DockerDesk') {

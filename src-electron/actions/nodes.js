@@ -19,7 +19,7 @@ export const nodes = {
 
   getNodeByID:  async (id) => {
     return await db('nodes')
-      .where('delete_flags', '!=', '1')
+      // .where('delete_flags', '!=', '1')
       .andWhere('id', '=', id)
       .select('*').then(
       row => {

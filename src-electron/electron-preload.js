@@ -448,6 +448,10 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('stopSubSystem')
   },
 
+  checkSubSystem () {
+    return ipcRenderer.invoke('checkSubSystem')
+  },
+
   installWSL(data) {
     return ipcRenderer.invoke('installWSL', data)
   },
