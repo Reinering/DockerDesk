@@ -283,6 +283,9 @@ const onWslStatusBtn = () => {
           })
         } else {
           isAssLocalBtn.value = false
+          wslStatusBtn.value = t('assistant.stop')
+          wslStatus.value = "Running"
+          wslStatusColor.value = "green"
         }
       })
 
@@ -290,9 +293,7 @@ const onWslStatusBtn = () => {
       isCall = false
     }, 5000)
 
-    wslStatusBtn.value = t('assistant.stop')
-    wslStatus.value = "Running"
-    wslStatusColor.value = "green"
+
   } else if (wslStatusBtn.value === t('assistant.stop')) {
     window.wslTerminal.stopSubSystem().then((result) => {
       if (result.success) {

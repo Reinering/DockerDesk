@@ -2,10 +2,10 @@
   <q-card :style="cardStyle">
     <q-card-section>
       <q-table
-        class="images-table"
+        class="volumes-table"
         :rows="rows"
         :columns="columns"
-        row-key="id"
+        row-key="volumeName"
         virtual-scroll
         v-model:pagination="pagination"
         :rows-per-page-options="[0]"
@@ -34,31 +34,31 @@
               size="xs"
               padding="xs"
               color="deep-purple"
-              @click="showPullDialog = !showPullDialog"
+              @click="onClearVolumes"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
                 {{ t('panel.volumes.clearVolumes') }}
               </q-tooltip>
             </q-btn>
-            <q-btn
-              icon="create"
-              size="xs"
-              padding="xs"
-              color="deep-purple"
-              @click="onImportImage"
-            >
-              <q-tooltip class="bg-amber text-black shadow-4">
-                {{ t('panel.volumes.create') }}
-              </q-tooltip>
-            </q-btn>
+<!--            <q-btn-->
+<!--              icon="create"-->
+<!--              size="xs"-->
+<!--              padding="xs"-->
+<!--              color="deep-purple"-->
+<!--              @click="onImportImage"-->
+<!--            >-->
+<!--              <q-tooltip class="bg-amber text-black shadow-4">-->
+<!--                {{ t('panel.volumes.create') }}-->
+<!--              </q-tooltip>-->
+<!--            </q-btn>-->
             <q-btn icon="delete" size="xs" padding="xs" color="red" @click="onDeleteBatch">
               <q-tooltip class="bg-amber text-black shadow-4">
-                {{ t('panel.images.batchDelete') }}
+                {{ t('panel.volumes.batchDelete') }}
               </q-tooltip>
             </q-btn>
             <q-btn icon="refresh" size="xs" padding="xs" color="green" @click="onRefresh">
               <q-tooltip class="bg-amber text-black shadow-4">
-                {{ t('panel.images.refresh') }}
+                {{ t('panel.volumes.refresh') }}
               </q-tooltip>
             </q-btn>
           </div>
@@ -66,25 +66,14 @@
 
         <template v-slot:body-cell-actions="props" >
           <q-btn
-            icon="edit"
-            color="primary"
+            icon="info"
+            color="blue"
             dense
             flat
-            @click="onEdit(props.row)"
+            @click="onDetail(props.row)"
           >
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('panel.images.edit')}}
-            </q-tooltip>
-          </q-btn>
-          <q-btn
-            icon="tag"
-            color="primary"
-            dense
-            flat
-            @click="onRetag(props.row)"
-          >
-            <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('panel.images.reTag')}}
+              {{t('panel.volumes.detail')}}
             </q-tooltip>
           </q-btn>
           <q-btn
@@ -92,42 +81,10 @@
             color="negative"
             dense
             flat
-            @click="deleteImage(props.row)"
+            @click="onDelete(props.row)"
           >
             <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('panel.images.delete')}}
-            </q-tooltip>
-          </q-btn>
-          <q-btn
-            icon="save_alt"
-            color="blue"
-            dense
-            flat
-            @click="onExportImage(props.row)"
-          >
-            <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('panel.images.export')}}
-            </q-tooltip>
-          </q-btn>
-          <q-btn
-            icon="upload"
-            size="xs"
-            padding="xs"
-            color="deep-purple"
-          >
-            <q-tooltip class="bg-amber text-black shadow-4">
-              {{ t('panel.images.push') }}
-            </q-tooltip>
-          </q-btn>
-          <q-btn
-            icon="post_add"
-            color="green"
-            dense
-            flat
-            @click="connectPanel(props.row)"
-          >
-            <q-tooltip class="bg-amber text-black shadow-4">
-              {{t('panel.images.createContainer')}}
+              {{t('panel.volumes.delete')}}
             </q-tooltip>
           </q-btn>
 
@@ -170,17 +127,256 @@ const tableStyle = reactive({
 const visibleColumns = ['volumeName', 'driver', 'actions']
 const columns = [
   { name: 'volumeName', label: t('panel.volumes.volumeName'), sortOrder: 'ad', sortable: true, align: 'left', field: 'volumeName' },
-  { name: 'driver', label: t('panel.volumes.driver'), align: 'left', field: 'tag' },
+  { name: 'driver', label: t('panel.volumes.driver'), align: 'left', field: 'driver' },
   { name: 'actions', label: t('panel.volumes.action'), align: 'center' }
 ]
 
 const pagination = ref({
   rowsPerPage: 0,
-  sortBy: 'repository', // 初始排序的列名
+  sortBy: 'volumeName', // 初始排序的列名
   descending: false, // true 为降序，false 为升序
 })
 
+const getSelectedString = () => {
+  return selected.value.length === 0 ? '' : `${selected.value.length} record${selected.value.length > 1 ? 's' : ''} selected of ${rows.length}`
+}
+
 const rows = reactive([])
+const selected = ref([])
+
+const onClearVolumes = () => {
+  $q.dialog({
+    title: t('confirm'),
+    message: t('panel.volumes.deleteMessage'),
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk(async () => {
+    if (service.connectionType === t('node.remoteNode')) {
+      if (!connectState.value) {
+        return
+      }
+
+      window.containerTerminal.exec({
+        connID: service.id,
+        command: `${serviceCmd.value} volume  rm $(${serviceCmd.value} volume ls -qf dangling=true)`
+      }).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.volumes.clearVolumesSuccess')}`,
+          })
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.volumes.clearVolumesFail')}: ${result.error}`
+          })
+        }
+      })
+    } else {
+      if (!wslInfo.enable) {
+        return
+      }
+
+      window.wslTerminal.execWSL(
+        ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} volume  rm $(${serviceCmd.value} volume ls -qf dangling=true)`]
+      ).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.volumes.clearVolumesSuccess')}`,
+          })
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.volumes.clearVolumesFail')}: ${result.error}`
+          })
+        }
+      })
+    }
+  })
+}
+const onDeleteBatch = () => {
+  $q.dialog({
+    title: t('confirm'),
+    message: `${t('panel.volumes.deleteMessage')}`,
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk(async () => {
+    if (service.connectionType === t('node.remoteNode')) {
+      if (!connectState.value) {
+        return
+      }
+
+      for (const item of selected.value) {
+        await window.containerTerminal.exec({
+          connID: service.id,
+          command: `${serviceCmd.value} volume rm ${item.volumeName}`
+        }).then((result) => {
+          if (result.success) {
+            $q.notify({
+              type: 'positive',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('panel.volumes.deleteSuccess')}: ${item.volumeName}`,
+            })
+          } else {
+            $q.notify({
+              type: 'negative',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('panel.volumes.deleteFail')}: ${item.volumeName}: ${result.error}`
+            })
+          }
+        })
+      }
+    } else {
+      if (!wslInfo.enable) {
+        return
+      }
+
+      for (const item of selected.value) {
+        await window.wslTerminal.execWSL(
+          ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} volume rm ${item.volumeName}`]
+        ).then((result) => {
+          if (result.success) {
+            $q.notify({
+              type: 'positive',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('panel.volumes.deleteSuccess')}: ${item.volumeName}`,
+            })
+          } else {
+            $q.notify({
+              type: 'negative',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('panel.volumes.deleteFail')}: ${item.volumeName}: ${result.error}`
+            })
+          }
+        })
+      }
+    }
+  })
+}
+const onRefresh = () => {
+  getVolumeList()
+}
+
+const onDelete = (row) => {
+  $q.dialog({
+    title: t('confirm'),
+    message: `${t('panel.volumes.deleteMessage')}`,
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+    persistent: true
+  }).onOk(() => {
+    if (service.connectionType === t('node.remoteNode')) {
+      if (!connectState.value) {
+        return
+      }
+
+      window.containerTerminal.exec({
+        connID: service.id,
+        command: `${serviceCmd.value} volume rm ${row.volumeName}`
+      }).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.volumes.deleteSuccess')}: ${name}`,
+          })
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.volumes.deleteFail')}: ${name}: ${result.error}`
+          })
+        }
+      })
+    } else {
+      if (!wslInfo.enable) {
+        return
+      }
+
+      window.wslTerminal.execWSL(
+        ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} volume rm ${row.volumeName}`]
+      ).then((result) => {
+        if (result.success) {
+          $q.notify({
+            type: 'positive',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.volumes.deleteSuccess')}: ${name}`,
+          })
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: `${t('panel.volumes.deleteFail')}: ${name}: ${result.error}`
+          })
+        }
+      })
+    }
+  })
+}
+const onDetail = (row) => {
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} volume inspect ${row.volumeName}`
+    }).then((result) => {
+      if (result.success) {
+
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.volumes.queryDetailFail')}: ${name}: ${result.error}`
+        })
+      }
+    })
+  } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    window.wslTerminal.execWSL(
+      ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} volume inspect ${row.volumeName}`]
+    ).then((result) => {
+      if (result.success) {
+
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.volumes.queryDetailFail')}: ${name}: ${result.error}`
+        })
+      }
+    })
+  }
+}
+
+
 
 const getVolumeList = () => {
   if (service.connectionType === t('node.remoteNode')) {
@@ -217,8 +413,14 @@ const getVolumeList = () => {
       return
     }
 
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     window.wslTerminal.execWSL(
-      ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} volume ls`]
+      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} volume ls`]
     ).then((result) => {
       if (result.success) {
         rows.length = 0
@@ -280,17 +482,17 @@ onUnmounted(() => {
 
 <style scoped>
 /* fix table header */
-.images-table thead tr th {
+.volumes-table thead tr th {
   position: sticky;
   z-index: 1;
 }
-.images-table thead tr:first-child th {
+.volumes-table thead tr:first-child th {
   top: 0;
 }
 
-.images-table .q-table__top,
-.images-table .q-table__bottom,
-.images-table thead tr:first-child th {
+.volumes-table .q-table__top,
+.volumes-table .q-table__bottom,
+.volumes-table thead tr:first-child th {
   /* set background color for fixed header rows */
   background-color: #aba79d;
 }

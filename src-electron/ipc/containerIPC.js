@@ -117,10 +117,8 @@ export function registerContainerIpcHandlers(win) {
           }
           return sshClient.execCmd(cmd)
             .then((result) => {
-              console.log("result", result)
               return { success: true, data: result }
             }, (error) => {
-              console.log("error", error)
               return { success: false, error: error }
             })
         }

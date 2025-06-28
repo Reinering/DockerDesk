@@ -1474,27 +1474,19 @@ const onCreateContainer = () => {
   }
 
   let command
-  if (serviceCmd.value === "docker") {
-    command = `bash -c "${generateCmd().join(' ')}"`
-  } else {
-    let env
-    if (podmanStore.getENV.length > 0) {
-      env = `export ${podmanStore.getENV.join(' && ')}`
-    }
-    command = `bash -c "${env}  ${generateCmd().join(' ')}"`
-  }
-
-  console.log(command)
-
   if (service.connectionType === t('node.remoteNode')) {
     if (!connectState.value) {
       return
     }
 
-    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
-      return
-    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
-      return
+    if (serviceCmd.value === "docker") {
+      command = generateCmd().join(' ')
+    } else {
+      let env
+      if (podmanStore.getENV.length > 0) {
+        env = `export ${podmanStore.getENV.join(' && ')}`
+      }
+      command = `${env}  ${generateCmd().join(' ')}`
     }
 
     router.push({
@@ -1515,15 +1507,29 @@ const onCreateContainer = () => {
       }
     })
   } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    if (serviceCmd.value === "docker") {
+      command = `bash -c "${generateCmd().join(' ')}"`
+    } else {
+      let env
+      if (podmanStore.getENV.length > 0) {
+        env = `export ${podmanStore.getENV.join(' && ')}`
+      }
+      command = `bash -c "${env}  ${generateCmd().join(' ')}"`
+    }
+
     router.push({
       path: 'logs',
       query: {
         tab: "logs",
         data: JSON.stringify({
-          label: "DockerDesk",
+          label: service.adress,
           icon: 'terminal',
           data: {
-            serviceName: "DockerDesk",
+            serviceName: service.adress,
             serviceType: 'WSL',
             user: 'root',
             disableStdin: true,
@@ -1581,8 +1587,18 @@ const getNetworkList = async () => {
       }
     })
   } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     await window.wslTerminal
-      .execWSL(['-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} network ls`])
+      .execWSL(['-d', service.address, '--user', 'root', '-e', `${serviceCmd.value} network ls`])
       .then((result) => {
         if (result.success) {
           $q.notify({

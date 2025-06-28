@@ -133,7 +133,7 @@ const toLog = (name) => {
         label: name,
         icon: 'terminal',
         data: {
-          serviceName: "DockerDesk",
+          serviceName: service.address,
           serviceType: 'WSL',
           user: 'root',
           disableStdin: true,
@@ -206,8 +206,14 @@ const getContainerList = () => {
       return
     }
 
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     window.wslTerminal.execWSL([
-      '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} ps -a`
+      '-d', service.address, '--user', 'root', '-e', `${serviceCmd.value} ps -a`
     ]).then((result) => {
       if (result.success) {
         containerDatas.length = 0

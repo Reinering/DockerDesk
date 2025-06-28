@@ -107,6 +107,11 @@ const podmanStore = usePodmanStore()
 const service = inject("service")
 const serviceCmd = ref('')
 
+const connectState = inject('connectState')
+const dockerInfo = inject('dockerInfo')
+const podmanInfo = inject('podmanInfo')
+const wslInfo = inject('wslInfo')
+
 let notify = ref(null)
 
 const hintNote = ref('')
@@ -159,35 +164,53 @@ const onCreate = () => {
     file = `-f ${DockerFile.filePath.name}`
   }
 
-  let cmd = ''
-  if (serviceCmd.value === "docker") {
-    cmd = `bash -c "cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build ${file} -t ${newRepository.repository}:${newRepository.tag} ."`
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
+
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
+
   } else {
-    let env = ''
-    if (podmanStore.getENV.length > 0) {
-      env = `export ${podmanStore.getENV.join(' && ')}`
+    if (!wslInfo.enable) {
+      return
     }
 
-    cmd = `bash -c "${env} cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build ${file} -t ${newRepository.repository}:${newRepository.tag} ."`
+    let cmd = ''
+    if (serviceCmd.value === "docker") {
+      cmd = `bash -c "cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build ${file} -t ${newRepository.repository}:${newRepository.tag} ."`
+    } else {
+      let env = ''
+      if (podmanStore.getENV.length > 0) {
+        env = `export ${podmanStore.getENV.join(' && ')}`
+      }
+
+      cmd = `bash -c "${env} cd /mnt/${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build ${file} -t ${newRepository.repository}:${newRepository.tag} ."`
+    }
+
+    router.push({
+      path: 'logs',
+      query: {
+        tab: "logs",
+        data: JSON.stringify({
+          label: service.address,
+          icon: 'terminal',
+          data: {
+            serviceName: service.address,
+            serviceType: 'WSL',
+            user: 'root',
+            disableStdin: true,
+            command: cmd
+          }
+        })
+      }
+    })
   }
-
-  router.push({
-    path: 'logs',
-    query: {
-      tab: "logs",
-      data: JSON.stringify({
-        label: "DockerDesk",
-        icon: 'terminal',
-        data: {
-          serviceName: "DockerDesk",
-          serviceType: 'WSL',
-          user: 'root',
-          disableStdin: true,
-          command: cmd
-        }
-      })
-    }
-  })
 
   DockerFile.folderPath  = null
   DockerFile.filePath  = null

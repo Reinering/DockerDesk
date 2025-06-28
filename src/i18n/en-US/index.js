@@ -373,6 +373,8 @@ export default {
       inputHint2: "Select the Dockerfile(Optional)",
       hintNote: "Note: This is the DockerFile file or directory where you choose to build the image",
 
+      deleteMessage: "Are you sure to delete?",
+
       pullDialog: {
         name: "Name",
         description: "Description",
@@ -392,9 +394,22 @@ export default {
       action: "Action",
       create: "Create",
 
+      batchDelete: 'Batch Delete',
+      refresh: 'Refresh',
+      detail: 'Detail',
+      delete: 'Delete',
+
       clearVolumes: "Clean up unused volumes",
 
+      deleteMessage: "Are you sure to delete?",
+
       getVolumesError: "Failed to get volume list",
+      deleting: "Deleting",
+      deleteSuccess: "Image deleted successfully",
+      deleteFail: "Image deleted failed",
+      queryDetailFail: "Failed to query detailed information",
+      clearVolumesSuccess: "Clean up successfully",
+      clearVolumesFail: "Clean up failed",
     },
 
     networks: {

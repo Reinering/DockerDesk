@@ -393,9 +393,22 @@ export default {
       action: "操作",
       create: "创建",
 
+      batchDelete: '批量删除',
+      refresh: '刷新',
+      detail: '详情',
+      delete: '删除',
+
       clearVolumes: "清理无用的卷",
 
+      deleteMessage: "确认删除吗？",
+
       getVolumesError: "获取卷列表失败",
+      deleting: "正在删除",
+      deleteSuccess: "镜像删除成功",
+      deleteFail: "镜像删除失败",
+      queryDetailFail: "查询详细信息失败",
+      clearVolumesSuccess: "清理成功",
+      clearVolumesFail: "清理失败",
     },
 
     networks: {

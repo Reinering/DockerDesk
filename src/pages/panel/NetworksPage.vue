@@ -363,8 +363,14 @@ const onCreateNetwork = () => {
       return
     }
 
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     window.wslTerminal.execWSL(
-      [ '-d', 'DockerDesk', '--user', 'root', '-e', "bash", '-c', `"${serviceCmd.value} network create ${command.join(' ')}"` ]
+      [ '-d', service.address, '--user', 'root', '-e', "bash", '-c', `"${serviceCmd.value} network create ${command.join(' ')}"` ]
     ).then((result) => {
       if (result.success) {
         $q.notify({
@@ -401,23 +407,52 @@ const onShowBindNetworkDialog = (item) => {
 const onBindNetwork = async () => {
   for (const item of containerDatas) {
     if (item["selected"] === true) {
-      await window.wslTerminal.execWSL(
-        [ '-d', 'DockerDesk', '--user', 'root', '-e', "bash", '-c', `"${serviceCmd.value} network connect ${selectedNetwork.value.network_id} ${item.containerId}"` ]
-      ).then((result) => {
-        if (result.success) {
-          $q.notify({
-            type: 'positive',
-            position: clientConfig.quasar.notify.position,
-            message: `${t('panel.networks.networkBindSuccess')}`,
-          })
-        } else {
-          $q.notify({
-            type: 'negative',
-            position: clientConfig.quasar.notify.position,
-            message: `${t('panel.networks.networkBindFail')}: ${result.error}`
-          })
+      if (service.connectionType === t('node.remoteNode')) {
+        if (!connectState.value) {
+          return
         }
-      })
+
+        window.containerTerminal.exec({
+          connID: service.id,
+          command: `${serviceCmd.value} network connect ${selectedNetwork.value.network_id} ${item.containerId}`
+        }).then((result) => {
+          if (result.success) {
+            $q.notify({
+              type: 'positive',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('panel.networks.networkBindSuccess')}`,
+            })
+          } else {
+            $q.notify({
+              type: 'negative',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('panel.networks.networkBindFail')}: ${result.error}`
+            })
+          }
+        })
+      } else {
+        if (!wslInfo.enable) {
+          return
+        }
+
+        await window.wslTerminal.execWSL(
+          [ '-d', service.address, '--user', 'root', '-e', "bash", '-c', `"${serviceCmd.value} network connect ${selectedNetwork.value.network_id} ${item.containerId}"` ]
+        ).then((result) => {
+          if (result.success) {
+            $q.notify({
+              type: 'positive',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('panel.networks.networkBindSuccess')}`,
+            })
+          } else {
+            $q.notify({
+              type: 'negative',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('panel.networks.networkBindFail')}: ${result.error}`
+            })
+          }
+        })
+      }
     }
   }
   getNetworkDetail(selectedNetwork.value)
@@ -439,12 +474,6 @@ const onUnbindNetwork = (name, network) => {
   }).onOk(async () => {
     if (service.connectionType === t('node.remoteNode')) {
       if (!connectState.value) {
-        return
-      }
-
-      if (serviceCmd.value === "docker" && !dockerInfo.enable) {
-        return
-      } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
         return
       }
 
@@ -743,10 +772,6 @@ const getNetworkDetail = async (row) => {
         }
 
       } else {
-        if (!wslInfo.enable) {
-          return
-        }
-
         $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
@@ -755,10 +780,14 @@ const getNetworkDetail = async (row) => {
       }
     })
   } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
     window.wslTerminal
       .execWSL([
         '-d',
-        'DockerDesk',
+        service.address,
         '--user',
         'root',
         '-e',
@@ -852,8 +881,14 @@ const getNetworkList = async () => {
       return
     }
 
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     await window.wslTerminal
-      .execWSL(['-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} network ls`])
+      .execWSL(['-d', service.address, '--user', 'root', '-e', `${serviceCmd.value} network ls`])
       .then((result) => {
         if (result.success) {
           rows.length = 0

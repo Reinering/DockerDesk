@@ -147,22 +147,35 @@ const showLoading = () => {
 
 const initDocker = () => {
   console.log("initDocker")
-  if (!connectState.value) {
-    return
-  }
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
 
-  window.containerTerminal.exec({
-    connID: service.id,
-    command: `docker -v`
-  }).then((result) => {
-    console.log(result)
-    if (result.success) {
-      const versionRegex = /(\d+\.\d+\.\d+)/
-      const match = result.data.match(versionRegex)
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `docker -v`
+    }).then((result) => {
+      if (result.success) {
+        const versionRegex = /(\d+\.\d+\.\d+)/
+        const match = result.data.match(versionRegex)
 
-      if (match) {
-        dockerInfo.enable = true
-        dockerInfo.version = match[1]
+        if (match) {
+          dockerInfo.enable = true
+          dockerInfo.version = match[1]
+        } else {
+          dockerInfo.enable = false
+
+          $q.dialog({
+            title: 'Alert',
+            message: `${t('nodePanel.dockerNotInstall')}`,
+            ok: {
+              push: true,
+              color: 'negative'
+            },
+            position: 'bottom'
+          })
+        }
       } else {
         dockerInfo.enable = false
 
@@ -176,26 +189,80 @@ const initDocker = () => {
           position: 'bottom'
         })
       }
-    }
-  })
+    })
+  } else {
+    window.wslTerminal.execWSL([
+      '-d', service.address, '--user', "root", '-e', "docker -v"
+    ]).then((result) => {
+      if (result.success) {
+        const versionRegex = /(\d+\.\d+\.\d+)/
+        const match = result.data.match(versionRegex)
+
+        if (match) {
+          dockerInfo.enable = true
+          dockerInfo.version = match[1]
+
+        } else {
+          dockerInfo.enable = false
+
+          $q.dialog({
+            title: 'Alert',
+            message: `${t('nodePanel.dockerNotInstall')}`,
+            ok: {
+              push: true,
+              color: 'negative'
+            },
+            position: 'bottom'
+          })
+        }
+      } else {
+        dockerInfo.enable = false
+
+        $q.dialog({
+          title: 'Alert',
+          message: `${t('nodePanel.dockerNotInstall')}`,
+          ok: {
+            push: true,
+            color: 'negative'
+          },
+          position: 'bottom'
+        })
+      }
+    })
+  }
 }
 
 const initPodman = () => {
-  if (!connectState.value) {
-    return
-  }
+  console.log("initPodman")
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
 
-  window.containerTerminal.exec({
-    connID: service.id,
-    command: `podman -v`
-  }).then((result) => {
-    if (result.success && result.data.includes("podman version ")) {
-      const versionRegex = /\d+\.\d+\.\d+/
-      const match = result.data.match(versionRegex)
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `podman -v`
+    }).then((result) => {
+      if (result.success && result.data.includes("podman version ")) {
+        const versionRegex = /\d+\.\d+\.\d+/
+        const match = result.data.match(versionRegex)
 
-      if (match) {
-        podmanInfo.enable = true
-        podmanInfo.version = match[0]
+        if (match) {
+          podmanInfo.enable = true
+          podmanInfo.version = match[0]
+        } else {
+          podmanInfo.enable = false
+
+          $q.dialog({
+            title: 'Alert',
+            message: `${t('nodePanel.podmanNotInstall')}`,
+            ok: {
+              push: true,
+              color: 'negative'
+            },
+            position: 'bottom'
+          })
+        }
       } else {
         podmanInfo.enable = false
 
@@ -209,8 +276,46 @@ const initPodman = () => {
           position: 'bottom'
         })
       }
-    }
-  })
+    })
+  } else {
+    window.wslTerminal.execWSL([
+      '-d', service.address, '--user', "root", '-e', "podman -v"
+    ]).then((result) => {
+      if (result.success && result.data.includes("podman version ")) {
+        const versionRegex = /\d+\.\d+\.\d+/
+        const match = result.data.match(versionRegex)
+
+        if (match) {
+          podmanInfo.enable = true
+          podmanInfo.version = match[0]
+        } else {
+          podmanInfo.enable = false
+
+          $q.dialog({
+            title: 'Alert',
+            message: `${t('nodePanel.podmanNotInstall')}`,
+            ok: {
+              push: true,
+              color: 'negative'
+            },
+            position: 'bottom'
+          })
+        }
+      } else {
+        podmanInfo.enable = false
+
+        $q.dialog({
+          title: 'Alert',
+          message: `${t('nodePanel.podmanNotInstall')}`,
+          ok: {
+            push: true,
+            color: 'negative'
+          },
+          position: 'bottom'
+        })
+      }
+    })
+  }
 
   // init env
   window.client.getSettings("podman_proxy_mode").then((result) => {
@@ -286,6 +391,12 @@ const initWSL = () => {
                   })
                 } else if (data[index].state === "Running") {
                   wslInfo.enable = true
+
+                  if (firstLower(service.serviceType) === "docker") {
+                    initDocker()
+                  } else if (firstLower(service.serviceType) === "podman") {
+                    initPodman()
+                  }
                 }
                 return
               }
@@ -346,7 +457,6 @@ const init = async () => {
   if (!isEmptyObj(service)) {
     if (service.connectionType === t('node.remoteNode')) {
       window.containerTerminal.connect(service.id).then(async (result) => {
-        console.log(result)
         if (result.success) {
           connectState.value = true
 

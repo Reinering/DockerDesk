@@ -34,26 +34,26 @@
       </q-tab-panel>
     </q-tab-panels>
 
-    <q-page-sticky position="bottom-right" :offset="fabPos">
-      <q-fab
-        icon="add"
-        direction="up"
-        color="accent"
-        :disable="draggingFab"
-        v-touch-pan.prevent.mouse="moveFab"
-      >
-        <!--        <q-fab-action @click="showCmdBar" color="primary" icon="keyboard_command_key" :disable="draggingFab">-->
-        <!--          <q-tooltip>-->
-        <!--            CMD Bar-->
-        <!--          </q-tooltip>-->
-        <!--        </q-fab-action>-->
-        <!--        <q-fab-action @click="showFileSystem" color="primary" icon="storage" :disable="draggingFab">-->
-        <!--          <q-tooltip>-->
-        <!--            FileSystem-->
-        <!--          </q-tooltip>-->
-        <!--        </q-fab-action>-->
-      </q-fab>
-    </q-page-sticky>
+<!--    <q-page-sticky position="bottom-right" :offset="fabPos">-->
+<!--      <q-fab-->
+<!--        icon="add"-->
+<!--        direction="up"-->
+<!--        color="accent"-->
+<!--        :disable="draggingFab"-->
+<!--        v-touch-pan.prevent.mouse="moveFab"-->
+<!--      >-->
+<!--        &lt;!&ndash;        <q-fab-action @click="showCmdBar" color="primary" icon="keyboard_command_key" :disable="draggingFab">&ndash;&gt;-->
+<!--        &lt;!&ndash;          <q-tooltip>&ndash;&gt;-->
+<!--        &lt;!&ndash;            CMD Bar&ndash;&gt;-->
+<!--        &lt;!&ndash;          </q-tooltip>&ndash;&gt;-->
+<!--        &lt;!&ndash;        </q-fab-action>&ndash;&gt;-->
+<!--        &lt;!&ndash;        <q-fab-action @click="showFileSystem" color="primary" icon="storage" :disable="draggingFab">&ndash;&gt;-->
+<!--        &lt;!&ndash;          <q-tooltip>&ndash;&gt;-->
+<!--        &lt;!&ndash;            FileSystem&ndash;&gt;-->
+<!--        &lt;!&ndash;          </q-tooltip>&ndash;&gt;-->
+<!--        &lt;!&ndash;        </q-fab-action>&ndash;&gt;-->
+<!--      </q-fab>-->
+<!--    </q-page-sticky>-->
   </q-page>
 </template>
 

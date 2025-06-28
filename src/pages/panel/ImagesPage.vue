@@ -363,16 +363,22 @@ const onImageSearch = (text) => {
       return
     }
 
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     let command
     if (serviceCmd.value === "docker") {
-      command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
+      command = ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
     } else if (serviceCmd.value === "podman") {
       const env = podmanStore.getENV
 
       if (env.length > 0) {
-        command = ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"export ${env.join(' && ')} ${serviceCmd.value} search ${text}"`]
+        command = ['-d', service.address, '--user', "root", '-e', "bash", '-c', `"export ${env.join(' && ')} ${serviceCmd.value} search ${text}"`]
       } else {
-        command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
+        command = ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} search ${text}`]
       }
     }
 
@@ -448,16 +454,22 @@ const onImagePull = (name) => {
       return
     }
 
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     let command
     if (serviceCmd.value === "docker") {
-      command = ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} pull ${name}`]
+      command = ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} pull ${name}`]
     } else {
       let env = ''
       if (podmanStore.getENV.length > 0) {
         env = `export ${podmanStore.getENV.join(' && ')}`
       }
 
-      command = ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"${env} ${serviceCmd.value} pull ${name} 2>&1"`]
+      command = ['-d', service.address, '--user', "root", '-e', "bash", '-c', `"${env} ${serviceCmd.value} pull ${name} 2>&1"`]
     }
 
     window.wslTerminal.execWSL(command).then((result) => {
@@ -555,8 +567,14 @@ const deleteImage = (row) => {
         return
       }
 
+      if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+        return
+      } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+        return
+      }
+
       window.wslTerminal.execWSL(
-        ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${name}`]
+        ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} rmi ${name}`]
       ).then((result) => {
         if (result.success) {
           notify.value({
@@ -674,10 +692,6 @@ const onEditImage = () => {
         }
       })
     } else {
-      if (!wslInfo.enable) {
-        return
-      }
-
       window.containerTerminal.exec({
         connID: service.id,
         command: `${serviceCmd.value} tag ${newTag.imageId} ${newName}`
@@ -701,16 +715,26 @@ const onEditImage = () => {
       })
     }
   } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     let newName = newTag.repository
     if (newTag.tag !== "<none>" && newTag.tag !== '') {
       newName += `:${newTag.tag}`
     }
-    commands.push(['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} tag ${newTag.imageId} ${newName}`],)
+    commands.push(['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} tag ${newTag.imageId} ${newName}`],)
 
     let oldName = oldTag.repository
     if (oldTag.repository !== "<none>" && newTag.tag !== "<none>" && oldTag.tag !== '') {
       oldName += `:${oldTag.tag}`
-      commands.push(['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${oldName}`])
+      commands.push(['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} rmi ${oldName}`])
     }
 
     if (isEdit.value) {
@@ -734,7 +758,7 @@ const onEditImage = () => {
       })
     } else {
       window.wslTerminal.execWSL(
-        ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} tag ${newTag.imageId} ${newName}`]
+        ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} tag ${newTag.imageId} ${newName}`]
       ).then((result) => {
         if (result.success) {
           $q.notify({
@@ -766,6 +790,12 @@ const onExportImage = async (row) => {
     return
   }
 
+  if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+    return
+  } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+    return
+  }
+
   const folders = await window.myWindowAPI.selectFolders()
   try {
     if (folders.length === 0) {
@@ -790,7 +820,7 @@ const onExportImage = async (row) => {
   }
 
   window.wslTerminal.execWSL(
-    ['-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c',
+    ['-d', service.address, '--user', "root", '-e', 'bash', '-c',
       `"${serviceCmd.value} save ${row.imageId} > "/mnt/${firstLower(folders[0]).replace(':', '').replace(/\\/g, '/')}/${filename}.tar""`]
   ).then((result) => {
     if (result.success) {
@@ -832,8 +862,14 @@ const loadImage = async (file) => {
     return
   }
 
+  if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+    return
+  } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+    return
+  }
+
   await window.wslTerminal.execWSL([
-    '-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c',
+    '-d', service.address, '--user', "root", '-e', 'bash', '-c',
     `"${serviceCmd.value} load < "/mnt/${firstLower(file).replace(':', '').replace(/\\/g, '/')}""`
   ]).then((result) => {
     if (result.success) {
@@ -930,12 +966,6 @@ const onDeleteBatch = async () => {
             return
           }
 
-          if (serviceCmd.value === "docker" && !dockerInfo.enable) {
-            return
-          } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
-            return
-          }
-
           window.containerTerminal.exec({
             connID: service.id,
             command: `${serviceCmd.value} rmi ${name}`
@@ -960,7 +990,7 @@ const onDeleteBatch = async () => {
           }
 
           await window.wslTerminal.execWSL(
-            ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} rmi ${name}`]
+            ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} rmi ${name}`]
           ).then((result) => {
             if (result.success) {
               $q.notify({
@@ -1043,8 +1073,14 @@ const getImageList = () => {
       return
     }
 
+    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+      return
+    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+      return
+    }
+
     window.wslTerminal.execWSL(
-      ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} images`]
+      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} images`]
     ).then((result) => {
       if (result.success) {
         rows.length = 0

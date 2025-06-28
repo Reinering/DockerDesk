@@ -262,6 +262,11 @@ const componentsStore = useComponentsStore()
 const service = inject("service")
 const serviceCmd = ref('info')
 
+const connectState = inject('connectState')
+const dockerInfo = inject('dockerInfo')
+const podmanInfo = inject('podmanInfo')
+const wslInfo = inject('wslInfo')
+
 let getContainerUsageInterval = null
 
 const splitterModel = ref(80)
@@ -339,18 +344,25 @@ const columns_vol = [
 const onSendHome = (row) => {
   console.log("onSendHome")
   let data = {}
-  if (serviceCmd.value === "docker") {
-    data["nodeId"] = '11111111'
+
+  if (service.connectionType === t('node.remoteNode')) {
+    data["nodeId"] = service.id
+
+    data["website"] = `http://${service.address}:${row.external}`
   } else {
-    data["nodeId"] = '22222222'
+    if (serviceCmd.value === "docker") {
+      data["nodeId"] = '11111111'
+    } else {
+      data["nodeId"] = '22222222'
+    }
+
+    data["website"] = `http://localhost:${row.external}`
   }
 
   data["websiteName"] = props.data.names
-  data["website"] = `http://localhost:${row.external}`
   data["iconText"] = props.data.names.slice(0,1).toUpperCase()
   data["iconColor"] = 'teal'
   data["fontSize"] = '24'
-
 
   window.shortcuts.addShortcuts(JSON.stringify(data))
     .then((result) => {
@@ -373,72 +385,161 @@ const onSendHome = (row) => {
 
 
 const getContainerUsage = () => {
+  if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+    return
+  } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+    return
+  }
 
-  window.wslTerminal.execWSL(
-    ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} stats ${props.data.names} --no-stream`]
-  ).then((result) => {
-    console.log(result)
-    if (result.success) {
-      if (serviceCmd.value === "docker") {
-        const data = parseContainerUsage(result.data)
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
 
-        containerUsage.value = data[0]
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} stats ${props.data.names} --no-stream`
+    }).then((result) => {
+      if (result.success) {
+        if (serviceCmd.value === "docker") {
+          const data = parseContainerUsage(result.data)
+
+          containerUsage.value = data[0]
+        } else {
+
+
+        }
+
       } else {
 
+      }
+    })
+  } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    window.wslTerminal.execWSL(
+      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} stats ${props.data.names} --no-stream`]
+    ).then((result) => {
+      if (result.success) {
+        if (serviceCmd.value === "docker") {
+          const data = parseContainerUsage(result.data)
+
+          containerUsage.value = data[0]
+        } else {
+
+
+        }
+
+      } else {
 
       }
-
-    } else {
-
-    }
-  })
+    })
+  }
 }
 
 const getContainerInfo = () => {
-  window.wslTerminal.execWSL(
-    ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} inspect ${props.data.names}`]
-  ).then((result) => {
-    console.log(result)
-    if (result.success) {
-      containerInfo.value = JSON.parse(result.data)[0]
+  if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+    return
+  } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+    return
+  }
 
-      restartPolicy.value["name"] = containerInfo.value["HostConfig"]["RestartPolicy"]["Name"]
-      restartPolicy.value["maximumRetryCount"] = containerInfo.value["HostConfig"]["RestartPolicy"]["MaximumRetryCount"]
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
 
-      const Env = containerInfo.value["Config"]["Env"]
-      const tmpEnv = {}
-      for (const item of Env) {
-        const tmp = item.split('=')
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} inspect ${props.data.names}`
+    }).then((result) => {
+      if (result.success) {
+        containerInfo.value = JSON.parse(result.data)[0]
 
-        tmpEnv[tmp[0]] = tmp[1]
-      }
+        restartPolicy.value["name"] = containerInfo.value["HostConfig"]["RestartPolicy"]["Name"]
+        restartPolicy.value["maximumRetryCount"] = containerInfo.value["HostConfig"]["RestartPolicy"]["MaximumRetryCount"]
 
-      envs.value = tmpEnv
+        const Env = containerInfo.value["Config"]["Env"]
+        const tmpEnv = {}
+        for (const item of Env) {
+          const tmp = item.split('=')
+
+          tmpEnv[tmp[0]] = tmp[1]
+        }
+
+        envs.value = tmpEnv
 
 
-      Object.keys(containerInfo.value["NetworkSettings"]["Networks"]).forEach(key => {
-        networks["network"] = `${key} - ${containerInfo.value["NetworkSettings"]["Networks"][key]["NetworkID"].slice(0, 12)}`
-        networks["ipAddress"] = containerInfo.value["NetworkSettings"]["Networks"][key]["IPAddress"]
-        networks["gateway"] = containerInfo.value["NetworkSettings"]["Networks"][key]["Gateway"]
-        return
-      })
+        Object.keys(containerInfo.value["NetworkSettings"]["Networks"]).forEach(key => {
+          networks["network"] = `${key} - ${containerInfo.value["NetworkSettings"]["Networks"][key]["NetworkID"].slice(0, 12)}`
+          networks["ipAddress"] = containerInfo.value["NetworkSettings"]["Networks"][key]["IPAddress"]
+          networks["gateway"] = containerInfo.value["NetworkSettings"]["Networks"][key]["Gateway"]
+          return
+        })
 
-      const Binds = containerInfo.value["HostConfig"]["Binds"]
-      if (!isEmptyObj(Binds)) {
-        for (const item of Binds) {
-          const tmp = {}
-          const tmpp = item.split(':')
-          tmp["host"] = tmpp[0]
-          tmp["container"] = tmpp[1]
-          tmp["type"] = tmpp[2]
+        const Binds = containerInfo.value["HostConfig"]["Binds"]
+        if (!isEmptyObj(Binds)) {
+          for (const item of Binds) {
+            const tmp = {}
+            const tmpp = item.split(':')
+            tmp["host"] = tmpp[0]
+            tmp["container"] = tmpp[1]
+            tmp["type"] = tmpp[2]
 
-          volumes.value.push(tmp)
+            volumes.value.push(tmp)
+          }
         }
       }
-    } else {
-
+    })
+  } else {
+    if (!wslInfo.enable) {
+      return
     }
-  })
+
+    window.wslTerminal.execWSL(
+      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} inspect ${props.data.names}`]
+    ).then((result) => {
+      if (result.success) {
+        containerInfo.value = JSON.parse(result.data)[0]
+
+        restartPolicy.value["name"] = containerInfo.value["HostConfig"]["RestartPolicy"]["Name"]
+        restartPolicy.value["maximumRetryCount"] = containerInfo.value["HostConfig"]["RestartPolicy"]["MaximumRetryCount"]
+
+        const Env = containerInfo.value["Config"]["Env"]
+        const tmpEnv = {}
+        for (const item of Env) {
+          const tmp = item.split('=')
+
+          tmpEnv[tmp[0]] = tmp[1]
+        }
+
+        envs.value = tmpEnv
+
+
+        Object.keys(containerInfo.value["NetworkSettings"]["Networks"]).forEach(key => {
+          networks["network"] = `${key} - ${containerInfo.value["NetworkSettings"]["Networks"][key]["NetworkID"].slice(0, 12)}`
+          networks["ipAddress"] = containerInfo.value["NetworkSettings"]["Networks"][key]["IPAddress"]
+          networks["gateway"] = containerInfo.value["NetworkSettings"]["Networks"][key]["Gateway"]
+          return
+        })
+
+        const Binds = containerInfo.value["HostConfig"]["Binds"]
+        if (!isEmptyObj(Binds)) {
+          for (const item of Binds) {
+            const tmp = {}
+            const tmpp = item.split(':')
+            tmp["host"] = tmpp[0]
+            tmp["container"] = tmpp[1]
+            tmp["type"] = tmpp[2]
+
+            volumes.value.push(tmp)
+          }
+        }
+      }
+    })
+  }
 }
 
 

@@ -41,6 +41,7 @@ export const parseDockerImages = (input) => {
   let id = 0
   return lines.map(line => {
     // 使用正则表达式匹配字段，处理 CREATED 字段的完整性
+    line = line.trim()
     const match = line.match(/(\S+)\s+(\S+)\s+(\S+)\s+(.+?)\s+(\S+)$/)
     if (!match) return null // 如果解析失败，返回 null
 

@@ -281,14 +281,14 @@ const onStart = () => {
       })
 
       emit('update:value', {name: props.data.servername, state: "Stopped"})
+    } else {
+      setTimeout(() => {
+        isCall = false
+      }, 5000)
+
+      emit('update:value', {name: props.data.servername, state: "Running"})
     }
   })
-
-  setTimeout(() => {
-    isCall = false
-  }, 5000)
-
-  emit('update:value', {name: props.data.servername, state: "Running"})
 }
 
 const onStop = () => {

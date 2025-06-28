@@ -75,6 +75,11 @@ const podmanStore = usePodmanStore()
 const service = inject("service")
 const serviceCmd = ref('')
 
+const connectState = inject('connectState')
+const dockerInfo = inject('dockerInfo')
+const podmanInfo = inject('podmanInfo')
+const wslInfo = inject('wslInfo')
+
 let notify = ref(null)
 
 const hintNote = ref('')
@@ -160,10 +165,10 @@ const onCreate = () => {
     query: {
       tab: "logs",
       data: JSON.stringify({
-        label: "DockerDesk",
+        label: service.address,
         icon: 'terminal',
         data: {
-          serviceName: "DockerDesk",
+          serviceName: service.address,
           serviceType: 'WSL',
           user: 'root',
           disableStdin: true,
@@ -221,17 +226,40 @@ const init = async () => {
     return
   }
 
-  await window.wslTerminal.execWSL([
-    '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} -v`
-  ]).then((result) => {
-    console.log(result)
-    if (result.success) {
-      hintMessage.value = result.data
-    } else {
-      hintMessage.value = t('panel.containers.hintError', [serviceCmd.value])
-      isOK.value= true
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
     }
-  })
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} -v`
+    }).then((result) => {
+      if (result.success) {
+        hintMessage.value = result.data
+      } else {
+        hintMessage.value = t('panel.containers.hintError', [serviceCmd.value])
+        isOK.value= true
+      }
+    })
+  } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    await window.wslTerminal.execWSL([
+      '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} -v`
+    ]).then((result) => {
+      if (result.success) {
+        hintMessage.value = result.data
+      } else {
+        hintMessage.value = t('panel.containers.hintError', [serviceCmd.value])
+        isOK.value= true
+      }
+    })
+  }
+
+
 
   hintNote.value = t('panel.containers.hintNote', [serviceCmd.value, service.serviceType])
 }
