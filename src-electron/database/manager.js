@@ -168,6 +168,7 @@ async function initDB() {
         table.text('label') //
         table.text('color') //
         table.binary('icon') //
+        table.text('font_size') //
         table.timestamp('create_time').notNullable() // 创建时间戳，非空
         table.timestamp('modify_time') // 修改时间戳，可空
         table.timestamp('delete_time') // 删除时间戳，可空
