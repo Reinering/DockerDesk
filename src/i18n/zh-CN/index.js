@@ -566,6 +566,7 @@ export default {
     editServiceTitle: "编辑服务",
     serviceManagement: "服务管理",
     addService: "添加服务",
+    refresh: "刷新",
     local: "本地",
     remote: "远程",
     localNode: "本地节点",

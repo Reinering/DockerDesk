@@ -141,7 +141,20 @@
         <q-card-section>
           <div class="row items-center justify-between">
             <div class="text-h6">{{t('node.serviceManagement')}}</div>
-            <q-btn :label="t('node.addService')" color="primary" @click="showDialog = true" />
+            <q-btn-dropdown
+              split
+              :label="t('node.addService')"
+              color="primary"
+              @click="showDialog = true"
+            >
+              <q-list>
+                <q-item clickable v-close-popup size="sm" @click="onRefresh">
+                  <q-item-section>
+                    <q-item-label class="text-blue">{{t('node.refresh')}}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </div>
         </q-card-section>
         <q-table
@@ -219,7 +232,7 @@ defineOptions({
   name: 'Nodes',
 })
 
-import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive, computed } from 'vue'
+import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive, computed, onActivated, onDeactivated } from 'vue'
 import { deepClone, isEmptyObj, findNaviItemByName } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 import { useNavigatorStore } from 'stores/navigator.js'
@@ -365,6 +378,10 @@ const onFileSelected = (file) => {
       message: t('node.fileReadError')
     })
   }
+}
+
+const onRefresh = () => {
+  init()
 }
 
 const addService = () => {
@@ -678,9 +695,8 @@ const connectPanel = (row) => {
 
 }
 
-onMounted(() => {
-  window.addEventListener('resize', checkScreenHeightSize)
-
+const init = () => {
+  services.length = 0
   window.nodes.getNodes().then((result) => {
     if (result instanceof Array) {
       if (!isEmptyObj(result)) {
@@ -717,6 +733,21 @@ onMounted(() => {
       }
     }
   })
+}
+
+onMounted(() => {
+
+  init()
+
+  window.addEventListener('resize', checkScreenHeightSize)
+})
+
+onActivated(() => {
+  init()
+})
+
+onDeactivated(() => {
+
 })
 
 onUnmounted(() => {

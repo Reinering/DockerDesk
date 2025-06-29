@@ -562,6 +562,7 @@ export default {
     editServiceTitle: "Edit Docker/Podman Service",
     serviceManagement: "Service Management",
     addService: "Add Service",
+    refresh: "Refresh",
     local: "local",
     remote: "remote",
     localNode: "local node",
