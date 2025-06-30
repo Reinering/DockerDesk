@@ -1,6 +1,11 @@
 <template>
-  <div class="tab-wrapper" style="position: relative;">
-    <q-tab :name="props.name" :label="props.label" :icon="props.icon" :selected="props.selected">
+  <div class="tab-wrapper">
+    <q-tab
+      :name="props.name"
+      :label="props.label"
+      :icon="props.icon"
+      :selected="props.selected"
+    >
       <q-tooltip>
         {{props.label}}
       </q-tooltip>
@@ -11,7 +16,7 @@
       dense
       size="xs"
       icon="close"
-      style="position: absolute; top: 0; left: 0;"
+      style="position: absolute; top: 0; right: 0;"
       @click="onClick"
     >
       <q-tooltip>
@@ -69,6 +74,7 @@ const onClick = (e) => {
 
 <style scoped>
 .tab-wrapper {
+  position: relative;
   display: inline-block; /* 确保包装器紧贴 q-tab 的尺寸 */
 }
 
