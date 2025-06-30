@@ -743,7 +743,7 @@ onMounted(() => {
 })
 
 onActivated(() => {
-  init()
+  
 })
 
 onDeactivated(() => {
