@@ -825,26 +825,57 @@ export function registerSCPIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('downloadFileSCP', async (event, data) => {
+  ipcMain.handle('downloadSFileSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
+
+        return await scpClient.downloadSFile(remotePath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+      } else {
+        return { success: false, error: "scp client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('downloadFileSCP', async (event, { uuid, remotePath }) => {
+    try {
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
+
+        return await scpClient.downloadFile(remotePath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+      } else {
+        return { success: false, error: "scp client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('downloadStreamSCP', async (event, data) => {
     try {
       const { uuid, remotePath } = JSON.parse(data)
 
-      if (ssh_clients.has(uuid)) {
-        const sshClient = ssh_clients.get(uuid)
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
 
-        if (sshClient.status === "disconnected") {
-          await sshClient.reconnect()
-            .then((result) => {
-
-            }, (error) => {
-              return { success: false, error: error }
-            })
-        }
-
-        const result = await sshClient.listDir(remotePath)
-        return { success: true, data: result, error: '' }
+        return await scpClient.downloadFile(remotePath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
       } else {
-        return { success: false, error: "ssh client write error" }
+        return { success: false, error: "scp client write error" }
       }
     } catch (error) {
       return { success: false, error: error }
@@ -891,22 +922,16 @@ export function registerSCPIpcHandlers(win) {
     try {
       const { uuid, remotePath } = JSON.parse(data)
 
-      if (ssh_clients.has(uuid)) {
-        const sshClient = ssh_clients.get(uuid)
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
 
-        if (sshClient.status === "disconnected" && data === '\r') {
-          await sshClient.reconnect()
-            .then((result) => {
-
-            }, (error) => {
-              return { success: false, error: error }
-            })
-        }
-
-        const result = await sshClient.listDir(remotePath)
-        return { success: true, data: result, error: '' }
+        return await scpClient.downloadFolder(remotePath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
       } else {
-        return { success: false, error: "ssh client write error" }
+        return { success: false, error: "scp client write error" }
       }
     } catch (error) {
       return { success: false, error: error }
@@ -1069,6 +1094,25 @@ export function registerSCPIpcHandlers(win) {
         const scpClient = scp_clients.get(uuid)
 
         return await scpClient.uploadFileStream(remotePath, localPath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+      } else {
+        return { success: false, error: "scp client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('downloadBatchSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath, files } = JSON.parse(data)
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
+
+        return await scpClient.downloadBatch(remotePath, files).then((result) => {
           return { success: true, data: result, error: '' }
         }, (error) => {
           return { success: false, error: error }

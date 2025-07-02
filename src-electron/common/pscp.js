@@ -5,6 +5,7 @@ import { isLocalExist, cmd, cmd1, devConsole } from './utils.js'
 import { app } from 'electron'
 import { spawn } from 'child_process'
 import iconv from 'iconv-lite'
+import os from 'os'
 
 
 const isDev = process.defaultApp || process.env.NODE_ENV === 'development'
@@ -27,6 +28,8 @@ const pscpEXEPath = path.join(puttyPath, 'pscp.exe')
 const psftpEXEPath = path.join(puttyPath, 'psftp.exe')
 const puttyEXEPath = path.join(puttyPath, 'putty.exe')
 
+const homeDir = os.homedir()
+const downloadDir = path.join(homeDir, 'Downloads')
 
 export class SCPClient {
   constructor(uuid, win, config) {
@@ -59,14 +62,70 @@ export class SCPClient {
     return this.cmdRunner.start(pscpEXEPath, ['-scp', '-pw', this.config.password, '-P', this.config.port, '-r', localPath, `${this.config.username}@${this.config.host}:${remotePath}`])
   }
 
-  async downloadFile(remotePath, localPath) {
-    const filename = path.basename(localPath)
+  async downloadSFile(remotePath, localPath=downloadDir) {
     return await cmd(`${pscpEXEPath} -scp -pw ${this.config.password} -P ${this.config.port} ${this.config.username}@${this.config.host}:${remotePath} ${localPath} `, 'utf8')
   }
 
-  async downloadFolder(remotePath, localPath) {
-    const filename = path.basename(localPath)
-    return await cmd(`${pscpEXEPath} -scp -pw ${this.config.password} -r -P ${this.config.port} ${this.config.username}@${this.config.host}:${remotePath} ${localPath} `, 'utf8')
+  async downloadFile(remotePath, localPath=downloadDir) {
+    const filename = path.basename(remotePath)
+    this.cmdRunner.filename = filename
+    this.cmdRunner.action = "download"
+    return await this.cmdRunner.start(pscpEXEPath,['-scp', '-pw', this.config.password, '-P', this.config.port, `${this.config.username}@${this.config.host}:${remotePath}`, localPath])
+  }
+
+  async downloadFile1(remotePath, localPath=downloadDir) {
+    const filename = path.basename(remotePath)
+    this.cmdRunner.filename = filename
+    this.cmdRunner.action = "download"
+    return await this.cmdRunner.start1(pscpEXEPath,['-scp', '-pw', this.config.password, '-P', this.config.port, `${this.config.username}@${this.config.host}:${remotePath}`, localPath])
+  }
+
+  async downloadFolder(remotePath, localPath=downloadDir) {
+    const filename = path.basename(remotePath)
+    this.cmdRunner.filename = filename
+    this.cmdRunner.action = "download"
+    return await this.cmdRunner.start(pscpEXEPath,['-scp', '-pw', this.config.password, '-P', this.config.port, '-r', `${this.config.username}@${this.config.host}:${remotePath}`, localPath])
+  }
+
+  async downloadBatch1(remotePath, files) {
+    let result = false
+    try {
+      for (const file of files) {
+        console.log("file", file)
+        if (file.isDir) {
+          await this.downloadFolder(path.posix.join(remotePath, file.name))
+        } else {
+          if (file.size <= clientConfig.file.limitSize) {
+            await this.downloadSFile(path.posix.join(remotePath, file.name))
+          } else {
+            await this.downloadFile(path.posix.join(remotePath, file.name))
+          }
+        }
+      }
+      result = true
+    } catch (error) {
+      result = error
+    }
+
+    return new Promise((resolve, reject) => {
+      if (result === true) {
+        resolve()
+      } else {
+        reject(result)
+      }
+    })
+  }
+
+  async downloadBatch(remotePath, files) {
+    await files.reduce(async (prevPromise, file) => {
+      await prevPromise
+      console.log("file", file)
+      if (file.isDir) {
+        return this.downloadFolder(path.posix.join(remotePath, file.name))
+      } else {
+        return this.downloadFile1(path.posix.join(remotePath, file.name))
+      }
+    }, Promise.resolve())
   }
 
 }
@@ -83,7 +142,7 @@ export class CmdRunner {
     this.filename = ''
   }
 
-  start(command='cmd.exe', options=[], isProgress=true) {
+  async start(command='cmd.exe', options=[], isProgress=true) {
     if (this.isRunning) {
       throw new Error('Cmd Running！')
     }
@@ -170,6 +229,101 @@ export class CmdRunner {
       })
 
       resolve()
+    })
+  }
+
+  async start1(command='cmd.exe', options=[], isProgress=true) {
+    if (this.isRunning) {
+      throw new Error('Cmd Running！')
+    }
+
+    return new Promise((resolve, reject) => {
+      console.log(command, options)
+
+      this.process = spawn(command, options, {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        shell: false,
+        windowsHide: true,
+      })
+
+      this.isRunning = true
+
+      let stdout = ''
+      let stderr = ''
+
+      // 监听输出
+      this.process.stdout.on('data', (data) => {
+        devConsole(`cmd : ${iconv.decode(Buffer.from(data, 'binary'), 'gbk')}`)
+        stdout = iconv.decode(Buffer.from(data, 'binary'), 'gbk')
+
+        if (isProgress) {
+          const result = parseProgressLog(stdout)
+
+          if (!result) {
+            return
+          }
+
+          this.win.webContents.send("onProgressSFTP",
+            {
+              uuid: this.uuid,
+              file: result.filename,
+              type: this.action,
+              // total: this.formatBytes(total),
+              // downloaded: this.formatBytes(total_transferred),
+              // speed: this.formatBytes(speed) + '/s',
+              // timeLeft: this.formatTime(estimatedTimeLeft),
+              progress: parseInt(result.progress) / 100 ,
+              status: 'doing',   // starting | doing | done | stop
+              error: ''
+            })
+        }
+      })
+
+      // 监听错误
+      this.process.stderr.on('data', (data) => {
+        devConsole(`cmd error: ${data}`)
+        if (isProgress) {
+          stderr += data.toString(this.encoding)
+        }
+      })
+
+      // 监听进程关闭
+      this.process.on('close', (code) => {
+        devConsole(`cmd exit code: ${code}`)
+
+        if (isProgress) {
+          if (code === 0) {
+            this.win.webContents.send("onProgressSFTP",
+              {
+                uuid: this.uuid,
+                file: this.filename,
+                type: this.action,
+                progress: '',
+                status: 'done',   // doing | done
+                error: ''
+              })
+          } else {
+            this.win.webContents.send("onProgressSFTP",
+              {
+                uuid: this.uuid,
+                file: this.filename,
+                type: this.action,
+                progress: '',
+                status: 'done',   // doing | done
+                error: stderr.length > 0 ? stderr : stdout
+              })
+          }
+        }
+
+        if (code === 0) {
+          resolve()
+        } else {
+          reject(stderr.length > 0 ? stderr : stdout)
+        }
+
+        this.isRunning = false
+        this.filename = ''
+      })
     })
   }
 

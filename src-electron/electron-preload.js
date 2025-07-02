@@ -376,8 +376,16 @@ contextBridge.exposeInMainWorld('scpTerminal', {
     return ipcRenderer.invoke('createFolderSCP', data)
   },
 
+  downloadSFile (data) {
+    return ipcRenderer.invoke('downloadSFileSCP', data)
+  },
+
   downloadFile (data) {
     return ipcRenderer.invoke('downloadFileSCP', data)
+  },
+
+  downloadStream (data) {
+    return ipcRenderer.invoke('downloadStreamSCP', data)
   },
 
   uploadFile (data) {
@@ -414,6 +422,10 @@ contextBridge.exposeInMainWorld('scpTerminal', {
 
   uploadStream (data) {
     return ipcRenderer.invoke('uploadStreamSCP', data)
+  },
+
+  downloadBatch (data) {
+    return ipcRenderer.invoke('downloadBatchSCP', data)
   },
 })
 

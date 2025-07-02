@@ -81,7 +81,12 @@
 <!--              @update:modelValue="onUploadFiles"-->
 <!--            />-->
           </q-btn>
-          <q-btn icon="arrow_downward" size="xs" padding="xs" color="teal" @click="onDownloadBatch">
+          <q-btn
+            icon="arrow_downward"
+            size="xs"
+            padding="xs"
+            color="teal"
+            @click="onDownloadBatch">
             <q-tooltip class="bg-amber text-black shadow-4">
               {{ t('filesystem.batchDownload') }}
             </q-tooltip>
@@ -253,7 +258,6 @@ const createTerminal = async () => {
   } else {
     await window.scpTerminal.create(props.data.id)
       .then((result) => {
-        console.log(result)
         if (result.success) {
 
         } else {
@@ -291,7 +295,6 @@ const listDir = (path) => {
       uuid: props.data.id,
       remotePath: path
     })).then((result) => {
-      console.log(result)
       if (result.success) {
         rows.length = 0
         rows.push(...result.data)
@@ -463,12 +466,12 @@ const rename = (newValue, oldValue) => {
 }
 
 const downloadSFile = (path) => {
+  const filename = path.split('/').slice(-1)
   if (isSftp.value) {
     window.sftpTerminal.downloadSFile(JSON.stringify({
       uuid: props.data.id,
       remotePath: path,
     })).then((result) => {
-      const filename = path.split('/').slice(-1)
       if (result.success) {
         $q.notify({
           type: 'positive',
@@ -484,7 +487,24 @@ const downloadSFile = (path) => {
       }
     })
   } else {
-
+    window.scpTerminal.downloadSFile(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.downloadFileSuccess')}:${filename}`
+        })
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.downloadFileError')}:${filename}:${result.error}`,
+        })
+      }
+    })
   }
 }
 
@@ -502,21 +522,32 @@ const downloadStream = (path) => {
         })
       }
     })
-
-    lineProgress.value = 0
-
-    notify.value = $q.notify({
-      type: 'info',
-      group: false,
-      timeout: 0,
-      spinner: true,
-      position: 'bottom-right',
-      message: t('filesystem.downloadingFile'),
-      caption: '0%'
-    })
   } else {
-
+    window.scpTerminal.downloadStream(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    })).then((result) => {
+      if (!result.success) {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.downloadFileError')}:${path.split('/').slice(-1)}:${result.error}`,
+        })
+      }
+    })
   }
+
+  lineProgress.value = 0
+
+  notify.value = $q.notify({
+    type: 'info',
+    group: false,
+    timeout: 0,
+    spinner: true,
+    position: 'bottom-right',
+    message: t('filesystem.downloadingFile'),
+    caption: '0%'
+  })
 }
 
 const deleteFile = (path) => {
@@ -633,16 +664,6 @@ const downloadFolder = (path) => {
         })
       }
     })
-
-    notify.value = $q.notify({
-      type: 'info',
-      group: false,
-      timeout: 0,
-      spinner: true,
-      position: 'bottom-right',
-      message: t('filesystem.downloadingFolder'),
-      caption: '0%'
-    })
   } else {
     window.scpTerminal.downloadFolder(JSON.stringify({
       uuid: props.data.id,
@@ -657,6 +678,16 @@ const downloadFolder = (path) => {
       }
     })
   }
+
+  notify.value = $q.notify({
+    type: 'info',
+    group: false,
+    timeout: 0,
+    spinner: true,
+    position: 'bottom-right',
+    message: t('filesystem.downloadingFolder'),
+    caption: '0%'
+  })
 }
 
 const enterFolder = (event, row, index) => {
@@ -881,7 +912,6 @@ const uploadFolder = async (folder, ) => {
       remotePath: currentPath.value,
       localPath: folder,
     }).then(async (result) => {
-      console.log(result)
       if (!result.success) {
         $q.notify({
           type: 'negative',
@@ -1120,18 +1150,44 @@ const onUploadFiles = async (files) => {
   }
 }
 
-const onDownloadBatch = () => {
+const onDownloadBatch = async () => {
   if (selected.value.length === 0) {
     return
   }
 
-  for (const file of selected.value) {
-    if (file.isDir) {
-      downloadFolder(currentPath.value + '/' + file.name)
-    } else {
-      downloadSFile(currentPath.value + '/' + file.name)
+  if (isSftp.value) {
+    for (const file of selected.value) {
+      if (file.isDir) {
+        downloadFolder(currentPath.value + '/' + file.name)
+      } else {
+        downloadSFile(currentPath.value + '/' + file.name)
+      }
     }
+  } else {
+    window.scpTerminal.downloadBatch(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: currentPath.value,
+      files: selected.value
+    })).then((result) => {
+      console.log(result)
+      if (result.success) {
+
+      } else {
+
+      }
+    })
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('filesystem.downloadingFolder'),
+      caption: '0%'
+    })
   }
+
 
   selected.value.length = 0
 }
@@ -1159,9 +1215,7 @@ const onDeleteBatch = () => {
   }).onOk(() => {
 
     isBatch.value = true
-    console.log("mark",  selected.value)
     for (const file of selected.value) {
-      console.log("mark",  file)
       if (file.isDir) {
         deleteFolder(currentPath.value + '/' + file.name)
       } else {
@@ -1232,9 +1286,7 @@ const init = async () => {
   }
 }
 
-onMounted( () => {
-  init()
-
+const receive = () => {
   window.sftpTerminal.onProgress((result) => {
     console.log(result)
     const { uuid, type, file, progress, status, error } = result
@@ -1288,6 +1340,12 @@ onMounted( () => {
       }
     }
   })
+}
+
+onMounted( () => {
+  init()
+
+  receive()
 })
 
 onUnmounted(() => {
