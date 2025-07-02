@@ -13,7 +13,7 @@
         align="left"
         v-model="tab"
       >
-        <rtab
+        <RTab
           v-for="item in tabs"
           :key="item.id"
           :name="item.id"
@@ -71,7 +71,7 @@
       </q-fab>
     </q-page-sticky>
 
-    <q-dialog v-model="isShowSettingsDialog">
+    <q-dialog v-if="isShowSettingsDialog" v-model="isShowSettingsDialog">
       <q-card style="min-width: 400px">
         <q-card-section>
           <div class="text-h6">{{settingDialogTitle}}</div>
@@ -88,7 +88,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="isShowFileSystemDialog" >
+    <q-dialog v-if="isShowFileSystemDialog" v-model="isShowFileSystemDialog" >
       <FileSystem  :data="fsData" />
     </q-dialog>
 
@@ -103,7 +103,7 @@ defineOptions({
 import { inject, onMounted, onActivated, reactive, ref, nextTick, watch, onUnmounted } from 'vue'
 import CommandBar from 'components/CommandBar.vue'
 import Xterm from 'components/Xterm.vue'
-import rtab from 'components/RTab.vue'
+import RTab from 'components/RTab.vue'
 import FileSystem from 'components/FileSystem.vue'
 import { generateUuid, isEmptyObj } from 'src/utils/common.js'
 

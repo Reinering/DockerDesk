@@ -7,8 +7,7 @@ import ini from 'ini'
 import * as sudo from 'sudo-prompt'
 
 
-
-const dev = true
+const isDev = process.defaultApp || process.env.NODE_ENV === 'development'
 
 // 获取总内存（单位：字节）
 export const totalMemory = os.totalmem()
@@ -81,7 +80,19 @@ export function isLocalExists(localPath, callback) {
   })
 }
 
-export function devConsole (text, debug=dev) {
+export function isLocalExist(localPath) {
+  return new Promise((resolve, reject) => {
+    fs.access(localPath, fs.constants.F_OK, (err) => {
+      if (err) {
+        reject(false) // 本地路径不存在
+        return
+      }
+      resolve(true) // 本地路径存在
+    })
+  })
+}
+
+export function devConsole (text, debug=isDev) {
   if (debug) {
     console.log(text)
   }
@@ -369,4 +380,39 @@ export class CmdRunner {
 }
 
 
+export function parseListDir(lsString) {
+  const lines = lsString.trim().split('\n')
+  const result = []
+
+  for (const line of lines) {
+    // 按空格分割，处理多个空格
+    const parts = line.trim().split(/\s+/)
+
+    // 确保有足够的字段进行解析
+    if (parts.length < 8) continue
+
+    // 提取各部分
+    const permString = parts[0]
+    const isDir = permString.startsWith('d')
+    const size = parseInt(parts[4], 10)
+    // 合并日期部分（月、日、时间/年份）
+    const mtime = `${parts[5]} ${parts[6]} ${parts[7]}`
+    // 名称是最后部分（可能包含空格）
+    const name = parts.slice(8).join(' ') || parts[8]
+
+    if (name === '.' || name === '..') {
+      continue
+    }
+
+    result.push({
+      name,
+      permString,
+      isDir,
+      size,
+      mtime
+    })
+  }
+
+  return result
+}
 

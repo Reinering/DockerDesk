@@ -72,14 +72,14 @@
             <q-tooltip class="bg-amber text-black shadow-4">
               {{ t('filesystem.uploadFile') }}
             </q-tooltip>
-            <q-file
-              ref="uploadFilesRef"
-              v-model="uploadFiles"
-              filled
-              multiple
-              style="display: none;"
-              @update:modelValue="onUploadFiles"
-            />
+<!--            <q-file-->
+<!--              ref="uploadFilesRef"-->
+<!--              v-model="uploadFiles"-->
+<!--              filled-->
+<!--              multiple-->
+<!--              style="display: none;"-->
+<!--              @update:modelValue="onUploadFiles"-->
+<!--            />-->
           </q-btn>
           <q-btn icon="arrow_downward" size="xs" padding="xs" color="teal" @click="onDownloadBatch">
             <q-tooltip class="bg-amber text-black shadow-4">
@@ -236,25 +236,6 @@ const uploadFiles = reactive([])
 
 const isBatch = ref(false)
 
-const init = () => {
-  console.log("init", props.data)
-  if (props.data.data.connectionType === t('node.remoteNode')  && props.data.data.protocol === 'SSH') {
-    window.sshTerminal.detect(props.data.id)
-      .then(async (result) => {
-        isSftp.value = result.success
-
-        await createTerminal()
-        listDir(rootPath)
-      })
-  } else {
-    $q.notify({
-      type: 'negative',
-      position: clientConfig.quasar.notify.position,
-      message: t('filesystem.initError')
-    })
-  }
-}
-
 const createTerminal = async () => {
   if (isSftp.value) {
     await window.sftpTerminal.create(props.data.id)
@@ -270,7 +251,19 @@ const createTerminal = async () => {
         }
       })
   } else {
+    await window.scpTerminal.create(props.data.id)
+      .then((result) => {
+        console.log(result)
+        if (result.success) {
 
+        } else {
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('filesystem.initError') + ':' + result.error,
+          })
+        }
+      })
   }
 }
 
@@ -294,7 +287,24 @@ const listDir = (path) => {
       }
     })
   } else {
-    // window.scpTerminal
+    window.scpTerminal.listDir(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    })).then((result) => {
+      console.log(result)
+      if (result.success) {
+        rows.length = 0
+        rows.push(...result.data)
+
+        currentPath.value = path
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.initError') + ':' + result.error,
+        })
+      }
+    })
   }
 }
 
@@ -305,7 +315,10 @@ const listDirs = (path) => {
       remotePath: path
     }))
   } else {
-    // window.scpTerminal
+    return window.scpTerminal.listDir(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    }))
   }
 }
 
@@ -314,26 +327,44 @@ const createFolder = (path) => {
     window.sftpTerminal.cteateFolder(JSON.stringify({
       uuid: props.data.id,
       remotePath: path
-    }))
-      .then((result) => {
-        if (result.success) {
-          $q.notify({
-            type: 'positive',
-            position: clientConfig.quasar.notify.position,
-            message: t('filesystem.createFolderSuccess')
-          })
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.createFolderSuccess')
+        })
 
-          listDir(currentPath.value)
-        } else {
-          $q.notify({
-            type: 'negative',
-            position: clientConfig.quasar.notify.position,
-            message: t('filesystem.createFolderError') + ':' + result.error,
-          })
-        }
-      })
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.createFolderError') + ':' + result.error,
+        })
+      }
+    })
   } else {
+    window.scpTerminal.cteateFolder(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.createFolderSuccess')
+        })
 
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.createFolderError') + ':' + result.error,
+        })
+      }
+    })
   }
 }
 
@@ -342,26 +373,44 @@ const createFile = (path) => {
     window.sftpTerminal.cteateFile(JSON.stringify({
       uuid: props.data.id,
       remotePath: path
-    }))
-      .then((result) => {
-        if (result.success) {
-          $q.notify({
-            type: 'positive',
-            position: clientConfig.quasar.notify.position,
-            message: t('filesystem.createFileSuccess')
-          })
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.createFileSuccess')
+        })
 
-          listDir(currentPath.value)
-        } else {
-          $q.notify({
-            type: 'negative',
-            position: clientConfig.quasar.notify.position,
-            message: t('filesystem.createFileError') + ':' + result.error,
-          })
-        }
-      })
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.createFileError') + ':' + result.error,
+        })
+      }
+    })
   } else {
+    window.scpTerminal.cteateFile(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.createFileSuccess')
+        })
 
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.createFileError') + ':' + result.error,
+        })
+      }
+    })
   }
 }
 
@@ -389,7 +438,27 @@ const rename = (newValue, oldValue) => {
         }
       })
   } else {
+    window.scpTerminal.rename(JSON.stringify({
+      uuid: props.data.id,
+      newValue: newValue,
+      oldValue: oldValue
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.renameSuccess')
+        })
 
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.renameError') + ':' + result.error,
+        })
+      }
+    })
   }
 }
 
@@ -475,7 +544,28 @@ const deleteFile = (path) => {
       }
     })
   } else {
+    window.scpTerminal.deleteFile(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.deleteFileSuccess')
+        })
 
+        if (!isBatch.value) {
+          listDir(currentPath.value)
+        }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.deleteFileError')}:${path}:${result.error}`,
+        })
+      }
+    })
   }
 }
 
@@ -504,7 +594,28 @@ const deleteFolder = (path) => {
       }
     })
   } else {
+    window.scpTerminal.deleteFolder(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.deleteFolderSuccess')
+        })
 
+        if (!isBatch.value) {
+          listDir(currentPath.value)
+        }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.deleteFolderError')}:${path}:${result.error}`,
+        })
+      }
+    })
   }
 }
 
@@ -533,7 +644,18 @@ const downloadFolder = (path) => {
       caption: '0%'
     })
   } else {
-
+    window.scpTerminal.downloadFolder(JSON.stringify({
+      uuid: props.data.id,
+      remotePath: path
+    })).then((result) => {
+      if (!result.success) {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.downloadFolderError') + ':' + result.error,
+        })
+      }
+    })
   }
 }
 
@@ -542,14 +664,21 @@ const enterFolder = (event, row, index) => {
     return
   }
 
-  listDirs(currentPath.value + '/' + row.name)
+  let nextDir
+  if (currentPath.value.charAt(currentPath.value.length-1) === '/') {
+    nextDir = currentPath.value + row.name
+  } else {
+    nextDir = currentPath.value + '/' + row.name
+  }
+
+  listDirs(nextDir)
     .then((result) => {
       if (result.success) {
         rows.length = 0
 
         rows.push(...result.data)
 
-        currentPath.value = currentPath.value + '/' + row.name
+        currentPath.value = nextDir
 
         breadcrumbs.push({
           label: row.name,
@@ -649,21 +778,25 @@ const uploadFile = async (file) => {
       remotePath: currentPath.value,
       localPath: file
     })
-
-    lineProgress.value = 0.0
-
-    notify.value = $q.notify({
-      type: 'info',
-      group: false,
-      timeout: 0,
-      spinner: true,
-      position: 'bottom-right',
-      message: t('filesystem.uploadingFile'),
-      caption: '0%'
-    })
   } else {
-
+    window.scpTerminal.uploadStream({
+      uuid: props.data.id,
+      remotePath: currentPath.value,
+      localPath: file
+    })
   }
+
+  lineProgress.value = 0.0
+
+  notify.value = $q.notify({
+    type: 'info',
+    group: false,
+    timeout: 0,
+    spinner: true,
+    position: 'bottom-right',
+    message: t('filesystem.uploadingFile'),
+    caption: '0%'
+  })
 }
 
 const uploadFileChunk = async (file, reader) => {
@@ -742,20 +875,32 @@ const uploadFolder = async (folder, ) => {
         })
       }
     })
-
-    notify.value = $q.notify({
-      type: 'info',
-      group: false,
-      timeout: 0,
-      spinner: true,
-      position: 'bottom-right',
-      message: t('filesystem.uploadingFolder'),
-      caption: '0%'
-    })
   } else {
-
+    window.scpTerminal.uploadFolder({
+      uuid: props.data.id,
+      remotePath: currentPath.value,
+      localPath: folder,
+    }).then(async (result) => {
+      console.log(result)
+      if (!result.success) {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFolderError')}:${folder.split('\\').slice(-1)}:${result.error}`,
+        })
+      }
+    })
   }
 
+  notify.value = $q.notify({
+    type: 'info',
+    group: false,
+    timeout: 0,
+    spinner: true,
+    position: 'bottom-right',
+    message: t('filesystem.uploadingFolder'),
+    caption: '0%'
+  })
 }
 
 const onBreadcrumbs = (item) => {
@@ -851,7 +996,11 @@ const onParentFolder = () => {
   if (currentPath.value === rootPath) {
     return
   }
-  const parentFolder = currentPath.value.split('/').slice(0, -1).join('/')
+
+  let parentFolder = currentPath.value.split('/').slice(0, -1).join('/')
+  if (parentFolder.length === 0) {
+    parentFolder = '/'
+  }
 
   listDirs(parentFolder)
     .then((result) => {
@@ -1010,7 +1159,9 @@ const onDeleteBatch = () => {
   }).onOk(() => {
 
     isBatch.value = true
+    console.log("mark",  selected.value)
     for (const file of selected.value) {
+      console.log("mark",  file)
       if (file.isDir) {
         deleteFolder(currentPath.value + '/' + file.name)
       } else {
@@ -1020,46 +1171,72 @@ const onDeleteBatch = () => {
 
     isBatch.value = false
     listDir(currentPath.value)
-  })
 
-  selected.value.length = 0
+    selected.value.length = 0
+  })
 }
 
+const init = async () => {
+  console.log("init", props.data)
+  if (props.data.data.connectionType === t('node.remoteNode')  && props.data.data.protocol === 'SSH') {
+    await window.sshTerminal.detect(props.data.id)
+      .then(async (result) => {
+        isSftp.value = result.success
 
+        await createTerminal()
+        listDir(rootPath)
+      })
 
-onMounted(() => {
+    if (isSftp.value) {
+      window.sftpTerminal.receive(
+        (result) => {
+          // const { uuid, data } = JSON.parse(result)
+          const { uuid, data } = result
+
+          if (props.data.id === uuid) {
+            $q.notify({
+              type: 'negative',
+              position: clientConfig.quasar.notify.position,
+              message: `${t('filesystem.sftpError')}:${data}`,
+            })
+          }
+        }
+      )
+
+      // window.sftpTerminal.uploadFile((result) => {
+      //   // const { uuid, data, error } = JSON.parse(result)
+      //   const { uuid, data, error } = result
+      //
+      //   if (props.data.id === uuid) {
+      //     $q.notify({
+      //       type: 'negative',
+      //       position: clientConfig.quasar.notify.position,
+      //       message: `${t('filesystem.uploadFileError')}:${error}`,
+      //     })
+      //   }
+      // })
+    }
+
+  } else if (props.data.data.connectionType === t('node.localNode')) {
+    $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: t('filesystem.initError')
+    })
+  } else {
+    $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: t('filesystem.initError')
+    })
+  }
+}
+
+onMounted( () => {
   init()
 
-  window.sftpTerminal.receive(
-    (result) => {
-      // const { uuid, data } = JSON.parse(result)
-      const { uuid, data } = result
-
-      if (props.data.id === uuid) {
-        $q.notify({
-          type: 'negative',
-          position: clientConfig.quasar.notify.position,
-          message: `${t('filesystem.sftpError')}:${data}`,
-        })
-      }
-    }
-  )
-
-  window.sftpTerminal.uploadFile((result) => {
-    // const { uuid, data, error } = JSON.parse(result)
-    const { uuid, data, error } = result
-
-    if (props.data.id === uuid) {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('filesystem.uploadFileError')}:${error}`,
-      })
-    }
-  })
-
   window.sftpTerminal.onProgress((result) => {
-    // console.log(result)
+    console.log(result)
     const { uuid, type, file, progress, status, error } = result
     if (props.data.id === uuid ) {
       if (status === "doing") {
@@ -1069,25 +1246,45 @@ onMounted(() => {
           caption: `${parseInt(progress*100)}%`
         })
       } else if (status === "done"  && type === "upload") {
-        notify.value({
-          type: 'positive',
-          icon: 'done',
-          spinner: false,
-          message: `${t('filesystem.uploadFileSuccess')}: ${file}`,
-          timeout: 3000
-        })
+        if (error) {
+          notify.value({
+            type: 'negative',
+            icon: 'done',
+            spinner: false,
+            message: `${t('filesystem.uploadFileSuccess')}: ${file}: ${error}`,
+            timeout: 10000
+          })
+        } else {
+          notify.value({
+            type: 'positive',
+            icon: 'done',
+            spinner: false,
+            message: `${t('filesystem.uploadFileSuccess')}: ${file}`,
+            timeout: 3000
+          })
 
-        if (!isBatch.value) {
-          listDir(currentPath.value)
+          if (!isBatch.value) {
+            listDir(currentPath.value)
+          }
         }
       } else if (status === "done"  && type === "download") {
-        notify.value({
-          type: 'positive',
-          icon: 'done',
-          spinner: false,
-          message: `${t('filesystem.downloadFileSuccess')}: ${file}`,
-          timeout: 3000
-        })
+        if (error) {
+          notify.value({
+            type: 'negative',
+            icon: 'done',
+            spinner: false,
+            message: `${t('filesystem.downloadFileSuccess')}: ${file}: ${error}`,
+            timeout: 10000
+          })
+        } else {
+          notify.value({
+            type: 'positive',
+            icon: 'done',
+            spinner: false,
+            message: `${t('filesystem.downloadFileSuccess')}: ${file}`,
+            timeout: 3000
+          })
+        }
       }
     }
   })

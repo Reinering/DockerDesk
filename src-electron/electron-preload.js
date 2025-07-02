@@ -261,14 +261,14 @@ contextBridge.exposeInMainWorld('sshTerminal', {
 
   receive (callback) {
     return ipcRenderer.on('sshTerminalReceive', (event, data) => callback(data))
-  }
+  },
+
 })
 
 
 contextBridge.exposeInMainWorld('sftpTerminal', {
 
   create (uuid) {
-    console.log("uuid", uuid)
     return ipcRenderer.invoke('createSFTPTerminal', uuid)
   },
 
@@ -400,12 +400,20 @@ contextBridge.exposeInMainWorld('scpTerminal', {
     return ipcRenderer.invoke('deleteFolderSCP', data)
   },
 
+  rename (data) {
+    return ipcRenderer.invoke('renameSFTP', data)
+  },
+
   readFile (data) {
     return ipcRenderer.invoke('readFileSCP', data)
   },
 
   saveFile (data) {
     return ipcRenderer.invoke('saveFileSCP', data)
+  },
+
+  uploadStream (data) {
+    return ipcRenderer.invoke('uploadStreamSCP', data)
   },
 })
 

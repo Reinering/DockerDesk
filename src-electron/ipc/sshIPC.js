@@ -1,15 +1,17 @@
 import { ipcMain } from 'electron'
 import { SSHClient } from '../actions/ssh-client.js'
 import { SFTPClient } from '../actions/sftp-client.js'
-import { SCPClient } from '../actions/scp-client.js'
+import { SCPClient } from '../common/pscp.js'
 import { nodes } from '../actions/nodes.js'
 import { interference, encryptPwd, dencryptPwd } from '../common/encrypt.js'
+
 import log from 'electron-log'
 
 
 export const ssh_clients = new Map()
 export const sftp_clients = new Map()
 export const scp_clients = new Map()
+
 
 export function registerSSHIpcHandlers(win) {
 
@@ -71,7 +73,6 @@ export function registerSSHIpcHandlers(win) {
     } catch (error) {
       return { success: false, error: error }
     }
-
   })
 
   ipcMain.handle('detectSSHTerminal', async (event, uuid) => {
@@ -145,16 +146,16 @@ export function registerSSHIpcHandlers(win) {
       if (ssh_clients.has(uuid)) {
         const sshClient = ssh_clients.get(uuid)
 
-        if (sshClient.ssh_status === "disconnected" && data === '\r') {
-          return await sshClient.reconnect()
+        if (sshClient.status === "disconnected" && data === '\r') {
+          await sshClient.reconnect()
             .then((result) => {
-              return { success: true, error: '' }
+
             }, (error) => {
               return { success: false, error: error }
             })
-        } else {
-          sshClient.write(data)
         }
+
+        sshClient.write(data)
 
         return { success: true, error: '' }
       } else {
@@ -165,8 +166,35 @@ export function registerSSHIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('sshTerminalExec', async (event, value) => {
+  ipcMain.handle('sshTerminalExec', async (event, { uuid, command }) => {
+    try {
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
 
+        if (sshClient.status === "disconnected") {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        sshClient.exec(command).then((result) => {
+          const { command, stdout, stderr, code, signal } = result
+
+          if (code !== 0 || stderr) {
+            return { success: false, error: `Command failed with code ${code}: ${stderr || stdout}` }
+          } else {
+            return { success: true, data: stdout, error: '' }
+          }
+        })
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
 }
@@ -185,7 +213,7 @@ export function registerSFTPIpcHandlers(win) {
       }
 
       const sshClient = ssh_clients.get(uuid)
-      if (sshClient.ssh_status === "disconnected") {
+      if (sshClient.status === "disconnected") {
         return { success: false, error: "ssh disconnected" }
       }
 
@@ -219,7 +247,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -249,7 +277,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -280,7 +308,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -310,7 +338,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -338,7 +366,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -366,7 +394,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -396,7 +424,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -424,7 +452,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -451,7 +479,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -478,7 +506,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -506,7 +534,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -536,7 +564,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -564,7 +592,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -594,7 +622,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -624,7 +652,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -654,7 +682,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: "sftp disconnected" }
       }
 
-      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).ssh_status === "disconnected") {
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
         return { success: false, error: 'ssh disconnected' }
       }
 
@@ -695,32 +723,24 @@ export function registerSCPIpcHandlers(win) {
 
     try {
       if (!ssh_clients.has(uuid)) {
-        return { success: true, error: '' }
+        return { success: false, error: 'ssh disconnected' }
       }
 
       const sshClient = ssh_clients.get(uuid)
-      if (sshClient.ssh_status === "disconnected") {
+      if (sshClient.status === "disconnected") {
         return { success: false, error: "ssh disconnected" }
       }
 
+      if (!scp_clients.has(uuid)) {
+        const scpClient = new SCPClient(uuid, win, sshClient.config)
 
-      let sftpClient
-      if (sftp_clients.has(uuid)) {
-        sftpClient = sftp_clients.get(uuid)
-      } else {
-        sftpClient = new SFTPClient(sshClient.config)
-        sftp_clients.set(uuid, sftpClient)
+        return scpClient.isExist().then(() => {
+          scp_clients.set(uuid, scpClient)
+          return { success: true, error: '' }
+        }, () => {
+          return { success: false, error: "pscp.exe not exist" }
+        })
       }
-
-      if (sftpClient.status === "disconnected") {
-        return await sftpClient.connect()
-          .then((result) => {
-            return { success: true, error: '' }
-          }, (error) => {
-            return { success: false, error: error }
-          })
-      }
-
       return { success: true, error: '' }
     } catch (error) {
       return { success: false, error: error }
@@ -731,55 +751,333 @@ export function registerSCPIpcHandlers(win) {
     try {
       const { uuid, remotePath } = JSON.parse(data)
 
-      if (!sftp_clients.has(uuid)) {
-        return { success: false, error: "sftp disconnected" }
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected") {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.listDir(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
       }
-
-      const sftpClient = sftp_clients.get(uuid)
-      return sftpClient.listDir(remotePath)
-
     } catch (error) {
       return { success: false, error: error }
     }
   })
 
   ipcMain.handle('createFileSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
 
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected") {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.createFile(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
   ipcMain.handle('createFolderSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
 
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected") {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.createFolder(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
   ipcMain.handle('downloadFileSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
 
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected") {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.listDir(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
-  ipcMain.handle('uploadFileSCP', async (event, data) => {
+  ipcMain.handle('uploadSFileSCP', async (event, { uuid, remotePath, localPath }) => {
+    try {
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
 
+        return await scpClient.uploadFile(remotePath, localPath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+      } else {
+        return { success: false, error: "scp client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('uploadFileSCP', async (event, { uuid, remotePath, localPath }) => {
+    try {
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
+
+        return await scpClient.uploadFile(remotePath, localPath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+      } else {
+        return { success: false, error: "scp client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
   ipcMain.handle('downloadFolderSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
 
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected" && data === '\r') {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.listDir(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
-  ipcMain.handle('uploadFolderSCP', async (event, data) => {
+  ipcMain.handle('uploadFolderSCP', async (event, { uuid, remotePath, localPath }) => {
+    try {
+      // const { uuid, remotePath, localPath } = JSON.parse(data)
 
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
+
+        return await scpClient.uploadFolder(remotePath, localPath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+      } else {
+        return { success: false, error: "scp client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
   ipcMain.handle('deleteFileSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
 
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected") {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.deleteFile(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
   ipcMain.handle('deleteFolderSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
 
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected" && data === '\r') {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.deleteFolder(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('renameSCP', async (event, data) => {
+    try {
+      const { uuid, newValue, oldValue } = JSON.parse(data)
+
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected" && data === '\r') {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.rename(newValue, oldValue)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
   ipcMain.handle('readFileSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
 
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected" && data === '\r') {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.listDir(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
-  ipcMain.handle('saveFileSCP', async (event, uuid) => {
+  ipcMain.handle('saveFileSCP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = JSON.parse(data)
 
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected" && data === '\r') {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.listDir(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('uploadStreamSCP', async (event, { uuid, remotePath, localPath }) => {
+    try {
+      if (scp_clients.has(uuid)) {
+        const scpClient = scp_clients.get(uuid)
+
+        return await scpClient.uploadFileStream(remotePath, localPath).then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+      } else {
+        return { success: false, error: "scp client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 }

@@ -12,6 +12,10 @@ export const clientConfig = {
     dbSize: 10 * 1024 * 1024, // 2MB
   },
 
+  putty: {
+    path: 'PuTTY'
+  },
+
   quasar: {
     notify: {
       position: 'bottom'     // left | right | top | bottom | center | top-left | top-right | bottom-left | bottom-right

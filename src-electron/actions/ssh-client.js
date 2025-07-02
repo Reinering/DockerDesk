@@ -3,7 +3,14 @@ import * as fs from 'fs'
 import { Client } from 'ssh2'
 import path from 'node:path'
 import os from 'os'
-import { formatPermissions, formatDate, isLocalExists } from '../common/utils.js'
+import {
+  devConsole,
+  formatPermissions,
+  formatDate,
+  isLocalExists,
+  parseListDir
+} from '../common/utils.js'
+import iconv from 'iconv-lite'
 
 
 const homeDir = os.homedir()
@@ -47,13 +54,13 @@ export class SSHClient {
               this.win.webContents.send("sshTerminalReceive",
                 JSON.stringify({
                   uuid: this.uuid,
-                  data: data.toString()
+                  data: iconv.decode(Buffer.from(data, 'binary'), 'gbk')
                 }))
             }).stderr.on('data', (data) => {
               this.win.webContents.send("sshTerminalReceive",
                 JSON.stringify({
                   uuid: this.uuid,
-                  data: data.toString()
+                  data: iconv.decode(Buffer.from(data, 'binary'), 'gbk')
                 }))
             })
 
@@ -83,17 +90,18 @@ export class SSHClient {
         let stdout = ''
         let stderr = ''
 
-        stream
-          .on('data', (data) => {
-            stdout += data // 收集 STDOUT
-          })
-          .stderr.on('data', (data) => {
-          stderr += data // 收集 STDERR
+        stream.on('data', (data) => {
+          devConsole(data.toString())
+          stdout += iconv.decode(Buffer.from(data, 'binary'), 'gbk') // 收集 STDOUT
         })
-          .on('close', (code, signal) => {
-            console.log(`Command "${command}" finished with code ${code}, signal ${signal}`)
-            resolve({ command, stdout, stderr, code, signal })
-          })
+        stream.stderr.on('data', (data) => {
+          devConsole(data.toString())
+          stderr += iconv.decode(Buffer.from(data, 'binary'), 'gbk') // 收集 STDERR
+        })
+        stream.on('close', (code, signal) => {
+          devConsole(`Command "${command}" finished with code ${code}, signal ${signal}`)
+          resolve({ command, stdout, stderr, code, signal })
+        })
       })
     })
   }
@@ -141,6 +149,90 @@ export class SSHClient {
     }
 
     this.status = 'Disconnected'
+  }
+
+  async listDir(remotePath){
+    try {
+      const result = await this.exec(`ls -la "${remotePath}"`)
+
+      if (result.stderr && result.code !== 0) {
+        throw new Error(result.stderr)
+      }
+
+      return parseListDir(result.stdout)
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
+
+  async createFile(remotePath){
+    try {
+      const result = await this.exec(`touch "${remotePath}"`)
+
+      if (result.stderr && result.code !== 0) {
+        throw new Error(result.stderr)
+      }
+
+      return result.stdout
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
+
+  async createFolder(remotePath){
+    try {
+      const result = await this.exec(`mkdir -p "${remotePath}"`)
+
+      if (result.stderr && result.code !== 0) {
+        throw new Error(result.stderr)
+      }
+
+      return result.stdout
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
+
+  async deleteFile(remotePath){
+    try {
+      const result = await this.exec(`rm "${remotePath}"`)
+
+      if (result.stderr && result.code !== 0) {
+        throw new Error(result.stderr)
+      }
+
+      return result.stdout
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
+
+  async deleteFolder(remotePath){
+    try {
+      const result = await this.exec(`rm -r "${remotePath}"`)
+
+      if (result.stderr && result.code !== 0) {
+        throw new Error(result.stderr)
+      }
+
+      return result.stdout
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
+
+  async rename(newValue, oldValue) {
+    try {
+      const result = await this.exec(`mv "${oldValue}" "${newValue}"`)
+
+      if (result.stderr && result.code !== 0) {
+        throw new Error(result.stderr)
+      }
+
+      return result.stdout
+    } catch (error) {
+      throw new Error(error.message)
+    }
   }
 }
 
@@ -550,15 +642,15 @@ export class SSH2Client {
         .on('ready', async () => {
           this.status = 'connected'
           console.log("ssh connected")
+          resolve()
       }).on('end', () => {
 
       }).on('error', (err) => {
         reject(err)
       }).on('close', () => {
+        reject()
         this.sendDisconnected()
       }).connect(this.config)
-
-      resolve()
     })
   }
 
@@ -608,7 +700,7 @@ export class SSH2Client {
         let stderr = ''
 
         stream.on('close', (code, signal) => {
-          resolve({ stdout, stderr, code, signal });
+          resolve({ stdout, stderr, code, signal })
         }).on('data', (data) => {
           stdout += data
         }).stderr.on('data', (data) => {
@@ -625,7 +717,7 @@ export class SSH2Client {
 
     try {
       // 检查是否为 root 用户
-      const whoami = await this.exec('whoami');
+      const whoami = await this.exec('whoami')
       if (whoami.stdout.trim() === 'root') {
         this.isSudo = false
       }
@@ -655,10 +747,10 @@ export class SSH2Client {
 
     let command = cmd
     if (this.isSudo) {
-      command = `sudo -E ${cmd}`
+      command = `sudo ${cmd}`
     }
 
-    console.log(command)
+    devConsole(command)
 
     return new Promise((resolve, reject) => {
       this.conn.exec(
@@ -677,19 +769,19 @@ export class SSH2Client {
           const dataStr = data.toString()
           stdout += dataStr
 
-          console.log("stdout", dataStr)
+          devConsole("stdout", dataStr)
 
           // 检测 sudo 提示
           if (!sudoPromptDetected && this.isSudo && /password for.*:|sudo.*password|Password:|[sudo]/i.test(dataStr)) {
             sudoPromptDetected = true
             stdout = ''
             stream.stdin.write(`${this.config.password}\n`)
-            console.log("sudo Mark")
+            devConsole("sudo Mark")
           }
         })
 
         stream.stderr.on('data', (data) => {
-          console.log("stderr", data.toString())
+          devConsole("stderr", data.toString())
           stderr += data.toString() // 收集 STDERR
         })
 
