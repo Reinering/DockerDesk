@@ -567,7 +567,8 @@ export default {
     remote: "remote",
     localNode: "local node",
     remoteNode: "remote node",
-    dockerPanel: "docker panel",
+    containerPanel: "Container panel",
+    terminal: "Terminal",
 
     serviceName: "Service Name",
     serviceType: "Service Type",
@@ -708,6 +709,7 @@ export default {
     fullscreen: "Fullscreen",
     fullWidth: "FullWidth",
     rename: "Rename",
+    select: "Select",
 
     enter: "Enter",
     modify: "Modify",

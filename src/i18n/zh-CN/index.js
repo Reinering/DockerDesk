@@ -556,8 +556,6 @@ export default {
     nameNotNull: "名称不能为空或超过长度",
     distributionNotNull: "WSL发行版不能为空",
     localImageNotNull: "本地镜像文件不能为空"
-
-
   },
 
   // Node
@@ -571,7 +569,8 @@ export default {
     remote: "远程",
     localNode: "本地节点",
     remoteNode: "远程节点",
-    dockerPanel: "docker面板",
+    containerPanel: "容器面板",
+    terminal: "终端",
 
     serviceName: "服务名称",
     serviceType: "服务类型",
@@ -722,6 +721,7 @@ export default {
     fullscreen: "全屏",
     fullWidth: "全宽",
     rename: "重命名",
+    select: "选择",
 
     enter: "输入",
     modify: "修改",

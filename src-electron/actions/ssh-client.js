@@ -795,5 +795,18 @@ export class SSH2Client {
       })
     })
   }
+  
+  async listDir(remotePath){
+    try {
+      const result = await this.exec(`ls -la "${remotePath}"`)
 
+      if (result.stderr && result.code !== 0) {
+        throw new Error(result.stderr)
+      }
+
+      return parseListDir(result.stdout)
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
 }

@@ -81,7 +81,16 @@
         <q-btn :disable="isOK" :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onCreate" />
       </q-card-actions>
     </q-card>
+
+    <FileSystemDialog
+      v-if="showFileSystemDialog"
+      v-model="showFileSystemDialog"
+      :onClose="onShowFileSystemDialog"
+    />
   </q-dialog>
+
+
+
 </template>
 
 <script setup>
@@ -93,6 +102,7 @@ const props = defineProps({
 })
 
 import { inject, ref, onMounted, onUnmounted, reactive } from 'vue'
+import FileSystemDialog from 'components/dialog/FileSystemDialog.vue'
 import { usePodmanStore } from 'src/stores/podman.js'
 import { isEmptyObj, isEmptyStr, format, firstLower } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
@@ -129,25 +139,32 @@ const newRepository = reactive({
   tag: 'latest',
 })
 
+const showFileSystemDialog = ref(false)
 
 const onSelectFolder = async () => {
-  const folders = await window.myWindowAPI.selectFolders()
-  try {
-    if (folders.length === 0) {
+  if (service.connectionType === t('node.remoteNode')) {
+    showFileSystemDialog.value = !showFileSystemDialog.value
+
+
+  } else {
+    const folders = await window.myWindowAPI.selectFolders()
+    try {
+      if (folders.length === 0) {
+        return
+      }
+    } catch (err) {
       return
     }
-  } catch (err) {
-    return
-  }
-  if (folders[0].indexOf(' ') !== -1) {
-    return $q.notify({
-      type: 'negative',
-      position: clientConfig.quasar.notify.position,
-      message: `${t('panel.containers.pathIncludeSpace')}`
-    })
-  }
+    if (folders[0].indexOf(' ') !== -1) {
+      return $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.containers.pathIncludeSpace')}`
+      })
+    }
 
-  DockerFile.folderPath = folders[0]
+    DockerFile.folderPath = folders[0]
+  }
 }
 
 const onCreate = () => {
