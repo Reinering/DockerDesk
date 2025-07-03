@@ -416,3 +416,13 @@ export function parseListDir(lsString) {
   return result
 }
 
+export const detectEncoding = (buffer) => {
+  // 简单的编码检测逻辑
+  const str = buffer.toString('utf8')
+
+  // 检查是否有乱码字符
+  if (str.includes('�')) {
+    return 'gbk' // 尝试GBK
+  }
+  return 'utf8'
+};

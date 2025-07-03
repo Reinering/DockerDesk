@@ -8,9 +8,11 @@ import {
   formatPermissions,
   formatDate,
   isLocalExists,
-  parseListDir
+  parseListDir,
+  detectEncoding
 } from '../common/utils.js'
 import iconv from 'iconv-lite'
+import chardet from 'chardet'
 
 
 const homeDir = os.homedir()
@@ -51,16 +53,22 @@ export class SSHClient {
 
             // 将 SSH 输出发送到前端
             stream.on('data', (data) => {
+              const encoding = detectEncoding(data)
+
               this.win.webContents.send("sshTerminalReceive",
                 JSON.stringify({
                   uuid: this.uuid,
-                  data: iconv.decode(Buffer.from(data, 'binary'), 'gbk')
+                  data: iconv.decode(Buffer.from(data, 'binary'), encoding)
                 }))
-            }).stderr.on('data', (data) => {
+            })
+
+            stream.stderr.on('data', (data) => {
+              const encoding = detectEncoding(data)
+
               this.win.webContents.send("sshTerminalReceive",
                 JSON.stringify({
                   uuid: this.uuid,
-                  data: iconv.decode(Buffer.from(data, 'binary'), 'gbk')
+                  data: iconv.decode(Buffer.from(data, 'binary'), encoding)
                 }))
             })
 
@@ -795,7 +803,7 @@ export class SSH2Client {
       })
     })
   }
-  
+
   async listDir(remotePath){
     try {
       const result = await this.exec(`ls -la "${remotePath}"`)
