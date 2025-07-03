@@ -55,7 +55,7 @@ export async function installWSL (win, data) {
 
   let command = []
   command.push("--install")
-  command.push("----web-download")
+  command.push("--web-download")
   command.push("--distribution")
   command.push(data.wslDistribution)
   command.push("--name")
@@ -170,7 +170,7 @@ export async function restartSubSystem (name='DockerDesk') {
 }
 
 export async function unregisterSubSystem (name) {
-  return cmd1(`wsl --unregister ${name}`, 'utf16le')
+  return cmd(`wsl --unregister ${name}`, 'utf16le')
 }
 
 export async function exportSubSystem (name, distDir) {

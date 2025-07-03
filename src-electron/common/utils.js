@@ -92,7 +92,7 @@ export function isLocalExist(localPath) {
   })
 }
 
-export function devConsole (text, debug=isDev) {
+export function   devConsole (text, debug=isDev) {
   if (debug) {
     console.log(text)
   }
@@ -133,7 +133,7 @@ export function cmd1(command, encoding='cp936', isAdmin=false) {
   if (command instanceof Array) {
     command = command.join(' ')
   }
-  console.log(command)
+  devConsole(`cmd1 ${command}`)
 
   const options = { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }
   if (isAdmin) {
@@ -143,12 +143,17 @@ export function cmd1(command, encoding='cp936', isAdmin=false) {
 
   return new Promise((resolve, reject) => {
     exec(command, options, (error, stdout, stderr) => {
+
       if (error) {
+        devConsole(`error ${error.message.toString(encoding)}`)
         return reject(isWindows ? error.message.toString(encoding) : error.message.toString('utf8'))
       }
       if (stderr) {
+        devConsole(`stderr ${stdout.toString(encoding)}`)
         return reject(isWindows ? stderr.toString(encoding) : stderr.toString('utf8'))
       }
+
+      devConsole(`stdout ${stdout.toString(encoding)}`)
       return resolve(isWindows ? stdout.toString(encoding) : stdout.toString('utf8'))
     })
   })
@@ -161,13 +166,13 @@ export function cmd(command, encoding='cp936', isAdmin=false) {
     command = command.join(' ')
   }
 
-  const options = { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }
+  const options = { cwd: process.cwd(), windowsHide: true, encoding: 'binary' }
   if (isAdmin) {
     options["sudo"] = true
     options["admin"] = true
   }
 
-  console.log(command)
+  devConsole(`cmd ${command}`)
   return new Promise((resolve, reject) => {
     exec(command, options, (error, stdout, stderr) => {
       if (error && error.code !== 0) {
