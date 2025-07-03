@@ -215,7 +215,7 @@
               @click="connectPanel(props.row)"
             >
               <q-tooltip class="bg-amber text-black shadow-4">
-                {{t('node.dockerPanel')}}
+                {{t('node.containerPanel')}}
               </q-tooltip>
             </q-btn>
 
@@ -601,7 +601,7 @@ const deleteService = (id) => {
 
 const connectTerminal = (row) => {
   $q.dialog({
-    title: t('confirm'),
+    title: `${t('node.terminal')} ${t('confirm')}`,
     message: t('node.connectMessage'),
     ok: {
       push: true
@@ -657,7 +657,7 @@ const connectTerminal = (row) => {
 
 const connectPanel = (row) => {
   $q.dialog({
-    title: t('confirm'),
+    title: `${t('node.containerPanel')} ${t('confirm')}`,
     message: t('node.connectMessage'),
     ok: {
       push: true
@@ -743,7 +743,7 @@ onMounted(() => {
 })
 
 onActivated(() => {
-  
+
 })
 
 onDeactivated(() => {

@@ -1,23 +1,12 @@
 <template>
   <q-layout container :style="background" class="shadow-2 rounded-borders">
-    <q-page class="flex flex-center" padding @dblclick="onDBClick">
+    <q-page  padding @dblclick="onDBClick">
   <!--    <img-->
   <!--      alt="Quasar logo"-->
   <!--      src="~assets/quasar-logo-vertical.svg"-->
   <!--      style="width: 200px; height: 200px"-->
   <!--    >-->
-
-      <q-card class="my-card" style="width: 100%; max-width: 500px; height: 300px">
-        <q-parallax
-          src="https://cdn.quasar.dev/img/parallax1.jpg"
-          :height="150"
-        />
-
-        <q-card-section>
-          <div class="text-h6">Our Changing Planet</div>
-          <div class="text-subtitle2">by John Doe</div>
-        </q-card-section>
-      </q-card>
+      <Carousel />
 
       <div class="flex flex-center q-gutter-x-md">
         <Shortcuts
@@ -53,6 +42,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, onActivated, onDeactivated, inject, reactive } from 'vue'
 import EditShortcutsDialog from 'src/components/dialog/EditShortcutsDialog.vue'
+import Carousel from 'components/Carousel.vue'
 import Shortcuts from 'src/components/Shortcuts.vue'
 import { clientConfig } from 'src/common/config.js'
 

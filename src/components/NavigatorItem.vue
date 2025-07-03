@@ -38,12 +38,6 @@
 </template>
 
 <script setup>
-
-import { ref, reactive, inject, onMounted, onUnmounted } from "vue"
-import NavigatorItem from "./NavigatorItem.vue"
-import { useConfigStore } from 'stores/config.js'
-
-
 const props = defineProps({
   prefixRoute: {
     type: String,
@@ -69,22 +63,28 @@ const props = defineProps({
   }
 })
 
+import { ref, reactive, inject, onMounted, onUnmounted, watch } from "vue"
+import NavigatorItem from "./NavigatorItem.vue"
+import { useConfigStore } from 'stores/config.js'
+
 const t = inject("t")  // i18
 const changeNavigatorGoto = inject("changeNavigatorGoto")
 const configStore = useConfigStore()
 
 const isShow = ref(true)
 
-if (props.item.mode === '' || props.item.mode === configStore.userMode) {
-  isShow.value = true
-} else {
-  isShow.value = false
-}
-
 const children = reactive([])
 
+const show = () => {
+  if (props.item.mode === '' || props.item.mode === configStore.userMode) {
+    isShow.value = true
+  } else {
+    isShow.value = false
+  }
+}
 
-const init = () => {
+const initChildren = () => {
+  children.length = 0
   for (const child of props.item.children) {
     if (child.mode === '' || child.mode === configStore.userMode) {
       children.push(child)
@@ -92,14 +92,26 @@ const init = () => {
   }
 }
 
+const init = () => {
+  initChildren()
+}
+
 onMounted(() => {
   init()
+
+  show()
 })
 
 onUnmounted(() => {
 
 })
 
+
+watch(() => configStore.userMode, (newVal, oldVal) => {
+  initChildren()
+
+  show()
+})
 
 </script>
 

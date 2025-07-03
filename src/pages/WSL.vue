@@ -611,7 +611,9 @@ onDeactivated(() => {
 })
 
 onUnmounted(() => {
-
+  if (getWSLListInterval !== null) {
+    clearInterval(getWSLListInterval)
+  }
 })
 
 </script>

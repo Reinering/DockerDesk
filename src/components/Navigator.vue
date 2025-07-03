@@ -126,15 +126,15 @@ const naviItems = reactive([
         state: false,
         children: []
       },
-      {
-        name: 'Edge',
-        label: "边缘节点列表",
-        icon: "commit",
-        route: 'edge_nodes',
-        mode: '',
-        state: false,
-        children: []
-      },
+      // {
+      //   name: 'Edge',
+      //   label: "边缘节点列表",
+      //   icon: "commit",
+      //   route: 'edge_nodes',
+      //   mode: '',
+      //   state: false,
+      //   children: []
+      // },
     ]
   },
 
