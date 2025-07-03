@@ -95,15 +95,15 @@ export async function installWSL (win, data) {
 }
 
 export async function startSubSystem (name='DockerDesk') {
-  return cmd1(`wsl --distribution ${name}`, 'utf16le')
+  return cmd(`wsl --distribution ${name}`, 'utf16le')
 }
 
 export async function startBGSubSystem (name='DockerDesk') {
-  return cmd1(`wsl --distribution ${name} --exec dbus-launch true`, 'utf16le')
+  return cmd(`wsl --distribution ${name} --exec dbus-launch true`, 'utf16le')
 }
 
 export async function stopSubSystem (name='DockerDesk') {
-  return cmd1(`wsl --terminate ${name}`, 'utf16le')
+  return cmd(`wsl --terminate ${name}`, 'utf16le')
 }
 
 export async function checkSubSystem (name='DockerDesk') {
