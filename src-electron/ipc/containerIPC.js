@@ -61,11 +61,11 @@ export function registerContainerIpcHandlers(win) {
           const sshClient = new SSH2Client(connID, win, config)
 
           return await sshClient.connect()
-            .then((result) => {
+            .then(async (result) => {
 
               ssh_clients.set(connID, sshClient)
 
-              sshClient.checkPermissions()
+              await sshClient.checkPermissions()
 
               return { success: true, error: '' }
             }, (error) => {
@@ -92,6 +92,30 @@ export function registerContainerIpcHandlers(win) {
         return { success: true, error: '' }
       } else {
         return { success: false, error: "ssh client close error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('containerSSHListDir', async (event, {connID, remotePath}) => {
+    try {
+      if (ssh_clients.has(connID)) {
+        const sshClient = ssh_clients.get(connID)
+
+        if (sshClient.ssh_status === "disconnected") {
+          return await sshClient.reconnect()
+            .then((result) => {
+              return { success: true, error: '' }
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        const result = await sshClient.listDir(remotePath)
+        return { success: true, data: result, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
       }
     } catch (error) {
       return { success: false, error: error }

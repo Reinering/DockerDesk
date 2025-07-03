@@ -92,8 +92,7 @@ const initTerminal = () => {
     window.sshTerminal.createSSHTerminal(JSON.stringify({
       uuid: props.terminalId,
       connID: props.data.id
-    }))
-      .then((result) => {
+    })).then((result) => {
         if (result.success === false) {
 
           $q.notify({
@@ -102,19 +101,37 @@ const initTerminal = () => {
             message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
           })
         } else {
-          term.onData((data) => {
-            sendSSHTerminal({
-              uuid: props.terminalId,
-              data: data,
+
+          if (Object.hasOwnProperty.call(props.data, "command")) {
+            setTimeout(() => {
+              window.sshTerminal.execStream(JSON.stringify({
+                uuid: props.terminalId,
+                command: props.data.command,
+              })).then((result) => {
+                if (!result.success) {
+
+                  $q.notify({
+                    type: 'negative',
+                    position: clientConfig.quasar.notify.position,
+                    message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
+                  })
+                }
+              })
+            }, 2000)
+          } else {
+            term.onData((data) => {
+              sendSSHTerminal({
+                uuid: props.terminalId,
+                data: data,
+              })
             })
-          })
+          }
         }
-    })
+      })
 
     window.sshTerminal.receive(
       (result) => {
         const { uuid, data } = JSON.parse(result)
-
         if (props.terminalId === uuid && term) {
           term.write(data)
         }
@@ -188,8 +205,6 @@ const initTerminal = () => {
         }
       })
     }
-
-
 
     window.terminal.receive(
       (result) => {
@@ -267,8 +282,6 @@ const onCopyButton = () => {
 
 const onPasteButton = () => {
   navigator.clipboard.readText().then(text => {
-    console.log("selectedText", text)
-
     if (props.data.connectionType === t('node.remoteNode')  && props.data.protocol === 'SSH') {
       sendSSHTerminal({
         uuid: props.terminalId,
@@ -282,7 +295,6 @@ const onPasteButton = () => {
     }
 
   })
-
 }
 
 const onSelectPasteButton = () => {

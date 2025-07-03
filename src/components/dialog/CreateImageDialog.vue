@@ -31,7 +31,26 @@
             </template>
           </q-input>
 
+          <q-input
+            v-if="service.connectionType === t('node.remoteNode')"
+            filled
+            bottom-slots
+            v-model="DockerFile.filePath"
+            :label="t('panel.images.inputHint1')"
+            dense
+          >
+            <template v-slot:append>
+              <q-icon
+                v-if="DockerFile.folderPath !== ''"
+                name="close"
+                @click="DockerFile.folderPath = ''"
+                class="cursor-pointer"
+              />
+            </template>
+          </q-input>
+
           <q-file
+            v-if="service.connectionType !== t('node.remoteNode')"
             dense
             filled
             v-model="DockerFile.filePath"
@@ -85,11 +104,10 @@
     <FileSystemDialog
       v-if="showFileSystemDialog"
       v-model="showFileSystemDialog"
-      :onClose="onShowFileSystemDialog"
+      :onSelect="onSelect"
+      :onClose="onCloseSystemDialog"
     />
   </q-dialog>
-
-
 
 </template>
 
@@ -141,11 +159,13 @@ const newRepository = reactive({
 
 const showFileSystemDialog = ref(false)
 
+const onCloseSystemDialog = () => {
+  showFileSystemDialog.value = false
+}
+
 const onSelectFolder = async () => {
   if (service.connectionType === t('node.remoteNode')) {
     showFileSystemDialog.value = !showFileSystemDialog.value
-
-
   } else {
     const folders = await window.myWindowAPI.selectFolders()
     try {
@@ -167,6 +187,19 @@ const onSelectFolder = async () => {
   }
 }
 
+const onSelect = (path, row) => {
+  if (row.isDir) {
+    if (path.charAt(path.length-1) === '/') {
+      DockerFile.folderPath = path + row.name
+    } else {
+      DockerFile.folderPath = path + '/' + row.name
+    }
+  } else {
+    DockerFile.folderPath = path
+    DockerFile.filePath = row.name
+  }
+}
+
 const onCreate = () => {
   if (DockerFile.folderPath === '' || newRepository.repository === '' || newRepository.tag === '') {
     return $q.notify({
@@ -178,7 +211,11 @@ const onCreate = () => {
 
   let file = ''
   if (!isEmptyObj(DockerFile.filePath)) {
-    file = `-f ${DockerFile.filePath.name}`
+    if (typeof DockerFile.filePath === "string") {
+      file = `-f ${DockerFile.filePath}`
+    } else {
+      file = `-f ${DockerFile.filePath.name}`
+    }
   }
 
   if (service.connectionType === t('node.remoteNode')) {
@@ -192,7 +229,37 @@ const onCreate = () => {
       return
     }
 
+    let cmd = ''
+    if (serviceCmd.value === "docker") {
+      cmd = `bash -c "cd ${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build ${file} -t ${newRepository.repository}:${newRepository.tag} ."`
+    } else {
+      let env = ''
+      if (podmanStore.getENV.length > 0) {
+        env = `export ${podmanStore.getENV.join(' && ')}`
+      }
 
+      cmd = `bash -c "${env} cd ${firstLower(DockerFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} build ${file} -t ${newRepository.repository}:${newRepository.tag} ."`
+    }
+
+    router.push({
+      path: 'logs',
+      query: {
+        tab: "logs",
+        data: JSON.stringify({
+          label: service.serviceName,
+          icon: 'terminal',
+          data: {
+            id: service.id,
+            serviceName: service.serviceName,
+            serviceType: service.serviceType,
+            connectionType: service.connectionType,
+            protocol: service.protocol,
+            disableStdin: true,
+            command: cmd
+          }
+        })
+      }
+    })
   } else {
     if (!wslInfo.enable) {
       return
@@ -275,7 +342,7 @@ const onCreate = () => {
 const init = async () => {
   await setTimeout(() => {}, 500)
 
-  serviceCmd.value = service.serviceType
+  serviceCmd.value = firstLower(service.serviceType)
   if (isEmptyObj(serviceCmd.value)) {
     isOK.value = true
     return

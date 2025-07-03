@@ -34,6 +34,7 @@
     "@xterm/xterm": "^5.5.0",
     "axios": "^1.8.4",
     "better-sqlite3": "^11.10.0",
+    "chardet": "^2.1.0",
     "crypto.js": "^3.3.4",
     "electron-log": "^5.3.4",
     "iconv-lite": "^0.6.3",

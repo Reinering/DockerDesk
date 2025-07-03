@@ -54,7 +54,7 @@
             flat
             icon="check_box_outline_blank"
             color="blue"
-            @click="onSelect(props.row)">
+            @click="onSelectRow(props.row)">
             <q-tooltip class="bg-amber text-black shadow-4">
               {{ t('filesystem.select') }}
             </q-tooltip>
@@ -66,6 +66,16 @@
 </template>
 
 <script setup>
+const props = defineProps({
+  onSelect: {
+    type: Function,
+    default: () => {}
+  },
+  onClose: {
+    type: Function,
+    default: () => {}
+  }
+})
 
 import { inject, reactive, ref, onMounted } from 'vue'
 import { clientConfig } from 'src/common/config.js'
@@ -211,8 +221,10 @@ const onParentFolder = () => {
   })
 }
 
-const onSelect = (row) => {
+const onSelectRow = (row) => {
+  props.onSelect(currentPath.value, row)
 
+  props.onClose()
 }
 
 const listDir = (path) => {

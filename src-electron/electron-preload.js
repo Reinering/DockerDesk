@@ -259,6 +259,14 @@ contextBridge.exposeInMainWorld('sshTerminal', {
     return ipcRenderer.invoke('sshTerminalSend', data)
   },
 
+  exec (data) {
+    return ipcRenderer.invoke('sshTerminalExec', data)
+  },
+
+  execStream (data) {
+    return ipcRenderer.invoke('sshTerminalExecStream', data)
+  },
+
   receive (callback) {
     return ipcRenderer.on('sshTerminalReceive', (event, data) => callback(data))
   },
@@ -589,6 +597,10 @@ contextBridge.exposeInMainWorld('containerTerminal', {
 
   receiveState (callback) {
     return ipcRenderer.on('containerSSHState', (event, data) => callback(data))
+  },
+
+  listDir (data) {
+    return ipcRenderer.invoke('containerSSHListDir', data)
   },
 
   exec (data) {

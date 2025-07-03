@@ -45,21 +45,14 @@ export function registerSSHIpcHandlers(win) {
            }
          }
 
-        // const sshClient = new SSHClient(config)
         const sshClient = new SSHClient(uuid, win, config)
 
-        ssh_clients.set(uuid, sshClient)
-
         return await sshClient.connect()
-          .then((result) => {
+          .then(async (result) => {
 
-            // sshClient.onData((data) => {
-            //   win.webContents.send("sshTerminalReceive",
-            //     JSON.stringify({
-            //       uuid: uuid,
-            //       data: data
-            //     }))
-            // })
+            ssh_clients.set(uuid, sshClient)
+
+            await sshClient.checkPermissions()
 
             return { success: true, error: '' }
           }, (error) => {
@@ -156,6 +149,33 @@ export function registerSSHIpcHandlers(win) {
         }
 
         sshClient.write(data)
+
+        return { success: true, error: '' }
+      } else {
+        return { success: false, error: "ssh client write error" }
+      }
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('sshTerminalExecStream', async (event, value) => {
+    try {
+      const { uuid, command } = JSON.parse(value)
+      if (ssh_clients.has(uuid)) {
+        const sshClient = ssh_clients.get(uuid)
+
+        if (sshClient.status === "disconnected" && command === '\r') {
+          await sshClient.reconnect()
+            .then((result) => {
+
+            }, (error) => {
+              return { success: false, error: error }
+            })
+        }
+
+        console.log("sshTerminalExecStream execStream")
+        sshClient.execStream(command)
 
         return { success: true, error: '' }
       } else {

@@ -243,6 +243,9 @@ onDeactivated(() => {
 })
 
 onUnmounted(() => {
+  if (getContainerListInterval !== null) {
+    clearInterval(getContainerListInterval)
+  }
 
   window.removeEventListener('resize', checkScreenSize)
 })

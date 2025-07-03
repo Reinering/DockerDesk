@@ -9,7 +9,7 @@
       align="left"
       v-model="tab"
     >
-      <rtab
+      <RTab
         v-for="item in tabs"
         :key="item.id"
         :name="item.id"
@@ -34,36 +34,42 @@
       </q-tab-panel>
     </q-tab-panels>
 
-<!--    <q-page-sticky position="bottom-right" :offset="fabPos">-->
-<!--      <q-fab-->
-<!--        icon="add"-->
-<!--        direction="up"-->
-<!--        color="accent"-->
-<!--        :disable="draggingFab"-->
-<!--        v-touch-pan.prevent.mouse="moveFab"-->
-<!--      >-->
-<!--        &lt;!&ndash;        <q-fab-action @click="showCmdBar" color="primary" icon="keyboard_command_key" :disable="draggingFab">&ndash;&gt;-->
-<!--        &lt;!&ndash;          <q-tooltip>&ndash;&gt;-->
-<!--        &lt;!&ndash;            CMD Bar&ndash;&gt;-->
-<!--        &lt;!&ndash;          </q-tooltip>&ndash;&gt;-->
-<!--        &lt;!&ndash;        </q-fab-action>&ndash;&gt;-->
-<!--        &lt;!&ndash;        <q-fab-action @click="showFileSystem" color="primary" icon="storage" :disable="draggingFab">&ndash;&gt;-->
-<!--        &lt;!&ndash;          <q-tooltip>&ndash;&gt;-->
-<!--        &lt;!&ndash;            FileSystem&ndash;&gt;-->
-<!--        &lt;!&ndash;          </q-tooltip>&ndash;&gt;-->
-<!--        &lt;!&ndash;        </q-fab-action>&ndash;&gt;-->
-<!--      </q-fab>-->
-<!--    </q-page-sticky>-->
+    <q-page-sticky position="bottom-right" :offset="fabPos">
+      <q-fab
+        icon="add"
+        direction="up"
+        color="accent"
+        :disable="draggingFab"
+        v-touch-pan.prevent.mouse="moveFab"
+      >
+        <!--        <q-fab-action @click="showCmdBar" color="primary" icon="keyboard_command_key" :disable="draggingFab">-->
+        <!--          <q-tooltip>-->
+        <!--            CMD Bar-->
+        <!--          </q-tooltip>-->
+        <!--        </q-fab-action>-->
+        <q-fab-action @click="showFileSystem" color="primary" icon="storage" :disable="draggingFab">
+          <q-tooltip>
+            FileSystem
+          </q-tooltip>
+        </q-fab-action>
+      </q-fab>
+    </q-page-sticky>
+
+    <q-dialog v-if="isShowFileSystemDialog" v-model="isShowFileSystemDialog" >
+      <FileSystem  :data="fsData" />
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup>
+import FileSystem from 'components/FileSystem.vue'
+
 defineOptions({
   name: 'DockerNodes',
 })
 
 import { inject, onMounted, onActivated, reactive, ref, nextTick, watch, onUnmounted } from 'vue'
-import rtab from 'components/RTab.vue'
+import RTab from 'components/RTab.vue'
 import { useNavigatorStore } from 'stores/navigator.js'
 import { generateUuid, isEmptyObj } from 'src/utils/common.js'
 
@@ -97,7 +103,6 @@ const tabs = reactive([
   // { id: 'mails', label: 'Mails', icon: 'check', data: {}},
 ])
 
-
 const deleteTab = (id) => {
   $q.dialog({
     title: t('confirm'),
@@ -126,8 +131,18 @@ const deleteTab = (id) => {
   })
 }
 
+const isShowFileSystemDialog = ref(false)
 
+const showFileSystem = () => {
+  if (tab.value === '') {
+    isShowFileSystemDialog.value = false
+    return
+  }
 
+  isShowFileSystemDialog.value = ! isShowFileSystemDialog.value
+}
+
+const fsData = ref({})
 
 
 
@@ -178,6 +193,26 @@ onActivated(() => {
 watch(tabs, (newVal, oldVal) => {
   if (tabs.length === 0) {
 
+    checkScreenSize()
+  } else {
+    for (let i = 0; i < tabs.length; i++) {
+
+    }
+    fsData.value = oldVal
+  }
+})
+
+watch(tab, (newVal, oldVal) => {
+  if (isEmptyObj(newVal)) {
+
+    checkScreenSize()
+  } else {
+    for (let i = 0; i < tabs.length; i++) {
+      if (tabs[i].id === newVal) {
+        fsData.value = tabs[i]
+        return
+      }
+    }
   }
 })
 

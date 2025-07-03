@@ -37,6 +37,25 @@
 
   </q-card>
 
+  <q-dialog v-if="showSelectDialog" v-model="showSelectDialog">
+    <q-card>
+      <q-card-section class="row items-center q-pb-none">
+        <div class="text-h6">Close icon</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+      </q-card-section>
+
+      <q-card-section class="q-gutter-x-md">
+        <q-btn align="between" class="btn-fixed-width" color="accent" label="Align between" icon="flight_takeoff" />
+        <q-btn align="around" class="btn-fixed-width" color="brown-5" label="Align around" icon="lightbulb_outline" />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
   <CreateContainerDialog v-if="showCreateContainerDialog" v-model="showCreateContainerDialog" :onClose="onShowContainerDialog"/>
 </template>
 
@@ -84,6 +103,8 @@ const scrollStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 183 - 55 - 48 + "px" : window.innerHeight - 149 - 122 - 48 + "px",
 })
 
+const showSelectDialog = ref(false)
+
 const showCreateContainerDialog = ref(false)
 const onShowContainerDialog = () => {
   showCreateContainerDialog.value = !showCreateContainerDialog.value
@@ -97,7 +118,6 @@ const containerDatas = reactive([
   //   description: "This is a node",
   // },
 ])
-
 
 const updateChildData = (nodeId, field, value) => {
   for (const item of containerDatas) {
@@ -311,6 +331,9 @@ onDeactivated(() => {
 })
 
 onUnmounted(() => {
+  if (getContainerListInterval !== null) {
+    clearInterval(getContainerListInterval)
+  }
 
   window.removeEventListener('resize', checkScreenSize)
 })

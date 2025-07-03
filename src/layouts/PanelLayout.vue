@@ -517,6 +517,7 @@ const addTab = () => {
   try {
     const data = JSON.parse(route.query.data).data
     if (data) {
+      showLoading()
       for (const key of Object.keys(data)) {
         service[key] = data[key]
       }
@@ -527,7 +528,6 @@ const addTab = () => {
 }
 
 onMounted(() => {
-  showLoading()
 
   addTab()
 

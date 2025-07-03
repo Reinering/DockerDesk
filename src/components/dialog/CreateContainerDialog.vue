@@ -31,7 +31,26 @@
             </template>
           </q-input>
 
+          <q-input
+            v-if="service.connectionType === t('node.remoteNode')"
+            filled
+            bottom-slots
+            v-model="composeFile.filePath"
+            :label="t('panel.containers.inputHint1')"
+            dense
+          >
+            <template v-slot:append>
+              <q-icon
+                v-if="composeFile.filePath !== ''"
+                name="close"
+                @click="composeFile.filePath = ''"
+                class="cursor-pointer"
+              />
+            </template>
+          </q-input>
+
           <q-file
+            v-if="service.connectionType !== t('node.remoteNode')"
             dense
             filled
             v-model="composeFile.filePath"
@@ -49,10 +68,19 @@
         <q-btn :disable="isOK" :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onCreate" />
       </q-card-actions>
     </q-card>
+
+    <FileSystemDialog
+      v-if="showFileSystemDialog"
+      v-model="showFileSystemDialog"
+      :onSelect="onSelect"
+      :onClose="onCloseSystemDialog"
+    />
   </q-dialog>
 </template>
 
 <script setup>
+import FileSystemDialog from 'components/dialog/FileSystemDialog.vue'
+
 const props = defineProps({
   onClose: {
     type: Function,
@@ -92,6 +120,25 @@ const composeFile = reactive({
   filePath: null
 })
 
+const showFileSystemDialog = ref(false)
+
+const onCloseSystemDialog = () => {
+  showFileSystemDialog.value = false
+}
+
+const onSelect = (path, row) => {
+  if (row.isDir) {
+    if (path.charAt(path.length-1) === '/') {
+      composeFile.folderPath = path + row.name
+    } else {
+      composeFile.folderPath = path + '/' + row.name
+    }
+  } else {
+    composeFile.folderPath = path
+    composeFile.filePath = row.name
+  }
+}
+
 const onSelectFile = async () => {
 
   const files = await window.myWindowAPI.selectFiles()
@@ -115,23 +162,27 @@ const onSelectFile = async () => {
 }
 
 const onSelectFolder = async () => {
-  const folders = await window.myWindowAPI.selectFolders()
-  try {
-    if (folders.length === 0) {
+  if (service.connectionType === t('node.remoteNode')) {
+    showFileSystemDialog.value = !showFileSystemDialog.value
+  } else {
+    const folders = await window.myWindowAPI.selectFolders()
+    try {
+      if (folders.length === 0) {
+        return
+      }
+    } catch (err) {
       return
     }
-  } catch (err) {
-    return
-  }
-  if (folders[0].indexOf(' ') !== -1) {
-    return $q.notify({
-      type: 'negative',
-      position: clientConfig.quasar.notify.position,
-      message: `${t('panel.containers.pathIncludeSpace')}`
-    })
-  }
+    if (folders[0].indexOf(' ') !== -1) {
+      return $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('panel.containers.pathIncludeSpace')}`
+      })
+    }
 
-  composeFile.folderPath = folders[0]
+    composeFile.folderPath = folders[0]
+  }
 }
 
 const onCreate = () => {
@@ -145,38 +196,80 @@ const onCreate = () => {
 
   let file = ''
   if (!isEmptyObj(composeFile.filePath)) {
-    file = `-f ${composeFile.filePath.name}`
+    if (typeof composeFile.filePath === "string") {
+      file = `-f ${composeFile.filePath}`
+    } else {
+      file = `-f ${composeFile.filePath.name}`
+    }
   }
 
-  let cmd = ''
-  if (serviceCmd.value === "docker-compose") {
-    cmd = `bash -c "cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} ${file} up -d"`
-  } else {
-    let env = ''
-    if (podmanStore.getENV.length > 0) {
-      env = `export ${podmanStore.getENV.join(' && ')}`
+  if (service.connectionType === t('node.remoteNode')) {
+    let cmd = ''
+    if (serviceCmd.value === "docker-compose") {
+      cmd = `bash -c "cd ${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} ${file} up -d"`
+    } else {
+      let env = ''
+      if (podmanStore.getENV.length > 0) {
+        env = `export ${podmanStore.getENV.join(' && ')}`
+      }
+
+      cmd = `bash -c "${env}  cd ${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} ${file} up -d"`
     }
 
-    cmd = `bash -c "${env}  cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} ${file} up -d"`
+    router.push({
+      path: 'logs',
+      query: {
+        tab: "logs",
+        data: JSON.stringify({
+          label: service.serviceName,
+          icon: 'terminal',
+          data: {
+            id: service.id,
+            serviceName: service.serviceName,
+            serviceType: service.serviceType,
+            connectionType: service.connectionType,
+            protocol: service.protocol,
+            disableStdin: true,
+            command: cmd
+          }
+        })
+      }
+    })
+  }  else {
+    let cmd = ''
+    if (serviceCmd.value === "docker-compose") {
+      cmd = `bash -c "cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} ${file} up -d"`
+    } else {
+      let env = ''
+      if (podmanStore.getENV.length > 0) {
+        env = `export ${podmanStore.getENV.join(' && ')}`
+      }
+
+      cmd = `bash -c "${env}  cd /mnt/${firstLower(composeFile.folderPath).replace(':', '').replace(/\\/g, '/')} && ${serviceCmd.value} ${file} up -d"`
+    }
+
+    router.push({
+      path: 'logs',
+      query: {
+        tab: "logs",
+        data: JSON.stringify({
+          label: service.address,
+          icon: 'terminal',
+          data: {
+            serviceName: service.address,
+            serviceType: 'WSL',
+            user: 'root',
+            disableStdin: true,
+            command: cmd
+          }
+        })
+      }
+    })
   }
 
-  router.push({
-    path: 'logs',
-    query: {
-      tab: "logs",
-      data: JSON.stringify({
-        label: service.address,
-        icon: 'terminal',
-        data: {
-          serviceName: service.address,
-          serviceType: 'WSL',
-          user: 'root',
-          disableStdin: true,
-          command: cmd
-        }
-      })
-    }
-  })
+
+
+
 
   composeFile.folderPath  = null
   composeFile.filePath  = null
@@ -221,7 +314,7 @@ const onCreate = () => {
 const init = async () => {
   await setTimeout(() => {}, 500)
 
-  serviceCmd.value = `${service.serviceType}-compose`
+  serviceCmd.value = `${firstLower(service.serviceType)}-compose`
   if (isEmptyObj(serviceCmd.value)) {
     return
   }
@@ -258,8 +351,6 @@ const init = async () => {
       }
     })
   }
-
-
 
   hintNote.value = t('panel.containers.hintNote', [serviceCmd.value, service.serviceType])
 }
