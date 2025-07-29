@@ -117,7 +117,13 @@
           >
 
             <q-list dense :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
-              <q-item clickable v-close-popup size="sm" @click="onBackgroundStart">
+              <q-item
+                :disable="isBGStart"
+                :clickable="isBGStartClick"
+                v-close-popup
+                size="sm"
+                @click="onBackgroundStart"
+              >
                 <q-item-section>
                   <q-icon name="play_arrow" color="amber" />
                   <q-tooltip class="bg-amber text-black shadow-4">
@@ -241,6 +247,8 @@ const isStart = ref(false)
 const isStop = ref(false)
 const isRestart = ref(false)
 const isMore = ref(false)
+const isBGStart = ref(false)
+const isBGStartClick = ref(false)
 
 const color = ref("yellow")
 
@@ -251,44 +259,44 @@ const changeState = (newVal) => {
     isStop.value = false
     isRestart.value = false
     isMore.value = false
+    isBGStart.value = true
+    isBGStartClick.value = false
   } else if (newVal === "Stopped") {
     color.value = "red"
     isStart.value = false
     isStop.value = true
     isRestart.value = true
     isMore.value = false
+    isBGStart.value = false
+    isBGStartClick.value = "clickable"
   } else {
     color.value = "yellow"
     isStart.value = true
     isStop.value = true
     isRestart.value = true
     isMore.value = true
+    isBGStart.value = true
+    isBGStartClick.value = "clickable"
   }
 }
 
 changeState(props.data.state)
 
-const onStart = () => {
+const onStart = async () => {
   let isCall = true
   window.wslTerminal.startWSL({
     name: props.data.servername
   }).then((result) => {
-    if (! result.success && isCall) {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('wsl.startFail')}: ${props.data.servername}: ${result.error}`
-      })
-
-      emit('update:value', {name: props.data.servername, state: "Stopped"})
-    } else {
-      setTimeout(() => {
-        isCall = false
-      }, 5000)
-
-      emit('update:value', {name: props.data.servername, state: "Running"})
+    if (!result.success) {
+      isCall = false
     }
   })
+
+  setTimeout(() => {
+    if (isCall) {
+      emit('update:value', {name: props.data.servername, state: "Running"})
+    }
+  }, 5000)
 }
 
 const onStop = () => {
@@ -335,10 +343,11 @@ const onRestart = () => {
 
   emit('update:value', {name: props.data.servername, state: "Stopped"})
 }
-const onBackgroundStart = () => {
-  let isCall = true
-  window.wslTerminal.startBGSubSystem().then((result) => {
-    if (! result.success && isCall) {
+const onBackgroundStart = async () => {
+  window.wslTerminal.startBGWSL({
+    name: props.data.servername
+  }).then((result) => {
+    if (!result.success) {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
@@ -346,14 +355,10 @@ const onBackgroundStart = () => {
       })
 
       emit('update:value', {name: props.data.servername, state: "Stopped"})
+    } else {
+      emit('update:value', {name: props.data.servername, state: "Running"})
     }
   })
-
-  setTimeout(() => {
-    isCall = false
-  }, 5000)
-
-  emit('update:value', {name: props.data.servername, state: "Running"})
 }
 const onDelete = () => {
   $q.dialog({
