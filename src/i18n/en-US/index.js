@@ -231,6 +231,7 @@ export default {
 
     containers: {
       create: "Create",
+      refresh: "Refresh",
 
       file: "File",
       folder: "Folder",
@@ -529,6 +530,8 @@ export default {
 
     display: "Display",
     edit: "Edit",
+    shutdownAll: "Force shut down all Linux subsystems",
+    restartService: "Restart WSL service",
 
     updating: "Upgrading...",
     upgradeSuccess: "Upgrade Successfully",
@@ -550,6 +553,8 @@ export default {
     movingFail: "Moved Failure",
     configModifySuccess: "Configuration Modification Successful",
     configModifyFail: "Configuration modification Failure",
+    actionSuccess: "Operation Successfully",
+    actionFail: "Operation Failure",
 
     nameNotNull: "The name cannot be empty or exceed the length",
     distributionNotNull: "WSL distribution version cannot be empty",

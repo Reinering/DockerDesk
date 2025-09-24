@@ -827,6 +827,9 @@ watch(() => props.data["data"]["status"], (newVal) => {
   state.value = props.data["data"]["status"].indexOf("Up") !== -1 ? "online" : "offline"
 })
 
+watch(() => props.data["data"]["containerId"], (newVal) => {
+  init()
+})
 
 watch(state, (newVal) => {
   changeState(newVal)

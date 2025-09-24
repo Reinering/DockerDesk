@@ -2,7 +2,23 @@
   <q-card :style="cardStyle">
     <q-card-section>
       <div class="row items-center justify-between">
-        <q-btn :label="t('panel.containers.create')" color="primary" @click="onShowContainerDialog" />
+<!--        <q-btn :label="t('panel.containers.create')" color="primary" @click="onShowContainerDialog" />-->
+        <q-btn-dropdown
+          split
+          :label="t('panel.containers.create')"
+          color="primary"
+          @click="onShowContainerDialog"
+        >
+          <q-list>
+            <q-item clickable v-close-popup size="sm" @click="onRefresh">
+              <q-item-section>
+                <q-item-label class="text-blue">{{t('panel.containers.refresh')}}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+
+
         <q-input v-model="search" dense label="Search" outlined clearable >
           <template v-slot:append>
             <q-icon name="search" />
@@ -276,6 +292,10 @@ const getContainerList = () => {
   getContainerListInterval = setInterval(() => {
     getContainerList()
   }, 30000)
+}
+
+const onRefresh = () => {
+  getContainerList()
 }
 
 componentsStore.refreshContainers = getContainerList

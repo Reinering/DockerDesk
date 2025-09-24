@@ -229,6 +229,7 @@ export default {
 
     containers: {
       create: "创建",
+      refresh: "刷新",
 
       file: "文件",
       folder: "目录",
@@ -531,6 +532,8 @@ export default {
 
     display: "显示",
     edit: "编辑",
+    shutdownAll: "强制关闭所有linux 子系统",
+    restartService: "重启WSL服务",
 
     updating: "正在升级...",
     upgradeSuccess: "升级成功",
@@ -552,6 +555,8 @@ export default {
     movingFail: "迁移失败",
     configModifySuccess: "配置修改成功",
     configModifyFail: "配置修改失败",
+    actionSuccess: "操作成功",
+    actionFail: "操作失败",
 
     nameNotNull: "名称不能为空或超过长度",
     distributionNotNull: "WSL发行版不能为空",
