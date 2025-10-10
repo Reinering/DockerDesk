@@ -30,7 +30,7 @@ export async function getWSLList () {
 }
 
 export async function wslUpdate (encoding='utf16le') {
-  return cmdAdmin('wsl --update --web-download', encoding)
+  return cmdAdmin('wsl --update --web-download', encoding, true)
 }
 
 export async function getDistributionList () {
@@ -98,8 +98,8 @@ export async function startSubSystem (name='DockerDesk') {
   return cmd(`wsl --distribution ${name}`, 'utf16le')
 }
 
-export async function startBGSubSystem (name='DockerDesk') {
-  return cmd(`wsl --distribution ${name} --exec dbus-launch true`, 'utf16le')
+export async function startBGSubSystem (name='DockerDesk', ) {
+  return cmd(`wsl --distribution ${name} --exec dbus-launch true`)
 }
 
 export async function stopSubSystem (name='DockerDesk') {

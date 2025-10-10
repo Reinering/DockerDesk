@@ -235,6 +235,38 @@
                       </q-item-section>
                     </q-item>
 
+                    <q-item tag="label" v-ripple dense>
+                      <q-item-section>
+                        <q-item-label>SubSystem Shutdown All</q-item-label>
+                        <q-item-label caption>{{t('wsl.shutdownAll')}}</q-item-label>
+                      </q-item-section>
+                      <q-item-section avatar>
+                        <q-btn
+                          rounded
+                          color="red"
+                          size="xs"
+                          icon="cancel_presentation"
+                          @click.stop="onShutdownAll"
+                        />
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item tag="label" v-ripple dense>
+                      <q-item-section>
+                        <q-item-label>WSL Service Restart </q-item-label>
+                        <q-item-label caption>{{t('wsl.restartService')}}</q-item-label>
+                      </q-item-section>
+                      <q-item-section avatar>
+                        <q-btn
+                        rounded
+                        color="primary"
+                        size="xs"
+                        icon="restart_alt"
+                        @click.stop="onRestartWSL"
+                        />
+                      </q-item-section>
+                    </q-item>
+
                   </q-list>
                 </template>
                 <template v-slot:after>
@@ -378,6 +410,48 @@ const changeDebugConsole = (value) => {
         type: 'negative',
         position: clientConfig.quasar.notify.position,
         message: `${t('wsl.configModifyFail')}: ${result.error}`
+      })
+    }
+  })
+}
+
+const onShutdownAll = () => {
+  window.client.exec(
+    "taskkill /IM /F wsl.exe"
+  ).then((result) => {
+    if (result.success) {
+      console.log(result)
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('wsl.actionSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.actionFail')}: ${result.error}`
+      })
+    }
+  })
+}
+
+const onRestartWSL = () => {
+  window.client.execAdmin(
+    "if (net stop \"WSLService\") { net start \"WSLService\" } else { taskkill /IM /F wslservice.exe }"
+  ).then((result) => {
+    if (result.success) {
+      console.log(result)
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('wsl.actionSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.actionFail')}: ${result.error}`
       })
     }
   })

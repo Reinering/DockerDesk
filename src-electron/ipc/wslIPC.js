@@ -108,6 +108,14 @@ export function registerWSLIpcHandlers(win) {
     })
   })
 
+  ipcMain.handle('startBGWSL', async (event, {name}) => {
+    return startBGSubSystem(name).then((data) => {
+      return { success: true, data: data, error: '' }
+    }, (error) => {
+      return { success: false, error: error }
+    })
+  })
+
   ipcMain.handle('stopWSL', async (event, {name}) => {
     return stopSubSystem(name).then((data) => {
       return { success: true, data: data, error: '' }
