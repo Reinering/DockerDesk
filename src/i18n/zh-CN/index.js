@@ -672,6 +672,9 @@ export default {
     wslSubNotFound: "WSL子系统未找到",
     dockerNotInstall: "Docker未安装",
     podmanNotInstall: "Podman未安装",
+
+    wantInstallDocker: "想要安装Docker组件？",
+    wantInstallPodman: "想要安装Podman组件？",
   },
 
   terminal: {

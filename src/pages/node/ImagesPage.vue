@@ -743,8 +743,15 @@ const onCreateContainer = (row) => {
 
 
 const getImageList = () => {
+  let cmd
+  if (serviceCmd.value === "docker") {
+    cmd = 'docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Created}}\t{{.Size}}"'
+  } else if (serviceCmd.value === "podman") {
+    cmd = "podman images"
+  }
+
   window.wslTerminal.execWSL(
-    ['-d', "DockerDesk", '--user', "root", '-e', `${serviceCmd.value} images`]
+    ['-d', "DockerDesk", '--user', "root", '-e', cmd]
   ).then((result) => {
     if (result.success) {
       rows.length = 0
@@ -771,7 +778,7 @@ const getImageList = () => {
 }
 
 const init = () => {
-  getImageList()
+  // getImageList()
 }
 
 const checkScreenSize = () => {

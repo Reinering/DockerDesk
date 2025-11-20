@@ -321,6 +321,7 @@ const onBackgroundStart = () => {
   if (wslStatusBtn.value === t('assistant.start')) {
     let isCall = true
     window.wslTerminal.startBGSubSystem().then((result) => {
+      console.log("result", result)
       if (! result.success && isCall) {
         $q.notify({
           type: 'negative',
@@ -329,16 +330,16 @@ const onBackgroundStart = () => {
         })
       } else {
         isAssLocalBtn.value = false
+
+        wslStatusBtn.value = t('assistant.stop')
+        wslStatus.value = "Running"
+        wslStatusColor.value = "green"
       }
     })
 
     setTimeout(() => {
       isCall = false
     }, 5000)
-
-    wslStatusBtn.value = t('assistant.stop')
-    wslStatus.value = "Running"
-    wslStatusColor.value = "green"
   }
 }
 

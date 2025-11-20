@@ -1032,20 +1032,26 @@ const onCreateContainer = (row) => {
 
 
 const getImageList = () => {
+  let cmd
+  if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+    return
+  } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+    return
+  } else if (serviceCmd.value === "docker") {
+    cmd = 'docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}\t{{.Size}}"'
+  } else if (serviceCmd.value === "podman") {
+    cmd = "podman images"
+  }
+
   if (service.connectionType === t('node.remoteNode')) {
     if (!connectState.value) {
       return
     }
 
-    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
-      return
-    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
-      return
-    }
-
+    // docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}\t{{.Size}}"
     window.containerTerminal.exec({
       connID: service.id,
-      command: `${serviceCmd.value} images`
+      command: cmd
     }).then((result) => {
       if (result.success) {
         rows.length = 0
@@ -1073,14 +1079,8 @@ const getImageList = () => {
       return
     }
 
-    if (serviceCmd.value === "docker" && !dockerInfo.enable) {
-      return
-    } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
-      return
-    }
-
     window.wslTerminal.execWSL(
-      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} images`]
+      ['-d', service.address, '--user', "root", '-e', cmd]
     ).then((result) => {
       if (result.success) {
         rows.length = 0
@@ -1107,7 +1107,7 @@ const getImageList = () => {
 }
 
 const init = () => {
-  getImageList()
+  // getImageList()
 
 }
 

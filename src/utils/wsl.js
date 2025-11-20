@@ -34,7 +34,135 @@ export function parseDistributionList(data) {
   })
 }
 
+
+/**
+ * 解析 docker images / docker image ls 的输出
+ * 支持以下几种常见表头（实际列顺序和空格数量不影响解析）：
+ * 1. 经典格式：REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
+ * 2. 新格式（带 CreatedAt）：REPOSITORY   TAG       IMAGE ID       CREATED AT      SIZE
+ * 3. Docker Desktop 29+ 的 pretty 格式（你当前看到的）：
+ *      IMAGE ID   DISK USAGE   CONTENT SIZE   EXTRA   REPOSITORY:TAG   U
+ * 4. 其他自定义 --format 表格格式
+ */
 export const parseDockerImages = (input) => {
+  const lines = input.trim().split('\n')
+
+  // 第一行是表头，用来判断格式
+  const header = lines[0]?.toUpperCase() || ''
+
+  const results = []
+
+  // ---------- 情况1：经典表格格式（包含 CREATED 或 CREATED AT） ----------
+  if (header.includes('REPOSITORY') && header.includes('TAG') && header.includes('IMAGE ID')) {
+    // 跳过表头
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim()
+      if (!line) continue
+
+      // 多个空格分隔的字段，使用 \s{2,} 进行分割（更稳健）
+      const cols = line.split(/\s{2,}/).map(s => s.trim())
+
+      // 至少要有 5 列（REPOSITORY TAG IMAGE ID CREATED* SIZE）
+      if (cols.length < 5) continue;
+
+      let repository = cols[0]
+      let tag        = cols[1]
+      let imageId    = cols[2]
+
+      // 处理 REPOSITORY 为 <none> 的情况，实际 repo:tag 可能出现在最后一列
+      if (repository === '<none>' || repository === '-') {
+        // 有些版本会把 repo:tag 合并到最后一列
+        const lastCol = cols[cols.length - 1];
+        if (lastCol.includes(':')) {
+          const [repo, t] = lastCol.split(/:/, 2);
+          repository = repo
+          tag = t || '<none>'
+        } else {
+          tag = '<none>'
+        }
+      }
+
+      // CREATED 可能是倒数第二列或倒数第三列（CreatedAt 占两列）
+      let created = ''
+      let size    = cols[cols.length - 1] // SIZE 永远是最后一列
+
+      if (cols.length === 5) {
+        // REPOSITORY TAG IMAGE ID CREATED SIZE
+        created = cols[3]
+      } else if (cols.length >= 6) {
+        // REPOSITORY TAG IMAGE ID CREATED AT ... SIZE
+        // CreatedAt 可能是两列：日期 + 时间
+        created = cols.slice(3, cols.length - 1).join(' ')
+      }
+
+      results.push({
+        id: results.length + 1,
+        repository,
+        tag: tag || '<none>',
+        imageId,
+        created: created.trim(),
+        size: size.trim(),
+      })
+    }
+
+    return results
+  }
+
+  // ---------- 情况2：Docker Desktop 29+ 的新 pretty 格式 ----------
+  // 表头示例：i Info → U In Use
+  //           IMAGE ID DISK USAGE CONTENT SIZE EXTRA
+  // 数据行示例：
+  // coturn/coturn:latest f44bafdab891 121MB 0B U
+  if (header.includes('IMAGE ID') && header.includes('DISK USAGE')) {
+    for (let i = 2; i < lines.length; i++) {  // 第1行是 i Info 那一行，第2行是列名
+      const line = lines[i].trim()
+      if (!line) continue
+
+      // 新格式的特点：repo:tag 在第一列，后面是 ID、DISK USAGE、CONTENT SIZE、EXTRA、U 标记
+      const parts = line.split(/\s{2,}/) // 用多个空格分割
+
+      if (parts.length < 4) continue
+
+      let fullName = parts[0]                     // coturn/coturn:latest
+      const imageId = parts[1]
+      const diskUsage = parts[2]
+      const contentSize = parts[3]
+      // EXTRA 可能为空，最后可能有 U 标记
+
+      let repository = '<none>'
+      let tag = '<none>'
+
+      if (fullName.includes(':')) {
+        const [repo, t] = fullName.split(/:/, 2);
+        repository = repo
+        tag = t
+      } else if (fullName.includes('/')) {
+        repository = fullName
+      }
+
+      results.push({
+        id: results.length + 1,
+        repository,
+        tag,
+        imageId,
+        created: '',                    // 新格式不提供 created，留空
+        size: diskUsage,                // 这里用磁盘实际占用作为 size（最有意义）
+        diskUsage,
+        contentSize,
+        inUse: line.includes(' U') || line.endsWith('U'), // 是否正在使用
+      })
+    }
+
+    return results
+  }
+
+  // ---------- 情况3：其他无法识别的格式，直接返回空 ----------
+  console.warn('Unrecognized docker images output format:', lines[0])
+  return []
+}
+
+
+export const parseDockerImages1 = (input) => {
   // 按行分割并移除表头
   const lines = input.trim().split('\n').slice(1)
 

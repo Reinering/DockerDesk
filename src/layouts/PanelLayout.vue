@@ -78,6 +78,8 @@ const route = inject("route")
 const t = inject("t")
 const deviceInfo = inject('deviceInfo')
 
+let notify = ref(null)
+
 const podmanStore = usePodmanStore()
 
 const tab = ref('containers')
@@ -145,8 +147,7 @@ const showLoading = () => {
   }, 2000)
 }
 
-const initDocker = () => {
-  console.log("initDocker")
+const checkDockerInstall = () => {
   if (service.connectionType === t('node.remoteNode')) {
     if (!connectState.value) {
       return
@@ -175,6 +176,19 @@ const initDocker = () => {
             },
             position: 'bottom'
           })
+
+          $q.dialog({
+            title: 'Confirm',
+            message: `${t('nodePanel.wantInstallDocker')}`,
+            cancel: true,
+            persistent: true
+          }).onOk(() => {
+            installDocker()
+          }).onCancel(() => {
+            // console.log('>>>> Cancel')
+          }).onDismiss(() => {
+            // console.log('I am triggered on both OK and Cancel')
+          })
         }
       } else {
         dockerInfo.enable = false
@@ -187,6 +201,19 @@ const initDocker = () => {
             color: 'negative'
           },
           position: 'bottom'
+        })
+
+        $q.dialog({
+          title: 'Confirm',
+          message: `${t('nodePanel.wantInstallDocker')}`,
+          cancel: true,
+          persistent: true
+        }).onOk(() => {
+          installDocker()
+        }).onCancel(() => {
+          // console.log('>>>> Cancel')
+        }).onDismiss(() => {
+          // console.log('I am triggered on both OK and Cancel')
         })
       }
     })
@@ -214,6 +241,19 @@ const initDocker = () => {
             },
             position: 'bottom'
           })
+
+          $q.dialog({
+            title: 'Confirm',
+            message: `${t('nodePanel.wantInstallDocker')}`,
+            cancel: true,
+            persistent: true
+          }).onOk(() => {
+            installDocker()
+          }).onCancel(() => {
+            // console.log('>>>> Cancel')
+          }).onDismiss(() => {
+            // console.log('I am triggered on both OK and Cancel')
+          })
         }
       } else {
         dockerInfo.enable = false
@@ -227,13 +267,114 @@ const initDocker = () => {
           },
           position: 'bottom'
         })
+
+        $q.dialog({
+          title: 'Confirm',
+          message: `${t('nodePanel.wantInstallDocker')}`,
+          cancel: true,
+          persistent: true
+        }).onOk(() => {
+          installDocker()
+        }).onCancel(() => {
+          // console.log('>>>> Cancel')
+        }).onDismiss(() => {
+          // console.log('I am triggered on both OK and Cancel')
+        })
       }
     })
   }
 }
 
-const initPodman = () => {
-  console.log("initPodman")
+const installDocker = () => {
+  if (service.connectionType === t('node.remoteNode')) {
+    window.containerTerminal.execs({
+      connID: service.id,
+      command: [
+        "bash", '-c', "\"curl -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | bash -s docker --mirror Aliyun && systemctl enable --now docker >/dev/null 2>&1\"",
+        "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""
+      ]
+    }).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          spinner: false,
+          message: `${t('assistant.installSuccess')}`,
+          timeout: 10000
+        })
+
+        checkDockerInstall()
+
+        window.nodes.updateNode(JSON.stringify({
+          id: '11111111',
+          delete_flags: 2
+        })).then((result) => {
+          console.log(result)
+          if (result.success) {
+
+          } else {
+
+          }
+        })
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.installFail')}: ${result.error}`,
+          timeout: 10000
+        })
+      }
+    })
+  } else {
+    window.wslTerminal.execSWSL([
+      // https://raw.githubusercontent.com/docker/docker-install/master/install.sh https://get.docker.com
+      ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | bash -s docker --mirror Aliyun && systemctl enable --now docker >/dev/null 2>&1\""],
+      ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""]
+    ]).then((result) => {
+      if (result.success) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          spinner: false,
+          message: `${t('assistant.installSuccess')}`,
+          timeout: 10000
+        })
+
+        checkDockerInstall()
+
+        window.nodes.updateNode(JSON.stringify({
+          id: '11111111',
+          delete_flags: 2
+        })).then((result) => {
+          console.log(result)
+          if (result.success) {
+
+          } else {
+
+          }
+        })
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.installFail')}: ${result.error}`,
+          timeout: 10000
+        })
+      }
+    })
+  }
+
+}
+
+const initDocker = () => {
+  console.log("initDocker")
+
+  checkDockerInstall()
+}
+
+const checkPodmanInstall = () => {
   if (service.connectionType === t('node.remoteNode')) {
     if (!connectState.value) {
       return
@@ -300,6 +441,19 @@ const initPodman = () => {
             },
             position: 'bottom'
           })
+
+          $q.dialog({
+            title: 'Confirm',
+            message: `${t('nodePanel.wantInstallPodman')}`,
+            cancel: true,
+            persistent: true
+          }).onOk(() => {
+            installPodman()
+          }).onCancel(() => {
+            // console.log('>>>> Cancel')
+          }).onDismiss(() => {
+            // console.log('I am triggered on both OK and Cancel')
+          })
         }
       } else {
         podmanInfo.enable = false
@@ -313,9 +467,35 @@ const initPodman = () => {
           },
           position: 'bottom'
         })
+
+        $q.dialog({
+          title: 'Confirm',
+          message: `${t('nodePanel.wantInstallPodman')}`,
+          cancel: true,
+          persistent: true
+        }).onOk(() => {
+          installPodman()
+        }).onCancel(() => {
+          // console.log('>>>> Cancel')
+        }).onDismiss(() => {
+          // console.log('I am triggered on both OK and Cancel')
+        })
       }
     })
   }
+}
+
+const installPodman = () => {
+  if (service.connectionType === t('node.remoteNode')) {
+
+  } else {
+
+  }
+}
+
+const initPodman = () => {
+  console.log("initPodman")
+  checkPodmanInstall()
 
   // init env
   window.client.getSettings("podman_proxy_mode").then((result) => {

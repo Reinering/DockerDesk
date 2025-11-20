@@ -151,10 +151,10 @@ const podmanInfo = ref(t('asslocal.notInstalled'))
 const onInstallDocker = () => {
   if (dockerBtn.value === t('asslocal.install')) {
     window.wslTerminal.execSWSL([
-      ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun systemctl enable --now docker >/dev/null 2>&1\""],
+      // https://raw.githubusercontent.com/docker/docker-install/master/install.sh https://get.docker.com
+      ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | bash -s docker --mirror Aliyun && systemctl enable --now docker >/dev/null 2>&1\""],
       ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""]
     ]).then((result) => {
-        console.log(result)
         if (result.success) {
           notify.value({
             type: 'positive',
@@ -196,7 +196,7 @@ const onInstallDocker = () => {
       position: 'bottom-right',
       message: t('assistant.installing'),
     })
-  } else if (podmanBtn.value === t('asslocal.panel')) {
+  } else if (dockerBtn.value === t('asslocal.panel')) {
     gotoNodePanel("docker")
   } else {
     showDockerSettingsDialog.value = !showDockerSettingsDialog.value

@@ -661,6 +661,9 @@ export default {
     wslSubNotFound: "WSL subsystem not found",
     dockerNotInstall: "Docker not installed",
     podmanNotInstall: "Podman not installed",
+
+    wantInstallDocker: "Would you Want to install Docker components?",
+    wantInstallPodman: "Would you Want to install Podman components?",
   },
 
 
