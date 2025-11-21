@@ -6,14 +6,22 @@ import {
   getSystemProxy,
 } from '../actions/client.js'
 import { settings } from '../actions/settings.js'
-import { CmdRunner } from '../common/utils.js'
+import { CmdRunner, cmdAdmin, cmd } from '../common/utils.js'
+import { setLang } from '../common/i18n.js'
 import Crypto from 'crypto.js'
 import { interference } from 'app/src-electron/common/encrypt.js'
+import { startBGSubSystem } from 'app/src-electron/actions/wsl.js'
+
+
 
 
 export  const CmdRunners = new Map()
 
 export function registerClientIpcHandlers(win) {
+
+  ipcMain.on('syncLang', async (event, lang) => {
+    setLang(lang)
+  })
 
   ipcMain.on('openUrlOnBrowser', async (event, url) => {
     shell.openExternal(url)
@@ -135,6 +143,42 @@ export function registerClientIpcHandlers(win) {
       data["modify_time"] = Date.now()
 
       return settings.updateByField(data)
+    }
+  })
+
+  ipcMain.handle('cmdExec', async (event, data) => {
+    try {
+      let command = data
+      if (data instanceof Array) {
+        command = data.join(' ')
+      }
+
+      return cmd(command).then((data) => {
+        return { success: true, data: data, error: '' }
+      }, (error) => {
+        return { success: false, error: error }
+      })
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('cmdExecAdmin', async (event, data) => {
+    try {
+      let command = data
+      if (data instanceof Array) {
+        command = data.join(' ')
+      }
+
+      return cmdAdmin(command, 'utf16le', true).then((data) => {
+        console.log("cmdExecAdmin", data)
+        return { success: true, data: data, error: '' }
+      }, (error) => {
+        console.log("cmdExecAdmin", error)
+        return { success: false, error: error }
+      })
+    } catch (error) {
+      return { success: false, error: error }
     }
   })
 

@@ -18,8 +18,14 @@ export const platform = os.platform()
 // 获取 CPU 架构 'x64', 'arm', 'arm64', 'ia32'
 export const arch = os.arch()
 
-const isWindows = platform === 'win32'
+export const isWindows = platform === 'win32'
+export const isMac = os.platform() === 'darwin'
+export const isLinux = os.platform() === 'linux'
+export const isFreebsd = os.platform() === 'freebsd'
 
+export function isEmptyObj (obj) {
+  return (typeof obj === 'undefined' || obj === null || obj === "")
+}
 
 // 指定长度和进制 len: 生成UUID长度,radix: 需要chars中字符集的长度 max:62
 export function generateUuid (len = 16, radix = 62) {
@@ -197,13 +203,28 @@ export function cmdAdmin(command, encoding='cp936', isAdmin=false) {
     command = command.join(' ')
   }
 
-  const options = { cwd: process.cwd(), windowsHide: true, encoding: 'buffer' }
-  if (isAdmin) {
-    options["sudo"] = true
-    options["admin"] = true
+  const options = {
+    name: 'DockerDesk',
+    cwd: process.cwd(),
+    windowsHide: true,
+    encoding: 'buffer'
   }
 
-  console.log(command)
+  let sudoCommand = command
+  if (isAdmin) {
+    if (process.platform === 'win32') {
+      // Windows 使用 PowerShell
+      sudoCommand = `powershell -Command "Start-Process cmd -ArgumentList '/c ${command}' -Verb RunAs -Wait"`
+    } else if (process.platform === 'darwin') {
+      // macOS 使用 osascript
+      sudoCommand = `osascript -e 'do shell script "${command}" with administrator privileges'`
+    } else {
+      // Linux 使用 pkexec 或 gksu
+      sudoCommand = `pkexec ${command}`
+    }
+  }
+
+  devConsole(`cmdAdmin ${command}`)
   return new Promise((resolve, reject) => {
     sudo.exec(command, options, (error, stdout, stderr) => {
       if (error && error.code !== 0) {
@@ -430,4 +451,60 @@ export const detectEncoding = (buffer) => {
     return 'gbk' // 尝试GBK
   }
   return 'utf8'
-};
+}
+
+
+export function cmdAdmin1(command, encoding = 'cp936', isAdmin = false) {
+  if (Array.isArray(command)) {
+    command = command.join(' ')
+  }
+
+  devConsole(`Executing with isAdmin=${isAdmin}: ${command}`)
+
+  let sudoCommand = command
+  if (isAdmin) {
+    if (process.platform === 'win32') {
+      // Windows 使用 PowerShell
+      sudoCommand = `powershell -Command "Start-Process cmd -ArgumentList '/c ${command}' -Verb RunAs -Wait"`
+    } else if (process.platform === 'darwin') {
+      // macOS 使用 osascript
+      sudoCommand = `osascript -e 'do shell script "${command}" with administrator privileges'`
+    } else {
+      // Linux 使用 pkexec 或 gksu
+      sudoCommand = `pkexec ${command}`
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    // Use standard child_process.exec for non-admin commands
+    const options = {
+      cwd: process.cwd(),
+      windowsHide: true,
+      encoding: 'buffer' // Get output as a buffer to decode it manually
+    }
+
+    exec(sudoCommand, options, (error, stdout, stderr) => {
+      const decode = (buffer) => buffer ? iconv.decode(Buffer.from(buffer), encoding) : ''
+
+      const stdoutStr = decode(stdout)
+      const stderrStr = decode(stderr)
+
+      if (error) {
+        // error.message is usually in UTF8, but stderr will have the command's output
+        devConsole(`Exec Error: ${error.message}`)
+        return reject(error.message)
+      }
+      if (stderrStr) {
+        devConsole(`Stderr: ${stderrStr}`)
+        return reject(stderrStr)
+      }
+      if (stdoutStr) {
+        devConsole(`Stdout: ${stdoutStr}`)
+        return resolve(stdoutStr)
+      }
+      devConsole('Non-admin command execution finished.')
+      reject('Non-admin command execution finished.')
+    })
+  })
+}
+

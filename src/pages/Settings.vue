@@ -196,6 +196,7 @@ watch(lang, (newVal) => {
   // localStorage
   configStore.lang = newVal
 
+  window.myWindowAPI.syncLang(configStore.lang)
 })
 
 

@@ -48,6 +48,8 @@ const init = () => {
     configStore.lang = navigator.language
   }
 
+  window.myWindowAPI.syncLang(configStore.lang)
+
   // theme
   if (configStore.theme === 'dark') {
     $q.dark.set(true)
@@ -60,7 +62,6 @@ const init = () => {
       deviceInfo.value = result
     })
   }
-
 }
 
 onBeforeMount(() => {

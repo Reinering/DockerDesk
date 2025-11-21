@@ -69,7 +69,12 @@ export default defineConfig((ctx) => {
           ...viteConf.resolve.alias,
           'src': fileURLToPath(new URL('./src', import.meta.url))
         }
+
+        // viteConf.optimizeDeps = {
+        //   exclude: []
+        // }
       },
+
       // viteVuePluginOptions: {},
 
       vitePlugins: [

@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu, Tray, nativeImage } from 'electron'
 import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'
@@ -6,12 +6,24 @@ import { fileURLToPath } from 'node:url'
 import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
 import { ssh_clients } from "./ipc/sshIPC.js"
+import { createTray } from "./common/tray.js"
+
 import { initLogging } from './common/logging.js'
+
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+console.log(__dirname)
 const currentDir = fileURLToPath(new URL('.', import.meta.url))
+console.log(currentDir)
+
+console.log(app.getPath('userData'))
+
+// public
+const publicFolder = path.resolve(__dirname, process.env.QUASAR_PUBLIC_FOLDER)
+console.log(publicFolder)
 
 let mainWindow
 
@@ -23,7 +35,7 @@ async function createWindow () {
   initialize()
 
   mainWindow = new BrowserWindow({
-    icon: path.resolve(currentDir, 'icons/icon.png'), // tray icon
+    icon: path.join(publicFolder, 'icons/favicon-128x128.png'), // tray icon
     width: 1000,
     height: 800,
     useContentSize: true,
@@ -71,7 +83,15 @@ async function createWindow () {
 initDB()
 initLogging()
 
-app.whenReady().then(createWindow)
+let tray = null
+app.whenReady().then(() => {
+  createWindow()
+
+  // 创建托盘图标 path.resolve(currentDir, 'icons/icon.png')
+  const icon = nativeImage.createFromPath(path.join(publicFolder, 'icons/favicon-16x16.png'))
+    .resize({ width: 16, height: 16 }) // 托盘图标通常较小
+  createTray(mainWindow, icon)
+})
 
 app.on('did-finish-load', () => {
 
@@ -85,7 +105,7 @@ app.on('window-all-closed', () => {
 
   // 退出前，断开所有ssh连接
   for (let conn of ssh_clients) {
-
+    conn.close()
   }
 
 })

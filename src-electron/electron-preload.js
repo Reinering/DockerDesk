@@ -49,7 +49,8 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
   },
 
   close () {
-    BrowserWindow.getFocusedWindow().close()
+    // BrowserWindow.getFocusedWindow().close()
+    BrowserWindow.getFocusedWindow().hide()
   },
 
   selectFiles () {
@@ -62,6 +63,10 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
 
   getProxy ()  {
     return ipcRenderer.invoke('getSystemProxy')
+  },
+
+  syncLang (lang) {
+    ipcRenderer.send('syncLang', lang)
   },
 
 })
@@ -105,6 +110,14 @@ contextBridge.exposeInMainWorld('client', {
     return ipcRenderer.invoke('updateSettings', data)
   },
 
+  exec (data) {
+    return ipcRenderer.invoke('cmdExec', data)
+  },
+
+  execAdmin (data) {
+    return ipcRenderer.invoke('cmdExecAdmin', data)
+  },
+
   cmdRunnerStart (data) {
     return ipcRenderer.invoke('cmdRunnerStart', data)
   },
@@ -120,6 +133,7 @@ contextBridge.exposeInMainWorld('client', {
   cmdRunnerReceive (callback) {
     return ipcRenderer.on('cmdRunnerReceive', (event, data) => callback(data))
   },
+
 })
 
 
@@ -490,6 +504,10 @@ contextBridge.exposeInMainWorld("wslTerminal", {
 
   startWSL(data) {
     return ipcRenderer.invoke('startWSL', data)
+  },
+
+  startBGWSL(data) {
+    return ipcRenderer.invoke('startBGWSL', data)
   },
 
   stopWSL(data) {
