@@ -14,16 +14,14 @@ import { initLogging } from './common/logging.js'
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-console.log(__dirname)
 const currentDir = fileURLToPath(new URL('.', import.meta.url))
-console.log(currentDir)
+console.log("currentDir", currentDir)
 
-console.log(app.getPath('userData'))
+console.log("userData", app.getPath('userData'))
 
 // public
-const publicFolder = path.resolve(__dirname, process.env.QUASAR_PUBLIC_FOLDER)
-console.log(publicFolder)
+const publicFolder = path.resolve(currentDir, process.env.QUASAR_PUBLIC_FOLDER)
+console.log("publicFolder", publicFolder)
 
 let mainWindow
 
@@ -35,6 +33,7 @@ async function createWindow () {
   initialize()
 
   mainWindow = new BrowserWindow({
+    // taskbar icon: path.resolve(currentDir, 'assets/icons/icon.ico') path.join(publicFolder, 'icons/favicon-128x128.png')
     icon: path.join(publicFolder, 'icons/favicon-128x128.png'), // tray icon
     width: 1000,
     height: 800,
@@ -53,8 +52,6 @@ async function createWindow () {
   })
 
   enable(mainWindow.webContents)
-
-
 
 
   if (process.env.DEV) {
@@ -88,7 +85,7 @@ app.whenReady().then(() => {
   createWindow()
 
   // 创建托盘图标 path.resolve(currentDir, 'icons/icon.png')
-  const icon = nativeImage.createFromPath(path.join(publicFolder, 'icons/favicon-16x16.png'))
+  const icon = nativeImage.createFromPath(path.join(publicFolder, 'icons/favicon-128x128.png'))
     .resize({ width: 16, height: 16 }) // 托盘图标通常较小
   createTray(mainWindow, icon)
 })

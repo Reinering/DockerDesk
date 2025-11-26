@@ -1,5 +1,5 @@
 import { app, Menu, Tray } from 'electron'
-import { i18n } from 'app/src-electron/common/i18n.js'
+import { it } from 'app/src-electron/common/i18n.js'
 // import { i18n } from './i18n.js'
 import { isEmptyObj } from 'app/src-electron/common/utils.js'
 
@@ -26,16 +26,16 @@ export const createTray = (mainWindow, icon) => {
 
   tray = new Tray(trayConf.icon) // 设置托盘图标
   const contextMenu = Menu.buildFromTemplate([
-    { label: i18n.t('show'), click: () => {
+    { label: it('show'), click: () => {
         /* 显示主窗口的逻辑 */
         trayConf.mainWindow.show()
         trayConf.mainWindow.setSkipTaskbar(false) // 从任务栏显示
       }},
-    { label: i18n.t('hide'), click: () => {
+    { label: it('hide'), click: () => {
         trayConf.mainWindow.hide()
         trayConf.mainWindow.setSkipTaskbar(true) // 从任务栏隐藏
       }},
-    { label: i18n.t('exit'), click: () => {
+    { label: it('exit'), click: () => {
         // 确保完全退出应用
         trayConf.mainWindow.destroy()
         app.quit()
@@ -44,9 +44,10 @@ export const createTray = (mainWindow, icon) => {
   tray.setToolTip('DockerDesk') // 设置悬浮提示
   tray.setContextMenu(contextMenu) // 设置上下文菜单
 
+  // click
   tray.on('click', () => {
     // mainWin.show()
-    tray.popUpContextMenu()
+    // tray.popUpContextMenu()
   })
 
   tray.on('right-click', () => {

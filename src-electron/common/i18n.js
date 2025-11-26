@@ -1,4 +1,5 @@
-import i18next from 'i18next'
+// import i18next from 'i18next'
+import { init, t, use, changeLanguage } from 'i18next'
 import { createTray } from '../common/tray.js'
 import en from '../i18n/en-US/en.json'
 import zh from '../i18n/zh-CN/zh.json'
@@ -12,7 +13,7 @@ const resources = {
   "en-US": { translation: en }
 }
 
-await i18next.init({
+await init({
   lng: I18_CONF.LANG,
   fallbackLng: 'zh-CN', // 默认语言
   resources,
@@ -25,11 +26,11 @@ export const setLang = (lang) => {
   console.log("setlang", lang)
   I18_CONF.LANG = lang
 
-  i18next.changeLanguage(lang)
+  changeLanguage(lang)
 
   createTray()
 }
 
 
 
-export const i18n = i18next
+export const it = t
