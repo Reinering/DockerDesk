@@ -29,15 +29,25 @@
                 outlined
                 dense
               />
-              <q-input
+              <q-select
                 class="q-mb-sm"
+                color="blue"
                 v-if="newService.connectionType === t('node.localNode')"
                 v-model="newService.subSystem"
+                :options="WSLList"
                 :label="t('node.wslsubName')"
-                maxlength="30"
                 outlined
                 dense
               />
+<!--              <q-input-->
+<!--                class="q-mb-sm"-->
+<!--                v-if="newService.connectionType === t('node.localNode')"-->
+<!--               dian v-model="newService.subSystem"-->
+<!--                :label="t('node.wslsubName')"-->
+<!--                maxlength="30"-->
+<!--                outlined-->
+<!--                dense-->
+<!--              />-->
               <q-select
                 class="q-mb-sm"
                 color="blue"
@@ -228,6 +238,8 @@
 
 <script setup>
 // 定义组件名称
+import { parseDistributionList, parseWSLListVersion } from 'src/utils/wsl.js'
+
 defineOptions({
   name: 'Nodes',
 })
@@ -243,6 +255,7 @@ const name = 'node'
 const $q = inject("$q")
 const router = inject("router")
 const t = inject("t")
+const deviceInfo = inject("deviceInfo")
 const navigatorStore = useNavigatorStore()
 
 const tableStyle = reactive({
@@ -289,6 +302,7 @@ const keyFile = ref('')
 const labelKey = ref(t('node.key') + ' | ' + t('node.selectKeyFile'))
 
 const connectionOptions = [t('node.localNode'), t('node.remoteNode')]
+const WSLList = reactive([])
 const protocolOptions = ['SSH', 'Telnet']
 const passwordOptions = [t('node.password'), t('node.key')]
 
@@ -327,6 +341,7 @@ const cleanService = () => {
   newService.id = ''
   newService.serviceName = ''
   newService.connectionType = ''
+  newService.subSystem = ''
   newService.serviceType = ''
   newService.address = ''
   newService.protocol= ''
@@ -695,6 +710,17 @@ const connectPanel = (row) => {
 
 }
 
+const getWSLList = () => {
+  window.wslTerminal.getWSLList().then((result) => {
+    if (result.success) {
+      const data = parseWSLListVersion(result.data)
+      for (let index in data) {
+        WSLList.push(data[index].name)
+      }
+    }
+  })
+}
+
 const init = () => {
   services.length = 0
   window.nodes.getNodes().then((result) => {
@@ -733,6 +759,8 @@ const init = () => {
       }
     }
   })
+
+  getWSLList()
 }
 
 onMounted(() => {
