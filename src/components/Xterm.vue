@@ -22,6 +22,19 @@
             {{ t('selectPaste') }}
           </q-item-section>
         </q-item>
+        <q-item v-if="showMenu" clickable @click="onCleanButton">
+          <q-item-section>
+            {{ t('clean') }}
+          </q-item-section>
+        </q-item>
+
+        <q-separator />
+
+        <q-item v-if="showMenu" clickable @click="onRefreshButton">
+          <q-item-section>
+            {{ t('refresh') }}
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-menu>
   </div>
@@ -53,6 +66,12 @@ import { clientConfig } from 'src/common/config.js'
 const t = inject('t')
 const $q = inject('$q')
 
+const connectState = ref('disconnected')  // disconnected / connecting / connected
+
+const lastEnterTime = ref(0)
+const DOUBLE_ENTER_THRESHOLD = ref(500)
+const isDoubleEnter = ref(false)
+
 const xtermRef = ref(null)
 let term = null
 let fitAddon = null
@@ -72,68 +91,165 @@ const xtermConfig = reactive({
 
 const showMenu = ref(true)
 
-const initTerminal = () => {
-  if (Object.hasOwnProperty.call(props.data, "disableStdin")) {
-    xtermConfig.disableStdin = props.data["disableStdin"]
-    showMenu.value = false
+const reconnect = () => {
+  console.log("reconnect")
+  // reconnect
+  if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
+    window.sshTerminal.createSSHTerminal(JSON.stringify({
+      uuid: props.terminalId,
+      connID: props.data.id
+    })).then((result) => {
+      if (result.success === false) {
+
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
+        })
+      } else {
+
+        if (Object.hasOwnProperty.call(props.data, "command")) {
+          setTimeout(() => {
+            window.sshTerminal.execStream(JSON.stringify({
+              uuid: props.terminalId,
+              command: props.data.command,
+            })).then((result) => {
+              if (!result.success) {
+
+                $q.notify({
+                  type: 'negative',
+                  position: clientConfig.quasar.notify.position,
+                  message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
+                })
+              }
+            })
+          }, 2000)
+        } else {
+          connectState.value = "connected"
+        }
+      }
+    })
+  } else if (props.data.serviceType === 'WSL' || props.data.serviceName === "wsl_docker" || props.data.serviceName === "wsl_podman") {
+    if (Object.hasOwnProperty.call(props.data, "command")) {
+      window.terminal.execTerminal({
+        uuid: props.terminalId,
+        // cmd: `wsl -d ${props.data.serviceName} --user ${props.data.user} -e ${props.data.command}`,
+        cmd: ['wsl', '-d', props.data.serviceName, "--user", props.data.user, '-e', props.data.command],
+      }).then((result) => {
+        if (result.success === false) {
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('xterm.termInitError') + ': ' + result.error
+          })
+        } else {
+          connectState.value = "connected"
+        }
+      })
+    } else if (props.data.serviceName === "wsl_docker" || props.data.serviceName === "wsl_podman") {
+      window.terminal.createWSLTerminal({
+        uuid: props.terminalId,
+        name: "DockerDesk",
+        user: 'root',
+      }).then((result) => {
+        if (result.success === false) {
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('xterm.termInitError') + ': ' + result.error
+          })
+        }
+      })
+    } else {
+      window.terminal.createWSLTerminal({
+        uuid: props.terminalId,
+        name: props.data.serviceName,
+        user: 'root',
+      }).then((result) => {
+        if (result.success === false) {
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('xterm.termInitError') + ': ' + result.error
+          })
+        } else {
+          connectState.value = "connected"
+        }
+      })
+    }
+  } else {
+    window.terminal.createTerminal(props.terminalId)
+      .then((result) => {
+        if (result.success === false) {
+
+          $q.notify({
+            type: 'negative',
+            position: clientConfig.quasar.notify.position,
+            message: t('xterm.termInitError') + ': ' + result.error
+          })
+        }
+      })
+
   }
+}
 
-  term = new Terminal(xtermConfig)
-  fitAddon = new FitAddon()
-  term.loadAddon(fitAddon)
-
-  term.open(xtermRef.value)
-  fitAddon.fit()
-
-  handleResize()
-
+const connect = () => {
   // init connect
   if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
     window.sshTerminal.createSSHTerminal(JSON.stringify({
       uuid: props.terminalId,
       connID: props.data.id
     })).then((result) => {
-        if (result.success === false) {
+      if (result.success === false) {
 
-          $q.notify({
-            type: 'negative',
-            position: clientConfig.quasar.notify.position,
-            message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
-          })
-        } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
+        })
+      } else {
+        if (Object.hasOwnProperty.call(props.data, "command")) {
+          setTimeout(() => {
+            window.sshTerminal.execStream(JSON.stringify({
+              uuid: props.terminalId,
+              command: props.data.command,
+            })).then((result) => {
+              if (!result.success) {
 
-          if (Object.hasOwnProperty.call(props.data, "command")) {
-            setTimeout(() => {
-              window.sshTerminal.execStream(JSON.stringify({
-                uuid: props.terminalId,
-                command: props.data.command,
-              })).then((result) => {
-                if (!result.success) {
-
-                  $q.notify({
-                    type: 'negative',
-                    position: clientConfig.quasar.notify.position,
-                    message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
-                  })
-                }
-              })
-            }, 2000)
-          } else {
-            term.onData((data) => {
-              sendSSHTerminal({
-                uuid: props.terminalId,
-                data: data,
-              })
+                $q.notify({
+                  type: 'negative',
+                  position: clientConfig.quasar.notify.position,
+                  message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
+                })
+              }
             })
-          }
+          }, 2000)
+        } else {
+          connectState.value = "connected"
+
+          term.onData((data) => {
+            sendSSHTerminal({
+              uuid: props.terminalId,
+              data: data,
+            })
+          })
         }
-      })
+      }
+    })
 
     window.sshTerminal.receive(
       (result) => {
         const { uuid, data } = JSON.parse(result)
+
         if (props.terminalId === uuid && term) {
-          term.write(data)
+          if (data === "Terminal disconnected") {
+            connectState.value = "disconnected"
+          } else {
+            term.write(data)
+          }
         }
       }
     )
@@ -152,6 +268,8 @@ const initTerminal = () => {
             message: t('xterm.termInitError') + ': ' + result.error
           })
         } else {
+          connectState.value = "connected"
+
           term.onData((data) => {
             sendTerminal({
               uuid: props.terminalId,
@@ -196,6 +314,8 @@ const initTerminal = () => {
             message: t('xterm.termInitError') + ': ' + result.error
           })
         } else {
+          connectState.value = "connected"
+
           term.onData((data) => {
             sendTerminal({
               uuid: props.terminalId,
@@ -209,9 +329,12 @@ const initTerminal = () => {
     window.terminal.receive(
       (result) => {
         const { uuid, data } = JSON.parse(result)
-
         if (props.terminalId === uuid && term) {
-          term.write(data)
+          if (data === "Terminal disconnected") {
+            connectState.value = "disconnected"
+          } else {
+            term.write(data)
+          }
         }
       }
     )
@@ -226,6 +349,8 @@ const initTerminal = () => {
             message: t('xterm.termInitError') + ': ' + result.error
           })
         } else {
+          connectState.value = "connected"
+
           term.onData((data) => {
             sendTerminal({
               uuid: props.terminalId,
@@ -240,11 +365,33 @@ const initTerminal = () => {
         const { uuid, data } = JSON.parse(result)
 
         if (props.terminalId === uuid && term) {
-          term.write(data)
+          if (data === "Terminal disconnected") {
+            connectState.value = "disconnected"
+          } else {
+            term.write(data)
+          }
         }
       }
     )
   }
+}
+
+const initTerminal = () => {
+  if (Object.hasOwnProperty.call(props.data, "disableStdin")) {
+    xtermConfig.disableStdin = props.data["disableStdin"]
+    showMenu.value = false
+  }
+
+  term = new Terminal(xtermConfig)
+  fitAddon = new FitAddon()
+  term.loadAddon(fitAddon)
+
+  term.open(xtermRef.value)
+  fitAddon.fit()
+
+  handleResize()
+
+  connect()
 }
 
 const destroyTerminal = () => {
@@ -321,17 +468,30 @@ const onSelectPasteButton = () => {
   }
 }
 
-const sendTerminal = (data) => {
-  window.terminal.send(JSON.stringify(data)).then((result) => {
-    if (!result.success) {
+const onCleanButton = () => {
+  term.clear()
+}
 
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: t('xterm.termInitError') + ': ' + result.error
-      })
-    }
-  })
+const onRefreshButton = () => {
+  connectState.value = "connecting"
+  connect()
+}
+
+const sendTerminal = (data) => {
+  if (connectState.value === "disconnected" && data === '\r' && isDoubleEnter.value) {
+    connectState.value = "connecting"
+    connect()
+  } else {
+    window.terminal.send(JSON.stringify(data)).then((result) => {
+      if (!result.success) {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: t('xterm.termInitError') + ': ' + result.error
+        })
+      }
+    })
+  }
 }
 
 const sendSSHTerminal = (data) => {
@@ -345,6 +505,16 @@ const sendSSHTerminal = (data) => {
       })
     }
   })
+
+  // if (connectState.value === "disconnected" && data.data === '\r') {
+  //   console.log("mark1")
+  //   if (isDoubleEnter.value) {
+  //     connectState.value = "connecting"
+  //     reconnect()
+  //   }
+  // } else {
+  //   console.log("mark2")
+  // }
 }
 
 // 行列匹配
@@ -383,10 +553,41 @@ const setupResizeObserver = () => {
   onBeforeUnmount(() => resizeObserver.disconnect())
 }
 
+
+
 const handleKeyDown = (event) => {
   // 标签页切换，快捷键 alt + 数字键
   console.log("handleKeyDown", event.key)
   if (event.altKey) {
+  }
+
+  // 检查是否是 Enter 键
+  if (event.key === 'Enter' || event.keyCode === 13) {
+    const currentTime = new Date().getTime()
+    const deltaTime = currentTime - lastEnterTime.value
+
+    // 阻止默认行为（例如表单提交或在 textarea 中换行），
+    // 以免干扰双回车逻辑，这取决于你在哪里监听事件
+    // event.preventDefault();
+
+    if (deltaTime < DOUBLE_ENTER_THRESHOLD.value && deltaTime > 0) {
+      // ✅ 检测到双回车
+      console.log('Double Enter detected!')
+      isDoubleEnter.value = true
+
+      // 执行双回车后的操作，例如：
+      // submitForm()
+
+      // 为了防止检测到“三连回车”甚至更多，在成功检测到双回车后，
+      // 最好重置 lastEnterTime 或设为一个非常小的值
+      lastEnterTime.value = 0
+
+    } else {
+      // 第一次按下 Enter，或者间隔时间太长
+      console.log('Single Enter or too slow.')
+      lastEnterTime.value = currentTime
+      isDoubleEnter.value = false
+    }
   }
 }
 

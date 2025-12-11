@@ -26,6 +26,7 @@ export default {
   reset: 'Reset',
   refresh: 'Refresh',
   connect: 'Connect',
+  clean: "Clean",
   upload: 'Upload',
   download: 'Download',
   select: 'Select',
@@ -591,6 +592,9 @@ export default {
     authType: "Auth Type",
     password: 'password',
     key: 'Key',
+    keyMode: "Key Mode",
+    keyString: "Key String",
+    keyFile: "Key File",
     selectKeyFile: "Select key file",
     keyFileHint: "Key hidden",
 
@@ -757,15 +761,24 @@ export default {
   },
 
   setting: {
+    base: "Base Settings",
+    basic: "Basic Settings",
+    system: "System Settings",
+
     theme: {
       auto: "Auto",
       light: "Light",
       dark: "Dark",
     },
+
+    userMode: "User Mode",
+
     mode: {
       normal: "Normal",
       professional: "Professional",
     },
+
+    autoStart: "Auto Start",
   },
 
   // db

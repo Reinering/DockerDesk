@@ -28,7 +28,9 @@ export function registerSSHIpcHandlers(win) {
          if (nodes.length === 0) {
            return { success: false, error: 'uuid not found' }
          }
+
          let config
+
          if (nodes[0].auth_type === 'password') {
            config = {
              host: nodes[0].address,
@@ -41,7 +43,7 @@ export function registerSSHIpcHandlers(win) {
              host: nodes[0].address,
              port: nodes[0].port,
              username: nodes[0].username,
-             privateKey: dencryptPwd(nodes[0].key),
+             privateKey: dencryptPwd(nodes[0].key).replace(/\\n/g, '\n'),
            }
          }
 
@@ -56,6 +58,7 @@ export function registerSSHIpcHandlers(win) {
 
             return { success: true, error: '' }
           }, (error) => {
+            console.log("error", error)
             return { success: false, error: error }
           })
       }, (error) => {
@@ -216,7 +219,7 @@ export function registerSSHIpcHandlers(win) {
       return { success: false, error: error }
     }
   })
-
+  
 }
 
 

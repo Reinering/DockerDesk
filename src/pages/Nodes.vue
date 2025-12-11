@@ -109,19 +109,29 @@
                 outlined
                 dense
               />
-              <q-input
+              <q-select
                 class="q-mb-sm"
-                v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.password')"
-                v-model="newService.password"
-                :label="t('node.password')"
-                type="password"
-                maxlength="50"
+                color="blue"
+                v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.key')"
+                v-model="newService.keyMode"
+                :options="keyOptions"
+                :label="t('node.keyMode')"
                 outlined
                 dense
               />
+              <q-input
+                class="q-mb-sm"
+                v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.key') && newService.keyMode === t('node.keyString')"
+                v-model="newService.key"
+                :label="t('node.key')"
+                type="textarea"
+                outlined
+                dense
+              />
+
               <q-file
                 class="q-mb-sm"
-                v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.key')"
+                v-if="newService.connectionType === t('node.remoteNode') && newService.authType === t('node.key') && newService.keyMode === t('node.keyFile')"
                 v-model="keyFile"
                 :label="labelKey"
                 outlined
@@ -129,6 +139,16 @@
                 clearable
                 @update:model-value="onFileSelected"
                />
+              <q-input
+                class="q-mb-sm"
+                v-if="newService.connectionType === t('node.remoteNode')"
+                v-model="newService.password"
+                :label="t('node.password')"
+                type="password"
+                maxlength="50"
+                outlined
+                dense
+              />
               <q-input
                 class="q-mb-sm"
                 v-model="newService.mark"
@@ -294,6 +314,7 @@ const newService = reactive({
   username: '',
   authType: '',
   password: '',
+  keyMode: '',
   key: '',
   mark: ''
 })
@@ -305,6 +326,7 @@ const connectionOptions = [t('node.localNode'), t('node.remoteNode')]
 const WSLList = reactive([])
 const protocolOptions = ['SSH', 'Telnet']
 const passwordOptions = [t('node.password'), t('node.key')]
+const keyOptions = [t('node.keyString'), t('node.keyFile')]
 
 const localServiceTypeOptions = ['Docker', 'Podman']
 const remoteServiceTypeOptions = ['Docker', 'Podman', 'SSH', 'Telnet']
@@ -350,6 +372,7 @@ const cleanService = () => {
   newService.authType = ''
   newService.password = ''
   newService.key = ''
+  newService.keyMode = ''
   newService.mark = ''
 
   keyFile.value = ''
@@ -500,6 +523,10 @@ const showEdit = (row) => {
   newService.port = row.port
   newService.username = row.username
   newService.authType = row.authType
+  if (newService.authType === t('node.key')) {
+    newService.keyMode = t('node.keyFile')
+  }
+
   newService.password = row.password
   newService.key = row.key
   newService.mark = row.mark
@@ -630,7 +657,7 @@ const connectTerminal = (row) => {
     let item
     let data = JSON.parse(JSON.stringify(row))
     if (row.connectionType === t('node.remoteNode')) {
-      if (!row.address || !row.port || !row.username || !row.password) {
+      if (!row.address || !row.port || !row.username || (!row.password && !row.key)) {
         return $q.notify({
           type: 'negative',
           position: clientConfig.quasar.notify.position,
@@ -810,6 +837,22 @@ watch(() => newService.connectionType, (newValue, oldValue) => {
   }
 })
 
+
+watch(() => newService.serviceType, (newValue, oldValue) => {
+  if (newValue === "SSH") {
+    newService.port = 22
+  } else if (newValue === "Telnet") {
+    newService.port = 23
+  }
+})
+
+watch(() => newService.protocol, (newValue, oldValue) => {
+  if (newValue === "SSH") {
+    newService.port = 22
+  } else if (newValue === "Telnet") {
+    newService.port = 23
+  }
+})
 
 </script>
 

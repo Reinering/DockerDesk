@@ -74,6 +74,7 @@ export class SSHClient {
             })
 
             stream.on('close', () => {
+              this.sendDisconnected()
               // this.conn.end()
               // resolve({ status: 'closed' })
             })
@@ -87,7 +88,7 @@ export class SSHClient {
           this.status = 'disconnected'
           reject(err)
         }).on('close', () => {
-        this.sendDisconnected()
+          this.sendDisconnected()
         }).connect(this.config)
     })
   }
@@ -141,6 +142,7 @@ export class SSHClient {
   }
 
   sendDisconnected() {
+    console.log("sendDisconnected")
     this.status = 'disconnected'
     this.win.webContents.send("sshTerminalReceive",
       JSON.stringify({
@@ -770,10 +772,12 @@ export class SSH2Client {
           console.log("ssh connected")
           resolve()
       }).on('end', () => {
-
+        console.log("mark end")
       }).on('error', (err) => {
+        console.log("mark error")
         reject(err)
       }).on('close', () => {
+        console.log("mark close")
         reject()
         this.sendDisconnected()
       }).connect(this.config)

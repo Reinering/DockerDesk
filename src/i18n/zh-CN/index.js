@@ -23,6 +23,7 @@ export default {
   reset: '重置',
   refresh: '刷新',
   connect: '连接',
+  clean: "清屏",
   upload: '上传',
   download: '下载',
   select: '选择',
@@ -593,6 +594,9 @@ export default {
     authType: "认证方式",
     password: "密码",
     key: "密钥",
+    keyMode: "密钥方式",
+    keyString: "密钥输入",
+    keyFile: "密钥文件",
     selectKeyFile: "选择密钥文件",
     keyFileHint: "密钥已隐藏",
 
@@ -769,15 +773,24 @@ export default {
   },
 
   setting: {
+    base: "基础用法",
+    basic: "基本设置",
+    system: "系统设置",
+
     theme: {
       auto: "自动模式",
       light: "浅色模式",
       dark: "深色模式",
     },
+
+    userMode: "用户模式",
+
     mode: {
       normal: "普通模式",
       professional: "专业模式",
     },
+
+    autoStart: "开机启动",
   },
 
   // db
