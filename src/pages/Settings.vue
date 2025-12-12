@@ -1,12 +1,12 @@
 <template>
   <q-page q-pa-md>
 
-    <q-scroll-area style="height: 500px">
+    <q-scroll-area :style="scrollAreaStyle">
       <div class="q-pa-md">
         <q-expansion-item
           expand-separator
           flat bordered
-          :label="t('panel.settings.basicSettings')"
+          :label="t('setting.basic')"
           header-class="text-grey-6"
           style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
         >
@@ -16,11 +16,12 @@
               color="blue"
               v-model="lang"
               :options="langOptions"
-              label="Quasar Language"
+              label="Language"
               borderless
               emit-value
               map-options
               options-dense
+              filled
             />
 
             <q-select
@@ -28,12 +29,27 @@
               color="blue"
               v-model="theme"
               :options="themeOptions"
-              label="Quasar Language"
+              label="Theme"
               borderless
               emit-value
               map-options
               options-dense
+              filled
               @update:modelValue="onThemeUpdate"
+            />
+
+            <q-select
+              class="bg-grey-3"
+              color="blue"
+              v-model="userMode"
+              :options="userModes"
+              :label="t('setting.userMode')"
+              borderless
+              emit-value
+              map-options
+              options-dense
+              filled
+              @update:modelValue="onUserModeUpdate"
             />
           </div>
         </q-expansion-item>
@@ -49,7 +65,7 @@
                 color="grey-6"
                 style="background-color: #e9ecef; border-radius: 4px; font-size: 16px; padding: 4px 12px;"
               >
-                基础用法
+                {{t('setting.base')}}
               </q-btn>
             </div>
             <div class="col-auto row items-center q-gutter-sm">
@@ -63,11 +79,12 @@
               color="blue"
               v-model="lang"
               :options="langOptions"
-              label="Quasar Language"
+              label="Language"
               borderless
               emit-value
               map-options
               options-dense
+              filled
             />
 
             <q-select
@@ -75,11 +92,12 @@
               color="blue"
               v-model="theme"
               :options="themeOptions"
-              label="Quasar Language"
+              label="Theme"
               borderless
               emit-value
               map-options
               options-dense
+              filled
               @update:modelValue="onThemeUpdate"
             />
 
@@ -88,16 +106,72 @@
               color="blue"
               v-model="userMode"
               :options="userModes"
-              label="用户模式"
+              label="User Mode"
               borderless
               emit-value
               map-options
               options-dense
+              filled
               @update:modelValue="onUserModeUpdate"
             />
           </div>
 
         </q-card>
+      </div>
+
+      <div class="q-pa-md">
+        <q-expansion-item
+          expand-separator
+          flat bordered
+          :label="t('setting.system')"
+          header-class="text-grey-6"
+          style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
+        >
+          <div class="q-pa-md q-gutter-sm">
+            <q-item class="bg-grey-4">
+              <q-item-section>
+                <q-item-label caption>Auto Start</q-item-label>
+                <q-item-label >{{t('setting.autoLaunch')}}</q-item-label>
+              </q-item-section>
+              <q-item-section avatar>
+                <q-toggle color="green" v-model="isAutoLaunch" @update:model-value="changeAutoLaunch"/>
+              </q-item-section>
+            </q-item>
+
+<!--            <q-item class="bg-grey-4">-->
+<!--              <q-item-section avatar top>-->
+<!--                <q-icon name="account_tree" color="black" size="34px" />-->
+<!--              </q-item-section>-->
+
+<!--              <q-item-section top class="col-2 gt-sm">-->
+<!--                <q-item-label class="q-mt-sm">GitHub</q-item-label>-->
+<!--              </q-item-section>-->
+
+<!--              <q-item-section top>-->
+<!--                <q-item-label lines="1">-->
+<!--                  <span class="text-weight-medium">[quasarframework/quasar]</span>-->
+<!--                  <span class="text-grey-8"> - GitHub repository</span>-->
+<!--                </q-item-label>-->
+<!--                <q-item-label caption lines="1">-->
+<!--                  @rstoenescu in #1: > The build system-->
+<!--                </q-item-label>-->
+<!--                <q-item-label lines="1" class="q-mt-xs text-body2 text-weight-bold text-primary text-uppercase">-->
+<!--                  <span class="cursor-pointer">Open in GitHub</span>-->
+<!--                </q-item-label>-->
+<!--              </q-item-section>-->
+
+<!--              <q-item-section top side>-->
+<!--                <div class="text-grey-8 q-gutter-xs">-->
+<!--                  <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />-->
+<!--                  <q-btn class="gt-xs" size="12px" flat dense round icon="done" />-->
+<!--                  <q-btn size="12px" flat dense round icon="more_vert" />-->
+<!--                </div>-->
+<!--              </q-item-section>-->
+<!--            </q-item>-->
+
+          </div>
+
+        </q-expansion-item>
       </div>
 
     </q-scroll-area>
@@ -111,13 +185,18 @@
 </template>
 
 <script setup>
-import { inject, ref, watch, onMounted, onUnmounted } from 'vue'
+import { inject, ref, watch, onMounted, onUnmounted, reactive } from 'vue'
 import languages from 'quasar/lang/index.json'
 import { useI18n } from 'vue-i18n'
 import { useConfigStore } from 'stores/config.js'
+import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
 const t = inject("t")
+
+const scrollAreaStyle = reactive({
+  height: window.innerHeight - 105 + "px"
+})
 
 const configStore = useConfigStore()
 
@@ -161,6 +240,45 @@ const onThemeUpdate = () => {
   }
 }
 
+const isAutoLaunch = ref(false)
+
+const changeAutoLaunch = () => {
+  window.client.setAutoLaunch(isAutoLaunch.value).then((result) => {
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('setting.actionSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('setting.actionFail')}: ${result.error}`
+      })
+    }
+  })
+}
+
+const init = () => {
+  if (configStore.theme) {
+    theme.value = t('setting.theme.' + configStore.theme)
+  }
+
+  if (configStore.userMode) {
+    userMode.value = configStore.userMode
+  }
+
+  window.client.getAutoLaunch().then((result) => {
+    if (result.success) {
+      isAutoLaunch.value = result.data
+    }
+  })
+}
+
+const checkScreenHeightSize = () => {
+  scrollAreaStyle.height = window.innerHeight - 105 + "px"
+}
 
 const onUserModeUpdate = () => {
   console.log(userMode.value)
@@ -169,18 +287,14 @@ const onUserModeUpdate = () => {
 }
 
 onMounted(() => {
-  if (configStore.theme) {
-    theme.value = t('setting.theme.' + configStore.theme)
-  }
+  init()
 
-  if (configStore.userMode) {
-    userMode.value = configStore.userMode
-  }
+  window.addEventListener('resize', checkScreenHeightSize)
 })
 
 
 onUnmounted(() => {
-
+  window.removeEventListener('resize', checkScreenHeightSize)
 })
 
 watch(lang, (newVal) => {

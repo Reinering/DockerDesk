@@ -1,4 +1,4 @@
-import { ipcMain, dialog, shell } from 'electron'
+import { app, ipcMain, dialog, shell } from 'electron'
 import * as fs from 'fs'
 import path from 'path'
 import {
@@ -11,6 +11,7 @@ import { setLang } from '../common/i18n.js'
 import Crypto from 'crypto.js'
 import { interference } from 'app/src-electron/common/encrypt.js'
 import { startBGSubSystem } from 'app/src-electron/actions/wsl.js'
+import { getupAutoLaunch, setupAutoLaunch } from "../common/launch.js"
 
 
 
@@ -222,7 +223,7 @@ export function registerClientIpcHandlers(win) {
   })
 
   ipcMain.handle('cmdRunnerStop', async (event, {uuid}) => {
-    try{
+    try {
       if (CmdRunners.has(uuid)) {
         const cmdRunner = CmdRunners.get(uuid)
         cmdRunner.stop()
@@ -237,6 +238,21 @@ export function registerClientIpcHandlers(win) {
 
   })
 
+  ipcMain.handle('getAutoLaunch', async (event, checked) => {
+    try {
+      return getupAutoLaunch().then((result) => {
+        return { success: true, data: result, error: '' }
+      })
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
 
+  ipcMain.handle('setAutoLaunch', async (event, checked) => {
+    return setupAutoLaunch(checked).then((result) => {
+      return result
+    })
+
+  })
 
 }

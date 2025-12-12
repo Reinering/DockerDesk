@@ -1,4 +1,7 @@
 import { app, BrowserWindow, Menu, Tray, nativeImage } from 'electron'
+
+
+
 import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'
@@ -7,6 +10,7 @@ import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
 import { ssh_clients } from "./ipc/sshIPC.js"
 import { createTray } from "./common/tray.js"
+
 
 import { initLogging } from './common/logging.js'
 
@@ -80,6 +84,8 @@ async function createWindow () {
 initDB()
 initLogging()
 
+app.setName('DockerDesk')
+
 let tray = null
 app.whenReady().then(() => {
   createWindow()
@@ -114,3 +120,4 @@ app.on('activate', () => {
 
   }
 })
+

@@ -779,6 +779,9 @@ export default {
     },
 
     autoStart: "Auto Start",
+
+    actionSuccess: "操作成功",
+    actionFail: "操作失败",
   },
 
   // db

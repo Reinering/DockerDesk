@@ -790,7 +790,10 @@ export default {
       professional: "专业模式",
     },
 
-    autoStart: "开机启动",
+    autoLaunch: "开机启动",
+
+    actionSuccess: "操作成功",
+    actionFail: "操作失败",
   },
 
   // db

@@ -134,6 +134,14 @@ contextBridge.exposeInMainWorld('client', {
     return ipcRenderer.on('cmdRunnerReceive', (event, data) => callback(data))
   },
 
+  getAutoLaunch () {
+    return ipcRenderer.invoke('getAutoLaunch')
+  },
+
+  setAutoLaunch (data) {
+    return ipcRenderer.invoke('setAutoLaunch', data)
+  },
+
 })
 
 
