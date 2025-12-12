@@ -249,7 +249,7 @@ export function registerClientIpcHandlers(win) {
   })
 
   ipcMain.handle('setAutoLaunch', async (event, checked) => {
-    return setupAutoLaunch(checked).then((result) => {
+    return setupAutoLaunch(checked, true).then((result) => {
       return result
     })
 

@@ -1,7 +1,4 @@
 import { app, BrowserWindow, Menu, Tray, nativeImage } from 'electron'
-
-
-
 import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'

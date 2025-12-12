@@ -5,11 +5,13 @@ import { app } from 'electron'
 /**
  * 设置应用开机自启动
  * @param enable 是否启用自启动，默认为true
+ * @param isHidden
  */
-export function setupAutoLaunch(enable = true) {
+export function setupAutoLaunch(enable = true, isHidden = false) {
   const autoLauncher = new AutoLaunch({
     name: app.getName(),
     path: process.execPath,
+    isHidden: isHidden
   })
 
   if (enable) {
