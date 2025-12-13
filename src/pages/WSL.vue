@@ -417,7 +417,7 @@ const changeDebugConsole = (value) => {
 
 const onShutdownAll = () => {
   window.client.exec(
-    "taskkill /IM /F wsl.exe"
+    "taskkill /IM wslservice.exe /F"
   ).then((result) => {
     if (result.success) {
       console.log(result)
@@ -438,7 +438,7 @@ const onShutdownAll = () => {
 
 const onRestartWSL = () => {
   window.client.execAdmin(
-    "if (net stop \"WSLService\") { net start \"WSLService\" } else { taskkill /IM /F wslservice.exe }"
+    "if (net stop \"WSLService\") { net start \"WSLService\" } else { taskkill /IM wslservice.exe /F }"
   ).then((result) => {
     if (result.success) {
       console.log(result)
@@ -513,6 +513,40 @@ const onProxyEdit = () => {
   showProxySettingsDialog.value = !showProxySettingsDialog.value
 }
 
+const checkNode = (serviceType) => {
+  if (serviceType === "docker") {
+    window.nodes.getNode(11111111).then((result) => {
+      if (result.success && result.data.length === 0) {
+        window.nodes.updateNode(JSON.stringify({
+          id: '11111111',
+          delete_flags: 2
+        })).then((result) => {
+          if (result.success) {
+
+          } else {
+
+          }
+        })
+      }
+    })
+  } else if (serviceType === "podman") {
+    window.nodes.getNode(11111112).then((result) => {
+      if (result.success && result.data.length === 0) {
+        window.nodes.updateNode(JSON.stringify({
+          id: '11111112',
+          delete_flags: 2
+        })).then((result) => {
+          if (result.success) {
+
+          } else {
+
+          }
+        })
+      }
+    })
+  }
+}
+
 const getWSLList = () => {
   window.wslTerminal.getWSLList().then((result) => {
     if (result.success) {
@@ -526,6 +560,11 @@ const getWSLList = () => {
           description: data[index].name,
           state: data[index].state,
         })
+
+        if (data[index].name === "DockerDesk") {
+          checkNode("docker")
+          checkNode("podman")
+        }
       }
     }
   })
@@ -619,16 +658,18 @@ const init = () => {
             getWSLList()
           }, 30000)
 
-          window.wslTerminal.getDistributionList().then((result) => {
-            if (result.success) {
-              const tmp = appxList[appxList.length - 1]
-              appxList.length = 0
-              parseDistributionList(result.data).forEach((item) => {
-                appxList.push(item)
-              })
-              appxList.push(tmp)
-            }
-          })
+          setTimeout(() => {
+            window.wslTerminal.getDistributionList().then((result) => {
+              if (result.success) {
+                const tmp = appxList[appxList.length - 1]
+                appxList.length = 0
+                parseDistributionList(result.data).forEach((item) => {
+                  appxList.push(item)
+                })
+                appxList.push(tmp)
+              }
+            })
+          }, 2000)
         } else {
           wslStatusBtn.value = t('assistant.needUpgrade')
           clearInterval(getWSLListInterval)
