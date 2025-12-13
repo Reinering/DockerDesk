@@ -92,7 +92,7 @@
                 <q-item-label>IPv6</q-item-label>
               </q-item-section>
               <q-item-section avatar>
-                {{ t(`panel.networks.${item.ipv6}`) }}
+                {{ item.ipv6 ? t(`panel.networks.${item.ipv6}`) : ''}}
               </q-item-section>
             </q-item>
             <q-expansion-item
@@ -520,6 +520,7 @@ const getNetworkDetail = async (row) => {
       `${serviceCmd.value} network inspect ${row.network_id}`,
     ])
     .then((result) => {
+      console.log(result)
       if (result.success) {
         const data = JSON.parse(result.data)
         if (serviceCmd.value ==="docker") {
@@ -590,8 +591,12 @@ const getNetworkList = async () => {
       }
     })
 
+  let i = 1
   for (const row of rows) {
-    getNetworkDetail(row)
+    setTimeout(() => {
+      getNetworkDetail(row)
+    }, 2000 * i)
+    i += 1
   }
 }
 
