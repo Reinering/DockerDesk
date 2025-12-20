@@ -91,8 +91,6 @@
 </template>
 
 <script setup>
-import { useConfigStore } from 'stores/config.js'
-
 const props = defineProps({
   height: {
     type: String,
@@ -102,6 +100,7 @@ const props = defineProps({
 
 
 import {
+  provide,
   inject,
   onActivated,
   onDeactivated,
@@ -117,6 +116,7 @@ import EditShortcutsDialog from 'components/dialog/EditShortcutsDialog.vue'
 import ShortcutsSettingsDialog from 'components/dialog/ShortcutsSettingsDialog.vue'
 import { VueDraggableNext } from 'vue-draggable-next'
 import { clientConfig } from 'src/common/config.js'
+import { useShortcutsStore } from 'stores/shortcuts.js'
 
 
 const $q = inject("$q")
@@ -124,7 +124,7 @@ const router = inject("router")
 const route = inject("route")
 const t = inject("t")
 
-const configStore = useConfigStore()
+const shortcutsStore = useShortcutsStore()
 
 const background = reactive({
   backgroundRepeat: 'no-repeat',
@@ -163,21 +163,6 @@ const editShortcuts = ref({
 
 const showShortcutsSettingsDialog = ref(false)
 
-const onSetTemplate = (id) => {
-  console.log("onSetTemplate", id)
-  templateId.value = id
-
-  configStore.shortcutTemplate = id
-}
-
-const onEditClose = () => {
-  showEditShortcutsDialog.value = !showEditShortcutsDialog.value
-}
-
-const onSettingsClose = () => {
-  showShortcutsSettingsDialog.value = !showShortcutsSettingsDialog.value
-}
-
 const shortcutsData = reactive([
   [
     {
@@ -190,6 +175,21 @@ const shortcutsData = reactive([
     }
   ]
 ])
+
+const onSetTemplate = (id) => {
+  console.log("onSetTemplate", id)
+  templateId.value = id
+
+  shortcutsStore.shortcutTemplate = id
+}
+
+const onEditClose = () => {
+  showEditShortcutsDialog.value = !showEditShortcutsDialog.value
+}
+
+const onSettingsClose = () => {
+  showShortcutsSettingsDialog.value = !showShortcutsSettingsDialog.value
+}
 
 const onSettings = () => {
   showShortcutsSettingsDialog.value = true
@@ -276,6 +276,8 @@ const onDeleteShortcuts = (id) => {
       }
     }
   })
+
+  shortcutsStore.shortcutsData = shortcutsData
 }
 
 const onUpdate = () => {
@@ -319,6 +321,8 @@ const onDrag = (event) => {
     lockScrolling()
     carouselRef.value.previous()
   }
+
+  shortcutsStore.shortcutsData = shortcutsData
 }
 
 const onChange = (event) => {
@@ -328,8 +332,6 @@ const onChange = (event) => {
 
   updatePrevId(event, node)
   updatePageNo(event, node)
-
-
 
   // if (shortcutsData[shortcutsData.length - 1].length === 0) {
   //   shortcutsData.splice(shortcutsData.length - 1, 1)
@@ -637,6 +639,8 @@ const getShortcutsList = () => {
       console.log("get shortcuts error")
     }
   })
+
+  shortcutsStore.shortcutsData = shortcutsData
 }
 
 const init = () => {
@@ -646,8 +650,8 @@ const init = () => {
   console.log(shortcutsData)
 
 
-  if (configStore.shortcutTemplate) {
-    templateId.value = configStore.shortcutTemplate
+  if (shortcutsStore.shortcutTemplate) {
+    templateId.value = shortcutsStore.shortcutTemplate
   }
 }
 

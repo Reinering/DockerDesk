@@ -249,6 +249,7 @@ const props = defineProps({
 
 import { inject, ref, onMounted, onUnmounted, onActivated, onDeactivated, reactive } from 'vue'
 import { useComponentsStore } from 'stores/components.js'
+import { useShortcutsStore } from 'stores/shortcuts.js'
 import { isEmptyObj } from 'src/utils/common.js'
 import { getPortsByContainer, parseContainerUsage } from 'src/utils/wsl.js'
 
@@ -258,6 +259,7 @@ const route = inject("route")
 const t = inject("t")
 
 const componentsStore = useComponentsStore()
+const shortcutsStore = useShortcutsStore()
 
 const service = inject("service")
 const serviceCmd = ref('info')
@@ -266,6 +268,8 @@ const connectState = inject('connectState')
 const dockerInfo = inject('dockerInfo')
 const podmanInfo = inject('podmanInfo')
 const wslInfo = inject('wslInfo')
+
+const isOK = ref(true)
 
 let getContainerUsageInterval = null
 
@@ -363,6 +367,8 @@ const onSendHome = (row) => {
   data["iconText"] = props.data.names.slice(0,1).toUpperCase()
   data["iconColor"] = 'teal'
   data["fontSize"] = '24'
+  data["prevId"] = shortcutsStore.shortcutsData[0][shortcutsStore.shortcutsData[0].length-1].id
+  data["pageNo"] = 0
 
   window.shortcuts.addShortcuts(JSON.stringify(data))
     .then((result) => {
@@ -562,7 +568,6 @@ const init = () => {
   getContainerInfo()
 
   ports.value = getPortsByContainer([props.data["ports"]])[0]
-  console.log(ports.value)
 }
 
 onMounted(() => {

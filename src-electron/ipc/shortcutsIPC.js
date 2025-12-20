@@ -85,10 +85,12 @@ export function registerShortcutsIpcHandlers(win) {
         label: res.iconText,
         color: res.iconColor,
         font_size: res.fontSize,
+        prev_id: res.prevId,
         create_time: Date.now(),
         modify_time: null,
         delete_time: null,
         delete_flags: 0,
+        page_no: res.pageNo,
       }
 
       return shortcuts.addShortcuts(value)

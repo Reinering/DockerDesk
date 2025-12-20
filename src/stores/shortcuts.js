@@ -1,11 +1,10 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { ref } from 'vue'
 
-export const useConfigStore = defineStore('config', {
+export const useShortcutsStore = defineStore('config', {
   state: () => ({
-    lang: '',
-    theme: 'dark',
-    userMode: ''
+    shortcutsData: null,
+    shortcutsTemplate: 0
   }),
 
   getters: {
@@ -20,11 +19,11 @@ export const useConfigStore = defineStore('config', {
 
   persist: {
     storage: localStorage,
-    paths: ['lang', 'theme', 'userMode'],
+    paths: ["shortcutsTemplate"],
   },
 })
 
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useConfigStore, import.meta.hot))
+  import.meta.hot.accept(acceptHMRUpdate(useShortcutsStore, import.meta.hot))
 }
