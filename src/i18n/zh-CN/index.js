@@ -51,6 +51,7 @@ export default {
     nodesMg: "节点管理",
     nodePanel: "节点面板",
     terminal: "终端节点",
+    appstore: "应用商店",
     settings: "设置"
   },
 
@@ -70,6 +71,8 @@ export default {
   },
 
   index: {
+    shortcuts: "快捷方式",
+
     editShortcuts: "编辑快捷方式",
     websiteUrl: "网站地址",
     websiteName: "网站名称",
@@ -81,6 +84,9 @@ export default {
     fontSize: "字体大小",
     color: "颜色",
 
+    settings: "设置",
+    shortcutsTemplate: "快捷方式模板",
+
 
 
     deleteMessage: "确认删除？",
@@ -88,8 +94,10 @@ export default {
 
     deleteSuccess: "删除成功",
     deleteFail: "删除失败",
-    editSuccess: "更新成功",
-    editFail: "更新失败",
+    editSuccess: "编辑成功",
+    editFail: "编辑失败",
+    updateSuccess: "更新成功",
+    updateFail: "更新失败",
   },
 
   assistant: {
@@ -796,6 +804,10 @@ export default {
     actionFail: "操作失败",
   },
 
+  other: {
+    addNextPage: "添加下一页"
+  },
+
   // db
   database: {
     initError: '数据库初始化失败',
@@ -816,4 +828,5 @@ export default {
     deleteSuccess: "删除成功",
     deleteFail: "删除失败",
   }
+
 }

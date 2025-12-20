@@ -56,6 +56,7 @@ export default {
     nodePanel: "Node Panel",
     dockerNode: "Docker Node",
     terminal: "Terminal Node",
+    appstore: "应用商店",
     settings: "Settings"
   },
 
@@ -75,6 +76,8 @@ export default {
   },
 
   index: {
+    shortcuts: "Shortcuts",
+
     editShortcuts: "Edit Shortcut",
     websiteUrl: "Website Url",
     websiteName: "Website Name",
@@ -86,13 +89,18 @@ export default {
     fontSize: "Font Size",
     color: "Color",
 
+    settings: "Settings",
+    shortcutsTemplate: "Shortcuts Template",
+
     deleteMessage: "Confirm deletion?？",
     inputUrlMessage: "Please enter the URL of the ICON",
 
     deleteSuccess: "Deleted successfully",
     deleteFail: "Deletion failed",
-    editSuccess: "Update successfully",
-    editFail: "Update failed",
+    editSuccess: "Edit successfully",
+    editFail: "Edit failed",
+    updateSuccess: "Update successfully",
+    updateFail: "Update failed",
   },
 
   assistant: {
@@ -782,6 +790,10 @@ export default {
 
     actionSuccess: "操作成功",
     actionFail: "操作失败",
+  },
+
+  other: {
+    addNextPage: "Add Next Page"
   },
 
   // db

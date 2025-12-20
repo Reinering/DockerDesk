@@ -6,7 +6,7 @@ export const useConfigStore = defineStore('config', {
     lang: '',
     theme: 'dark',
     userMode: '',
-
+    shortcutTemplate: 0
   }),
 
   getters: {
@@ -21,7 +21,7 @@ export const useConfigStore = defineStore('config', {
 
   persist: {
     storage: localStorage,
-    paths: ['lang', 'theme', 'userMode'],
+    paths: ['lang', 'theme', 'userMode', 'shortcutTemplate'],
   },
 })
 

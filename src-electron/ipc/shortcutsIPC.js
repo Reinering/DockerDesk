@@ -9,31 +9,69 @@ export function registerShortcutsIpcHandlers(win) {
     try {
       return shortcuts.getShortcutss()
         .then((result) => {
-          if (result instanceof Array) {
-            const data = []
-
-            result.forEach(node => {
-              data.push({
-                id: node.id,
-                nodeId: node.node_id,
-                websiteName: node.name,
-                website: node.url,
-                iconText: node.label,
-                iconColor: node.color,
-                icon: node.icon,
-                fontSize: node.font_size
-              })
-            })
-
-            return { success: true, data: data }
+          if (!Array.isArray(result)) {
+            return { success: true, data: result }
           }
 
-          return { success: true, data: result }
+          const pagesMap = {}
+
+          result.forEach(node => {
+            const p = node.page_no
+            if (!pagesMap[p]) {
+              pagesMap[p] = []
+            }
+
+            const item = {
+              id: node.id,
+              nodeId: node.node_id,
+              websiteName: node.name,
+              website: node.url,
+              iconText: node.label,
+              iconColor: node.color,
+              icon: node.icon,
+              fontSize: node.font_size,
+              prevId: node.prev_id,
+              pageNo: node.page_no
+            }
+
+            pagesMap[p].push(item)
+          })
+
+          const finalData = []
+
+          Object.keys(pagesMap).forEach(p => {
+            const orderedPage = []
+            const page = pagesMap[p]
+
+            let currentPrevId = '0'
+            while (true) {
+              let check = false
+
+              for (const node of page) {
+                if ((currentPrevId === '0' && node.prevId === '0') || node.prevId === currentPrevId) {
+                  orderedPage.push(node)
+                  currentPrevId = node.id
+                  check = true
+                  break
+                }
+              }
+
+              if (! check) {
+                if (orderedPage.length !== page.length) {
+                  console.log("Some nodes are not covered by the chain.")
+                }
+                break
+              }
+            }
+
+            finalData[p] = orderedPage
+          })
+
+          return { success: true, data: finalData }
         })
     } catch (error) {
       return { success: false, error: error.message }
     }
-
   })
 
   ipcMain.handle('addShortcuts', async (event, data) => {
@@ -90,11 +128,46 @@ export function registerShortcutsIpcHandlers(win) {
     }
   })
 
+  ipcMain.handle('updatesShortcutsById', async (event, data) => {
+    try {
+      return shortcuts.updatesShortcutsById(data).then((result) => {
+        console.log(result)
+        if (result.success ) {
+          return result
+        }
+      })
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle('updatesShortcutsByPage', async (event, data) => {
+    try {
+      return shortcuts.updatesShortcutsByPage(data).then((result) => {
+        console.log(result)
+        if (result.success ) {
+          return result
+        }
+      })
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle('updatesPageShortcutsByPage', async (event, data) => {
+    try {
+      return shortcuts.updatesPageShortcutsByPage(data).then((result) => {
+        console.log(result)
+        if (result.success ) {
+          return result
+        }
+      })
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
+  })
+
   ipcMain.handle('deleteShortcuts', async (event, id) => {
     return await shortcuts.delShortcutsByID(id)
   })
-
-
-
-
 }

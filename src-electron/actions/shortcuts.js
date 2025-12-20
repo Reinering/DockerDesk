@@ -35,6 +35,89 @@ export const shortcuts = {
     })
   },
 
+  updatesShortcutsById: async (data) => {
+    try {
+      await db.transaction(async (trx) => {
+        const updatePromises = data.map((item) => {
+          if (Object.prototype.hasOwnProperty.call(item, 'pageNo')) {
+            return trx('shortcuts')
+              .where('id', item.id)
+              .update({
+                page_no: item.pageNo,
+                modify_time: new Date()
+              })
+          } else {
+            return trx('shortcuts')
+              .where('id', item.id)
+              .update({
+                prev_id: item.prevId,
+                modify_time: new Date()
+              })
+          }
+
+        })
+
+        await Promise.all(updatePromises)
+      })
+
+      return { success: true }
+    } catch (error) {
+      return error
+    }
+  },
+
+  updatesShortcutsByPage: async (data) => {
+    try {
+      await db.transaction(async (trx) => {
+        const updatePromises = data.map((item) => {
+          if (Object.prototype.hasOwnProperty.call(item, 'pageNo')) {
+            return trx('shortcuts')
+              .where('id', item.id)
+              .update({
+                page_no: item.pageNo,
+                modify_time: new Date()
+              })
+          } else {
+            return trx('shortcuts')
+              .where('id', item.id)
+              .update({
+                prev_id: item.prevId,
+                modify_time: new Date()
+              })
+          }
+
+        })
+
+        await Promise.all(updatePromises)
+      })
+
+      return { success: true }
+    } catch (error) {
+      return error
+    }
+  },
+
+  updatesPageShortcutsByPage: async (data) => {
+    try {
+      await db.transaction(async (trx) => {
+        const updatePromises = data.map((item) => {
+          return trx('shortcuts')
+            .where('page_no', item.oldPage)
+            .update({
+              page_no: item.newPage,
+              modify_time: new Date()
+            })
+        })
+
+        await Promise.all(updatePromises)
+      })
+
+      return { success: true }
+    } catch (error) {
+      return error
+    }
+  },
+
   deleteShortcutsByID: async (id) => {
     return await db('shortcuts').where('id', '=', id).delete().then((result) => {
       return { success: true, id: id, error: '' }

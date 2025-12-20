@@ -173,6 +173,9 @@ async function initDB() {
         table.timestamp('modify_time') // 修改时间戳，可空
         table.timestamp('delete_time') // 删除时间戳，可空
         table.integer('delete_flags').notNullable() // 删除标志，整数类型，非空
+        table.text('prev_id').notNullable() // 上一个元素
+        table.integer('page_no').notNullable() // page number
+
       })
     }
 
