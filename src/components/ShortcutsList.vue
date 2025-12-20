@@ -100,7 +100,6 @@ const props = defineProps({
 
 
 import {
-  provide,
   inject,
   onActivated,
   onDeactivated,
@@ -117,7 +116,6 @@ import ShortcutsSettingsDialog from 'components/dialog/ShortcutsSettingsDialog.v
 import { VueDraggableNext } from 'vue-draggable-next'
 import { clientConfig } from 'src/common/config.js'
 import { useShortcutsStore } from 'stores/shortcuts.js'
-
 
 const $q = inject("$q")
 const router = inject("router")
@@ -203,8 +201,10 @@ const onDBClick = () => {
   isEdit.value = false
   editBtnHint.value = 'edit'
 
-  for (const item of shortcutsData) {
-    item.isShowOverlay = false
+  for (const page of shortcutsData) {
+    for (const item of page) {
+      item.isShowOverlay = false
+    }
   }
 }
 
