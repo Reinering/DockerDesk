@@ -6,6 +6,7 @@
         round
         push
         glossy
+        no-caps
         @click="onOpenUrl"
         class="main-btn shadow-14"
         :style="btnStyle"
