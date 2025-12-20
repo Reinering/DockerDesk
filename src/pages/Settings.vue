@@ -130,7 +130,7 @@
           <div class="q-pa-md q-gutter-sm">
             <q-item class="bg-grey-4">
               <q-item-section>
-                <q-item-label caption>Auto Start</q-item-label>
+                <q-item-label caption>Auto Launch</q-item-label>
                 <q-item-label >{{t('setting.autoLaunch')}}</q-item-label>
               </q-item-section>
               <q-item-section avatar>

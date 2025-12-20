@@ -36,7 +36,7 @@ async function createWindow () {
   mainWindow = new BrowserWindow({
     // taskbar icon: path.resolve(currentDir, 'assets/icons/icon.ico') path.join(publicFolder, 'icons/favicon-128x128.png')
     icon: path.join(publicFolder, 'icons/favicon-128x128.png'), // tray icon
-    width: 1000,
+    width: 1200,
     height: 800,
     useContentSize: true,
     frame: false, // <-- 添加这里
