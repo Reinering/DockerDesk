@@ -163,6 +163,15 @@ const routes = [
       },
 
       {
+        path: 'appstore',
+        name: 'appstore',
+        component: () => import('pages/AppStore.vue'),
+        meta: {
+          keepAlive: true,
+        }
+      },
+
+      {
         path: 'settings',
         name: 'settings',
         component: () => import('pages/Settings.vue'),

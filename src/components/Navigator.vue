@@ -139,6 +139,16 @@ const naviItems = reactive([
   },
 
   {
+    name: 'appstore',
+    label: 'navigator.appstore',
+    icon: "store",
+    route: 'appstore',
+    mode: '',
+    state: false,
+    children: []
+  },
+
+  {
     name: "Settings",
     label: 'navigator.settings',
     icon: "settings",
