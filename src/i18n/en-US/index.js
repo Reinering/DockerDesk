@@ -792,6 +792,27 @@ export default {
     actionFail: "操作失败",
   },
 
+  store: {
+    settings: "Settings",
+    refresh: "Refresh",
+    api: "API Settings",
+    add: "添加",
+    delete: "Delete",
+    edit: "Edit",
+    confirm: "确认",
+
+    storeName: 'Store Name',
+    storeApi: 'Store API',
+
+    addStoreApi: "Add Store API",
+
+    getApiError: "Get API Error",
+    updateAPiSuccess: "Update API Successful",
+    updateAPiError: "Update API Failed",
+    saveSuccess: "Save Successful",
+    saveError: "Save Failed",
+  },
+
   other: {
     addNextPage: "Add Next Page"
   },

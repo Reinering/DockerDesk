@@ -69,6 +69,10 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
     ipcRenderer.send('syncLang', lang)
   },
 
+  fetchData (url, options) {
+    return ipcRenderer.invoke('fetch-data', url, options)
+  }
+
 })
 
 
@@ -141,6 +145,14 @@ contextBridge.exposeInMainWorld('client', {
   setAutoLaunch (data) {
     return ipcRenderer.invoke('setAutoLaunch', data)
   },
+
+  readStoreData () {
+    return ipcRenderer.invoke('readStoreData')
+  },
+
+  writeStoreData (path, data) {
+    return ipcRenderer.invoke('writeStoreData', path, data)
+  }
 
 })
 

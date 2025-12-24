@@ -1,17 +1,17 @@
 import { app, ipcMain, dialog, shell } from 'electron'
+import axios from 'axios'
 import * as fs from 'fs'
-import path from 'path'
 import {
   getOSInfo, getUtilization,
   getSystemProxy,
 } from '../actions/client.js'
 import { settings } from '../actions/settings.js'
 import { CmdRunner, cmdAdmin, cmd } from '../common/utils.js'
+import { readStoreData, writeStoreData, getStoreApis, setStoreApis } from '../common/store.js'
 import { setLang } from '../common/i18n.js'
 import Crypto from 'crypto.js'
-import { interference } from 'app/src-electron/common/encrypt.js'
-import { startBGSubSystem } from 'app/src-electron/actions/wsl.js'
 import { getupAutoLaunch, setupAutoLaunch } from "../common/launch.js"
+
 
 
 
@@ -19,6 +19,15 @@ import { getupAutoLaunch, setupAutoLaunch } from "../common/launch.js"
 export  const CmdRunners = new Map()
 
 export function registerClientIpcHandlers(win) {
+
+  ipcMain.handle('fetch-data', async (event, url, options) => {
+    try {
+      const response = await axios({ url, ...options })
+      return { success: true, data: response.data }
+    } catch (error) {
+      return { success: false, error }
+    }
+  })
 
   ipcMain.on('syncLang', async (event, lang) => {
     setLang(lang)
@@ -136,7 +145,7 @@ export function registerClientIpcHandlers(win) {
     if (data instanceof Array) {
       let result
       for (const item of data) {
-        item["modify_time"] = Date.now()
+
         result = settings.updateByField(item)
       }
       return result
@@ -253,6 +262,14 @@ export function registerClientIpcHandlers(win) {
       return result
     })
 
+  })
+
+  ipcMain.handle('readStoreData', async (event, ) => {
+    return readStoreData()
+  })
+
+  ipcMain.handle('writeStoreData', async (event, data) => {
+    return writeStoreData(data)
   })
 
 }

@@ -155,6 +155,13 @@ async function initDB() {
           mark: "disable / system / manual",
           delete_flags: 0
         },
+        {
+          field: "storeApis",
+          type: "json",
+          value: '',
+          mark: "store api",
+          delete_flags: 0
+        },
       ])
     }
 

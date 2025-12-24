@@ -38,7 +38,16 @@ export const clientConfig = {
     level: 'info',      // error, warn, info, verbose, debug, silly
   },
 
-  dockerRegistryProxy: []
+  dockerRegistryProxy: [],
+
+  dockerStore: {
+    defaultApi: '',
+
+    storeData: {
+      path: 'data',
+      filename: 'store.json'
+    }
+  }
 }
 
 

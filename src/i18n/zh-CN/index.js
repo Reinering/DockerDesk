@@ -804,6 +804,27 @@ export default {
     actionFail: "操作失败",
   },
 
+  store: {
+    settings: "设置",
+    refresh: "刷新",
+    api: "API设置",
+    add: "添加",
+    delete: "删除",
+    edit: "编辑",
+    confirm: "确认",
+
+    storeName: '商店名称',
+    storeApi: '商店API',
+
+    addStoreApi: "添加商店API",
+
+    getApiError: "获取API失败",
+    updateAPiSuccess: "更新API成功",
+    updateAPiError: "更新API失败",
+    saveSuccess: "保存成功",
+    saveError: "保存失败",
+  },
+
   other: {
     addNextPage: "添加下一页"
   },
