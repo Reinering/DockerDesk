@@ -4,12 +4,21 @@ import { DockerNode } from '../actions/docker.js'
 import { nodes } from 'app/src-electron/actions/nodes.js'
 import { dencryptPwd } from 'app/src-electron/common/encrypt.js'
 import { sftp_clients } from 'app/src-electron/ipc/sshIPC.js'
+// import { getDockerInfo } from 'app/src-electron/actions/client.js'
 
 
 export const ssh_clients = new Map()
 
 
 export function registerDockerIpcHandlers(win) {
+
+  ipcMain.handle('checkDockerInfo', async (event) => {
+    // return getDockerInfo().then((data) => {
+    //   return { success: true, data:data, error: '' }
+    // }, (error) => {
+    //   return { success: false, error: error }
+    // })
+  })
 
   ipcMain.handle('connectDocker', async (event, {uuid, connID}) => {
     if (connID === undefined || connID === null) {
@@ -59,7 +68,6 @@ export function registerDockerIpcHandlers(win) {
       return { success: false, error: err }
     }
   })
-
 
   ipcMain.handle('closeDocker', async (event, uuid) => {
     try{

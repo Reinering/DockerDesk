@@ -47,11 +47,11 @@
         <!--            CMD Bar-->
         <!--          </q-tooltip>-->
         <!--        </q-fab-action>-->
-        <q-fab-action @click="showFileSystem" color="primary" icon="storage" :disable="draggingFab">
-          <q-tooltip>
-            FileSystem
-          </q-tooltip>
-        </q-fab-action>
+<!--        <q-fab-action @click="showFileSystem" color="primary" icon="storage" :disable="draggingFab">-->
+<!--          <q-tooltip>-->
+<!--            FileSystem-->
+<!--          </q-tooltip>-->
+<!--        </q-fab-action>-->
       </q-fab>
     </q-page-sticky>
 
