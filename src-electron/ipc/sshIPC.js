@@ -49,6 +49,7 @@ export function registerSSHIpcHandlers(win) {
 
         const sshClient = new SSHClient(uuid, win, config)
 
+        sshClient.setW
         return await sshClient.connect()
           .then(async (result) => {
 
@@ -126,7 +127,7 @@ export function registerSSHIpcHandlers(win) {
 
       if (ssh_clients.has(uuid)) {
         const sshClient = ssh_clients.get(uuid)
-        sshClient.resize(cols, rows)
+        sshClient.resize(rows, cols)
         return { success: true, error: '' }
       } else {
         return { success: false, error: "ssh client resize error" }
@@ -219,7 +220,7 @@ export function registerSSHIpcHandlers(win) {
       return { success: false, error: error }
     }
   })
-  
+
 }
 
 

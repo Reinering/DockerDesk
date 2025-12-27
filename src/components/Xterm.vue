@@ -107,6 +107,7 @@ const reconnect = () => {
           message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
         })
       } else {
+        handleResize()
 
         if (Object.hasOwnProperty.call(props.data, "command")) {
           setTimeout(() => {
@@ -211,6 +212,8 @@ const connect = () => {
           message: 'SSH ' + t('xterm.termInitError') + ': ' + result.error
         })
       } else {
+        handleResize()
+
         if (Object.hasOwnProperty.call(props.data, "command")) {
           setTimeout(() => {
             window.sshTerminal.execStream(JSON.stringify({
@@ -519,14 +522,25 @@ const sendSSHTerminal = (data) => {
 
 // 行列匹配
 const handleResize = () => {
-  // console.log('resize', term.rows, term.cols)
-  window.terminal.resize(JSON.stringify({
-    uuid: props.terminalId,
-    rows: term.rows,
-    cols: term.cols,
-  })).then((result) => {
+  console.log('resize', term.rows, term.cols)
+  if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
+    window.sshTerminal.resize(JSON.stringify({
+      uuid: props.terminalId,
+      rows: term.rows,
+      cols: term.cols,
+    })).then((result) => {
 
-  })
+    })
+  } else {
+    window.terminal.resize(JSON.stringify({
+      uuid: props.terminalId,
+      rows: term.rows,
+      cols: term.cols,
+    })).then((result) => {
+
+    })
+  }
+
 }
 
 const debounce = (func, wait) => {
@@ -549,6 +563,7 @@ const setupResizeObserver = () => {
       handleResize()
     }
   }, 200))
+
   resizeObserver.observe(xtermRef.value)
   onBeforeUnmount(() => resizeObserver.disconnect())
 }
@@ -621,6 +636,7 @@ onMounted(async () => {
   initTerminal()
   await nextTick()
   fitAddon.fit()
+
   setupResizeObserver()
 
   // window.addEventListener('keydown', handleKeyDown)

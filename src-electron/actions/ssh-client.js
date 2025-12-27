@@ -362,6 +362,14 @@ export class SSHClient {
         })
     })
   }
+
+  async resize(rows, cols) {
+    try {
+      this.stream.setWindow(rows, cols, 0, 0)
+    } catch (e) {
+      console.log(e)
+    }
+  }
 }
 
 

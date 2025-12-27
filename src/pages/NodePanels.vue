@@ -62,14 +62,13 @@
 </template>
 
 <script setup>
-import FileSystem from 'components/FileSystem.vue'
-
 defineOptions({
   name: 'DockerNodes',
 })
 
 import { inject, onMounted, onActivated, reactive, ref, nextTick, watch, onUnmounted } from 'vue'
 import RTab from 'components/RTab.vue'
+import FileSystem from 'components/FileSystem.vue'
 import { useNavigatorStore } from 'stores/navigator.js'
 import { generateUuid, isEmptyObj } from 'src/utils/common.js'
 

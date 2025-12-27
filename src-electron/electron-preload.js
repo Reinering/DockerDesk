@@ -286,7 +286,7 @@ contextBridge.exposeInMainWorld('sshTerminal', {
   },
 
   resize (data) {
-    return ipcRenderer.invoke('sshTerminalReize', data)
+    return ipcRenderer.invoke('sshTerminalResize', data)
   },
 
   send (data) {
