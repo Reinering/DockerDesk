@@ -128,6 +128,7 @@ export function registerNodesIpcHandlers(win) {
         modify_time: Date.now(),
         mark: res.mark !== null && res.mark.length > 0 ? res.mark : null,
       }
+
       if (res.authType === "password") {
         if (res.password !== null && res.password.length > 0 && res.password !== interference) {
           value.password = encryptPwd(res.password)

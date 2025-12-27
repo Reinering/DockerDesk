@@ -464,6 +464,10 @@ const addService = () => {
     }
     data.protocol = data.protocol.toLowerCase()
 
+    if (data.port) {
+      data.port = data.port.toString()
+    }
+
     // edit
     if (isEdit.value === true) {
       editService(data)
@@ -657,6 +661,9 @@ const connectTerminal = (row) => {
     let item
     let data = JSON.parse(JSON.stringify(row))
     if (row.connectionType === t('node.remoteNode')) {
+      console.log(row.address)
+      console.log(row.port)
+      console.log(row.username)
       if (!row.address || !row.port || !row.username || (!row.password && !row.key)) {
         return $q.notify({
           type: 'negative',
