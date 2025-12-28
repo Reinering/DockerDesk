@@ -522,7 +522,7 @@ const sendSSHTerminal = (data) => {
 
 // 行列匹配
 const handleResize = () => {
-  console.log('resize', term.rows, term.cols)
+  // console.log('resize', term.rows, term.cols)
   if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
     window.sshTerminal.resize(JSON.stringify({
       uuid: props.terminalId,

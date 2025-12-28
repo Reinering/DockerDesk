@@ -123,10 +123,10 @@ const xtermStyle = reactive({
 })
 
 const fabPos = ref([ 30, 200 ])
-const draggingFab = ref(false)
+const draggingFab = ref(true)
 
 const moveFab = (ev) => {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
+  // draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
 
   fabPos.value = [
     fabPos.value[ 0 ] - ev.delta.x,
@@ -247,7 +247,10 @@ const deleteTab = (id) => {
         }
 
         tabs.splice(i, 1)
-        if (tabs.length === 0) break
+        if (tabs.length === 0) {
+          tab.value = ''
+          break
+        }
         tab.value = tabs[0].id
         return
       }
@@ -283,7 +286,7 @@ onActivated(() => {
   }
 })
 
-watch(tabs, (newVal, oldVal) => {
+watch(tabs, (newVal, oldVal) =>  {
   if (tabs.length === 0) {
     isShowCmdBar.value = false
     isShowSettingsDialog.value = false
@@ -297,11 +300,14 @@ watch(tabs, (newVal, oldVal) => {
 })
 
 watch(tab, (newVal, oldVal) => {
+  console.log(newVal, oldVal)
   if (isEmptyObj(newVal)) {
     isShowSettingsDialog.value = false
-    isShowSettingsDialog.value = false
+    draggingFab.value = true
     checkScreenSize()
   } else {
+    draggingFab.value = false
+
     for (let i = 0; i < tabs.length; i++) {
       if (tabs[i].id === newVal) {
         fsData.value = tabs[i]
@@ -310,6 +316,7 @@ watch(tab, (newVal, oldVal) => {
     }
   }
 })
+
 
 
 </script>

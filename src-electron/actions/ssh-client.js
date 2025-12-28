@@ -364,6 +364,10 @@ export class SSHClient {
   }
 
   async resize(rows, cols) {
+    if (!this.stream) {
+      return
+    }
+
     try {
       this.stream.setWindow(rows, cols, 0, 0)
     } catch (e) {
