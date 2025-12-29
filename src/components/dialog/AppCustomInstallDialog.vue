@@ -41,16 +41,12 @@ const props = defineProps({
   }
 })
 
-import { inject, ref } from 'vue'
-
+import { inject } from 'vue'
 
 const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
-
-const isOK = ref(false)
-
 
 </script>
 

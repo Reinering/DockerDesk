@@ -13,14 +13,14 @@ let storeDir
 if (isDev) {
   // 开发环境，使用源代码目录
   const __dirname = path.dirname(fileURLToPath(import.meta.url))
-  storeDir = path.resolve(__dirname, clientConfig.dockerStore.storeData.path)
+  storeDir = path.resolve(__dirname, clientConfig.appStore.storeData.path)
 } else {
   // 生产环境，使用exe所在目录
   const exeDir = path.dirname(app.getPath('exe'))
-  storeDir = path.resolve(exeDir,clientConfig.dockerStore.storeData.path)
+  storeDir = path.resolve(exeDir,clientConfig.appStore.storeData.path)
 }
 
-const storePath = path.join(storeDir, clientConfig.dockerStore.storeData.filename)
+const storePath = path.join(storeDir, clientConfig.appStore.storeData.filename)
 
 export async function getStoreApis () {
   return await db('settings')

@@ -1,5 +1,6 @@
 <template>
   <div class="card">
+<!--   glossy-->
     <div
       class="container shadow-14 q-pa-md"
       :style="getStyle()"
@@ -22,6 +23,11 @@
       >
         {{ props.data.id[0].toUpperCase() }}
       </div>
+
+      <q-tooltip class="text-caption bg-indigo-4">
+        <div class="text-center">{{ props.data.description }}</div>
+        <div class="text-center">{{ props.storeName }}</div>
+      </q-tooltip>
     </div>
 
     <div
@@ -30,21 +36,11 @@
     >
       {{ props.data.name }}
     </div>
-
-    <q-tooltip class="text-caption bg-indigo-4">
-      {{ props.storeName}}
-      {{ props.data.description }}
-    </q-tooltip>
-
   </div>
-
-
 
 </template>
 
 <script setup>
-import StoreSettingsDialog from 'components/dialog/StoreSettingsDialog.vue'
-
 const props = defineProps({
   data: {
     type: Object,
@@ -130,14 +126,6 @@ const onClose = () => {
 </script>
 
 <style scoped>
-.card:hover {
-  transition: transform 0.2s ease;
-  transform: scale(1.1);
-}
-
-.card:active {
-  opacity: 0.9;
-}
 
 
 </style>

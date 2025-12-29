@@ -30,11 +30,32 @@
 
         <q-separator />
 
-        <q-input v-model="search" dense label="Search" outlined clearable >
-          <template v-slot:append>
-            <q-icon name="search" />
+        <q-select
+          clearable
+          outlined
+          dense
+          :model-value="search"
+          use-input
+          fill-input
+          input-debounce="0"
+          :options="options"
+          @filter="filterFn"
+          @input-value="setModel"
+          label="Search"
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                No results
+              </q-item-section>
+            </q-item>
           </template>
-        </q-input>
+
+          <template v-slot:append>
+            <q-icon v-if="search !== ''" name="close" @click.stop="search = ''" class="cursor-pointer" />
+            <q-icon name="search" @click.stop />
+          </template>
+        </q-select>
       </div>
     </q-card-section>
 
@@ -66,14 +87,99 @@
       storeApis: dockerStoreApis
     }"
     :onUpdate="onUpdate"
-    :onClose="onSettingsClose"
+    :onClose="() => showSettingsDialog = false"
   />
 
   <ContainerAppDialog
     v-if="showAppDialog"
     v-model="showAppDialog"
-    :onClose="onAppClose"
+    :data="currentItem"
+    :onClose="() => showAppDialog = false"
   />
+
+  <AppInstallDialog
+    v-if="showInstallDialog"
+    v-model="showInstallDialog"
+    transition-show="scale"
+    transition-hide="scale"
+    :onClose="() => showInstallDialog = false"
+  />
+
+  <AppCustomInstallDialog
+    v-if="showCustomInstallDialog"
+    v-model="showCustomInstallDialog"
+    transition-show="scale"
+    transition-hide="scale"
+    :onClose="() => showCustomInstallDialog = false"
+  />
+
+  <q-dialog
+    v-if="showOptionDialog"
+    v-model="showOptionDialog"
+    transition-show="scale"
+    transition-hide="scale"
+  >
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">{{ t('store.confirmInstall') }}</div>
+      </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        {{ t('store.installPrompt') }}
+      </q-card-section>
+
+      <q-card-section
+        v-if="configStore.userMode === 'professional'"
+      >
+        <div class="bg-grey-2 row">
+          <q-item-section class="text-body2 bg-white">{{ t('store.selectNode') }}</q-item-section>
+          <q-select
+            v-model="installNode"
+            class="bg-grey-3"
+            color="blue"
+            bg-color="cyan-14"
+            :options="nodes"
+            filled
+            dense
+            borderless
+            transition-show="flip-up"
+            transition-hide="flip-down"
+            style="min-width: 50%"
+          />
+
+<!--          <q-item-section-->
+<!--            v-if="composition.ports.portMode.indexOf('manual') > -1 || composition.ports.portMode.indexOf('expose') > -1"-->
+<!--            side-->
+<!--          >-->
+<!--            <q-btn icon="add_circle_outline" size="xs" padding="xs" color="blue" @click.stop="onAddNewPort">-->
+<!--              <q-tooltip class="bg-amber text-black shadow-4">-->
+<!--                {{ t('panel.create.new') }}-->
+<!--              </q-tooltip>-->
+<!--            </q-btn>-->
+<!--          </q-item-section>-->
+        </div>
+      </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <q-btn-toggle
+          v-model="installMode"
+          spread
+          no-caps
+          toggle-color="purple"
+          color="white"
+          text-color="black"
+          :options="installOptions"
+        />
+
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="() => showOptionDialog = false" />
+        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onConfirmOK"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
 </template>
 
 <script setup>
@@ -81,6 +187,8 @@ import { ref, inject, reactive, onMounted, onUnmounted, toRaw } from 'vue'
 import ContainerApp from 'components/ContainerApp.vue'
 import StoreSettingsDialog from 'components/dialog/StoreSettingsDialog.vue'
 import ContainerAppDialog from 'components/dialog/ContainerAppDialog.vue'
+import AppInstallDialog from 'components/dialog/AppInstallDialog.vue'
+import AppCustomInstallDialog from 'components/dialog/AppCustomInstallDialog.vue'
 import { clientConfig } from 'src/common/config.js'
 import { parseWSLListVersion } from 'src/utils/wsl.js'
 import { isEmptyObj } from 'src/utils/common.js'
@@ -94,15 +202,31 @@ const t = inject("t")
 
 const configStore = useConfigStore()
 
-const services = reactive([])
+const nodes = reactive([])
 
 const WSLList = reactive([])
+
+const categories = reactive([
+  '',
+])
 
 const search = ref('')
 
 const showSettingsDialog = ref(false)
 
 const showAppDialog = ref(false)
+
+const showOptionDialog = ref(false)
+const installOptions = [
+  {label: t('store.defaultInstall'), value: 'default'},
+  {label: t('store.customInstall'), value: 'custom'}
+]
+const installMode = ref('default')
+const installNode = ref('')
+
+const showInstallDialog = ref(false)
+
+const showCustomInstallDialog = ref(false)
 
 const cardStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 102 + "px" : window.innerHeight - 149 + "px",
@@ -116,44 +240,39 @@ const dockerStoreApis = reactive([])
 
 const storeDatas = reactive([])
 
-const onSettingsClose = () => {
-  showSettingsDialog.value = !showSettingsDialog.value
-}
+const currentItem = ref(null)
 
-const onAppClose = () => {
-  showAppDialog.value = !showAppDialog.value
-}
+const onConfirmOK = () => {
+  if (configStore.userMode === 'professional' && installNode.value === '') {
+    $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: t('verifyMessage.dataNotNull')
+    })
 
+    return
+  }
+
+  showOptionDialog.value = false
+  // showAppDialog.value = true
+
+  if (installMode.value === 'default') {
+    showInstallDialog.value = true
+  } else {
+    showCustomInstallDialog.value = true
+  }
+}
 
 const onSettings = () => {
   showSettingsDialog.value = true
 }
 
-
-
 const onAppClick = (item) => {
   console.log("onAppClick")
 
-  showAppDialog.value = true
+  currentItem.value = item
 
-  // $q.dialog({
-  //   title: t('store.confirm'),
-  //   message: 'Would you like to turn on the wifi?',
-  //   ok: {
-  //     push: true
-  //   },
-  //   cancel: {
-  //     push: true,
-  //     color: 'negative'
-  //   },
-  //   persistent: true
-  // }).onOk(() => {
-  //   // console.log('>>>> OK')
-  // }).onCancel(() => {
-  //   // console.log('>>>> Cancel')
-  // }).onDismiss(() => {
-  //   // console.log('I am triggered on both OK and Cancel')
-  // })
+  showOptionDialog.value = true
 }
 
 
@@ -163,86 +282,67 @@ const onUpdate = () => {
 }
 
 const onRefresh = async () => {
-  storeDatas.splice(0, storeDatas.length)
-
+  const resTmp = []
   for (const item of dockerStoreApis) {
     if (!item.enable) {
       continue
     }
-    await getApiData(item["url"])
+
+    const result = await getApiData(item["url"])
+    if (result) {
+      resTmp.push(result)
+    }
   }
 
-  await window.client.writeStoreData(JSON.stringify(storeDatas)).then((result) => {
-    if (result.success) {
-      $q.notify({
-        type: 'positive',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('store.saveSuccess')}`
-      })
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('store.saveError')}`
-      })
-    }
-  })
+  if (resTmp.length > 0) {
+    storeDatas.splice(0, storeDatas.length)
+    storeDatas.push(...resTmp)
+    await window.client.writeStoreData(JSON.stringify(storeDatas)).then((result) => {
+      if (!result.success) {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('store.saveError')}`
+        })
+      }
+    })
+  }
 
   if (storeDatas.length === 0) {
     return
   }
-
-  if (configStore.userMode === 'professional') {
-    getWSLList()
-  }
-
-  getNodes()
-
 }
 
 const getApiData = async (url) => {
-  await window.myWindowAPI.fetchData(
+  return await window.myWindowAPI.fetchData(
     url,
     {method: 'get'}
   ).then((result) => {
     if (result.success && result.data) {
-      storeDatas.push(result.data)
+      return result.data
     } else {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
         message: `${t('store.getApiError')}: ${url}`
       })
+
+      return []
     }
   })
 }
 
 const getNodes = () => {
-  services.length = 0
   window.nodes.getNodes().then((result) => {
     if (result instanceof Array) {
       if (!isEmptyObj(result)) {
         for (const node of result) {
-          if (node.connectionType === "local") {
-            node.connectionType = t('node.localNode')
-          } else if (node.connectionType === "remote") {
-            node.connectionType = t('node.remoteNode')
+          if (node.serviceType === "Docker" || node.serviceType === "Podman") {
+            nodes.push({label: node.serviceName, value: node.id})
           }
-
-          if (node.protocol === "telnet") {
-            node.protocol = "Telnet"
-          } else if (node.protocol === "ssh") {
-            node.protocol = "SSH"
-          }
-
-          if (node.authType === "password") {
-            node.authType = t('node.password')
-          } else if (node.authType === "key") {
-            node.authType = t('node.key')
-          }
-
-          services.push(node)
         }
+
+        console.log(nodes)
       }
     } else {
       if (result.success === false) {
@@ -252,17 +352,6 @@ const getNodes = () => {
           position: clientConfig.quasar.notify.position,
           message: t('database.accessFail') + ': ' + result.error
         })
-      }
-    }
-  })
-}
-
-const getWSLList = () => {
-  window.wslTerminal.getWSLList().then((result) => {
-    if (result.success) {
-      const data = parseWSLListVersion(result.data)
-      for (let index in data) {
-        WSLList.push(data[index].name)
       }
     }
   })
@@ -305,6 +394,9 @@ const init =() => {
     }
   })
 
+  if (configStore.userMode === 'professional') {
+    getNodes()
+  }
 }
 
 onMounted(() => {

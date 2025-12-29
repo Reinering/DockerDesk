@@ -40,14 +40,14 @@ export const clientConfig = {
 
   dockerRegistryProxy: [],
 
-  dockerStore: {
+  appStore: {
     defaultApi: '',
 
     storeData: {
       path: 'data',
       filename: 'store.json'
     }
-  }
+  },
 }
 
 

@@ -806,6 +806,14 @@ export default {
 
     addStoreApi: "Add Store API",
 
+    confirmInstall: "Confirm Install？",
+    install: "Install",
+    defaultInstall: "Default Install",
+    customInstall: "Custom Install",
+    installPrompt: "If you are unfamiliar with container installation, please select the default installation. If you are familiar with container installation, you can choose custom installation.",
+
+    selectNode: "Select Install Node",
+
     getApiError: "Get API Error",
     updateAPiSuccess: "Update API Successful",
     updateAPiError: "Update API Failed",

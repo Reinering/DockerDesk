@@ -7,7 +7,7 @@ import {
 } from '../actions/client.js'
 import { settings } from '../actions/settings.js'
 import { CmdRunner, cmdAdmin, cmd } from '../common/utils.js'
-import { readStoreData, writeStoreData, getStoreApis, setStoreApis } from '../common/store.js'
+import { readStoreData, writeStoreData, } from '../common/store.js'
 import { setLang } from '../common/i18n.js'
 import Crypto from 'crypto.js'
 import { getupAutoLaunch, setupAutoLaunch } from "../common/launch.js"
@@ -20,12 +20,21 @@ export  const CmdRunners = new Map()
 
 export function registerClientIpcHandlers(win) {
 
-  ipcMain.handle('fetch-data', async (event, url, options) => {
+  ipcMain.handle('fetchData', async (event, url, options) => {
     try {
       const response = await axios({ url, ...options })
+      // 只返回真正需要的数据，剔除 axios 的额外属性
       return { success: true, data: response.data }
     } catch (error) {
-      return { success: false, error }
+      // 这里也可以只返回必要的错误信息，避免 error 对象本身不可克隆
+      return {
+        success: false,
+        error: {
+          message: error.message,
+          code: error.code,
+          response: error.response ? { status: error.response.status, data: error.response.data } : null
+        }
+      }
     }
   })
 

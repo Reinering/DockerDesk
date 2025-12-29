@@ -813,10 +813,20 @@ export default {
     edit: "编辑",
     confirm: "确认",
 
+
+
     storeName: '商店名称',
     storeApi: '商店API',
 
     addStoreApi: "添加商店API",
+
+    confirmInstall: "确认安装？",
+    install: "安装",
+    defaultInstall: "默认安装",
+    customInstall: "自定义安装",
+    installPrompt: "不熟悉容器的安装时，请选择默认安装，确认熟悉容器安装时，可以选择自定义安装",
+
+    selectNode: "选择安装节点",
 
     getApiError: "获取API失败",
     updateAPiSuccess: "更新API成功",

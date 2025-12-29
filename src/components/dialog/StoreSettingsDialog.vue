@@ -123,8 +123,6 @@
 </template>
 
 <script setup>
-import { clientConfig } from 'src/common/config.js'
-
 const props = defineProps({
   data: {
     type: Object,
@@ -145,6 +143,7 @@ const props = defineProps({
 })
 
 import { inject, ref, reactive } from 'vue'
+import { clientConfig } from 'src/common/config.js'
 
 
 const $q = inject("$q")
@@ -196,7 +195,7 @@ const onSettings = () => {
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
-        message: t('index.updateAPiSuccess')
+        message: t('store.updateAPiSuccess')
       })
 
       props.onClose()
@@ -204,14 +203,14 @@ const onSettings = () => {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: `${t('index.updateAPiError')}: ${result.error}`
+        message: `${t('store.updateAPiError')}: ${result.error}`
       })
     }
   })
 
 
 
-  props.onUpdate()
+  // props.onUpdate()
 }
 
 </script>

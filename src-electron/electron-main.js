@@ -7,8 +7,6 @@ import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
 import { ssh_clients } from "./ipc/sshIPC.js"
 import { createTray } from "./common/tray.js"
-
-
 import { initLogging } from './common/logging.js'
 
 
@@ -49,6 +47,8 @@ async function createWindow () {
       ),
       sandbox: false, // <-- to be able to import @electron/remote in preload script
       devTools: true,  // build open debug console
+      nodeIntegration: false,
+      webSecurity: true       // 建议开启，但需配合上方正确的 CSP
     }
   })
 
