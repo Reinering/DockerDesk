@@ -300,7 +300,7 @@ watch(tabs, (newVal, oldVal) =>  {
 })
 
 watch(tab, (newVal, oldVal) => {
-  console.log(newVal, oldVal)
+  // console.log(newVal, oldVal)
   if (isEmptyObj(newVal)) {
     isShowSettingsDialog.value = false
     draggingFab.value = true
