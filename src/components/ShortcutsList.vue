@@ -328,10 +328,10 @@ const onDrag = (event) => {
 const onChange = (event) => {
   console.log("onChange", event)
 
-  const node = JSON.parse(JSON.stringify(event.added.element))
 
-  updatePrevId(event, node)
-  updatePageNo(event, node)
+
+  updatePrevId(event)
+  updatePageNo(event)
 
   // if (shortcutsData[shortcutsData.length - 1].length === 0) {
   //   shortcutsData.splice(shortcutsData.length - 1, 1)
@@ -366,7 +366,7 @@ const checkDrag = async () => {
   }
 }
 
-const updatePrevId = (event, node) => {
+const updatePrevId = (event) => {
   const sqlList = []
 
   if (event.removed) console.log('从旧页面移除了:', event.removed.element)
@@ -374,6 +374,7 @@ const updatePrevId = (event, node) => {
   if (event.added) {
     console.log('添加到了新页面:', event.added.element)
     let page
+    const node = JSON.parse(JSON.stringify(event.added.element))
 
     if (node.pageNo === slide.value) {  // 同页拖拽
       page = shortcutsData[node.pageNo]
@@ -577,6 +578,7 @@ const updatePageNo = (event, node) => {
   if (event.added) {
     console.log('添加到了新页面:', event.added.element)
 
+    const node = JSON.parse(JSON.stringify(event.added.element))
     const page = shortcutsData[node.pageNo]
 
     // 删除空白页
