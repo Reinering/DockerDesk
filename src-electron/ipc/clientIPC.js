@@ -39,6 +39,7 @@ export function registerClientIpcHandlers(win) {
 
   ipcMain.handle('getTitle', async (event, url) => {
     try {
+      // eslint-disable-next-line import/no-named-as-default-member
       const browser = await puppeteer.launch()
       const page = await browser.newPage()
       await page.goto(url, { waitUntil: 'networkidle2' })

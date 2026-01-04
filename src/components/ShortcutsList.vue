@@ -237,12 +237,17 @@ const onAdd = () => {
 
   editShortcuts.value = {}
 
-  const length = shortcutsData[slide.value].length
-  if (length === 0) {
+  if (shortcutsData.length === 0) {
     data0.prevId = '0'
   } else {
-    data0.prevId = shortcutsData[slide.value][length-1].id
+    const length = shortcutsData[slide.value].length
+    if (length === 0) {
+      data0.prevId = '0'
+    } else {
+      data0.prevId = shortcutsData[slide.value][length-1].id
+    }
   }
+
   data0.pageNo = slide.value
 
   showEditShortcutsDialog.value = !showEditShortcutsDialog.value
