@@ -7,6 +7,7 @@ import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
 import { ssh_clients } from "./ipc/sshIPC.js"
 import { createTray } from "./common/tray.js"
+import { wslAutoLaunch } from "./common/wsl.js"
 import { initLogging } from './common/logging.js'
 
 
@@ -91,6 +92,8 @@ app.whenReady().then(() => {
   const icon = nativeImage.createFromPath(path.join(publicFolder, 'icons/favicon-128x128.png'))
     .resize({ width: 16, height: 16 }) // 托盘图标通常较小
   createTray(mainWindow, icon)
+
+  wslAutoLaunch()
 })
 
 app.on('did-finish-load', () => {

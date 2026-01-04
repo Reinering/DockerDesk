@@ -1,5 +1,7 @@
 import { spawn } from 'child_process'
 import { devConsole } from './utils.js'
+import { getWSLAutoLaunch, getWSLList, startSubSystem } from 'app/src-electron/actions/wsl.js'
+import { parseWSLListVersion } from 'src/utils/wsl.js'
 
 export class WslCmdRunner {
   constructor(win, options = {}) {
@@ -262,3 +264,24 @@ export class DockerLoginCmdRunner {
 }
 
 
+export function wslAutoLaunch () {
+  getWSLAutoLaunch().then((result) => {
+    if (!result.success) {
+      return
+    }
+
+    const data = JSON.parse(result.data)
+    if (data.length === 0) {
+      return
+    }
+
+    getWSLList().then((result1) => {
+      const wsls = parseWSLListVersion(result1)
+      for (const wsl of wsls) {
+        if (wsl["sate"] === "Stopped" && data.includes(wsl["name"])) {
+          startSubSystem(wsl["name"])
+        }
+      }
+    })
+  })
+}
