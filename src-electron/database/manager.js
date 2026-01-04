@@ -162,6 +162,13 @@ async function initDB() {
           mark: "store api",
           delete_flags: 0
         },
+        {
+          field: "wsl_autoLaunch",
+          type: "json",
+          value: '',
+          mark: "wsl auto launch",
+          delete_flags: 0
+        },
       ])
     }
 

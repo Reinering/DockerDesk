@@ -56,7 +56,7 @@ export function setupAutoLaunch(enable = true, isHidden = false) {
   }
 }
 
-export function getupAutoLaunch() {
+export function getAutoLaunch() {
   const autoLauncher = new AutoLaunch({
     name: app.getName(),
     path: process.execPath,
@@ -66,3 +66,4 @@ export function getupAutoLaunch() {
     return isEnabled
   })
 }
+

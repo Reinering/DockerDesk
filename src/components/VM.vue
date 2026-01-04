@@ -10,14 +10,16 @@
 
     <div class="col text-subtitle1 text-weight-bold text-center">{{ props.data.servername }}</div>
 
-<!--    <q-item style="height: 30px">-->
-<!--      -->
-<!--    </q-item>-->
-
     <q-separator />
 
-    <q-card-section class="q-gutter-y-sm">
-      <div class="text-caption">wsl2</div>
+    <q-card-section class="q-gutter-y-xs">
+      <div class="row items-center justify-between">
+        <div class="text-caption">wsl2</div>
+        <q-space />
+        <q-toggle size="xs" color="green" v-model="isAutoLaunch" @update:model-value="changeAutoLaunch">
+          <q-tooltip>{{ t('assistant.launchWithApp') }}</q-tooltip>
+        </q-toggle>
+      </div>
 
       <div class="row flex flex-center">
         <q-knob
@@ -178,8 +180,6 @@
 
 
 <script setup>
-import { clientConfig } from 'src/common/config.js'
-
 defineOptions({
   name: 'VM',
 })
@@ -203,6 +203,7 @@ import { inject, reactive, ref, watch, onMounted, defineEmits } from 'vue'
 import { changeNavigatorGoto } from "src/utils/router.js"
 import { useNavigatorStore } from 'stores/navigator.js'
 import { findNaviItemByName, isEmptyObj } from 'src/utils/common.js'
+import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
 const router = inject("router")
@@ -242,6 +243,8 @@ const wslStatus = reactive({
   memoryValue: 0,
   diskValue: 0,
 })
+
+const isAutoLaunch = ref(props.data.isAutoLaunch)
 
 const isStart = ref(false)
 const isStop = ref(false)
@@ -506,6 +509,24 @@ const onMove = async () => {
   })
 }
 
+const changeAutoLaunch = () => {
+  window.wslTerminal.setWSLAutoLaunch(JSON.stringify({
+      wslName: props.data.servername,
+      checked: isAutoLaunch.value
+    })
+  ).then((result) => {
+    if (result.success) {
+      emit('update:value', {name: props.data.servername, isAutoLaunch: isAutoLaunch.value })
+    } else {
+      isAutoLaunch.value = !isAutoLaunch.value
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('assistant.saveFail')}`
+      })
+    }
+  })
+}
 
 const init = () => {
   if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32" && props.data.servername) {

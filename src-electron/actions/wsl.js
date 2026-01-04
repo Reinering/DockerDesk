@@ -1,6 +1,7 @@
 import { cmd, cmd1, cmdAdmin,  CmdRunner, modifyIniConfig, } from 'app/src-electron/common/utils.js'
 import { WslCmdRunner } from 'app/src-electron/common/wsl.js'
 import { nodes } from '../actions/nodes.js'
+import { db } from '../database/manager.js'
 import readline from 'readline'
 import path from 'path'
 import { parse, stringify } from 'smol-toml'
@@ -104,6 +105,10 @@ export async function startBGSubSystem (name='DockerDesk', ) {
 
 export async function stopSubSystem (name='DockerDesk') {
   return cmd(`wsl --terminate ${name}`, 'utf16le')
+}
+
+export async function stopSubAll (name='DockerDesk') {
+  return cmd(`wsl --shutdown`, 'utf16le')
 }
 
 export async function checkSubSystem (name='DockerDesk') {
@@ -255,4 +260,66 @@ export async function dockerLogin (win, data) {
 export async function readPodmanConf(commands) {
   const configContent = await execSubSystem(commands)
   return parse(configContent)
+}
+
+export function setWSLAutoLaunch (wslName, enable=true) {
+  const result = db('settings')
+    .where('field', '=', 'wsl_autoLaunch')
+    .select('*').then(
+      rows => {
+        return rows[0]["value"]
+      }).catch(error => {
+      return error
+    })
+
+  return result.then((res) => {
+    const data = JSON.parse(res)
+
+    if (data.includes(wslName)) {
+      if (enable){
+        return { success: true, data: '' }
+      } else {
+        const tmp = JSON.stringify(data.filter(item => item !== wslName))
+
+        return db('settings')
+          .where('field', '=', "wsl_autoLaunch")
+          .update({
+            value: tmp
+          }).then(
+            rows => {
+              return { success: true, data: rows }
+            }).catch(error => {
+            return { success: false, error: error }
+          })
+      }
+    } else {
+      if (enable) {
+        data.push(wslName)
+
+        return db('settings')
+          .where('field', '=', "wsl_autoLaunch")
+          .update({
+            value: JSON.stringify(data)
+          }).then(
+            rows => {
+              return { success: true, data: rows }
+            }).catch(error => {
+            return { success: false, error: error }
+          })
+      } else {
+        return { success: true, data: '' }
+      }
+    }
+  })
+}
+
+export function getWSLAutoLaunch () {
+  return db('settings')
+    .where('field', '=', 'wsl_autoLaunch')
+    .select('*').then(
+      rows => {
+        return { success: true, data: rows[0]["value"] }
+      }).catch(error => {
+      return { success: false, error: error }
+    })
 }

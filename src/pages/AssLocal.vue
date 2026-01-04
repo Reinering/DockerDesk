@@ -39,7 +39,7 @@
           </q-card>
 
           <q-card class="bg-grey-6 q-ma-md q-pa-md"  style="width: 200px; height: 200px;">
-            <div class="column items-center">
+            <div class=" items-center">
               <q-icon :name="`img:${podmanIconPath}`"  style="width: 80px; height: 80px;" />
               <div class="text-h6">Podman</div>
             </div>

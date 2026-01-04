@@ -58,7 +58,7 @@ export default {
   verifyMessage: {
     dataNotNull: "必填数据不能为空",
     dataLenNotMax: "数据长度不能超过:",
-    dataLenNotMin: "数据长度不能超过:",
+    dataLenNotMin: "数据长度不能小于:",
 
     invalidRepositoryName: "无效的名称",
     repositoryNameSlash: "名称斜杠错误",
@@ -116,6 +116,8 @@ export default {
     start: "启动",
     stop: "停止",
     bgStart: "后台运行",
+    autoLaunch: "开机启动",
+    launchWithApp: "随APP启动",
 
     wslVersionHint: "版本: WSL1, 建议: WSL2",
     wslVersionHint1: "建议: WSL2",
@@ -133,6 +135,8 @@ export default {
     uninstalling: "正在卸载...",
     uninstallSuccess: "卸载成功",
     uninstallFail: "卸载失败",
+    saveSuccess: "保存成功",
+    saveFail: "保存失败"
   },
 
   asslocal: {

@@ -119,6 +119,8 @@ export default {
     start: "Start",
     stop: "Stop",
     bgStart: "Background Start",
+    autoLaunch: "Auto Launch",
+    launchWithApp: "Launch with App",
 
     wslVersionHint: "Version: WSL1, Suggestions: WSL2",
     wslVersionHint1: "Suggestions: WSL2",
@@ -137,6 +139,8 @@ export default {
     uninstalling: "Uninstalling",
     uninstallSuccess: "Uninstall Successfully",
     uninstallFail: "Uninstall Failure",
+    saveSuccess: "Settings saved successfully.",
+    saveFail: "Settings saved Failure."
 
   },
 

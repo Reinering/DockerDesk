@@ -568,7 +568,15 @@ contextBridge.exposeInMainWorld("wslTerminal", {
 
   readPodmanConfWSL(data) {
     return ipcRenderer.invoke('readPodmanConfWSL', data)
-  }
+  },
+
+  getWSLAutoLaunch () {
+    return ipcRenderer.invoke('getWSLAutoLaunch')
+  },
+
+  setWSLAutoLaunch (data) {
+    return ipcRenderer.invoke('setWSLAutoLaunch', data)
+  },
 
 })
 

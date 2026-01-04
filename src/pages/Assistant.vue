@@ -55,30 +55,25 @@
         <q-separator />
 
         <q-card-section>
-          <q-chip shaquare color="orange" text-color="white" icon="star">
-            {{wslVersionHint}}
-          </q-chip>
+          <div class="row items-center justify-between">
+            <div class="col">
+              <q-chip shaquare color="orange" text-color="white" icon="star">
+                {{wslVersionHint}}
+              </q-chip>
+            </div>
+
+            <q-space />
+
+            <q-toggle color="green" v-model="isAutoLaunch" @update:model-value="changeAutoLaunch">
+              {{ t('assistant.launchWithApp') }}
+            </q-toggle>
+          </div>
         </q-card-section>
 
         <q-card-section>
-          <div class="q-pa-md row justify-between">
+          <div class="q-pa-md row items-center justify-between">
             <div class="col"><q-badge :color="wslStatusColor" rounded class="q-mr-sm" />{{wslStatus}}</div>
             <q-space />
-
-            <q-btn
-              v-if="showWslStatusBtn"
-              :disable="disabledWslStatusBtn"
-              color="accent"
-              icon="flight_takeoff"
-              style="width: 150px"
-              @click="onWslStatusBtn"
-            >
-              {{wslStatusBtn}}
-              <template v-slot:loading>
-                <q-spinner-gears class="on-left" />
-                Computing...
-              </template>
-            </q-btn>
 
             <q-btn-dropdown
               v-if="!showWslStatusBtn"
@@ -91,7 +86,7 @@
               @click="onWslStatusBtn"
             >
               <q-list>
-                <q-item class="bg-purple-4" clickable v-close-popup @click="onBackgroundStart">
+                <q-item class="bg-amber-14" clickable v-close-popup @click="onBackgroundStart">
                   <q-item-section avatar>
                     <q-icon name="play_arrow" color="white" />
                   </q-item-section>
@@ -153,6 +148,8 @@ const disabledWslStatusBtn = ref(false)
 const wslStatus = ref('Stopped')
 const wslStatusColor = ref('orange')
 const showWslStatusBtn = ref(true)
+
+const isAutoLaunch = ref(false)
 
 const installWSLPackage = () => {
   window.wslTerminal.execSWSL([
@@ -343,6 +340,42 @@ const onBackgroundStart = () => {
   }
 }
 
+const changeAutoLaunch = () => {
+  window.wslTerminal.setWSLAutoLaunch(JSON.stringify({
+      wslName: 'DockerDesk',
+      checked: isAutoLaunch.value
+    })
+  ).then((result) => {
+    if (!result.success) {
+      isAutoLaunch.value = !isAutoLaunch.value
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('assistant.saveFail')}`
+      })
+    }
+  })
+}
+
+const getAutoLaunch = () => {
+  window.wslTerminal.getWSLAutoLaunch().then((result) => {
+    if (result.success) {
+      const data = JSON.parse(result.data)
+      if (data.includes("DockerDesk")) {
+        isAutoLaunch.value = true
+      } else {
+        isAutoLaunch.value = false
+      }
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('assistant.saveSuccess')}`
+      })
+    }
+  })
+}
+
 const checkSubSystem = async () => {
   window.wslTerminal.checkSubSystem().then((result) => {
     console.log(result)
@@ -376,6 +409,8 @@ const init = () => {
                     wslStatus.value = "Running"
                     isAssLocalBtn.value = false
                   }
+
+                  getAutoLaunch()
 
                   showWslStatusBtn.value = false
                   checkSubSystem()

@@ -45,8 +45,17 @@ db.init = () => {
       "mark" TEXT,
       PRIMARY KEY ("id")
     )
-`)
+  `)
 
+  this.exec(`
+    CREATE TABLE IF NOT EXISTS pre_cmds (
+      "group" TEXT NOT NULL,
+      "label" TEXT NOT NULL,
+      "text" TEXT,
+      "mark" TEXT,
+      "create_time" datetime NOT NULL
+    )
+  `)
 
 }
 

@@ -83,7 +83,8 @@
               <div class="q-gutter-x-md q-gutter-y-md row justify-center">
                 <VM
                   v-for="(item, index) in vms"
-                  :key="index" :data="item"
+                  :key="index"
+                  :data="item"
                   :onDelete="onDelete"
                   @update:value="updateChild"
                 />
@@ -348,6 +349,8 @@ const vms = reactive([
   // },
 ])
 
+const vms_AutoLaunch = reactive([])
+
 const appxList = reactive([
   { label: 'ubuntu', value: 'Ubuntu', desc: 'Ubuntu' },
   { label: 'debian', value: 'Debian', desc: 'Debian' },
@@ -386,12 +389,27 @@ const clearNewWSL = () => {
 }
 
 const updateChild = (data) => {
-  vms.forEach((vm) => {
-    if (vm.servername === data.name) {
-      vm.state = data.state
-      return
+
+  for (const vm of vms) {
+    if (vm.servername !== data.name) {
+      continue
     }
-  })
+
+    if (Object.prototype.hasOwnProperty.call(data, "state")) {
+      vm.state = data.state
+    }
+    if (Object.prototype.hasOwnProperty.call(data, "isAutoLaunch")) {
+      vm.isAutoLaunch = data.isAutoLaunch
+
+      if (data.isAutoLaunch) {
+        vms_AutoLaunch.push(data.name)
+      } else {
+        vms_AutoLaunch.splice(vms_AutoLaunch.indexOf(data.name), 1)
+      }
+    }
+
+    break
+  }
 }
 
 const isDebugConsole = ref(false)
@@ -559,6 +577,7 @@ const getWSLList = () => {
           servername: data[index].name,
           description: data[index].name,
           state: data[index].state,
+          isAutoLaunch: vms_AutoLaunch.includes(data[index].name)
         })
 
         if (data[index].name === "DockerDesk") {
@@ -643,6 +662,21 @@ const onCreate = () => {
   })
 }
 
+const getAutoLaunch = () => {
+  window.wslTerminal.getWSLAutoLaunch().then((result) => {
+    if (result.success) {
+      const data = JSON.parse(result.data)
+      vms_AutoLaunch.push(...data)
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('assistant.saveSuccess')}`
+      })
+    }
+  })
+}
+
 const init = () => {
   if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32") {
     window.wslTerminal.checkWSLInfo().then((result) => {
@@ -652,6 +686,8 @@ const init = () => {
         if (line.indexOf('WSL') !== -1) {
           wslStatusBtn.value = t('assistant.installed')
           disabledWslStatusBtn.value = true
+
+          getAutoLaunch()
 
           getWSLList()
           getWSLListInterval = setInterval(() => {
@@ -685,6 +721,7 @@ const init = () => {
         })
       }
     })
+
   }
 }
 
