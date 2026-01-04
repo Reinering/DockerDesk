@@ -73,6 +73,7 @@ export default {
   index: {
     shortcuts: "快捷方式",
 
+    addShortcuts: "添加快捷方式",
     editShortcuts: "编辑快捷方式",
     websiteUrl: "网站地址",
     websiteName: "网站名称",
@@ -86,8 +87,6 @@ export default {
 
     settings: "设置",
     shortcutsTemplate: "快捷方式模板",
-
-
 
     deleteMessage: "确认删除？",
     inputUrlMessage: "请输入ICON的URL",

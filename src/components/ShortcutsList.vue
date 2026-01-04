@@ -58,11 +58,18 @@
   </q-carousel>
 
   <q-menu context-menu auto-close>
+    <q-item clickable @click="onAdd">
+      <q-item-section>
+        {{ t("add") }}
+      </q-item-section>
+    </q-item>
+
     <q-item clickable @click="onEdit">
       <q-item-section>
         {{ t(editBtnHint) }}
       </q-item-section>
     </q-item>
+
     <q-item clickable @click="onSettings">
       <q-item-section>
         {{ t("settings") }}
@@ -70,13 +77,22 @@
     </q-item>
   </q-menu>
 
-  <EditShortcutsDialog
+  <ShortcutsEditDialog
     v-if="showEditShortcutsDialog"
     v-model="showEditShortcutsDialog"
+    :data0="data0"
     :data="editShortcuts"
     :onUpdate="onUpdate"
     :onClose="onEditClose"
   />
+
+<!--  <EditShortcutsDialog-->
+<!--    v-if="showEditShortcutsDialog"-->
+<!--    v-model="showEditShortcutsDialog"-->
+<!--    :data="editShortcuts"-->
+<!--    :onUpdate="onUpdate"-->
+<!--    :onClose="onEditClose"-->
+<!--  />-->
 
   <ShortcutsSettingsDialog
     v-if="showShortcutsSettingsDialog"
@@ -111,7 +127,7 @@ import {
 } from 'vue'
 import Shortcuts1 from 'components/Shortcuts1.vue'
 import Shortcuts2 from 'components/Shortcuts2.vue'
-import EditShortcutsDialog from 'components/dialog/EditShortcutsDialog.vue'
+import ShortcutsEditDialog from 'components/dialog/ShortcutsEditDialog.vue'
 import ShortcutsSettingsDialog from 'components/dialog/ShortcutsSettingsDialog.vue'
 import { VueDraggableNext } from 'vue-draggable-next'
 import { clientConfig } from 'src/common/config.js'
@@ -143,10 +159,18 @@ const THRESHOLD = 50
 const SCROLL_DELAY = 600
 let isScrollingLocked = false
 
+const mode = ref('')
+
 const isDrag = ref(false)
 
 const isEdit = ref(false)
 const editBtnHint = ref('edit')
+
+const data0 = reactive({
+  mode: '',  // add / edit
+  prevId: '',
+  pageNo: '',
+})
 
 const showEditShortcutsDialog = ref(false)
 
@@ -208,6 +232,22 @@ const onDBClick = () => {
   }
 }
 
+const onAdd = () => {
+  data0.mode = "add"
+
+  editShortcuts.value = {}
+
+  const length = shortcutsData[slide.value].length
+  if (length === 0) {
+    data0.prevId = '0'
+  } else {
+    data0.prevId = shortcutsData[slide.value][length-1].id
+  }
+  data0.pageNo = slide.value
+
+  showEditShortcutsDialog.value = !showEditShortcutsDialog.value
+}
+
 const onEdit = () => {
   isEdit.value = !isEdit.value
 
@@ -225,6 +265,10 @@ const onEdit = () => {
 }
 
 const onEditShortcuts = (id) => {
+  data0.mode = "edit"
+  data0.prevId = ''
+  data0.pageNo = ''
+
   const page = shortcutsData[slide.value]
   for (let i=0; i <= page.length; i++) {
     if (page[i].id === id) {
@@ -327,8 +371,6 @@ const onDrag = (event) => {
 
 const onChange = (event) => {
   console.log("onChange", event)
-
-
 
   updatePrevId(event)
   updatePageNo(event)

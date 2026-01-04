@@ -78,6 +78,7 @@ export default {
   index: {
     shortcuts: "Shortcuts",
 
+    addShortcuts: "Add Shortcut",
     editShortcuts: "Edit Shortcut",
     websiteUrl: "Website Url",
     websiteName: "Website Name",
