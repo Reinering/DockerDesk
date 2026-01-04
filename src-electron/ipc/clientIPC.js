@@ -1,5 +1,6 @@
 import { app, ipcMain, dialog, shell } from 'electron'
 import axios from 'axios'
+import puppeteer from 'puppeteer'
 import * as fs from 'fs'
 import {
   getOSInfo, getUtilization,
@@ -7,13 +8,11 @@ import {
 } from '../actions/client.js'
 import { settings } from '../actions/settings.js'
 import { CmdRunner, cmdAdmin, cmd } from '../common/utils.js'
+
 import { readStoreData, writeStoreData, } from '../common/store.js'
 import { setLang } from '../common/i18n.js'
 import Crypto from 'crypto.js'
-import { getupAutoLaunch, setupAutoLaunch } from "../common/launch.js"
-
-
-
+import { getAutoLaunch, setupAutoLaunch } from "../common/launch.js"
 
 
 export  const CmdRunners = new Map()
@@ -27,6 +26,30 @@ export function registerClientIpcHandlers(win) {
       return { success: true, data: response.data }
     } catch (error) {
       // 这里也可以只返回必要的错误信息，避免 error 对象本身不可克隆
+      return {
+        success: false,
+        error: {
+          message: error.message,
+          code: error.code,
+          response: error.response ? { status: error.response.status, data: error.response.data } : null
+        }
+      }
+    }
+  })
+
+  ipcMain.handle('getTitle', async (event, url) => {
+    try {
+      const browser = await puppeteer.launch()
+      const page = await browser.newPage()
+      await page.goto(url, { waitUntil: 'networkidle2' })
+
+      const title = await page.title()
+
+      await browser.close()
+
+      return { success: true, data: title.trim() }
+    } catch (error) {
+      // 这里也可以只返回必要的错误信息，避免 error 对象本身不可克隆z
       return {
         success: false,
         error: {
@@ -256,9 +279,9 @@ export function registerClientIpcHandlers(win) {
 
   })
 
-  ipcMain.handle('getAutoLaunch', async (event, checked) => {
+  ipcMain.handle('getAutoLaunch', async (event) => {
     try {
-      return getupAutoLaunch().then((result) => {
+      return getAutoLaunch().then((result) => {
         return { success: true, data: result, error: '' }
       })
     } catch (error) {

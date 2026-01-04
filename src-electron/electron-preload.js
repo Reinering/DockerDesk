@@ -71,6 +71,10 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
 
   fetchData (url, options) {
     return ipcRenderer.invoke('fetchData', url, options)
+  },
+
+  getTitle (url) {
+    return ipcRenderer.invoke('getTitle', url)
   }
 
 })

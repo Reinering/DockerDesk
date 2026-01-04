@@ -267,14 +267,12 @@ const formData1 = reactive({
 
 const getWebInfo = () => {
   if (formData.value.website) {
-    try {
-      const urlObj = new URL(formData.value.website)  // 如果 url 不带协议，会自动补 http:// 或 https://
-      console.log(urlObj.hostname)
-      return urlObj.hostname       // 返回域名，如 "www.google.com"
-    } catch (e) {
-      console.error("无效的 URL:", e)
-      return null
-    }
+    window.myWindowAPI.getTitle(formData.value.website).then((result) => {
+      if (result.success) {
+        formData.value.websiteName = result.data
+        formData.value.iconText = result.data
+      }
+    })
   }
 }
 
@@ -379,7 +377,6 @@ const editShortcuts = () => {
     })
   }
 }
-
 
 const init = () => {
   if (props.data0.mode === "edit") {
