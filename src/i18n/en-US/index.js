@@ -139,9 +139,11 @@ export default {
     uninstalling: "Uninstalling",
     uninstallSuccess: "Uninstall Successfully",
     uninstallFail: "Uninstall Failure",
-    saveSuccess: "Settings saved successfully.",
-    saveFail: "Settings saved Failure."
-
+    saveSuccess: "Settings saved Successfully.",
+    saveFail: "Settings saved Failure.",
+    restarting: "Restart...",
+    restartSuccess: "Restart Successfully",
+    restartFail: "Restart Failure",
   },
 
   asslocal: {
@@ -151,6 +153,7 @@ export default {
     panel: "Panel",
     notInstalled: "Not Installed",
     management: "MG",
+    restart: "Restart"
   },
 
   panel: {

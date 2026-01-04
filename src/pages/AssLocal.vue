@@ -25,10 +25,21 @@
                   <q-list dense class="bg-blue-grey-13" >
                     <q-item clickable v-close-popup size="sm" :disable="isReinstallDocker" @click="onReinstallDocker">
                       <q-item-section>
-                        <q-icon name="install_desktop" />
-                        <q-tooltip class="bg-amber text-black shadow-4">
-                          {{t('asslocal.reinstall')}}
-                        </q-tooltip>
+                        <q-icon name="install_desktop" color="teal-7"/>
+                      </q-item-section>
+
+                      <q-item-section>
+                        <q-item-label caption text-weight-medium>{{t('asslocal.reinstall')}}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item clickable v-close-popup size="sm" @click="onRestartDocker">
+                      <q-item-section>
+                        <q-icon name="restart_alt" color="red" />
+                      </q-item-section>
+
+                      <q-item-section>
+                        <q-item-label caption text-weight-medium>{{t('asslocal.restart')}}</q-item-label>
                       </q-item-section>
                     </q-item>
                   </q-list>
@@ -39,7 +50,7 @@
           </q-card>
 
           <q-card class="bg-grey-6 q-ma-md q-pa-md"  style="width: 200px; height: 200px;">
-            <div class=" items-center">
+            <div class="column items-center">
               <q-icon :name="`img:${podmanIconPath}`"  style="width: 80px; height: 80px;" />
               <div class="text-h6">Podman</div>
             </div>
@@ -58,10 +69,21 @@
                   <q-list dense class="bg-blue-grey-13" >
                     <q-item clickable v-close-popup size="sm" :disable="isReinstallPodman" @click="onReinstallPodman">
                       <q-item-section>
-                        <q-icon name="install_desktop" />
-                        <q-tooltip class="bg-amber text-black shadow-4">
-                          {{t('asslocal.reinstall')}}
-                        </q-tooltip>
+                        <q-icon name="install_desktop" color="teal-7"/>
+                      </q-item-section>
+
+                      <q-item-section>
+                        <q-item-label caption>{{t('asslocal.reinstall')}}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item clickable v-close-popup size="sm" @click="onTerminal">
+                      <q-item-section>
+                        <q-icon name="restart_alt" color="red" />
+                      </q-item-section>
+
+                      <q-item-section>
+                        <q-item-label caption>{{t('asslocal.restart')}}</q-item-label>
                       </q-item-section>
                     </q-item>
                   </q-list>
@@ -290,6 +312,48 @@ const onReinstallDocker = () => {
       spinner: true,
       position: 'bottom-right',
       message: t('assistant.uninstalling'),
+    })
+  } else {
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: `${t('asslocal.notInstalled')}`
+    })
+  }
+}
+
+const onRestartDocker = () => {
+  if (dockerBtn.value === t('asslocal.panel')) {
+    window.wslTerminal.execSWSL([
+      ['-d', "DockerDesk", '--user', "root", '-e', "systemctl restart docker"],
+    ]).then((result) => {
+      console.log(result)
+      if (result) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          spinner: false,
+          message: `${t('assistant.restartSuccess')}`,
+          timeout: 10000
+        })
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.restartFail')}: ${result.error}`,
+          timeout: 10000
+        })
+      }
+    })
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('assistant.restarting'),
     })
   } else {
     return $q.notify({

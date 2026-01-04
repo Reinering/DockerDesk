@@ -136,7 +136,10 @@ export default {
     uninstallSuccess: "卸载成功",
     uninstallFail: "卸载失败",
     saveSuccess: "保存成功",
-    saveFail: "保存失败"
+    saveFail: "保存失败",
+    restarting: "正在重启...",
+    restartSuccess: "重启成功",
+    restartFail: "重启失败",
   },
 
   asslocal: {
@@ -146,7 +149,7 @@ export default {
     panel: "面板",
     notInstalled: "未安装",
     management: "管理",
-
+    restart: "重启"
 
   },
 
