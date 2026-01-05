@@ -8,16 +8,16 @@
     >
       <img
         class="items-center"
-        v-if="isShowImg"
+        v-show="!isShowImg"
         alt="logo"
         :src="props.data.icon"
-        @load="onLoad"
-        @error="isShowImg = false"
+        @load="isShowImg = false"
+        @error="isShowImg = true"
         :style="templates[props.templateId].imgStyle"
       />
 
       <div
-        v-if="!isShowImg"
+        v-if="isShowImg"
         class="text-center"
         :style="templates[props.templateId].textStyle"
       >
@@ -106,6 +106,8 @@ const getStyle = () => {
 
 const onLoad = () => {
   console.log("onLoad")
+
+  showSettingsDialog.value = false
 }
 
 const onError = () => {
