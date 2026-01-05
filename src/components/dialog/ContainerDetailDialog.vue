@@ -346,7 +346,6 @@ const columns_vol = [
 ]
 
 const onSendHome = (row) => {
-  console.log("onSendHome")
   let data = {}
 
   if (service.connectionType === t('node.remoteNode')) {
@@ -367,12 +366,19 @@ const onSendHome = (row) => {
   data["iconText"] = props.data.names.slice(0,1).toUpperCase()
   data["iconColor"] = 'teal'
   data["fontSize"] = '24'
-  data["prevId"] = shortcutsStore.shortcutsData[0][shortcutsStore.shortcutsData[0].length-1].id
   data["pageNo"] = 0
+
+  if (shortcutsStore.shortcutsData.length === 0) {
+    data["prevId"] = "0"
+  } else {
+    data["prevId"] = shortcutsStore.shortcutsData[0][shortcutsStore.shortcutsData[0].length-1].id
+  }
 
   window.shortcuts.addShortcuts(JSON.stringify(data))
     .then((result) => {
     if (result.success) {
+
+
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
@@ -386,9 +392,7 @@ const onSendHome = (row) => {
       })
     }
   })
-
 }
-
 
 const getContainerUsage = () => {
   if (serviceCmd.value === "docker" && !dockerInfo.enable) {

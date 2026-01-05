@@ -165,7 +165,7 @@ async function initDB() {
         {
           field: "wsl_autoLaunch",
           type: "json",
-          value: '',
+          value: '[]',
           mark: "wsl auto launch",
           delete_flags: 0
         },
