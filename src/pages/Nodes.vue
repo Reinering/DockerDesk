@@ -488,6 +488,10 @@ const addService = () => {
           newService.key = res.data.key
         }
 
+        if (newService.connectionType === t('node.localNode')) {
+          newService.address = newService.subSystem
+        }
+
         services.push({ ...newService })
 
         cleanService()
