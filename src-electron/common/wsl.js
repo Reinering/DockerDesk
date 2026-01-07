@@ -277,8 +277,10 @@ export function wslAutoLaunch () {
 
     getWSLList().then((result1) => {
       const wsls = parseWSLListVersion(result1)
+
       for (const wsl of wsls) {
-        if (wsl["sate"] === "Stopped" && data.includes(wsl["name"])) {
+        if (wsl["state"] === "Stopped" && data.includes(wsl["name"])) {
+          console.log("mark")
           startSubSystem(wsl["name"])
         }
       }
