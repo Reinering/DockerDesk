@@ -400,6 +400,10 @@ contextBridge.exposeInMainWorld('sftpTerminal', {
 
   onProgress (callback) {
     return ipcRenderer.on('onProgressSFTP', (event, data) => callback(data))
+  },
+
+  openFile (data) {
+    return ipcRenderer.invoke('openFileSFTP', data)
   }
 
 })

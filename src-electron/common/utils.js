@@ -1,10 +1,11 @@
-import * as fs from 'fs'
+import fs from 'fs-extra'
 import { exec, execSync, spawn } from 'child_process'
 import readline from 'readline'
 import os from 'node:os'
 import iconv from 'iconv-lite'
 import ini from 'ini'
 import * as sudo from 'sudo-prompt'
+import { clientConfig } from 'src/common/config'
 
 
 const isDev = process.defaultApp || process.env.NODE_ENV === 'development'
@@ -454,7 +455,7 @@ export const detectEncoding = (buffer) => {
 }
 
 
-export function cmdAdmin1(command, encoding = 'cp936', isAdmin = false) {
+export function cmdAdmin1 (command, encoding = 'cp936', isAdmin = false) {
   if (Array.isArray(command)) {
     command = command.join(' ')
   }
@@ -506,5 +507,18 @@ export function cmdAdmin1(command, encoding = 'cp936', isAdmin = false) {
       reject('Non-admin command execution finished.')
     })
   })
+}
+
+
+export function cleanupTmp () {
+  for (const tmp of clientConfig.tmpFiles) {
+    try {
+      fs.removeSync(tmp)
+      console.log('所有临时缓存已清空')
+    } catch (err) {
+      console.error('清理缓存失败:', err)
+    }
+  }
+
 }
 

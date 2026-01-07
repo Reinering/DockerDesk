@@ -156,25 +156,12 @@
       </template>
     </q-table>
   </q-card>
-
-  <q-dialog v-model="isShowEditorDialog" style="width: 90%; height: 90%" persistent>
-    <q-card>
-      <q-card-actions>
-        <Editor />
-      </q-card-actions>
-
-      <q-card-actions align="right">
-        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="addService" />
-        <q-btn :label="t('cancel')" class="q-mt-md" color="negative" @click="closeEditorDialog" />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
 </template>
 
 <script setup>
 import { ref, inject, reactive, onMounted, onUnmounted } from 'vue'
 import { clientConfig } from 'src/common/config.js'
-import Editor from 'src/components/Editor.vue'
+
 
 
 defineOptions({
@@ -979,16 +966,6 @@ const onRename = (row) => {
   })
 }
 
-const isShowEditorDialog = ref(false)
-
-const closeEditorDialog = () => {
-  isShowEditorDialog.value = false
-}
-
-const onEditFile = () => {
-  isShowEditorDialog.value = !isShowEditorDialog.value
-}
-
 const onDownload = (row) => {
   if (row.isDir) {
     downloadFolder(currentPath.value + '/' + row.name)
@@ -1230,6 +1207,27 @@ const onDeleteBatch = () => {
   })
 }
 
+const onEditFile = (row) => {
+  if (row.isDir) {
+    return
+  }
+
+  window.sftpTerminal.openFile({
+      uuid: props.data.id,
+      remotePath: currentPath.value + '/' + row.name,
+    }).then((result) => {
+    console.log(result)
+    if (!result.success) {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('filesystem.openFileError')}:${result.error}`,
+      })
+    }
+  })
+}
+
+
 const init = async () => {
   console.log("init", props.data)
   if (props.data.data.connectionType === t('node.remoteNode')  && props.data.data.protocol === 'SSH') {
@@ -1370,4 +1368,17 @@ onUnmounted(() => {
   background-color: #aba79d;
 }
 
+::v-deep .q-editor-content pre {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+  margin: 10px 0;
+}
+
+::v-deep .q-editor-content code {
+  font-family: 'Courier New', monospace;
+  background: transparent;
+}
 </style>

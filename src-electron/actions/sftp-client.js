@@ -66,7 +66,6 @@ export class SFTPClient {
   // 断开连接
   disconnect() {
     if (this.sftp) this.sftp.end()
-    this.sendDisconnected()
   }
 
   // 列出远程目录
@@ -670,6 +669,27 @@ export class SFTPClient {
         status: 'done',   // doing | done
         error: ''
       })
+  }
+
+  async readFile(remotePath) {
+    if (!this.sftp) throw new Error('SFTP not connected')
+
+    return await this.sftp.get(remotePath)
+  }
+
+  async writeFile(remotePath, content) {
+    if (!this.sftp) throw new Error('SFTP not connected')
+
+    return await this.sftp.put(Buffer.from(content, 'utf8'), remotePath)
+  }
+
+  async uploadBack(localPath, remotePath) {
+    try {
+      const localContent = await fs.readFileSync(localPath)
+      await this.sftp.put(localContent, remotePath)
+    } catch (err) {
+      console.error('Upload error:', err)
+    }
   }
 }
 

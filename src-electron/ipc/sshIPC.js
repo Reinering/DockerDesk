@@ -1,4 +1,8 @@
-import { ipcMain } from 'electron'
+import { ipcMain, shell } from 'electron'
+import * as tmp from 'tmp'
+// import tmp  from 'tmp-promise'
+import fs from 'fs'
+import { clientConfig } from 'src/common/config'
 import { SSHClient } from '../actions/ssh-client.js'
 import { SFTPClient } from '../actions/sftp-client.js'
 import { SCPClient } from '../common/pscp.js'
@@ -7,6 +11,7 @@ import { interference, encryptPwd, dencryptPwd } from '../common/encrypt.js'
 
 import log from 'electron-log'
 
+tmp.setGracefulCleanup ( )
 
 export const ssh_clients = new Map()
 export const sftp_clients = new Map()
@@ -729,11 +734,122 @@ export function registerSFTPIpcHandlers(win) {
   })
 
   ipcMain.handle('readFileSFTP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = data
 
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.readFile(remotePath)
+        .then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 
-  ipcMain.handle('saveFileSFTP', async (event, uuid) => {
+  ipcMain.handle('saveFileSFTP', async (event, data) => {
+    try {
+      const { uuid, remotePath, content } = data
 
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      return await sftpClient.writeFile(remotePath, content)
+        .then((result) => {
+          return { success: true, data: result, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('openFileSFTP', async (event, data) => {
+    try {
+      const { uuid, remotePath } = data
+
+      if (!sftp_clients.has(uuid)) {
+        return { success: false, error: "sftp disconnected" }
+      }
+
+      if (!ssh_clients.has(uuid) || ssh_clients.get(uuid).status === "disconnected") {
+        return { success: false, error: 'ssh disconnected' }
+      }
+
+      const sftpClient = sftp_clients.get(uuid)
+
+      if (sftpClient.status === "disconnected") {
+        return { success: false, error: 'sftp disconnected' }
+      }
+
+      const suffix = remotePath.substring(remotePath.lastIndexOf("."))
+
+      return await sftpClient.readFile(remotePath)
+        .then(async (result) => {
+          try {
+            tmp.file({ postfix: suffix }, async (err, path, fd, cleanupCallback) => {
+              if (err) throw err;
+
+              // console.log('临时文件路径: ', path)
+              // cleanupCallback() // 调用此函数会物理删除该临时文件
+
+              clientConfig.tmpFiles.push(path)
+
+              await fs.writeFileSync(path, result) // 写入临时文件
+
+              shell.openPath(path)
+
+              const watcher = fs.watch(path, async (event) => {
+                console.log("save", event)
+                if (event === 'change' && sftpClient.status !== "disconnected") {
+                  await sftpClient.uploadBack(path, remotePath)
+
+                } else {
+                  watcher.close()   //关闭监听
+                }
+              })
+            })
+          } catch (e) {
+            return { success: false, error: e }
+          }
+
+          return { success: true, error: '' }
+        }, (error) => {
+          return { success: false, error: error }
+        })
+
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
 }
 

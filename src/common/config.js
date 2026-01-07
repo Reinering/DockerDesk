@@ -48,6 +48,8 @@ export const clientConfig = {
       filename: 'store.json'
     }
   },
+
+  tmpFiles: []
 }
 
 

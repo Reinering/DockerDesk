@@ -33,17 +33,36 @@
           :name="item.id"
           class="no-padding"
         >
-          <Xterm
-            :terminal-id="item.id"
-            :data="item.data"
-            :ref="(el) => (xtermRefs[item.id] = el)"
-            :style="xtermStyle"
-          />
+          <q-splitter
+            v-model="splitterModel"
+          >
+            <template v-slot:before>
+              <Xterm
+                :terminal-id="item.id"
+                :data="item.data"
+                :ref="(el) => (xtermRefs[item.id] = el)"
+                :style="xtermStyle"
+              />
+
+            </template>
+
+            <template v-slot:after>
+              <q-scroll-area>
+
+              </q-scroll-area>
+
+            </template>
+
+            <!-- 可选：自定义左侧分隔器（加折叠按钮） -->
+            <template v-slot:separator>
+              <q-separator vertical />
+            </template>
+          </q-splitter>
         </q-tab-panel>
       </q-tab-panels>
     </q-card>
 
-    <CommandBar v-if="isShowCmdBar" :send="submitCmd"  />
+    <CommandBar v-if="isShowCmdBar" :send="submitCmd" />
 
     <q-page-sticky position="bottom-right" :offset="fabPos">
       <q-fab
@@ -89,7 +108,7 @@
     </q-dialog>
 
     <q-dialog v-if="isShowFileSystemDialog" v-model="isShowFileSystemDialog" >
-      <FileSystem  :data="fsData" />
+      <FileSystem :data="fsData" />
     </q-dialog>
 
   </q-page>
@@ -115,11 +134,12 @@ const t = inject("t")
 const background = reactive({
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
-  height: window.innerHeight - 70 + "px"
+  height: window.innerHeight - 70 + "px",
 })
 
 const xtermStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 151 + "px" : window.innerHeight - 70 + "px",
+  paddingLeft: "3px",
 })
 
 const fabPos = ref([ 30, 200 ])
@@ -137,6 +157,8 @@ const moveFab = (ev) => {
 const tab = ref('')
 
 const tabs = reactive([])
+
+const splitterModel = ref(100)
 
 const xtermRefs = reactive({}); // 存储 xterm 实例的 ref
 

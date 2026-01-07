@@ -1,5 +1,4 @@
 <template>
-
   <div ref="xtermRef" :id="'xterm-container-' + terminalId">
     <q-menu
       context-menu

@@ -160,7 +160,7 @@ export class SSHClient {
       this.conn.end()
     }
 
-    this.status = 'Disconnected'
+    this.status = 'disconnected'
   }
 
   async listDir(remotePath){

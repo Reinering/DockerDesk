@@ -748,6 +748,8 @@ export default {
     fullWidth: "全宽",
     rename: "重命名",
     select: "选择",
+    save: "保存",
+    close: "关闭",
 
     enter: "输入",
     modify: "修改",
@@ -782,6 +784,12 @@ export default {
     deleteFileError: "文件删除成功",
     deleteFolderSuccess: "文件夹删除成功",
     deleteFolderError: "文件夹删除失败",
+    saveFileSuccess: "文件保存成功",
+    saveFileError: "文件保存失败",
+    readFileSuccess: "文件读取成功",
+    readFileError: "文件读取失败",
+    openFileSuccess: "文件打开成功",
+    openFileError: "文件打开失败",
 
     deleteMessage: "确认删除吗？",
   },
@@ -819,7 +827,8 @@ export default {
     edit: "编辑",
     confirm: "确认",
 
-
+    appName: "应用名称",
+    port: "网络端口",
 
     storeName: '商店名称',
     storeApi: '商店API',
@@ -839,6 +848,8 @@ export default {
     updateAPiError: "更新API失败",
     saveSuccess: "保存成功",
     saveError: "保存失败",
+
+    portExistError: "端口已存在，请"
   },
 
   other: {

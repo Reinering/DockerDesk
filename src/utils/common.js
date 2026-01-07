@@ -261,3 +261,59 @@ class Refresher {
   }
 }
 
+
+export function htmlToText (html) {
+  const lines = html.split(/\r?\n/);
+  let result = '';
+  let inCodeBlock = false;
+  let codeLines = [];
+
+  lines.forEach(line => {
+    // 简单检测：以 4 个空格或 tab 开头，或用 ``` 包裹（可增强）
+    if (line.startsWith('    ') || line.startsWith('\t') || line.trim() === '```') {
+      if (!inCodeBlock) {
+        // 开始代码块
+        if (codeLines.length > 0) {
+          result += linesToParagraphs(codeLines);
+          codeLines = [];
+        }
+        inCodeBlock = true;
+        codeLines.push(line.replace(/^ {4}/, '')); // 去缩进
+      } else {
+        if (line.trim() === '```') {
+          // 结束代码块
+          const code = codeLines.map(l => l.replace(/&/g,'&amp;').replace(/</g,'&lt;')).join('\n');
+          result += `<pre><code>${code}</code></pre>`;
+          inCodeBlock = false;
+          codeLines = [];
+        } else {
+          codeLines.push(line.replace(/^ {4}/, ''));
+        }
+      }
+    } else {
+      if (inCodeBlock) {
+        // 意外结束
+        inCodeBlock = false;
+      }
+      codeLines.push(line);
+    }
+  });
+
+  if (codeLines.length > 0) {
+    result += inCodeBlock
+      ? `<pre><code>${codeLines.join('\n')}</code></pre>`
+      : linesToParagraphs(codeLines);
+  }
+
+  return result || '<p><br></p>';
+}
+
+export function textToHtml (text) {
+
+}
+
+function linesToParagraphs(lines) {
+  return lines
+    .map(line => `<p>${line || '&nbsp;'}</p>`)
+    .join('');
+}

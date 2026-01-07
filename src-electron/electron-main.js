@@ -5,9 +5,10 @@ import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { registerIpcHandlers } from './ipcManager.js'
 import { initDB } from './database/manager.js'
-import { ssh_clients } from "./ipc/sshIPC.js"
+import { ssh_clients, sftp_clients } from "./ipc/sshIPC.js"
 import { createTray } from "./common/tray.js"
 import { wslAutoLaunch } from "./common/wsl.js"
+import { cleanupTmp } from "./common/utils.js"
 import { initLogging } from './common/logging.js'
 
 
@@ -107,9 +108,29 @@ app.on('window-all-closed', () => {
   }
 
   // 退出前，断开所有ssh连接
-  for (let conn of ssh_clients) {
-    conn.close()
+  for (let uuid of ssh_clients.keys()) {
+    const sshClient =  ssh_clients.get(uuid)
+    try {
+      if (sshClient.status !== 'disconnected') {
+        sshClient.disconnect()
+      }
+    } catch (e) {
+
+    }
   }
+
+  for (let uuid of sftp_clients.keys()) {
+    const sftpClient =  sftp_clients.get(uuid)
+    try {
+      if (sftpClient.status !== 'disconnected') {
+        sftpClient.disconnect()
+      }
+    } catch (e) {
+
+    }
+  }
+
+  cleanupTmp()
 
 })
 

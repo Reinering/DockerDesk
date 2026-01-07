@@ -738,6 +738,8 @@ export default {
     fullWidth: "FullWidth",
     rename: "Rename",
     select: "Select",
+    save: "Save",
+    close: "Close",
 
     enter: "Enter",
     modify: "Modify",
@@ -772,6 +774,12 @@ export default {
     deleteFileError: "File Delete Error",
     deleteFolderSuccess: "Folder Delete Success",
     deleteFolderError: "Folder Delete Error",
+    saveFileSuccess: "File Save Success",
+    saveFileError: "File Save Error",
+    readFileSuccess: "File Read Success",
+    readFileError: "File Read Error",
+    openFileSuccess: "File Open Success",
+    openFileError: "File Open Error",
 
     deleteMessage: "Are you sure to delete?",
   },
@@ -808,6 +816,9 @@ export default {
     delete: "Delete",
     edit: "Edit",
     confirm: "确认",
+
+    appName: "App Name",
+    port: "Network Port",
 
     storeName: 'Store Name',
     storeApi: 'Store API',
