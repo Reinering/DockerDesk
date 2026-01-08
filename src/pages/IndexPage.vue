@@ -28,19 +28,19 @@ const t = inject("t")
 const background = reactive({
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
-  height: window.innerHeight - 70 - 16 + "px"
+  height: window.innerHeight - 34 - 16 + "px"
 })
 
-const SCHeight = ref(window.innerHeight - 70 -16 - 264 + "px")
+const SCHeight = ref(window.innerHeight - 34 -16 - 264 + "px")
 
 const init = () => {
 
 }
 
 const checkScreenHeightSize = () => {
-  background.height = window.innerHeight - 70 -16 + "px"
+  background.height = window.innerHeight - 34 -16 + "px"
 
-  SCHeight.value = window.innerHeight - 70 -16 - 264 + "px"
+  SCHeight.value = window.innerHeight - 34 -16 - 264 + "px"
 }
 
 onMounted(() => {

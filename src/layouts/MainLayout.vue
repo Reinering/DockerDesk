@@ -1,26 +1,13 @@
 <template>
   <q-layout view="hHh lpR lFf" :layout="layout">
 
-    <q-header elevated class="bg-primary text-white" height-hint="98" >
-      <ToolBar />
+    <q-header elevated class="bg-primary text-white q-electron-drag" height-hint="98">
+<!--      <TitleBar />-->
 
-      <q-toolbar style="height: 70px;">
-        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
-
-        <q-avatar>
-          <img
-            alt="logo"
-            :src="faviconPath"
-          />
-        </q-avatar>
-
-        <q-toolbar-title>
-          App for Docker
-        </q-toolbar-title>
-
-        <q-space />
-        <q-item-label>关于</q-item-label>
-      </q-toolbar>
+      <ToolBar
+        :logoSrc="faviconPath"
+        :toggle="toggleLeftDrawer"
+      />
     </q-header>
 
     <q-drawer
@@ -57,6 +44,7 @@
 <script setup>
 import { ref, reactive, inject, toRefs } from 'vue'
 import Navigator from 'components/Navigator.vue'
+import TitleBar from 'components/TitleBar.vue'
 import ToolBar from 'components/ToolBar.vue'
 import { getResourcePath } from 'src/utils/common.js'
 
@@ -102,7 +90,6 @@ const disableNavi = reactive({
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
-
 
 
 </script>

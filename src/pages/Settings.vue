@@ -195,7 +195,7 @@ const $q = inject("$q")
 const t = inject("t")
 
 const scrollAreaStyle = reactive({
-  height: window.innerHeight - 105 + "px"
+  height: window.innerHeight - 53 + "px"
 })
 
 const configStore = useConfigStore()
@@ -277,7 +277,7 @@ const init = () => {
 }
 
 const checkScreenHeightSize = () => {
-  scrollAreaStyle.height = window.innerHeight - 105 + "px"
+  scrollAreaStyle.height = window.innerHeight - 53 + "px"
 }
 
 const onUserModeUpdate = () => {

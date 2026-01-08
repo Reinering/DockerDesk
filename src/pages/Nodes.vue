@@ -279,7 +279,7 @@ const deviceInfo = inject("deviceInfo")
 const navigatorStore = useNavigatorStore()
 
 const tableStyle = reactive({
-  height: window.innerHeight - 210 + "px",
+  height: window.innerHeight - 158 + "px",
 })
 const pagination = ref({
   rowsPerPage: 0
@@ -292,7 +292,7 @@ const showDialog = ref(false)
 const background = reactive({
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
-  height: window.innerHeight - 70 + "px"
+  height: window.innerHeight - 22 + "px"
 })
 
 const services = reactive([
@@ -355,8 +355,8 @@ const isShowPanelBtn = (row) => {
 }
 
 const checkScreenHeightSize = () => {
-  background.height = window.innerHeight - 70 + "px"
-  tableStyle.height = window.innerHeight - 210 + "px"
+  background.height = window.innerHeight - 22 + "px"
+  tableStyle.height = window.innerHeight - 158 + "px"
 }
 
 const cleanService = () => {

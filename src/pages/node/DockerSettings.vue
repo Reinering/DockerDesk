@@ -364,10 +364,10 @@ const service = inject("service")
 console.log("service", service)
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 182 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 130 + "px" : window.innerHeight - 97 + "px",
 })
 const scrollStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 183 - 70 + "px" : window.innerHeight - 149 - 122 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 130 - 70 + "px" : window.innerHeight - 97 - 122 + "px",
 })
 
 const filterFn = (val, update, abort) => {
@@ -605,11 +605,11 @@ const onSave = () => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 182 + "px"
-    scrollStyle.height = window.innerHeight - 183 - 70 + "px"
+    cardStyle.height = window.innerHeight - 130 + "px"
+    scrollStyle.height = window.innerHeight - 131 - 70 + "px"
   } else {
-    cardStyle.height = window.innerHeight - 149 + "px"
-    scrollStyle.height = window.innerHeight - 149 - 122 + "px"
+    cardStyle.height = window.innerHeight - 97 + "px"
+    scrollStyle.height = window.innerHeight - 97 - 122 + "px"
   }
 }
 

@@ -73,10 +73,10 @@ let getContainerListInterval = null
 const search = ref('')
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 150 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 98 + "px" : window.innerHeight - 97 + "px",
 })
 const scrollStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 183 - 55 + "px" : window.innerHeight - 149 - 122 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 186 + "px" : window.innerHeight - 97 - 122 + "px",
 })
 
 const showCreateContainerDialog = ref(false)
@@ -213,11 +213,11 @@ const checkScreenSize = () => {
   // console.log('check screenSize', window.innerHeight)
 
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 150 + "px"
-    scrollStyle.height = window.innerHeight - 183 - 55 + "px"
+    cardStyle.height = window.innerHeight - 98 + "px"
+    scrollStyle.height = window.innerHeight - 186 + "px"
   } else {
-    cardStyle.height = window.innerHeight - 149 + "px"
-    scrollStyle.height = window.innerHeight - 149 - 122 + "px"
+    cardStyle.height = window.innerHeight - 97 + "px"
+    scrollStyle.height = window.innerHeight - 97 - 122 + "px"
   }
 }
 

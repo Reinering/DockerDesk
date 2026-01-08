@@ -276,8 +276,8 @@ const serviceCmd = ref('')
 const cardStyle = reactive({
   height:
     process.env.MODE === 'electron'
-      ? window.innerHeight - 150 + 'px'
-      : window.innerHeight - 149 + 'px',
+      ? window.innerHeight - 98 + 'px'
+      : window.innerHeight - 97 + 'px',
 })
 
 // ['network_id', 'name', 'driver', 'scope', 'subnet', 'gateway', 'ipv6', 'containers']
@@ -606,9 +606,9 @@ const init = () => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 182 + 'px'
+    cardStyle.height = window.innerHeight - 130 + 'px'
   } else {
-    cardStyle.height = window.innerHeight - 149 + 'px'
+    cardStyle.height = window.innerHeight - 97 + 'px'
   }
 }
 

@@ -1051,7 +1051,7 @@ const podmanInfo = inject('podmanInfo')
 const wslInfo = inject('wslInfo')
 
 const scrollStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 150 + "px" : window.innerHeight - 149 - 20 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 98 + "px" : window.innerHeight - 97 - 20 + "px",
 })
 
 const image = ref('nginx:latest')
@@ -1654,9 +1654,9 @@ const init = () => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    scrollStyle.height = window.innerHeight - 150 + "px"
+    scrollStyle.height = window.innerHeight - 98 + "px"
   } else {
-    scrollStyle.height = window.innerHeight - 149 - 20 + "px"
+    scrollStyle.height = window.innerHeight - 97 - 20 + "px"
   }
 }
 

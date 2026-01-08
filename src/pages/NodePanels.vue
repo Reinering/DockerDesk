@@ -81,7 +81,7 @@ const navigatorStore = useNavigatorStore()
 const background = reactive({
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
-  height: window.innerHeight - 70 + "px"
+  height: window.innerHeight - 22 + "px"
 })
 
 const fabPos = ref([ 30, 200 ])

@@ -263,11 +263,11 @@ const showCreatePage = inject("showCreatePage")
 let notify = ref(null)
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 150 - 48 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 98 - 48 + "px" : window.innerHeight - 97 + "px",
 })
 
 const tableStyle = reactive({
-  height: window.innerHeight - 182 - 48 + "px",
+  height: window.innerHeight - 130 - 48 + "px",
 })
 const visibleColumns = ['repository', 'tag', 'imageId', 'created', 'size', 'port', 'actions']
 const columns = [
@@ -1113,11 +1113,11 @@ const init = () => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 182 - 48 + "px"
-    tableStyle.height = window.innerHeight - 182 - 48 + "px"
+    cardStyle.height = window.innerHeight - 130 - 48 + "px"
+    tableStyle.height = window.innerHeight - 130 - 48 + "px"
   } else {
-    cardStyle.height = window.innerHeight - 149 - 48 + "px"
-    tableStyle.height = window.innerHeight - 182 - 48 + "px"
+    cardStyle.height = window.innerHeight - 97 - 48 + "px"
+    tableStyle.height = window.innerHeight - 97 - 48 + "px"
   }
 }
 

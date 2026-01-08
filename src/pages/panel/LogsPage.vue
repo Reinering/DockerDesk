@@ -56,11 +56,11 @@ const route = inject("route")
 const t = inject("t")
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 150 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 98 + "px" : window.innerHeight - 97 + "px",
 })
 
 const xtermStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 151 - 45 + "px" : window.innerHeight - 70 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 99 - 45 + "px" : window.innerHeight - 70 + "px",
 })
 
 const tab = ref('')
@@ -122,10 +122,10 @@ const handleKeyDown = (event) => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 150 + "px"
-    xtermStyle.height = window.innerHeight - 151 - 45 + "px"
+    cardStyle.height = window.innerHeight - 98 + "px"
+    xtermStyle.height = window.innerHeight - 99 - 45 + "px"
   } else {
-    cardStyle.height = window.innerHeight - 149 + "px"
+    cardStyle.height = window.innerHeight - 97 + "px"
     xtermStyle.height = window.innerHeight - 70 + "px"
   }
 }

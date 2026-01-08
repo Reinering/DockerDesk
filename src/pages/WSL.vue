@@ -316,8 +316,8 @@ let notify = ref(null)
 const splitterStyle = reactive({
   height:
     process.env.MODE === 'electron'
-      ? window.innerHeight - 416 + 'px'
-      : window.innerHeight - 384 + 'px',
+      ? window.innerHeight - 364 + 'px'
+      : window.innerHeight - 332 + 'px',
 })
 
 const splitterModel = ref(5)
@@ -325,8 +325,8 @@ const splitterModel = ref(5)
 const cardStyle = reactive({
   height:
     process.env.MODE === 'electron'
-      ? window.innerHeight - 516 + 'px'
-      : window.innerHeight - 484 + 'px',
+      ? window.innerHeight - 464 + 'px'
+      : window.innerHeight - 432 + 'px',
 })
 
 const splitterModel1 = ref(50)
@@ -728,12 +728,12 @@ const init = () => {
 const checkScreenHeightSize = () => {
   splitterStyle.height =
     process.env.MODE === 'electron'
-      ? window.innerHeight - 416 + 'px'
-      : window.innerHeight - 384 + 'px'
+      ? window.innerHeight - 364 + 'px'
+      : window.innerHeight - 332 + 'px'
   cardStyle.height =
     process.env.MODE === 'electron'
-      ? window.innerHeight - 516 + 'px'
-      : window.innerHeight - 484 + 'px'
+      ? window.innerHeight - 464 + 'px'
+      : window.innerHeight - 432 + 'px'
 }
 
 onMounted(() => {

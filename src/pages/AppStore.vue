@@ -102,6 +102,8 @@
     v-model="showInstallDialog"
     transition-show="scale"
     transition-hide="scale"
+    :item="currentItem"
+    :mode="installMode"
     :onClose="() => showInstallDialog = false"
   />
 
@@ -110,6 +112,9 @@
     v-model="showCustomInstallDialog"
     transition-show="scale"
     transition-hide="scale"
+    :item="currentItem"
+    :mode="installMode"
+    :node="installNode"
     :onClose="() => showCustomInstallDialog = false"
   />
 
@@ -132,7 +137,7 @@
         v-if="configStore.userMode === 'professional'"
       >
         <div class="bg-grey-2 row">
-          <q-item-section class="text-body2 bg-white">{{ t('store.selectNode') }}</q-item-section>
+          <q-item-section class="text-center">{{ t('store.selectNode') }}</q-item-section>
           <q-select
             v-model="installNode"
             class="bg-grey-3"
@@ -146,17 +151,6 @@
             transition-hide="flip-down"
             style="min-width: 50%"
           />
-
-<!--          <q-item-section-->
-<!--            v-if="composition.ports.portMode.indexOf('manual') > -1 || composition.ports.portMode.indexOf('expose') > -1"-->
-<!--            side-->
-<!--          >-->
-<!--            <q-btn icon="add_circle_outline" size="xs" padding="xs" color="blue" @click.stop="onAddNewPort">-->
-<!--              <q-tooltip class="bg-amber text-black shadow-4">-->
-<!--                {{ t('panel.create.new') }}-->
-<!--              </q-tooltip>-->
-<!--            </q-btn>-->
-<!--          </q-item-section>-->
         </div>
       </q-card-section>
 
@@ -190,7 +184,6 @@ import ContainerAppDialog from 'components/dialog/ContainerAppDialog.vue'
 import AppInstallDialog from 'components/dialog/AppInstallDialog.vue'
 import AppCustomInstallDialog from 'components/dialog/AppCustomInstallDialog.vue'
 import { clientConfig } from 'src/common/config.js'
-import { parseWSLListVersion } from 'src/utils/wsl.js'
 import { isEmptyObj } from 'src/utils/common.js'
 import { useConfigStore } from 'stores/config.js'
 
@@ -203,8 +196,6 @@ const t = inject("t")
 const configStore = useConfigStore()
 
 const nodes = reactive([])
-
-const WSLList = reactive([])
 
 const categories = reactive([
   '',
@@ -229,11 +220,11 @@ const showInstallDialog = ref(false)
 const showCustomInstallDialog = ref(false)
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 102 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 50 + "px" : window.innerHeight - 97 + "px",
 })
 
 const scrollStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 174 + "px" : window.innerHeight - 149 - 58 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 122 + "px" : window.innerHeight - 97 - 58 + "px",
 })
 
 const dockerStoreApis = reactive([])
@@ -254,7 +245,6 @@ const onConfirmOK = () => {
   }
 
   showOptionDialog.value = false
-  // showAppDialog.value = true
 
   if (installMode.value === 'default') {
     showInstallDialog.value = true
@@ -271,7 +261,8 @@ const onAppClick = (item) => {
   console.log("onAppClick")
 
   currentItem.value = item
-
+  installNode.value = ''
+  installMode.value = 'default'
   showOptionDialog.value = true
 }
 
@@ -282,6 +273,7 @@ const onUpdate = () => {
 }
 
 const onRefresh = async () => {
+
   const resTmp = []
   for (const item of dockerStoreApis) {
     if (!item.enable) {
@@ -289,7 +281,7 @@ const onRefresh = async () => {
     }
 
     const result = await getApiData(item["url"])
-    if (result) {
+    if (Object.prototype.hasOwnProperty.call(result, "apps")) {
       resTmp.push(result)
     }
   }
@@ -297,6 +289,7 @@ const onRefresh = async () => {
   if (resTmp.length > 0) {
     storeDatas.splice(0, storeDatas.length)
     storeDatas.push(...resTmp)
+
     await window.client.writeStoreData(JSON.stringify(storeDatas)).then((result) => {
       if (!result.success) {
         $q.notify({
@@ -308,9 +301,9 @@ const onRefresh = async () => {
     })
   }
 
-  if (storeDatas.length === 0) {
-    return
-  }
+  // if (storeDatas.length === 0) {
+  //   return
+  // }
 }
 
 const getApiData = async (url) => {
@@ -341,8 +334,6 @@ const getNodes = () => {
             nodes.push({label: node.serviceName, value: node.id})
           }
         }
-
-        console.log(nodes)
       }
     } else {
       if (result.success === false) {
@@ -359,11 +350,11 @@ const getNodes = () => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 102 + "px"
-    scrollStyle.height = window.innerHeight - 174 + "px"
+    cardStyle.height = window.innerHeight - 50 + "px"
+    scrollStyle.height = window.innerHeight - 122 + "px"
   } else {
-    cardStyle.height = window.innerHeight - 149 + "px"
-    scrollStyle.height = window.innerHeight - 149 - 58 + "px"
+    cardStyle.height = window.innerHeight - 97 + "px"
+    scrollStyle.height = window.innerHeight - 97 - 58 + "px"
   }
 }
 

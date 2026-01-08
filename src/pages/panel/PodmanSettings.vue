@@ -515,7 +515,7 @@ const service = inject("service")
 console.log("service", service)
 
 const scrollStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 166 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 114 + "px" : window.innerHeight - 97 + "px",
 })
 
 const showSRDialog = ref(false)
@@ -752,9 +752,9 @@ const checkScreenSize = () => {
   console.log('check screenSize', window.innerHeight)
 
   if (process.env.MODE === 'electron') {
-    scrollStyle.height = window.innerHeight - 166 + "px"
+    scrollStyle.height = window.innerHeight - 114 + "px"
   } else {
-    scrollStyle.height = window.innerHeight - 149 + "px"
+    scrollStyle.height = window.innerHeight - 97 + "px"
   }
 }
 

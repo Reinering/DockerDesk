@@ -112,11 +112,11 @@ const serviceCmd = ref('')
 let notify = ref(null)
 
 const cardStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 150 + "px" : window.innerHeight - 149 + "px",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 98 + "px" : window.innerHeight - 97 + "px",
 })
 
 const tableStyle = reactive({
-  height: window.innerHeight - 182 + "px",
+  height: window.innerHeight - 130 + "px",
 })
 const visibleColumns = ['volumeName', 'driver', 'actions']
 const columns = [
@@ -284,11 +284,11 @@ const init = () => {
 
 const checkScreenSize = () => {
   if (process.env.MODE === 'electron') {
-    cardStyle.height = window.innerHeight - 182 + "px"
-    tableStyle.height = window.innerHeight - 182 + "px"
+    cardStyle.height = window.innerHeight - 130 + "px"
+    tableStyle.height = window.innerHeight - 130 + "px"
   } else {
-    cardStyle.height = window.innerHeight - 149 + "px"
-    tableStyle.height = window.innerHeight - 182 + "px"
+    cardStyle.height = window.innerHeight - 97 + "px"
+    tableStyle.height = window.innerHeight - 130 + "px"
   }
 }
 
