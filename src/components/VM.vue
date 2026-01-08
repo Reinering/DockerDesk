@@ -365,8 +365,8 @@ const onBackgroundStart = async () => {
 }
 const onDelete = () => {
   $q.dialog({
-    title: t('confirm'),
-    message: t('wsl.deleteMessage'),
+    title: t('wsl.confirmDel'),
+    message: t('wsl.deleteMessage1'),
     ok: {
       push: true
     },
@@ -434,36 +434,23 @@ const onExport = async () => {
     return
   }
 
-  window.wslTerminal.exportWSL({
-    name: props.data.servername,
-    distDir: folders[0]
-  }).then((result) => {
-    if (result.success) {
-      notify.value({
-        type: 'positive',
-        icon: 'done',
-        spinner: false,
-        message: `${t('wsl.exportSuccess')}: ${props.data.servername}`,
-        timeout: 3000
-      })
-    } else {
-      notify.value({
-        type: 'negative',
-        icon: 'done',
-        spinner: false,
-        message: `${t('wsl.exportFail')}: ${props.data.servername}: ${result.error}`,
-        timeout: 3000
-      })
-    }
-  })
-
-  notify.value = $q.notify({
-    type: 'info',
-    group: false,
-    timeout: 0,
-    spinner: true,
-    position: 'bottom-right',
-    message: t('wsl.exporting'),
+  $q.dialog({
+    title: t('wsl.option'),
+    message: t('wsl.selectFormat'),
+    options: {
+      type: 'radio',
+      model: "tar",
+      // inline: true
+      items: [
+        { label: 'TAR', value: 'tar' },
+        { label: 'VHD', value: 'vhd' },
+      ]
+    },
+    cancel: true,
+    persistent: true
+  }).onOk(data => {
+    // console.log('>>>> OK, received', data)
+    exportWSL(data, folders[0])
   })
 }
 const onMove = async () => {
@@ -506,6 +493,41 @@ const onMove = async () => {
     spinner: true,
     position: 'bottom-right',
     message: t('wsl.moving'),
+  })
+}
+
+const exportWSL = (format, path) => {
+  window.wslTerminal.exportWSL({
+    name: props.data.servername,
+    format: format,
+    distDir: path
+  }).then((result) => {
+    if (result.success) {
+      notify.value({
+        type: 'positive',
+        icon: 'done',
+        spinner: false,
+        message: `${t('wsl.exportSuccess')}: ${props.data.servername}`,
+        timeout: 3000
+      })
+    } else {
+      notify.value({
+        type: 'negative',
+        icon: 'done',
+        spinner: false,
+        message: `${t('wsl.exportFail')}: ${props.data.servername}: ${result.error}`,
+        timeout: 3000
+      })
+    }
+  })
+
+  notify.value = $q.notify({
+    type: 'info',
+    group: false,
+    timeout: 0,
+    spinner: true,
+    position: 'bottom-right',
+    message: t('wsl.exporting'),
   })
 }
 

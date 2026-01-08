@@ -178,9 +178,14 @@ export async function unregisterSubSystem (name) {
   return cmd(`wsl --unregister ${name}`, 'utf16le')
 }
 
-export async function exportSubSystem (name, distDir) {
-  const filename = path.join(distDir, `${name}.tar`)
-  return cmd(`wsl --export ${name} "${filename}"`, 'utf16le')
+export async function exportSubSystem (name, format, distDir) {
+  if (format === "tar") {
+    const filename = path.join(distDir, `${name}.tar`)
+    return cmd(`wsl --export ${name} "${filename}"`, 'utf8')
+  } else if (format === "vhd") {
+    const filename = path.join(distDir, `${name}.vhdx`)
+    return cmd(`wsl --export ${name} "${filename}" --vhd`, 'utf8')
+  }
 }
 
 export async function moveSubSystem (name, distDir) {

@@ -531,6 +531,7 @@ export default {
     terminal: "终端",
     export: "导出",
     move: "迁移",
+    option: "选项",
 
     wslCreate: "WSL 创建",
     create: "创建",
@@ -550,6 +551,7 @@ export default {
     shutdownAll: "强制关闭所有linux 子系统",
     restartService: "重启WSL服务",
 
+    confirmDel: "确认删除",
     updating: "正在升级...",
     upgradeSuccess: "升级成功",
     upgradeFail: "升级失败",
@@ -560,6 +562,7 @@ export default {
     restartSuccess: "重启成功",
     restartFail: "重启失败",
     deleteMessage: "确认删除吗？",
+    deleteMessage1: "确认删除之前，请确保重要数据已经保存。",
     deleteSuccess: "删除成功",
     deleteFail: "删除失败",
     exporting: "正在导出",
@@ -572,6 +575,7 @@ export default {
     configModifyFail: "配置修改失败",
     actionSuccess: "操作成功",
     actionFail: "操作失败",
+    selectFormat: "请选择导出格式",
 
     nameNotNull: "名称不能为空或超过长度",
     distributionNotNull: "WSL发行版不能为空",
@@ -834,6 +838,9 @@ export default {
     storeApi: '商店API',
 
     addStoreApi: "添加商店API",
+
+    installSettings: "安装设置",
+    defaultVolumeDir: "默认安装目录",
 
     confirmInstall: "确认安装？",
     install: "安装",

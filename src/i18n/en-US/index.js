@@ -532,6 +532,7 @@ export default {
     terminal: "Terminal",
     export: "Export",
     move: "Move",
+    option: "Option",
 
     wslCreate: "WSL Create",
     create: "Create",
@@ -550,6 +551,7 @@ export default {
     shutdownAll: "Force shut down all Linux subsystems",
     restartService: "Restart WSL service",
 
+    confirmDel: "Confirm Delete",
     updating: "Upgrading...",
     upgradeSuccess: "Upgrade Successfully",
     upgradeFail: "Upgrade Failure",
@@ -560,6 +562,7 @@ export default {
     restartSuccess: "Restart Successfully",
     restartFail: "Restart Failure",
     deleteMessage: "Are you sure to delete?",
+    deleteMessage1: "Before confirming the deletion, please ensure that all important data has been saved.",
     deleteSuccess: "Delete Successfully",
     deleteFail: "Delete Failure",
     exporting: "Exporting",
@@ -572,6 +575,7 @@ export default {
     configModifyFail: "Configuration modification Failure",
     actionSuccess: "Operation Successfully",
     actionFail: "Operation Failure",
+    selectFormat: "Please select the export format",
 
     nameNotNull: "The name cannot be empty or exceed the length",
     distributionNotNull: "WSL distribution version cannot be empty",
@@ -824,6 +828,9 @@ export default {
     storeApi: 'Store API',
 
     addStoreApi: "Add Store API",
+
+    installSettings: "Installation Settings",
+    defaultVolumeDir: "Default Volume Dir",
 
     confirmInstall: "Confirm Install？",
     install: "Install",

@@ -277,13 +277,13 @@ export function registerWSLIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('exportWSL', async (event, {name, distDir}) => {
+  ipcMain.handle('exportWSL', async (event, {name, format, distDir}) => {
     if (isProcessing) {
       return { success: false, error: "Other WSL commands are being executed... Please try again later" }
     } else {
       isProcessing = true
 
-      return exportSubSystem(name, distDir).then((data) => {
+      return exportSubSystem(name, format, distDir).then((data) => {
         isProcessing = false
         return { success: true, data: data, error: '' }
       }, (error) => {

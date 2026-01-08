@@ -41,7 +41,6 @@ export function registerNodesIpcHandlers(win) {
 
   ipcMain.handle('getNode', async (event, id) => {
     return nodes.getNodeByID(id).then((result) => {
-      console.log("checkNode", result)
       if (result instanceof Array && result.length > 0 ) {
         const data = {
           id: result[0].id,
