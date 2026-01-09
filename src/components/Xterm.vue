@@ -71,6 +71,10 @@ const lastEnterTime = ref(0)
 const DOUBLE_ENTER_THRESHOLD = ref(500)
 const isDoubleEnter = ref(false)
 
+const xtermStyle = reactive({
+  height: process.env.MODE === 'electron' ? window.innerHeight - 98 + "px" : window.innerHeight - 70 + "px"
+})
+
 const xtermRef = ref(null)
 let term = null
 let fitAddon = null
@@ -521,23 +525,19 @@ const sendSSHTerminal = (data) => {
 
 // 行列匹配
 const handleResize = () => {
-  // console.log('resize', term.rows, term.cols)
+  console.log('resize', term.rows, term.cols)
   if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
     window.sshTerminal.resize(JSON.stringify({
       uuid: props.terminalId,
       rows: term.rows,
       cols: term.cols,
-    })).then((result) => {
-
-    })
+    }))
   } else {
     window.terminal.resize(JSON.stringify({
       uuid: props.terminalId,
       rows: term.rows,
       cols: term.cols,
-    })).then((result) => {
-
-    })
+    }))
   }
 
 }
@@ -658,9 +658,5 @@ onDeactivated(() => {
 </script>
 
 <style scoped>
-.xterm-container {
-  width: 100%;
-  height: 100%;
-  min-height: 300px;
-}
+
 </style>

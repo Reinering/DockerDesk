@@ -3,7 +3,7 @@
 <!--    -->
 <!--  </q-layout>-->
   <q-page q-pa-md>
-    <q-card>
+    <q-card :style="cardStyle">
       <q-tabs
         inline-label
         switch-indicator
@@ -25,39 +25,42 @@
 
       <q-separator />
 
-      <q-tab-panels v-model="tab" animated style="height: 100%" keep-alive>
+      <q-tab-panels v-model="tab" animated keep-alive :style="xtermStyle">
 <!--        class="grey-9 text-white"-->
         <q-tab-panel
           v-for="item in tabs"
           :key="item.id"
           :name="item.id"
           class="no-padding"
+          style="width: 100%; height: 100%"
         >
-          <q-splitter
-            v-model="splitterModel"
-          >
-            <template v-slot:before>
-              <Xterm
-                :terminal-id="item.id"
-                :data="item.data"
-                :ref="(el) => (xtermRefs[item.id] = el)"
-                :style="xtermStyle"
-              />
+          <Xterm
+            :terminal-id="item.id"
+            :data="item.data"
+            :ref="(el) => (xtermRefs[item.id] = el)"
+            :style="xtermStyle"
+          />
 
-            </template>
+<!--          <q-splitter-->
+<!--            v-model="splitterModel"-->
+<!--          >-->
+<!--            <template v-slot:before>-->
+<!--              -->
 
-            <template v-slot:after>
-              <q-scroll-area>
+<!--            </template>-->
 
-              </q-scroll-area>
+<!--            <template v-slot:after>-->
+<!--              <q-scroll-area>-->
 
-            </template>
+<!--              </q-scroll-area>-->
 
-            <!-- 可选：自定义左侧分隔器（加折叠按钮） -->
-            <template v-slot:separator>
-              <q-separator vertical />
-            </template>
-          </q-splitter>
+<!--            </template>-->
+
+<!--            &lt;!&ndash; 可选：自定义左侧分隔器（加折叠按钮） &ndash;&gt;-->
+<!--            <template v-slot:separator>-->
+<!--              <q-separator vertical />-->
+<!--            </template>-->
+<!--          </q-splitter>-->
         </q-tab-panel>
       </q-tab-panels>
     </q-card>
@@ -138,8 +141,13 @@ const background = reactive({
 })
 
 const xtermStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 151 + "px" : window.innerHeight - 70 + "px",
+  width: "100%",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 97 + "px" : window.innerHeight - 70 + "px",
   paddingLeft: "3px",
+})
+
+const cardStyle = reactive({
+  height: process.env.MODE === 'electron' ? window.innerHeight - 50 + "px" : window.innerHeight - 70 + "px",
 })
 
 const fabPos = ref([ 30, 200 ])
@@ -173,14 +181,18 @@ const showCmdBar = () => {
   isShowCmdBar.value = ! isShowCmdBar.value
   if (isShowCmdBar.value) {
     if (process.env.MODE === 'electron') {
-      xtermStyle.height = window.innerHeight - 230 - 66 - 5 + "px"
+      cardStyle.height = window.innerHeight - 50 - 155 + "px"
+      xtermStyle.height = window.innerHeight - 97 - 155 + "px"
     } else {
-      xtermStyle.height = window.innerHeight - 222 - 42 - 5 + "px"
+      cardStyle.height = window.innerHeight - 70 - 155 + "px"
+      xtermStyle.height = window.innerHeight - 70 - 155 + "px"
     }
   } else {
     if (process.env.MODE === 'electron') {
-      xtermStyle.height = window.innerHeight - 151 + "px"
+      cardStyle.height = window.innerHeight - 50 + "px"
+      xtermStyle.height = window.innerHeight - 97 + "px"
     } else {
+      cardStyle.height = window.innerHeight - 70 + "px"
       xtermStyle.height = window.innerHeight - 70 + "px"
     }
   }
@@ -229,18 +241,22 @@ const submitCmd = (cmd) => {
 }
 
 const checkScreenSize = () => {
-  // console.log('check screenHeightSize', window.innerHeight)
+  console.log('check screenHeightSize', window.innerHeight)
 
   if (isShowCmdBar.value) {
     if (process.env.MODE === 'electron') {
-      xtermStyle.height = window.innerHeight - 230 - 66 - 5 + "px"
+      cardStyle.height = window.innerHeight - 50 - 155 + "px"
+      xtermStyle.height = window.innerHeight - 97 - 155 + "px"
     } else {
-      xtermStyle.height = window.innerHeight - 222 - 42 - 5 + "px"
+      cardStyle.height = window.innerHeight - 70 - 155 + "px"
+      xtermStyle.height = window.innerHeight - 70 - 155 + "px"
     }
   } else {
     if (process.env.MODE === 'electron') {
-      xtermStyle.height = window.innerHeight - 151 + "px"
+      cardStyle.height = window.innerHeight - 50 + "px"
+      xtermStyle.height = window.innerHeight - 97 + "px"
     } else {
+      cardStyle.height = window.innerHeight - 70 + "px"
       xtermStyle.height = window.innerHeight - 70 + "px"
     }
   }
@@ -344,13 +360,5 @@ watch(tab, (newVal, oldVal) => {
 </script>
 
 <style scoped>
-.tab-panels {
-  flex: 1;
-  height: 100%;
-}
 
-.q-tab-panel {
-  flex: 1;
-  overflow: hidden;
-}
 </style>
