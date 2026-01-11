@@ -5,7 +5,7 @@ import {
   wslInstallSubSystem, installWSL, startSubSystem, stopSubSystem, restartSubSystem,
   unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList, dockerLogin, startBGSubSystem,
   readPodmanConf, checkSubSystem,
-  setWSLAutoLaunch, getWSLAutoLaunch
+  getWSLSettings, setWSLSettings
 } from 'app/src-electron/actions/wsl.js'
 
 
@@ -379,18 +379,19 @@ export function registerWSLIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('getWSLAutoLaunch', async (event) => {
+  ipcMain.handle('getWSLSettings', async (event, data) => {
     try {
-      return getWSLAutoLaunch()
+      return getWSLSettings(data)
     } catch (error) {
       return { success: false, error: error }
     }
   })
 
-  ipcMain.handle('setWSLAutoLaunch', async (event, data) => {
-    const { wslName,  checked } = JSON.parse(data)
-    return setWSLAutoLaunch(wslName, checked)
-
+  ipcMain.handle('setWSLSettings', async (event, data) => {
+    try {
+      return setWSLSettings(data)
+    } catch (error) {
+      return { success: false, error: error }
+    }
   })
-
 }

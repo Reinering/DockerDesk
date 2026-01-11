@@ -117,6 +117,10 @@ export default {
     bgStart: "后台运行",
     autoLaunch: "开机启动",
     launchWithApp: "随APP启动",
+    startupBehavior: "启动行为",
+    startWithApp: "随APP启动",
+    stopWithApp: "随APP关闭",
+    wslSettings: "WSL 设置",
 
     wslVersionHint: "版本: WSL1, 建议: WSL2",
     wslVersionHint1: "建议: WSL2",
@@ -139,6 +143,9 @@ export default {
     restarting: "正在重启...",
     restartSuccess: "重启成功",
     restartFail: "重启失败",
+    getSettingError: "获取设置失败",
+    setSuccess: "设置成功",
+    setFail: "设置成功",
   },
 
   asslocal: {
@@ -532,6 +539,14 @@ export default {
     export: "导出",
     move: "迁移",
     option: "选项",
+    settings: "设置",
+
+    wslSettings: "WSL 设置",
+    startupBehavior: "启动行为",
+    startWithApp: "跟随APP开启",
+    stopWithApp: "跟随APP关闭",
+
+    // wsl
 
     wslCreate: "WSL 创建",
     create: "创建",
@@ -576,6 +591,9 @@ export default {
     actionSuccess: "操作成功",
     actionFail: "操作失败",
     selectFormat: "请选择导出格式",
+    getSettingError: "获取设置失败",
+    setSuccess: "设置成功",
+    setFail: "设置成功",
 
     nameNotNull: "名称不能为空或超过长度",
     distributionNotNull: "WSL发行版不能为空",

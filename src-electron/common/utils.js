@@ -156,7 +156,7 @@ export function cmd1(command, encoding='cp936', isAdmin=false) {
         return reject(isWindows ? error.message.toString(encoding) : error.message.toString('utf8'))
       }
       if (stderr) {
-        devConsole(`stderr ${stdout.toString(encoding)}`)
+        devConsole(`stderr ${stderr.toString(encoding)}`)
         return reject(isWindows ? stderr.toString(encoding) : stderr.toString('utf8'))
       }
 

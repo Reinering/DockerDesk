@@ -12,14 +12,8 @@
 
     <q-separator />
 
-    <q-card-section class="q-gutter-y-xs">
-      <div class="row items-center justify-between">
-        <div class="text-caption">wsl2</div>
-        <q-space />
-        <q-toggle size="xs" color="green" v-model="isAutoLaunch" @update:model-value="changeAutoLaunch">
-          <q-tooltip>{{ t('assistant.launchWithApp') }}</q-tooltip>
-        </q-toggle>
-      </div>
+    <q-card-section class="q-gutter-y-sm">
+      <div class="text-caption">wsl2</div>
 
       <div class="row flex flex-center">
         <q-knob
@@ -120,6 +114,21 @@
 
             <q-list dense :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
               <q-item
+                :disable="isSettings"
+                clickable
+                v-close-popup
+                size="sm"
+                @click="onSettings"
+              >
+                <q-item-section>
+                  <q-icon name="settings" color="teal-9" />
+                  <q-tooltip class="bg-amber text-black shadow-4">
+                    {{t('wsl.settings')}}
+                  </q-tooltip>
+                </q-item-section>
+              </q-item>
+
+              <q-item
                 :disable="isBGStart"
                 :clickable="isBGStartClick"
                 v-close-popup
@@ -176,6 +185,60 @@
       </q-card-actions>
     </q-card-section>
   </q-card>
+
+  <q-dialog
+    v-if="showSettingsDialog"
+    v-model="showSettingsDialog"
+  >
+    <q-card style="min-width: 60%" class="q-pa-md">
+      <q-card-section>
+        <div class="text-h6">{{t('wsl.wslSettings')}}</div>
+      </q-card-section>
+
+      <q-expansion-item
+        expand-separator
+        flat bordered
+        :label="t('wsl.startupBehavior')"
+        header-class="text-grey-6"
+        style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
+      >
+        <div class="q-pa-md q-gutter-sm">
+          <q-item class="bg-grey-4">
+            <q-item-section>
+              <q-item-label caption>Start With App</q-item-label>
+              <q-item-label >{{t('wsl.startWithApp')}}</q-item-label>
+            </q-item-section>
+            <q-item-section top side>
+              <q-toggle
+                v-model="settingsDatas.startWithApp"
+                color="green"
+                @update:model-value="onStartWithApp"
+              />
+            </q-item-section>
+          </q-item>
+
+          <q-item class="bg-grey-4">
+            <q-item-section>
+              <q-item-label caption>Stop With App</q-item-label>
+              <q-item-label >{{t('wsl.stopWithApp')}}</q-item-label>
+            </q-item-section>
+            <q-item-section top side>
+              <q-toggle
+                v-model="settingsDatas.stopWithApp"
+                color="green"
+                @update:model-value="onStopWithApp"
+              />
+            </q-item-section>
+          </q-item>
+        </div>
+      </q-expansion-item>
+
+      <q-card-actions align="right">
+        <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="showSettingsDialog = false" />
+        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onAddStoreApi" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 
@@ -246,6 +309,7 @@ const wslStatus = reactive({
 
 const isAutoLaunch = ref(props.data.isAutoLaunch)
 
+const isSettings = ref(false)
 const isStart = ref(false)
 const isStop = ref(false)
 const isRestart = ref(false)
@@ -282,6 +346,12 @@ const changeState = (newVal) => {
     isBGStartClick.value = "clickable"
   }
 }
+
+const showSettingsDialog = ref(false)
+const settingsDatas = reactive({
+  startWithApp: false,
+  stopWithApp: false
+})
 
 changeState(props.data.state)
 
@@ -346,6 +416,75 @@ const onRestart = () => {
 
   emit('update:value', {name: props.data.servername, state: "Stopped"})
 }
+
+const onSettings = () => {
+  window.wslTerminal.getWSLSettings(props.data.servername).then((result) => {
+    if (result.success) {
+      if (Object.prototype.hasOwnProperty.call(result.data, "startWithApp")) {
+        settingsDatas.startWithApp = result.data.startWithApp
+      }
+
+      if (Object.prototype.hasOwnProperty.call(result.data, "stopWithApp")) {
+        settingsDatas.stopWithApp = result.data.stopWithApp
+      }
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.getSettingError')}: ${result.error}`
+      })
+    }
+  })
+
+  showSettingsDialog.value = true
+}
+
+const onStartWithApp = () => {
+  window.wslTerminal.setWSLSettings(JSON.stringify({
+      wslName: props.data.servername,
+      startWithApp: settingsDatas.startWithApp
+    })
+  ).then((result) => {
+    console.log(result)
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('wsl.setSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.setFail')}`
+      })
+    }
+  })
+}
+
+const onStopWithApp = () => {
+  window.wslTerminal.setWSLSettings(JSON.stringify({
+      wslName: props.data.servername,
+      stopWithApp: settingsDatas.stopWithApp
+    })
+  ).then((result) => {
+    console.log(result)
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('wsl.setSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.setFail')}`
+      })
+    }
+  })
+}
+
 const onBackgroundStart = async () => {
   window.wslTerminal.startBGWSL({
     name: props.data.servername
@@ -531,24 +670,6 @@ const exportWSL = (format, path) => {
   })
 }
 
-const changeAutoLaunch = () => {
-  window.wslTerminal.setWSLAutoLaunch(JSON.stringify({
-      wslName: props.data.servername,
-      checked: isAutoLaunch.value
-    })
-  ).then((result) => {
-    if (result.success) {
-      emit('update:value', {name: props.data.servername, isAutoLaunch: isAutoLaunch.value })
-    } else {
-      isAutoLaunch.value = !isAutoLaunch.value
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('assistant.saveFail')}`
-      })
-    }
-  })
-}
 
 const init = () => {
   if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32" && props.data.servername) {
@@ -561,14 +682,9 @@ onMounted(() => {
   init()
 })
 
-
 watch(() => props.data.state, (newVal) => {
   changeState(newVal)
 })
-
-
-
-
 
 </script>
 

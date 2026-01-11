@@ -163,10 +163,17 @@ async function initDB() {
           delete_flags: 0
         },
         {
-          field: "wsl_autoLaunch",
+          field: "wsl_settings",
           type: "json",
-          value: '[]',
-          mark: "wsl auto launch",
+          value: '{}',
+          mark: "wsl settings",
+          delete_flags: 0
+        },
+        {
+          field: "app_install_settings",
+          type: "json",
+          value: '{}',
+          mark: "app install settings",
           delete_flags: 0
         },
       ])

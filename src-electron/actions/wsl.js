@@ -267,9 +267,29 @@ export async function readPodmanConf(commands) {
   return parse(configContent)
 }
 
-export function setWSLAutoLaunch (wslName, enable=true) {
+export function getWSLSettings (wslName=null) {
+  return db('settings')
+    .where('field', '=', 'wsl_settings')
+    .select('*').then(
+      rows => {
+        const data = JSON.parse(rows[0]["value"])
+        if (wslName === null) {
+          return { success: true, data }
+        }
+
+        if (Object.prototype.hasOwnProperty.call(data, wslName)) {
+          return { success: true, data: data[wslName] }
+        } else {
+          return { success: true, data: {} }
+        }
+      }).catch(error => {
+      return { success: false, error: error }
+    })
+}
+
+export function setWSLSettings (data) {
   const result = db('settings')
-    .where('field', '=', 'wsl_autoLaunch')
+    .where('field', '=', 'wsl_settings')
     .select('*').then(
       rows => {
         return rows[0]["value"]
@@ -278,53 +298,32 @@ export function setWSLAutoLaunch (wslName, enable=true) {
     })
 
   return result.then((res) => {
-    const data = JSON.parse(res)
+    const wslSettings = JSON.parse(res)
 
-    if (data.includes(wslName)) {
-      if (enable){
-        return { success: true, data: '' }
-      } else {
-        const tmp = JSON.stringify(data.filter(item => item !== wslName))
-
-        return db('settings')
-          .where('field', '=', "wsl_autoLaunch")
-          .update({
-            value: tmp
-          }).then(
-            rows => {
-              return { success: true, data: rows }
-            }).catch(error => {
-            return { success: false, error: error }
-          })
+    const _data = JSON.parse(data)
+    if (Object.prototype.hasOwnProperty.call(_data, "wslName")) {
+      if (!Object.prototype.hasOwnProperty.call(wslSettings, _data.wslName)) {
+        wslSettings[_data.wslName] = {}
       }
-    } else {
-      if (enable) {
-        data.push(wslName)
 
-        return db('settings')
-          .where('field', '=', "wsl_autoLaunch")
-          .update({
-            value: JSON.stringify(data)
-          }).then(
-            rows => {
-              return { success: true, data: rows }
-            }).catch(error => {
-            return { success: false, error: error }
-          })
-      } else {
-        return { success: true, data: '' }
+      for (let key of Object.keys(_data)) {
+        if (key === "wslName") {
+          continue
+        }
+
+        wslSettings[_data.wslName][key] = _data[key]
       }
+
+      return db('settings')
+        .where('field', '=', "wsl_settings")
+        .update({
+          value: JSON.stringify(wslSettings)
+        }).then(
+          rows => {
+            return { success: true, data: rows }
+          }).catch(error => {
+          return { success: false, error: error }
+        })
     }
   })
-}
-
-export function getWSLAutoLaunch () {
-  return db('settings')
-    .where('field', '=', 'wsl_autoLaunch')
-    .select('*').then(
-      rows => {
-        return { success: true, data: rows[0]["value"] }
-      }).catch(error => {
-      return { success: false, error: error }
-    })
 }

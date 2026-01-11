@@ -122,6 +122,10 @@ export default {
     bgStart: "Background Start",
     autoLaunch: "Auto Launch",
     launchWithApp: "Launch with App",
+    startupBehavior: "Startup Behavior",
+    startWithApp: "Start with App",
+    stopWithApp: "Stop with App",
+    wslSettings: "WSL Settings",
 
     wslVersionHint: "Version: WSL1, Suggestions: WSL2",
     wslVersionHint1: "Suggestions: WSL2",
@@ -145,6 +149,9 @@ export default {
     restarting: "Restart...",
     restartSuccess: "Restart Successfully",
     restartFail: "Restart Failure",
+    getSettingError: "Get Settings Failure",
+    setSuccess: "Set Successfully",
+    setFail: "Set Failure",
   },
 
   asslocal: {
@@ -533,6 +540,13 @@ export default {
     export: "Export",
     move: "Move",
     option: "Option",
+    settings: "Settings",
+
+    wslSettings: "WSL Settings",
+    startupBehavior: "Startup Behavior",
+    startWithApp: "Start With App",
+    stopWithApp: "Stop With App",
+
 
     wslCreate: "WSL Create",
     create: "Create",
@@ -576,6 +590,9 @@ export default {
     actionSuccess: "Operation Successfully",
     actionFail: "Operation Failure",
     selectFormat: "Please select the export format",
+    getSettingError: "Get Settings Failure",
+    setSuccess: "Set Successfully",
+    setFail: "Set Failure",
 
     nameNotNull: "The name cannot be empty or exceed the length",
     distributionNotNull: "WSL distribution version cannot be empty",

@@ -64,9 +64,16 @@
 
             <q-space />
 
-            <q-toggle color="green" v-model="isAutoLaunch" @update:model-value="changeAutoLaunch">
-              {{ t('assistant.launchWithApp') }}
-            </q-toggle>
+            <q-btn
+              flat
+              icon="settings"
+              color="secondary"
+              @click="onWSLSettings"
+            >
+              <q-tooltip class="bg-amber text-black shadow-4">
+                {{t('assistant.wslSettings')}}
+              </q-tooltip>
+            </q-btn>
           </div>
         </q-card-section>
 
@@ -100,15 +107,68 @@
         </q-card-section>
       </q-card>
     </div>
+
+    <q-dialog
+      v-if="showWSLSettingsDialog"
+      v-model="showWSLSettingsDialog"
+    >
+      <q-card style="min-width: 60%" class="q-pa-md">
+        <q-card-section>
+          <div class="text-h6">{{t('assistant.wslSettings')}}</div>
+        </q-card-section>
+
+        <q-expansion-item
+          expand-separator
+          flat bordered
+          :label="t('assistant.startupBehavior')"
+          header-class="text-grey-6"
+          style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
+        >
+          <div class="q-pa-md q-gutter-sm">
+            <q-item class="bg-grey-4">
+              <q-item-section>
+                <q-item-label caption>Start With App</q-item-label>
+                <q-item-label >{{t('assistant.startWithApp')}}</q-item-label>
+              </q-item-section>
+              <q-item-section top side>
+                <q-toggle
+                  v-model="settingsDatas.startWithApp"
+                  color="green"
+                  @update:model-value="onStartWithApp"
+                />
+              </q-item-section>
+            </q-item>
+
+            <q-item class="bg-grey-4">
+              <q-item-section>
+                <q-item-label caption>Stop With App</q-item-label>
+                <q-item-label >{{t('assistant.stopWithApp')}}</q-item-label>
+              </q-item-section>
+              <q-item-section top side>
+                <q-toggle
+                  v-model="settingsDatas.stopWithApp"
+                  color="green"
+                  @update:model-value="onStopWithApp"
+                />
+              </q-item-section>
+            </q-item>
+          </div>
+        </q-expansion-item>
+
+        <q-card-actions align="right">
+          <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="showWSLSettingsDialog = false" />
+          <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onAddStoreApi" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from 'vue'
+import { ref, inject, onMounted, reactive } from 'vue'
 import { clientConfig } from 'src/common/config.js'
 import { parseWSLListVersion } from 'src/utils/wsl.js'
 import { isEmptyObj } from 'src/utils/common.js'
-
 
 const $q = inject('$q')
 const router = inject('router')
@@ -149,7 +209,11 @@ const wslStatus = ref('Stopped')
 const wslStatusColor = ref('orange')
 const showWslStatusBtn = ref(true)
 
-const isAutoLaunch = ref(false)
+const showWSLSettingsDialog = ref(false)
+const settingsDatas = reactive({
+  startWithApp: false,
+  stopWithApp: false
+})
 
 const installWSLPackage = () => {
   window.wslTerminal.execSWSL([
@@ -340,37 +404,69 @@ const onBackgroundStart = () => {
   }
 }
 
-const changeAutoLaunch = () => {
-  window.wslTerminal.setWSLAutoLaunch(JSON.stringify({
-      wslName: 'DockerDesk',
-      checked: isAutoLaunch.value
-    })
-  ).then((result) => {
-    if (!result.success) {
-      isAutoLaunch.value = !isAutoLaunch.value
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('assistant.saveFail')}`
-      })
-    }
-  })
-}
-
-const getAutoLaunch = () => {
-  window.wslTerminal.getWSLAutoLaunch().then((result) => {
+const onWSLSettings = () => {
+  window.wslTerminal.getWSLSettings("DockerDesk").then((result) => {
     if (result.success) {
-      const data = JSON.parse(result.data)
-      if (data.includes("DockerDesk")) {
-        isAutoLaunch.value = true
-      } else {
-        isAutoLaunch.value = false
+      if (Object.prototype.hasOwnProperty.call(result.data, "startWithApp")) {
+        settingsDatas.startWithApp = result.data.startWithApp
+      }
+
+      if (Object.prototype.hasOwnProperty.call(result.data, "stopWithApp")) {
+        settingsDatas.stopWithApp = result.data.stopWithApp
       }
     } else {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
-        message: `${t('assistant.saveSuccess')}`
+        message: `${t('assistant.getSettingError')}: ${result.error}`
+      })
+    }
+  })
+
+  showWSLSettingsDialog.value = true
+}
+
+const onStartWithApp = () => {
+  window.wslTerminal.setWSLSettings(JSON.stringify({
+      wslName: "DockerDesk",
+      startWithApp: settingsDatas.startWithApp
+    })
+  ).then((result) => {
+    console.log(result)
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('assistant.setSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('assistant.setFail')}`
+      })
+    }
+  })
+}
+
+const onStopWithApp = () => {
+  window.wslTerminal.setWSLSettings(JSON.stringify({
+      wslName: "DockerDesk",
+      stopWithApp: settingsDatas.stopWithApp
+    })
+  ).then((result) => {
+    console.log(result)
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('assistant.setSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('assistant.setFail')}`
       })
     }
   })
@@ -409,8 +505,6 @@ const init = () => {
                     wslStatus.value = "Running"
                     isAssLocalBtn.value = false
                   }
-
-                  getAutoLaunch()
 
                   showWslStatusBtn.value = false
                   checkSubSystem()

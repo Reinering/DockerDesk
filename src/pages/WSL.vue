@@ -398,15 +398,6 @@ const updateChild = (data) => {
     if (Object.prototype.hasOwnProperty.call(data, "state")) {
       vm.state = data.state
     }
-    if (Object.prototype.hasOwnProperty.call(data, "isAutoLaunch")) {
-      vm.isAutoLaunch = data.isAutoLaunch
-
-      if (data.isAutoLaunch) {
-        vms_AutoLaunch.push(data.name)
-      } else {
-        vms_AutoLaunch.splice(vms_AutoLaunch.indexOf(data.name), 1)
-      }
-    }
 
     break
   }
@@ -577,7 +568,6 @@ const getWSLList = () => {
           servername: data[index].name,
           description: data[index].name,
           state: data[index].state,
-          isAutoLaunch: vms_AutoLaunch.includes(data[index].name)
         })
 
         if (data[index].name === "DockerDesk") {
@@ -686,8 +676,6 @@ const init = () => {
         if (line.indexOf('WSL') !== -1) {
           wslStatusBtn.value = t('assistant.installed')
           disabledWslStatusBtn.value = true
-
-          getAutoLaunch()
 
           getWSLList()
           getWSLListInterval = setInterval(() => {

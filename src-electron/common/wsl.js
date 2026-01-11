@@ -1,6 +1,10 @@
 import { spawn } from 'child_process'
 import { devConsole } from './utils.js'
-import { getWSLAutoLaunch, getWSLList, startSubSystem } from 'app/src-electron/actions/wsl.js'
+import {
+  getWSLSettings,
+  getWSLList,
+  startSubSystem, stopSubSystem
+} from 'app/src-electron/actions/wsl.js'
 import { parseWSLListVersion } from 'src/utils/wsl.js'
 
 export class WslCmdRunner {
@@ -263,9 +267,33 @@ export class DockerLoginCmdRunner {
   }
 }
 
+export function wslStartLaunch () {
+  getWSLSettings().then((result) => {
+    if (!result.success) {
+      return
+    }
 
-export function wslAutoLaunch () {
-  getWSLAutoLaunch().then((result) => {
+    const data = result.data
+    if (data.length === 0) {
+      return
+    }
+
+    getWSLList().then((result1) => {
+      const wsls = parseWSLListVersion(result1)
+
+      for (const wsl of wsls) {
+        if (Object.prototype.hasOwnProperty.call(data, wsl["name"]) && data[wsl["name"]]["startWithApp"]) {
+          if (wsl["state"] === "Stopped") {
+            startSubSystem(wsl["name"])
+          }
+        }
+      }
+    })
+  })
+}
+
+export function wslStopLaunch () {
+  getWSLSettings().then((result) => {
     if (!result.success) {
       return
     }
@@ -279,9 +307,10 @@ export function wslAutoLaunch () {
       const wsls = parseWSLListVersion(result1)
 
       for (const wsl of wsls) {
-        if (wsl["state"] === "Stopped" && data.includes(wsl["name"])) {
-          console.log("mark")
-          startSubSystem(wsl["name"])
+        if (Object.prototype.hasOwnProperty.call(data, wsl["name"]) && data[wsl["name"]]["stopWithApp"]) {
+          if (wsl["state"] === "Running") {
+            stopSubSystem(wsl["name"])
+          }
         }
       }
     })
