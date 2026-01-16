@@ -56,6 +56,8 @@ async function createWindow () {
 
   enable(mainWindow.webContents)
 
+  registerIpcHandlers(mainWindow)   // 注意注册顺序
+
 
   if (process.env.DEV) {
     await mainWindow.loadURL(process.env.APP_URL)
@@ -77,7 +79,7 @@ async function createWindow () {
     mainWindow = null
   })
 
-  registerIpcHandlers(mainWindow)
+
 }
 
 initDB()
