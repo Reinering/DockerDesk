@@ -84,7 +84,7 @@
 
             <q-btn-dropdown
               split
-              :disable="disabledWslStatusBtn"
+              :disable="isWslStatusBtn"
               color="accent"
               icon="flight_takeoff"
               :label="wslStatusBtn"
@@ -211,6 +211,8 @@ const gotoAssRemote = () => {
 
 }
 
+const vms = reactive([])
+
 let notify = ref(null)
 
 const debianSourcesLines = [
@@ -231,7 +233,7 @@ const isAssRemoteBtn = ref(false)
 
 const wslVersionHint = ref('')
 const wslStatusBtn = ref(t('assistant.notInstalled'))
-const disabledWslStatusBtn = ref(false)
+const isWslStatusBtn = ref(false)
 const isBgStart = ref(true)
 const wslStatus = ref('Stopped')
 const wslStatusColor = ref('orange')
@@ -254,7 +256,6 @@ const installWSLPackage = () => {
     ['-d', "DockerDesk", '--user', "root", '-e', "apt-get update"],
     ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y curl dbus dbus-x11 git "]
   ]).then((result) => {
-    console.log(result)
     if (result.success) {
       notify.value({
         type: 'positive',
@@ -343,7 +344,7 @@ const onWslStatusBtn = () => {
         })
 
         installWSLPackage()
-        disabledWslStatusBtn.value = true
+        isWslStatusBtn.value = true
       }else if (wslStatusBtn.value === t('assistant.addPackage')) {
         installWSLPackage()
       } else {
@@ -366,24 +367,12 @@ const onWslStatusBtn = () => {
       message: t('assistant.installing'),
     })
   } else if (wslStatusBtn.value === t('assistant.start')) {
-      let isCall = true
-      window.wslTerminal.startSubSystem().then((result) => {
-        if (!result.success && isCall) {
-          $q.notify({
-            type: 'negative',
-            position: clientConfig.quasar.notify.position,
-            message: `${t('assistant.startFail')}: ${result.error}`
-          })
-        } else {
-          isAssLocalBtn.value = false
-          wslStatusBtn.value = t('assistant.stop')
-          wslStatus.value = "Running"
-          wslStatusColor.value = "green"
-        }
-      })
+    window.wslTerminal.startSubSystem()
+
+    isWslStatusBtn.value = true
 
     setTimeout(() => {
-      isCall = false
+      getWSLList()
     }, 5000)
 
 
@@ -414,7 +403,6 @@ const onBackgroundStart = () => {
   if (wslStatusBtn.value === t('assistant.start')) {
     let isCall = true
     window.wslTerminal.startBGSubSystem().then((result) => {
-      console.log("result", result)
       if (! result.success && isCall) {
         $q.notify({
           type: 'negative',
@@ -432,7 +420,7 @@ const onBackgroundStart = () => {
 
     setTimeout(() => {
       isCall = false
-    }, 5000)
+    }, 7000)
   }
 }
 
@@ -531,6 +519,39 @@ const onWSLDirEdit = () => {
   })
 }
 
+const getWSLList = () => {
+  window.wslTerminal.getWSLList().then((result) => {
+    if (result.success) {
+      isWslStatusBtn.value = false
+      const data = parseWSLListVersion(result.data)
+
+      for (let index in data) {
+        if (data[index].name === "DockerDesk") {
+          if (data[index].state === "Stopped") {
+            wslStatusBtn.value = t('assistant.start')
+            wslStatusColor.value = "red"
+            wslStatus.value = "Stopped"
+            isAssLocalBtn.value = true
+          } else if (data[index].state === "Running") {
+            wslStatusBtn.value = t('assistant.stop')
+            wslStatusColor.value = "green"
+            wslStatus.value = "Running"
+            isAssLocalBtn.value = false
+          }
+
+          isBgStart.value = false
+          showWslStatusBtn.value = false
+          checkSubSystem()
+          return
+        }
+      }
+      wslStatusBtn.value = t('assistant.addSubSystem')
+    } else {
+      wslStatusBtn.value = t('assistant.addSubSystem')
+    }
+  })
+}
+
 const checkSubSystem = async () => {
   window.wslTerminal.checkSubSystem().then((result) => {
     console.log(result)
@@ -547,35 +568,7 @@ const init = () => {
           wslVersionHint.value = t('assistant.wslVersionHint1')
           wslStatusBtn.value = t('assistant.installed')
 
-          window.wslTerminal.getWSLList().then((result) => {
-            if (result.success) {
-              const data = parseWSLListVersion(result.data)
-
-              for (let index in data) {
-                if (data[index].name === "DockerDesk") {
-                  if (data[index].state === "Stopped") {
-                    wslStatusBtn.value = t('assistant.start')
-                    wslStatusColor.value = "red"
-                    wslStatus.value = "Stopped"
-                    isAssLocalBtn.value = true
-                  } else if (data[index].state === "Running") {
-                    wslStatusBtn.value = t('assistant.stop')
-                    wslStatusColor.value = "green"
-                    wslStatus.value = "Running"
-                    isAssLocalBtn.value = false
-                  }
-
-                  isBgStart.value = false
-                  showWslStatusBtn.value = false
-                  checkSubSystem()
-                  return
-                }
-              }
-              wslStatusBtn.value = t('assistant.addSubSystem')
-            } else {
-              wslStatusBtn.value = t('assistant.addSubSystem')
-            }
-          })
+          getWSLList()
         } else {
           wslStatusBtn.value = t('assistant.needUpgrade')
           wslVersionHint.value = t('assistant.wslVersionHint')

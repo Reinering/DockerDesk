@@ -506,8 +506,12 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('upgradeWSL')
   },
 
+  // startSubSystem () {
+  //   return ipcRenderer.invoke('startSubSystem')
+  // },
+
   startSubSystem () {
-    return ipcRenderer.invoke('startSubSystem')
+    return ipcRenderer.send('startSubSystem')
   },
 
   startBGSubSystem () {
@@ -530,8 +534,12 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.on('wslSpawnReceive', (event, data) => callback(data))
   },
 
+  // startWSL(data) {
+  //   return ipcRenderer.invoke('startWSL', data)
+  // },
+
   startWSL(data) {
-    return ipcRenderer.invoke('startWSL', data)
+    return ipcRenderer.send('startWSL', data)
   },
 
   startBGWSL(data) {

@@ -213,6 +213,10 @@ const props = defineProps({
   onDelete: {
     type: Function,
     default: () => {}
+  },
+  onUpdateState: {
+    type: Function,
+    default: () => {}
   }
 })
 
@@ -305,19 +309,12 @@ const showDetailDialog = ref(false)
 changeState(props.data.state)
 
 const onStart = async () => {
-  let isCall = true
   window.wslTerminal.startWSL({
     name: props.data.servername
-  }).then((result) => {
-    if (!result.success) {
-      isCall = false
-    }
   })
 
   setTimeout(() => {
-    if (isCall) {
-      emit('update:value', {name: props.data.servername, state: "Running"})
-    }
+    props.onUpdateState()
   }, 5000)
 }
 

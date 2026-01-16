@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, shell } from 'electron'
 import {
   modifyWSLDebugConfig, execSubSystem, execSSubSystem,
   getWSLInfo, getWSLList, wslUpdate,
@@ -117,6 +117,10 @@ export function registerWSLIpcHandlers(win) {
     }
   })
 
+  ipcMain.on('startSubSystem', async (event) => {
+    startSubSystem()
+  })
+
   ipcMain.handle('startBGSubSystem', async (event) => {
     if (isProcessing) {
       return { success: false, error: "Other WSL commands are being executed... Please try again later" }
@@ -181,20 +185,24 @@ export function registerWSLIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('startWSL', async (event, {name}) => {
-    if (isProcessing) {
-      return { success: false, error: "Other WSL commands are being executed... Please try again later" }
-    } else {
-      isProcessing = true
+  // ipcMain.handle('startWSL', async (event, name) => {
+  //   if (isProcessing) {
+  //     return { success: false, error: "Other WSL commands are being executed... Please try again later" }
+  //   } else {
+  //     isProcessing = true
+  //
+  //     return startSubSystem(name).then((data) => {
+  //       isProcessing = false
+  //       return { success: true, data: data, error: '' }
+  //     }, (error) => {
+  //       isProcessing = false
+  //       return { success: false, error: error }
+  //     })
+  //   }
+  // })
 
-      return startSubSystem(name).then((data) => {
-        isProcessing = false
-        return { success: true, data: data, error: '' }
-      }, (error) => {
-        isProcessing = false
-        return { success: false, error: error }
-      })
-    }
+  ipcMain.on('startWSL', async (event, {name}) => {
+    startSubSystem(name)
   })
 
   ipcMain.handle('startBGWSL', async (event, {name}) => {
@@ -212,6 +220,7 @@ export function registerWSLIpcHandlers(win) {
       })
     }
   })
+
 
   ipcMain.handle('stopWSL', async (event, {name}) => {
     if (isProcessing) {

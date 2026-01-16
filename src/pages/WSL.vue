@@ -87,6 +87,7 @@
                   :data="item"
                   :onDelete="onDelete"
                   @update:value="updateChild"
+                  :onUpdateState="() => getWSLList()"
                 />
               </div>
             </q-tab-panel>
