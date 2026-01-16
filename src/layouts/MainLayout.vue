@@ -1,9 +1,7 @@
 <template>
   <q-layout view="hHh lpR lFf" :layout="layout">
-
-    <q-header elevated class="bg-primary text-white q-electron-drag" height-hint="98">
-<!--      <TitleBar />-->
-
+    <!--    q-electron-drag / q-electron-drag--exception 拖拽双/击放大 的作用区域-->
+    <q-header  class="bg-primary text-white q-electron-drag" height-hint="98">
       <ToolBar
         :logoSrc="faviconPath"
         :toggle="toggleLeftDrawer"
@@ -44,7 +42,6 @@
 <script setup>
 import { ref, reactive, inject, toRefs } from 'vue'
 import Navigator from 'components/Navigator.vue'
-import TitleBar from 'components/TitleBar.vue'
 import ToolBar from 'components/ToolBar.vue'
 import { getResourcePath } from 'src/utils/common.js'
 
