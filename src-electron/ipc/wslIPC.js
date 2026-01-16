@@ -5,7 +5,7 @@ import {
   wslInstallSubSystem, installWSL, startSubSystem, stopSubSystem, restartSubSystem,
   unregisterSubSystem, exportSubSystem, moveSubSystem, getDistributionList, dockerLogin, startBGSubSystem,
   readPodmanConf, checkSubSystem,
-  getWSLSettings, setWSLSettings
+  getWSLSettings, setWSLSettings, getWSLLaunch, setWSLLaunch, getSubSystemState
 } from 'app/src-electron/actions/wsl.js'
 
 
@@ -261,7 +261,7 @@ export function registerWSLIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('termimalWSL', async (event) => {
+  ipcMain.handle('terminalWSL', async (event) => {
     if (isProcessing) {
       return { success: false, error: "Other WSL commands are being executed... Please try again later" }
     } else {
@@ -394,4 +394,21 @@ export function registerWSLIpcHandlers(win) {
       return { success: false, error: error }
     }
   })
+
+  ipcMain.handle('getWSLLaunch', async (event, data) => {
+    try {
+      return getWSLLaunch(data)
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
+  ipcMain.handle('setWSLLaunch', async (event, data) => {
+    try {
+      return setWSLLaunch(data)
+    } catch (error) {
+      return { success: false, error: error }
+    }
+  })
+
 }

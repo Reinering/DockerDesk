@@ -100,7 +100,7 @@
               <q-card :style="cardStyle">
                 <q-splitter v-model="splitterModel1" :limits="[50, 50]" style="height: 100%">
                   <template v-slot:before>
-                    <div class="q-pa-md">
+                    <div class="q-gutter-y-md">
                       <q-input
                         class="q-mb-sm"
                         v-model="newWSL.name"
@@ -147,6 +147,21 @@
                         </q-item-section>
                       </q-item>
 
+                      <q-item tag="label" v-ripple dense>
+                        <q-item-section>
+                          <q-item-label>{{t('wsl.customInstallDir')}}</q-item-label>
+                          <q-item-label caption>{{wslCustomDir}}</q-item-label>
+                        </q-item-section>
+
+                        <q-item-section avatar>
+                          <q-btn dense round flat color="white" text-color="primary" icon="edit" size="md" @click="onWSLCustomDirEdit" >
+                            <q-tooltip class="bg-amber text-black shadow-4">
+                              {{t('wsl.edit')}}
+                            </q-tooltip>
+                          </q-btn>
+                        </q-item-section>
+                      </q-item>
+
                     </div>
                   </template>
 
@@ -178,15 +193,15 @@
                         v-if="newWSL.wslDistribution === 'Custom'"
                         filled
                         bottom-slots
-                        v-model="newWSL.localImagePath"
-                        :label="t('wsl.localImagePath')"
+                        v-model="newWSL.localPath"
+                        :label="t('wsl.localPath')"
                         dense
                       >
                         <template v-slot:append>
                           <q-icon
-                            v-if="newWSL.localImagePath !== ''"
+                            v-if="newWSL.localPath !== ''"
                             name="close"
-                            @click="newWSL.localImagePath = ''"
+                            @click="newWSL.localPath = ''"
                             class="cursor-pointer"
                           />
                         </template>
@@ -271,13 +286,28 @@
                   </q-list>
                 </template>
                 <template v-slot:after>
-                  <q-list class="q-pa-md">
+                  <q-list>
                     <q-item tag="label" v-ripple dense>
                       <q-item-section>
                         <q-item-label>Proxy Settings</q-item-label>
                       </q-item-section>
                       <q-item-section avatar>
                         <q-btn dense round flat color="white" text-color="primary" icon="edit" size="md" @click="onProxyEdit" >
+                          <q-tooltip class="bg-amber text-black shadow-4">
+                            {{t('wsl.edit')}}
+                          </q-tooltip>
+                        </q-btn>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item v-ripple dense>
+                      <q-item-section>
+                        <q-item-label>{{t('wsl.defaultInstallDir')}}</q-item-label>
+                        <q-item-label caption>{{wslDefaultDir}}</q-item-label>
+                      </q-item-section>
+
+                      <q-item-section avatar>
+                        <q-btn dense round flat color="white" text-color="primary" icon="edit" size="md" @click="onWSLDirEdit" >
                           <q-tooltip class="bg-amber text-black shadow-4">
                             {{t('wsl.edit')}}
                           </q-tooltip>
@@ -349,8 +379,6 @@ const vms = reactive([
   // },
 ])
 
-const vms_AutoLaunch = reactive([])
-
 const appxList = reactive([
   { label: 'ubuntu', value: 'Ubuntu', desc: 'Ubuntu' },
   { label: 'debian', value: 'Debian', desc: 'Debian' },
@@ -374,7 +402,7 @@ const newWSL = reactive({
   root: false,
   startNow: false,
   wslDistribution: null,
-  localImagePath: '',
+  localPath: '',
   username: 'user',
   password: 'user',
 })
@@ -383,7 +411,7 @@ const clearNewWSL = () => {
   newWSL.root = false
   newWSL.startNow = false
   newWSL.wslDistribution = null
-  newWSL.localImagePath = ''
+  newWSL.localPath = ''
   newWSL.username = 'user'
   newWSL.password = 'user'
 }
@@ -450,7 +478,6 @@ const onRestartWSL = () => {
     "if (net stop \"WSLService\") { net start \"WSLService\" } else { taskkill /IM wslservice.exe /F }"
   ).then((result) => {
     if (result.success) {
-      console.log(result)
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
@@ -522,6 +549,47 @@ const onProxyEdit = () => {
   showProxySettingsDialog.value = !showProxySettingsDialog.value
 }
 
+const wslDefaultDir = ref('')
+const onWSLDirEdit = () => {
+  window.myWindowAPI.selectFolders().then((result) => {
+    if (result) {
+      wslDefaultDir.value = result[0]
+    } else {
+      wslDefaultDir.value = ''
+    }
+
+    window.wslTerminal.setWSLSettings(JSON.stringify({
+      key: "defaultInstallDir",
+      value: wslDefaultDir.value
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('wsl.setSuccess')
+        })
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('wsl.setFail')}: ${result.error}`
+        })
+      }
+    })
+  })
+}
+
+const wslCustomDir = ref('')
+const onWSLCustomDirEdit = () => {
+  window.myWindowAPI.selectFolders().then((result) => {
+    if (result) {
+      wslCustomDir.value = result[0]
+    } else {
+      wslCustomDir.value = ''
+    }
+  })
+}
+
 const checkNode = (serviceType) => {
   if (serviceType === "docker") {
     window.nodes.getNode(11111111).then((result) => {
@@ -591,7 +659,7 @@ const onSelect = async() => {
     return
   }
 
-  newWSL.localImagePath = files[0]
+  newWSL.localPath = files[0]
 }
 
 const onCreate = () => {
@@ -611,7 +679,7 @@ const onCreate = () => {
     })
   }
 
-  if (newWSL.wslDistribution === "Custom" && isEmptyStr(newWSL.localImagePath)) {
+  if (newWSL.wslDistribution === "Custom" && isEmptyStr(newWSL.localPath)) {
     return $q.notify({
       type: 'negative',
       position: clientConfig.quasar.notify.position,
@@ -619,7 +687,10 @@ const onCreate = () => {
     })
   }
 
-  window.wslTerminal.installWSL(JSON.stringify(newWSL)).then((result) => {
+  const _newL = JSON.parse(JSON.stringify(newWSL))
+  _newL["installDir"] = wslCustomDir.value
+
+  window.wslTerminal.installWSL(JSON.stringify(_newL)).then((result) => {
     if (result.success) {
       notify.value({
         type: 'positive',
@@ -649,21 +720,6 @@ const onCreate = () => {
     spinner: true,
     position: 'bottom-right',
     message: t('assistant.installing'),
-  })
-}
-
-const getAutoLaunch = () => {
-  window.wslTerminal.getWSLAutoLaunch().then((result) => {
-    if (result.success) {
-      const data = JSON.parse(result.data)
-      vms_AutoLaunch.push(...data)
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('assistant.saveSuccess')}`
-      })
-    }
   })
 }
 
@@ -711,6 +767,18 @@ const init = () => {
     })
 
   }
+
+  window.wslTerminal.getWSLSettings("defaultInstallDir").then((result) => {
+    if (result.success) {
+      wslDefaultDir.value = result.data
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('wsl.getSettingError')}: ${result.error}`
+      })
+    }
+  })
 }
 
 const checkScreenHeightSize = () => {

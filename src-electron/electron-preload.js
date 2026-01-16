@@ -550,8 +550,8 @@ contextBridge.exposeInMainWorld("wslTerminal", {
     return ipcRenderer.invoke('deleteWSL', data)
   },
 
-  termimalWSL(data) {
-    return ipcRenderer.invoke('termimalWSL', data)
+  terminalWSL(data) {
+    return ipcRenderer.invoke('terminalWSL', data)
   },
 
   exportWSL(data) {
@@ -577,13 +577,21 @@ contextBridge.exposeInMainWorld("wslTerminal", {
   readPodmanConfWSL(data) {
     return ipcRenderer.invoke('readPodmanConfWSL', data)
   },
-  
+
   getWSLSettings (data) {
     return ipcRenderer.invoke('getWSLSettings', data)
   },
 
   setWSLSettings (data) {
     return ipcRenderer.invoke('setWSLSettings', data)
+  },
+
+  getWSLLaunch (data) {
+    return ipcRenderer.invoke('getWSLLaunch', data)
+  },
+
+  setWSLLaunch (data) {
+    return ipcRenderer.invoke('setWSLLaunch', data)
   }
 
 })

@@ -1,5 +1,6 @@
 import { cmd, cmd1, cmdAdmin,  CmdRunner, modifyIniConfig, } from 'app/src-electron/common/utils.js'
 import { WslCmdRunner } from 'app/src-electron/common/wsl.js'
+import { parseWSLListVersion } from 'app/src/utils/wsl.js'
 import { nodes } from '../actions/nodes.js'
 import { db } from '../database/manager.js'
 import readline from 'readline'
@@ -39,8 +40,16 @@ export async function getDistributionList () {
 }
 
 export async function wslInstallSubSystem (win) {
+  const result = await getWSLSettings("defaultInstallDir")
+
   const cmdRunner = new WslCmdRunner(win)
-  const command = ['--install', '-d', 'Debian', '--name', 'DockerDesk']
+  let command
+  if (result.success && result.data) {
+    command = ['--install', '-d', 'Debian', '--name', 'DockerDesk', '--location', path.join(result.data, 'DockerDesk')]
+  } else {
+    command = ['--install', '-d', 'Debian', '--name', 'DockerDesk']
+  }
+
 
   try {
     return await cmdRunner.setupWslUser(command, 'user', 'user')
@@ -52,47 +61,68 @@ export async function wslInstallSubSystem (win) {
 }
 
 export async function installWSL (win, data) {
-  const cmdRunner = new WslCmdRunner(win, )
-
-  let command = []
-  command.push("--install")
-  command.push("--web-download")
-  command.push("--distribution")
-  command.push(data.wslDistribution)
-  command.push("--name")
-  command.push(data.name)
-
-  let username = ''
-  let password = ''
-
-  if (data.wslDistribution !== "Custom") {
-    if (!data.startNow) {
-      command.push("--no-launch")
-    }
+  if (data.wslDistribution === "Custom" && data.localPath) {
+    const fileExtension = data.localPath.split('.').pop().toLowerCase()
+    return importSubSystem(fileExtension, data.name, data.installDir, data.localPath)
   } else {
-    command.push("--location")
-    command.push(data.localImagePath)
+    let command = []
+    command.push("--install")
+    command.push("--web-download")
+    command.push("--distribution")
+    command.push(data.wslDistribution)
+    command.push("--name")
+    command.push(data.name)
+
+    if (data.installDir) {
+      command.push("--location")
+      command.push(path.join(data.installDir, data.name))
+    } else {
+      const result = await getWSLSettings("defaultInstallDir")
+
+      if (result.success && result.data) {
+        command.push("--location")
+        command.push(path.join(result.data, data.name))
+      }
+    }
+
     if (!data.startNow) {
       command.push("--no-launch")
     }
-  }
 
-  try {
-    if (data.startNow) {
-      if (data.root) {
-        username = 'root'
-      } else {
-        username = data.username
+    const cmdRunner = new WslCmdRunner(win, )
+
+    let username = ''
+    let password = ''
+
+    try {
+      if (data.startNow) {
+        if (data.root) {
+          username = 'root'
+        } else {
+          username = data.username
+        }
+        password = data.password
       }
-      password = data.password
+       // throw new TypeError("asdfasdfasdf")
+      return await cmdRunner.setupWslUser(command, username, password)
+    } catch (error) {
+      return new Promise((resolve, reject) => {
+        reject(error)
+      })
     }
-
-    return await cmdRunner.setupWslUser(command, username, password)
-  } catch (error) {
-    return new Promise((resolve, reject) => {
-      reject(error)
-    })
   }
+}
+
+export async function getSubSystemState (name='DockerDesk') {
+  return cmd(`wsl -l -v`, 'utf16le').then((result) => {
+    const data = parseWSLListVersion(result)
+
+    for (let index in data) {
+      if (data[index].name === "DockerDesk") {
+        return data[index].state
+      }
+    }
+  })
 }
 
 export async function startSubSystem (name='DockerDesk') {
@@ -188,6 +218,25 @@ export async function exportSubSystem (name, format, distDir) {
   }
 }
 
+export async function importSubSystem (format, name, installDir, file) {
+  let cmd = `wsl --import ${name}`
+
+  if (installDir) {
+    installDir = path.join(installDir, name)
+    cmd = `${cmd} ${installDir}`
+  }
+
+  cmd = `${cmd} ${file}`
+
+  if (format === "vhdx") {
+    cmd = `${cmd} --vhd`
+  }
+
+  cmd = `${cmd} --version 2`
+
+  return cmd(cmd, 'utf8')
+}
+
 export async function moveSubSystem (name, distDir) {
   const folder = path.join(distDir, `${name}`)
   return cmd(`wsl --manage ${name} --move "${folder}"`, 'utf16le')
@@ -267,20 +316,20 @@ export async function readPodmanConf(commands) {
   return parse(configContent)
 }
 
-export function getWSLSettings (wslName=null) {
+export function getWSLSettings (key) {
   return db('settings')
     .where('field', '=', 'wsl_settings')
     .select('*').then(
       rows => {
         const data = JSON.parse(rows[0]["value"])
-        if (wslName === null) {
+        if (key === null) {
           return { success: true, data }
         }
 
-        if (Object.prototype.hasOwnProperty.call(data, wslName)) {
-          return { success: true, data: data[wslName] }
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          return { success: true, data: data[key] }
         } else {
-          return { success: true, data: {} }
+          return { success: true, data: '' }
         }
       }).catch(error => {
       return { success: false, error: error }
@@ -298,26 +347,16 @@ export function setWSLSettings (data) {
     })
 
   return result.then((res) => {
-    const wslSettings = JSON.parse(res)
+    const settings = JSON.parse(res)
 
     const _data = JSON.parse(data)
-    if (Object.prototype.hasOwnProperty.call(_data, "wslName")) {
-      if (!Object.prototype.hasOwnProperty.call(wslSettings, _data.wslName)) {
-        wslSettings[_data.wslName] = {}
-      }
-
-      for (let key of Object.keys(_data)) {
-        if (key === "wslName") {
-          continue
-        }
-
-        wslSettings[_data.wslName][key] = _data[key]
-      }
+    if (Object.prototype.hasOwnProperty.call(_data, "key") && Object.prototype.hasOwnProperty.call(_data, "value")) {
+      settings[_data.key] = _data.value
 
       return db('settings')
         .where('field', '=', "wsl_settings")
         .update({
-          value: JSON.stringify(wslSettings)
+          value: JSON.stringify(settings)
         }).then(
           rows => {
             return { success: true, data: rows }
@@ -327,3 +366,69 @@ export function setWSLSettings (data) {
     }
   })
 }
+
+export function getWSLLaunch (wslName=null) {
+  return db('settings')
+    .where('field', '=', 'wsl_settings')
+    .select('*').then(
+      rows => {
+        const data = JSON.parse(rows[0]["value"])
+        if (wslName === null) {
+          return { success: true, data }
+        }
+
+        if (Object.prototype.hasOwnProperty.call(data, "startupBehavior") && Object.prototype.hasOwnProperty.call(data["startupBehavior"], wslName)) {
+          return { success: true, data: data["startupBehavior"][wslName] }
+        } else {
+          return { success: true, data: {} }
+        }
+      }).catch(error => {
+      return { success: false, error: error }
+    })
+}
+
+export function setWSLLaunch (data) {
+  const result = db('settings')
+    .where('field', '=', 'wsl_settings')
+    .select('*').then(
+      rows => {
+        return rows[0]["value"]
+      }).catch(error => {
+      return error
+    })
+
+  return result.then((res) => {
+    const settings = JSON.parse(res)
+
+    const _data = JSON.parse(data)
+    if (Object.prototype.hasOwnProperty.call(_data, "wslName")) {
+      if (!Object.prototype.hasOwnProperty.call(settings, "startupBehavior")) {
+        settings["startupBehavior"] = {}
+      }
+
+      if (!Object.prototype.hasOwnProperty.call(settings["startupBehavior"], _data.wslName)) {
+        settings["startupBehavior"][_data.wslName] = {}
+      }
+
+      for (let key of Object.keys(_data)) {
+        if (key === "wslName") {
+          continue
+        }
+
+        settings["startupBehavior"][_data.wslName][key] = _data[key]
+      }
+
+      return db('settings')
+        .where('field', '=', "wsl_settings")
+        .update({
+          value: JSON.stringify(settings)
+        }).then(
+          rows => {
+            return { success: true, data: rows }
+          }).catch(error => {
+          return { success: false, error: error }
+        })
+    }
+  })
+}
+

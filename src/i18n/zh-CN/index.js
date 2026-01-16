@@ -70,6 +70,10 @@ export default {
     portRange: "端口范围内(1-65535)",
   },
 
+  errorMessage: {
+    verify: "数据校验错误",
+  },
+
   index: {
     shortcuts: "快捷方式",
 
@@ -120,7 +124,9 @@ export default {
     startupBehavior: "启动行为",
     startWithApp: "随APP启动",
     stopWithApp: "随APP关闭",
+    basicSettings: "基本设置",
     wslSettings: "WSL 设置",
+    defaultInstallDir: "WSL默认安装目录",
 
     wslVersionHint: "版本: WSL1, 建议: WSL2",
     wslVersionHint1: "建议: WSL2",
@@ -540,7 +546,10 @@ export default {
     move: "迁移",
     option: "选项",
     settings: "设置",
+    detail: "详情",
+    wslDetail: "WSL 详情",
 
+    basicSettings: "基本设置",
     wslSettings: "WSL 设置",
     startupBehavior: "启动行为",
     startWithApp: "跟随APP开启",
@@ -557,7 +566,7 @@ export default {
     wslDistribution: "WSL 发行版",
     distributionName: "",
     customImage: "自定义镜像",
-    localImagePath: "选择本地镜像文件(非必选)",
+    localPath: "选择本地文件(tar/vhdx)",
     username: "用户名",
     password: "密码",
 
@@ -565,6 +574,12 @@ export default {
     edit: "编辑",
     shutdownAll: "强制关闭所有linux 子系统",
     restartService: "重启WSL服务",
+    defaultInstallDir: "WSL默认安装目录",
+    customInstallDir: "自定义安装目录",
+
+    network: "网络",
+
+
 
     confirmDel: "确认删除",
     updating: "正在升级...",
@@ -848,6 +863,8 @@ export default {
     delete: "删除",
     edit: "编辑",
     confirm: "确认",
+    detail: "详情",
+    appDetail: "应用详情",
 
     appName: "应用名称",
     port: "网络端口",
@@ -862,9 +879,11 @@ export default {
 
     confirmInstall: "确认安装？",
     install: "安装",
+    installing: "正在安装",
     defaultInstall: "默认安装",
     customInstall: "自定义安装",
     installPrompt: "不熟悉容器的安装时，请选择默认安装，确认熟悉容器安装时，可以选择自定义安装",
+    installErrorPrompt: "普通模式下，请先在引导页面安装WSL和相关组件后，才能安装Docker应用",
 
     selectNode: "选择安装节点",
 

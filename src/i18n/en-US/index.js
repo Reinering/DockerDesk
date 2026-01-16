@@ -75,6 +75,10 @@ export default {
     portRange: "port range (1-65535)",
   },
 
+  errorMessage: {
+    verify: "Data validation error",
+  },
+
   index: {
     shortcuts: "Shortcuts",
 
@@ -125,7 +129,9 @@ export default {
     startupBehavior: "Startup Behavior",
     startWithApp: "Start with App",
     stopWithApp: "Stop with App",
+    basicSettings: "Basic Settings",
     wslSettings: "WSL Settings",
+    defaultInstallDir: "WSL default installation directory",
 
     wslVersionHint: "Version: WSL1, Suggestions: WSL2",
     wslVersionHint1: "Suggestions: WSL2",
@@ -541,7 +547,10 @@ export default {
     move: "Move",
     option: "Option",
     settings: "Settings",
+    detail: "Detail",
+    wslDetail: "WSL Detail",
 
+    basicSettings: "Basic Settings",
     wslSettings: "WSL Settings",
     startupBehavior: "Startup Behavior",
     startWithApp: "Start With App",
@@ -556,7 +565,7 @@ export default {
 
     wslDistribution: "WSL Distribution",
     customImage: "Custom Image",
-    localImagePath: "Select Local Image Path(Optional)",
+    localPath: "Select Local Path(tar/vhdx)",
     username: "Username",
     password: "Password",
 
@@ -564,6 +573,10 @@ export default {
     edit: "Edit",
     shutdownAll: "Force shut down all Linux subsystems",
     restartService: "Restart WSL service",
+    defaultInstallDir: "WSL default installation directory",
+    customInstallDir: "Custom installation directory",
+
+    Network: "Network",
 
     confirmDel: "Confirm Delete",
     updating: "Upgrading...",
@@ -837,6 +850,8 @@ export default {
     delete: "Delete",
     edit: "Edit",
     confirm: "确认",
+    detail: "Detail",
+    appDetail: "App Detail",
 
     appName: "App Name",
     port: "Network Port",
@@ -851,9 +866,11 @@ export default {
 
     confirmInstall: "Confirm Install？",
     install: "Install",
+    installing: "Installing",
     defaultInstall: "Default Install",
     customInstall: "Custom Install",
     installPrompt: "If you are unfamiliar with container installation, please select the default installation. If you are familiar with container installation, you can choose custom installation.",
+    installErrorPrompt: "In standard mode, you must first install WSL and related components on the setup page before you can install the Docker application.",
 
     selectNode: "Select Install Node",
 

@@ -83,7 +83,6 @@
             <q-space />
 
             <q-btn-dropdown
-              v-if="!showWslStatusBtn"
               split
               :disable="disabledWslStatusBtn"
               color="accent"
@@ -92,8 +91,8 @@
               style="width: 150px"
               @click="onWslStatusBtn"
             >
-              <q-list>
-                <q-item class="bg-amber-14" clickable v-close-popup @click="onBackgroundStart">
+              <q-list >
+                <q-item :disable="isBgStart" class="bg-amber-14" clickable v-close-popup @click="onBackgroundStart">
                   <q-item-section avatar>
                     <q-icon name="play_arrow" color="white" />
                   </q-item-section>
@@ -112,52 +111,80 @@
       v-if="showWSLSettingsDialog"
       v-model="showWSLSettingsDialog"
     >
-      <q-card style="min-width: 60%" class="q-pa-md">
+      <q-card style="min-width: 80%" class="q-pa-md">
         <q-card-section>
           <div class="text-h6">{{t('assistant.wslSettings')}}</div>
         </q-card-section>
 
-        <q-expansion-item
-          expand-separator
-          flat bordered
-          :label="t('assistant.startupBehavior')"
-          header-class="text-grey-6"
-          style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
-        >
-          <div class="q-pa-md q-gutter-sm">
-            <q-item class="bg-grey-4">
-              <q-item-section>
-                <q-item-label caption>Start With App</q-item-label>
-                <q-item-label >{{t('assistant.startWithApp')}}</q-item-label>
-              </q-item-section>
-              <q-item-section top side>
-                <q-toggle
-                  v-model="settingsDatas.startWithApp"
-                  color="green"
-                  @update:model-value="onStartWithApp"
-                />
-              </q-item-section>
-            </q-item>
+        <div class="q-gutter-sm">
+          <q-expansion-item
+            expand-separator
+            flat bordered
+            :label="t('assistant.basicSettings')"
+            header-class="text-grey-6"
+            style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
+          >
+            <div class="q-pa-md q-gutter-sm">
+              <q-item class="bg-grey-4">
+                <q-item-section>
+                  <q-item-label>{{t('assistant.defaultInstallDir')}}</q-item-label>
+                  <q-item-label caption>{{wslDefaultDir}}</q-item-label>
+                </q-item-section>
 
-            <q-item class="bg-grey-4">
-              <q-item-section>
-                <q-item-label caption>Stop With App</q-item-label>
-                <q-item-label >{{t('assistant.stopWithApp')}}</q-item-label>
-              </q-item-section>
-              <q-item-section top side>
-                <q-toggle
-                  v-model="settingsDatas.stopWithApp"
-                  color="green"
-                  @update:model-value="onStopWithApp"
-                />
-              </q-item-section>
-            </q-item>
-          </div>
-        </q-expansion-item>
+                <q-item-section avatar>
+                  <q-btn dense round flat color="white" text-color="primary" icon="edit" size="md" @click="onWSLDirEdit" >
+                    <q-tooltip class="bg-amber text-black shadow-4">
+                      {{t('wsl.edit')}}
+                    </q-tooltip>
+                  </q-btn>
+                </q-item-section>
+              </q-item>
+
+            </div>
+          </q-expansion-item>
+
+          <q-expansion-item
+            expand-separator
+            flat bordered
+            :label="t('assistant.startupBehavior')"
+            header-class="text-grey-6"
+            style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
+          >
+            <div class="q-pa-md q-gutter-sm">
+              <q-item class="bg-grey-4">
+                <q-item-section>
+                  <q-item-label caption>Start With App</q-item-label>
+                  <q-item-label >{{t('assistant.startWithApp')}}</q-item-label>
+                </q-item-section>
+                <q-item-section top side>
+                  <q-toggle
+                    v-model="settingsDatas.startWithApp"
+                    color="green"
+                    @update:model-value="onStartWithApp"
+                  />
+                </q-item-section>
+              </q-item>
+
+              <q-item class="bg-grey-4">
+                <q-item-section>
+                  <q-item-label caption>Stop With App</q-item-label>
+                  <q-item-label >{{t('assistant.stopWithApp')}}</q-item-label>
+                </q-item-section>
+                <q-item-section top side>
+                  <q-toggle
+                    v-model="settingsDatas.stopWithApp"
+                    color="green"
+                    @update:model-value="onStopWithApp"
+                  />
+                </q-item-section>
+              </q-item>
+            </div>
+          </q-expansion-item>
+        </div>
 
         <q-card-actions align="right">
           <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="showWSLSettingsDialog = false" />
-          <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onAddStoreApi" />
+          <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="showWSLSettingsDialog = false" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -165,7 +192,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, reactive } from 'vue'
+import { ref, inject, onMounted, reactive, onUnmounted } from 'vue'
 import { clientConfig } from 'src/common/config.js'
 import { parseWSLListVersion } from 'src/utils/wsl.js'
 import { isEmptyObj } from 'src/utils/common.js'
@@ -205,6 +232,7 @@ const isAssRemoteBtn = ref(false)
 const wslVersionHint = ref('')
 const wslStatusBtn = ref(t('assistant.notInstalled'))
 const disabledWslStatusBtn = ref(false)
+const isBgStart = ref(true)
 const wslStatus = ref('Stopped')
 const wslStatusColor = ref('orange')
 const showWslStatusBtn = ref(true)
@@ -214,6 +242,8 @@ const settingsDatas = reactive({
   startWithApp: false,
   stopWithApp: false
 })
+
+const wslDefaultDir = ref('')
 
 const installWSLPackage = () => {
   window.wslTerminal.execSWSL([
@@ -303,6 +333,7 @@ const onWslStatusBtn = () => {
         wslStatusBtn.value === t('assistant.addPackage')
         wslStatusColor.value = "red"
         wslStatus.value = 'Stopped'
+
         notify.value({
           type: 'info',
           group: false,
@@ -312,6 +343,7 @@ const onWslStatusBtn = () => {
         })
 
         installWSLPackage()
+        disabledWslStatusBtn.value = true
       }else if (wslStatusBtn.value === t('assistant.addPackage')) {
         installWSLPackage()
       } else {
@@ -405,7 +437,7 @@ const onBackgroundStart = () => {
 }
 
 const onWSLSettings = () => {
-  window.wslTerminal.getWSLSettings("DockerDesk").then((result) => {
+  window.wslTerminal.getWSLLaunch("DockerDesk").then((result) => {
     if (result.success) {
       if (Object.prototype.hasOwnProperty.call(result.data, "startWithApp")) {
         settingsDatas.startWithApp = result.data.startWithApp
@@ -427,12 +459,11 @@ const onWSLSettings = () => {
 }
 
 const onStartWithApp = () => {
-  window.wslTerminal.setWSLSettings(JSON.stringify({
+  window.wslTerminal.setWSLLaunch(JSON.stringify({
       wslName: "DockerDesk",
       startWithApp: settingsDatas.startWithApp
     })
   ).then((result) => {
-    console.log(result)
     if (result.success) {
       $q.notify({
         type: 'positive',
@@ -450,12 +481,11 @@ const onStartWithApp = () => {
 }
 
 const onStopWithApp = () => {
-  window.wslTerminal.setWSLSettings(JSON.stringify({
+  window.wslTerminal.setWSLLaunch(JSON.stringify({
       wslName: "DockerDesk",
       stopWithApp: settingsDatas.stopWithApp
     })
   ).then((result) => {
-    console.log(result)
     if (result.success) {
       $q.notify({
         type: 'positive',
@@ -469,6 +499,35 @@ const onStopWithApp = () => {
         message: `${t('assistant.setFail')}`
       })
     }
+  })
+}
+
+const onWSLDirEdit = () => {
+  window.myWindowAPI.selectFolders().then((result) => {
+    if (result) {
+      wslDefaultDir.value = result[0]
+    } else {
+      wslDefaultDir.value = ''
+    }
+
+    window.wslTerminal.setWSLSettings(JSON.stringify({
+      key: "defaultInstallDir",
+      value: wslDefaultDir.value
+    })).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('assistant.setSuccess')
+        })
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('assistant.setFail')}: ${result.error}`
+        })
+      }
+    })
   })
 }
 
@@ -506,6 +565,7 @@ const init = () => {
                     isAssLocalBtn.value = false
                   }
 
+                  isBgStart.value = false
                   showWslStatusBtn.value = false
                   checkSubSystem()
                   return
@@ -531,12 +591,23 @@ const init = () => {
         })
       }
     })
+
+    window.wslTerminal.getWSLSettings("defaultInstallDir").then((result) => {
+      if (result.success) {
+        wslDefaultDir.value = result.data
+      }
+    })
   }
 }
 
 onMounted(() => {
   init()
 })
+
+onUnmounted(() => {
+
+})
+
 </script>
 
 <style scoped></style>

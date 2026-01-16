@@ -114,16 +114,16 @@
 
             <q-list dense :style="`backgroundColor:${templates[props.data.templateId].backgroundColor}`">
               <q-item
-                :disable="isSettings"
+                :disable="isDetail"
                 clickable
                 v-close-popup
                 size="sm"
-                @click="onSettings"
+                @click="onDetail"
               >
                 <q-item-section>
-                  <q-icon name="settings" color="teal-9" />
+                  <q-icon name="details" color="brown" />
                   <q-tooltip class="bg-amber text-black shadow-4">
-                    {{t('wsl.settings')}}
+                    {{t('wsl.detail')}}
                   </q-tooltip>
                 </q-item-section>
               </q-item>
@@ -186,59 +186,13 @@
     </q-card-section>
   </q-card>
 
-  <q-dialog
-    v-if="showSettingsDialog"
-    v-model="showSettingsDialog"
-  >
-    <q-card style="min-width: 60%" class="q-pa-md">
-      <q-card-section>
-        <div class="text-h6">{{t('wsl.wslSettings')}}</div>
-      </q-card-section>
+  <WSLDetailDialog
+    v-if="showDetailDialog"
+    v-model="showDetailDialog"
+    :data="props.data"
+    :onClose="() => showDetailDialog = false"
+  />
 
-      <q-expansion-item
-        expand-separator
-        flat bordered
-        :label="t('wsl.startupBehavior')"
-        header-class="text-grey-6"
-        style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
-      >
-        <div class="q-pa-md q-gutter-sm">
-          <q-item class="bg-grey-4">
-            <q-item-section>
-              <q-item-label caption>Start With App</q-item-label>
-              <q-item-label >{{t('wsl.startWithApp')}}</q-item-label>
-            </q-item-section>
-            <q-item-section top side>
-              <q-toggle
-                v-model="settingsDatas.startWithApp"
-                color="green"
-                @update:model-value="onStartWithApp"
-              />
-            </q-item-section>
-          </q-item>
-
-          <q-item class="bg-grey-4">
-            <q-item-section>
-              <q-item-label caption>Stop With App</q-item-label>
-              <q-item-label >{{t('wsl.stopWithApp')}}</q-item-label>
-            </q-item-section>
-            <q-item-section top side>
-              <q-toggle
-                v-model="settingsDatas.stopWithApp"
-                color="green"
-                @update:model-value="onStopWithApp"
-              />
-            </q-item-section>
-          </q-item>
-        </div>
-      </q-expansion-item>
-
-      <q-card-actions align="right">
-        <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="showSettingsDialog = false" />
-        <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="onAddStoreApi" />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
 </template>
 
 
@@ -263,6 +217,7 @@ const props = defineProps({
 })
 
 import { inject, reactive, ref, watch, onMounted, defineEmits } from 'vue'
+import WSLDetailDialog from 'src/components/dialog/WSLDetailDialog.vue'
 import { changeNavigatorGoto } from "src/utils/router.js"
 import { useNavigatorStore } from 'stores/navigator.js'
 import { findNaviItemByName, isEmptyObj } from 'src/utils/common.js'
@@ -307,9 +262,7 @@ const wslStatus = reactive({
   diskValue: 0,
 })
 
-const isAutoLaunch = ref(props.data.isAutoLaunch)
-
-const isSettings = ref(false)
+const isDetail = ref(false)
 const isStart = ref(false)
 const isStop = ref(false)
 const isRestart = ref(false)
@@ -347,11 +300,7 @@ const changeState = (newVal) => {
   }
 }
 
-const showSettingsDialog = ref(false)
-const settingsDatas = reactive({
-  startWithApp: false,
-  stopWithApp: false
-})
+const showDetailDialog = ref(false)
 
 changeState(props.data.state)
 
@@ -417,72 +366,8 @@ const onRestart = () => {
   emit('update:value', {name: props.data.servername, state: "Stopped"})
 }
 
-const onSettings = () => {
-  window.wslTerminal.getWSLSettings(props.data.servername).then((result) => {
-    if (result.success) {
-      if (Object.prototype.hasOwnProperty.call(result.data, "startWithApp")) {
-        settingsDatas.startWithApp = result.data.startWithApp
-      }
-
-      if (Object.prototype.hasOwnProperty.call(result.data, "stopWithApp")) {
-        settingsDatas.stopWithApp = result.data.stopWithApp
-      }
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('wsl.getSettingError')}: ${result.error}`
-      })
-    }
-  })
-
-  showSettingsDialog.value = true
-}
-
-const onStartWithApp = () => {
-  window.wslTerminal.setWSLSettings(JSON.stringify({
-      wslName: props.data.servername,
-      startWithApp: settingsDatas.startWithApp
-    })
-  ).then((result) => {
-    console.log(result)
-    if (result.success) {
-      $q.notify({
-        type: 'positive',
-        position: clientConfig.quasar.notify.position,
-        message: t('wsl.setSuccess')
-      })
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('wsl.setFail')}`
-      })
-    }
-  })
-}
-
-const onStopWithApp = () => {
-  window.wslTerminal.setWSLSettings(JSON.stringify({
-      wslName: props.data.servername,
-      stopWithApp: settingsDatas.stopWithApp
-    })
-  ).then((result) => {
-    console.log(result)
-    if (result.success) {
-      $q.notify({
-        type: 'positive',
-        position: clientConfig.quasar.notify.position,
-        message: t('wsl.setSuccess')
-      })
-    } else {
-      $q.notify({
-        type: 'negative',
-        position: clientConfig.quasar.notify.position,
-        message: `${t('wsl.setFail')}`
-      })
-    }
-  })
+const onDetail = () => {
+  showDetailDialog.value = true
 }
 
 const onBackgroundStart = async () => {
