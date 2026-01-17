@@ -274,7 +274,7 @@ const settings = reactive({
   isAutoLaunch: false,
   display: {
     isShowCarousel: true,
-    isShowSearchBar: false
+    isShowSearchBar: true
   }
 })
 

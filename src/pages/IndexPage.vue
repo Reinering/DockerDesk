@@ -70,7 +70,7 @@ const pHeight = computed(() => {
 
 const displaySettings = reactive({
   isShowCarousel: true,
-  isShowSearchBar: false
+  isShowSearchBar: true
 })
 
 const getDisplaySettings = () => {
