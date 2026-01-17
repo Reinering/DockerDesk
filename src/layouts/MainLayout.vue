@@ -77,7 +77,6 @@ if (process.env.MODE === 'electron') {
   pageState.isBarHide = false
 }
 
-
 // 导航栏是否禁用
 const disableNavi = reactive({
   disabled: null, // 是否禁用导航栏 null/true
@@ -87,6 +86,5 @@ const disableNavi = reactive({
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
-
 
 </script>

@@ -55,71 +55,102 @@
         </q-expansion-item>
       </div>
 
-      <div class="q-pa-md">
-        <q-card class="q-mb-md" flat bordered>
-          <q-card-section class="row items-center q-py-sm q-px-md" style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-            <div class="col">
-              <q-btn
-                flat
-                dense
-                color="grey-6"
-                style="background-color: #e9ecef; border-radius: 4px; font-size: 16px; padding: 4px 12px;"
-              >
-                {{t('setting.base')}}
-              </q-btn>
-            </div>
-            <div class="col-auto row items-center q-gutter-sm">
-              <q-btn color="teal" label="save" size="md"/>
-            </div>
-          </q-card-section>
+<!--      <div class="q-pa-md">-->
+<!--        <q-card class="q-mb-md" flat bordered>-->
+<!--          <q-card-section class="row items-center q-py-sm q-px-md" style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">-->
+<!--            <div class="col">-->
+<!--              <q-btn-->
+<!--                flat-->
+<!--                dense-->
+<!--                color="grey-6"-->
+<!--                style="background-color: #e9ecef; border-radius: 4px; font-size: 16px; padding: 4px 12px;"-->
+<!--              >-->
+<!--                {{t('setting.base')}}-->
+<!--              </q-btn>-->
+<!--            </div>-->
+<!--            <div class="col-auto row items-center q-gutter-sm">-->
+<!--              <q-btn color="teal" label="save" size="md"/>-->
+<!--            </div>-->
+<!--          </q-card-section>-->
 
+<!--          <div class="q-pa-md q-gutter-sm">-->
+<!--            <q-select-->
+<!--              class="bg-grey-3"-->
+<!--              color="blue"-->
+<!--              v-model="lang"-->
+<!--              :options="langOptions"-->
+<!--              label="Language"-->
+<!--              borderless-->
+<!--              emit-value-->
+<!--              map-options-->
+<!--              options-dense-->
+<!--              filled-->
+<!--            />-->
+
+<!--            <q-select-->
+<!--              class="bg-grey-3"-->
+<!--              color="blue"-->
+<!--              v-model="theme"-->
+<!--              :options="themeOptions"-->
+<!--              label="Theme"-->
+<!--              borderless-->
+<!--              emit-value-->
+<!--              map-options-->
+<!--              options-dense-->
+<!--              filled-->
+<!--              @update:modelValue="onThemeUpdate"-->
+<!--            />-->
+
+<!--            <q-select-->
+<!--              class="bg-grey-3"-->
+<!--              color="blue"-->
+<!--              v-model="userMode"-->
+<!--              :options="userModes"-->
+<!--              label="User Mode"-->
+<!--              borderless-->
+<!--              emit-value-->
+<!--              map-options-->
+<!--              options-dense-->
+<!--              filled-->
+<!--              @update:modelValue="onUserModeUpdate"-->
+<!--            />-->
+<!--          </div>-->
+
+<!--        </q-card>-->
+<!--      </div>-->
+
+      <div class="q-pa-md q-gutter-y-md">
+        <q-expansion-item
+          expand-separator
+          flat bordered
+          :label="t('setting.display')"
+          header-class="text-grey-6"
+          style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
+        >
           <div class="q-pa-md q-gutter-sm">
-            <q-select
-              class="bg-grey-3"
-              color="blue"
-              v-model="lang"
-              :options="langOptions"
-              label="Language"
-              borderless
-              emit-value
-              map-options
-              options-dense
-              filled
-            />
+            <q-item class="bg-grey-4">
+              <q-item-section>
+                <q-item-label caption>SHow Carousel</q-item-label>
+                <q-item-label >{{t('setting.show') + t('setting.carousel')}}</q-item-label>
+              </q-item-section>
+              <q-item-section avatar>
+                <q-toggle color="green" v-model="settings.display.isShowCarousel" @update:model-value="changeDisplay"/>
+              </q-item-section>
+            </q-item>
 
-            <q-select
-              class="bg-grey-3"
-              color="blue"
-              v-model="theme"
-              :options="themeOptions"
-              label="Theme"
-              borderless
-              emit-value
-              map-options
-              options-dense
-              filled
-              @update:modelValue="onThemeUpdate"
-            />
+            <q-item class="bg-grey-4">
+              <q-item-section>
+                <q-item-label caption>Show Search Bar</q-item-label>
+                <q-item-label >{{t('setting.show') + t('setting.searchBar')}}</q-item-label>
+              </q-item-section>
+              <q-item-section avatar>
+                <q-toggle color="green" v-model="settings.display.isShowSearchBar" @update:model-value="changeDisplay"/>
+              </q-item-section>
+            </q-item>
 
-            <q-select
-              class="bg-grey-3"
-              color="blue"
-              v-model="userMode"
-              :options="userModes"
-              label="User Mode"
-              borderless
-              emit-value
-              map-options
-              options-dense
-              filled
-              @update:modelValue="onUserModeUpdate"
-            />
           </div>
+        </q-expansion-item>
 
-        </q-card>
-      </div>
-
-      <div class="q-pa-md">
         <q-expansion-item
           expand-separator
           flat bordered
@@ -134,7 +165,7 @@
                 <q-item-label >{{t('setting.autoLaunch')}}</q-item-label>
               </q-item-section>
               <q-item-section avatar>
-                <q-toggle color="green" v-model="isAutoLaunch" @update:model-value="changeAutoLaunch"/>
+                <q-toggle color="green" v-model="settings.isAutoLaunch" @update:model-value="changeAutoLaunch"/>
               </q-item-section>
             </q-item>
 
@@ -224,9 +255,8 @@ const userModes = [
 
 const userMode = ref("normal")
 
-
 const onThemeUpdate = () => {
-  console.log(theme.value)
+  // console.log(theme.value)
 
   if (theme.value === t('setting.theme.dark')) {
     $q.dark.set(true)
@@ -240,10 +270,39 @@ const onThemeUpdate = () => {
   }
 }
 
-const isAutoLaunch = ref(false)
+const settings = reactive({
+  isAutoLaunch: false,
+  display: {
+    isShowCarousel: true,
+    isShowSearchBar: false
+  }
+})
+
+const changeDisplay = () => {
+  window.client.updateSettings({
+    field: "display_settings",
+    type: "json",
+    value: JSON.stringify(settings.display),
+
+  }).then((result) => {
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('setting.actionSuccess')
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('setting.actionFail')}: ${result.error}`
+      })
+    }
+  })
+}
 
 const changeAutoLaunch = () => {
-  window.client.setAutoLaunch(isAutoLaunch.value).then((result) => {
+  window.client.setAutoLaunch(settings.isAutoLaunch).then((result) => {
     if (result.success) {
       $q.notify({
         type: 'positive',
@@ -271,7 +330,19 @@ const init = () => {
 
   window.client.getAutoLaunch().then((result) => {
     if (result.success) {
-      isAutoLaunch.value = result.data
+      settings.isAutoLaunch = result.data
+    }
+  })
+
+  window.client.getSettings("display_settings").then((result) => {
+    if (result.success) {
+      const data= JSON.parse(result.data.value)
+      if (Object.prototype.hasOwnProperty.call(data, "isShowCarousel")) {
+        settings.display.isShowCarousel = data.isShowCarousel
+      }
+      if (Object.prototype.hasOwnProperty.call(data, "isShowSearchBar")) {
+        settings.display.isShowSearchBar = data.isShowSearchBar
+      }
     }
   })
 }
@@ -281,8 +352,6 @@ const checkScreenHeightSize = () => {
 }
 
 const onUserModeUpdate = () => {
-  console.log(userMode.value)
-
   configStore.userMode = userMode.value
 }
 
@@ -291,7 +360,6 @@ onMounted(() => {
 
   window.addEventListener('resize', checkScreenHeightSize)
 })
-
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreenHeightSize)
@@ -312,11 +380,6 @@ watch(lang, (newVal) => {
 
   window.myWindowAPI.syncLang(configStore.lang)
 })
-
-
-
-
-
 
 
 </script>

@@ -824,6 +824,8 @@ export default {
     base: "Base Settings",
     basic: "Basic Settings",
     system: "System Settings",
+    display: "Display Settings",
+    show: "Show",
 
     theme: {
       auto: "Auto",
@@ -837,6 +839,9 @@ export default {
       normal: "Normal",
       professional: "Professional",
     },
+
+    searchBar: "Search Bar",
+    carousel: "carousel",
 
     autoStart: "Auto Start",
 

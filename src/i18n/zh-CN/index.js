@@ -837,6 +837,8 @@ export default {
     base: "基础用法",
     basic: "基本设置",
     system: "系统设置",
+    display: "显示设置",
+    show: "显示",
 
     theme: {
       auto: "自动模式",
@@ -850,6 +852,9 @@ export default {
       normal: "普通模式",
       professional: "专业模式",
     },
+
+    searchBar: "搜索栏",
+    carousel: "幻灯片",
 
     autoLaunch: "开机启动",
 

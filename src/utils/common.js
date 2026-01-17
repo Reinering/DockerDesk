@@ -190,7 +190,7 @@ export function getResourcePath(filePath) {
     if (process.env.NODE_ENV !== 'development') {
       return filePath
     } else {
-      return `src/static/${filePath}`
+      return `src/assets/${filePath}`
     }
   }
 }

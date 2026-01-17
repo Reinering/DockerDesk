@@ -176,6 +176,13 @@ async function initDB() {
           mark: "app install settings",
           delete_flags: 0
         },
+        {
+          field: "display_settings",
+          type: "json",
+          value: '{}',
+          mark: "display settings",
+          delete_flags: 0
+        },
       ])
     }
 
