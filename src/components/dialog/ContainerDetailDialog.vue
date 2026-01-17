@@ -377,7 +377,7 @@ const onSendHome = (row) => {
   window.shortcuts.addShortcuts(JSON.stringify(data))
     .then((result) => {
     if (result.success) {
-
+      shortcutsStore.shortcutsData[0].push(data)
 
       $q.notify({
         type: 'positive',
