@@ -175,7 +175,7 @@ const props = defineProps({
     type: Object,
     default: () => ({
       id: '',
-      nodeId: 0,
+      nodeId: '0',
       templateId: 0,
       websiteName: '',
       website: '',
@@ -247,7 +247,7 @@ const colors = [
 
 const formData = ref({
   id: '',
-  nodeId: 0,
+  nodeId: '0',
   templateId: 0,
   websiteName: '',
   website: '',

@@ -106,7 +106,7 @@ const serviceCmd = ref('')
 const connectState = inject('connectState')
 const dockerInfo = inject('dockerInfo')
 const podmanInfo = inject('podmanInfo')
-const wslInfo = inject('wslInfo')
+// const wslInfo = inject('wslInfo')
 
 let notify = ref(null)
 
@@ -336,9 +336,9 @@ const init = async () => {
       }
     })
   } else {
-    if (!wslInfo.enable) {
-      return
-    }
+    // if (!wslInfo.enable) {
+    //   return
+    // }
 
     await window.wslTerminal.execWSL([
       '-d', 'DockerDesk', '--user', 'root', '-e', `${serviceCmd.value} -v`

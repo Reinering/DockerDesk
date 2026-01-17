@@ -221,7 +221,6 @@ export function registerWSLIpcHandlers(win) {
     }
   })
 
-
   ipcMain.handle('stopWSL', async (event, {name}) => {
     if (isProcessing) {
       return { success: false, error: "Other WSL commands are being executed... Please try again later" }

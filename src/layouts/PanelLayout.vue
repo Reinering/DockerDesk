@@ -128,7 +128,7 @@ provide("showCreatePage", showCreatePage)
 
 const showLoading = () => {
   $q.loading.show({
-    message: 'First message. Gonna change it in 3 seconds...'
+    message: 'First message. Gonna change it in 2 seconds...'
   })
 
   let timer = setTimeout(() => {
@@ -143,8 +143,8 @@ const showLoading = () => {
     timer = setTimeout(() => {
       $q.loading.hide()
       timer = void 0
-    }, 2000)
-  }, 2000)
+    }, 1000)
+  }, 1000)
 }
 
 const checkDockerInstall = () => {

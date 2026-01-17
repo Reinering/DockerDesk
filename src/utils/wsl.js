@@ -563,3 +563,37 @@ export function getPortsByContainer(mappings) {
 
   return result
 }
+
+export function parseNetstat(data) {
+  const lines = data.trim().split('\n')
+  const result = {}
+
+  // 正则提取：协议、IP、端口
+  const regex = /^(\w+)\s+\d+\s+\d+\s+([\d.a-fA-F:]+):(\d+)\s+/
+
+  lines.forEach(line => {
+    const match = line.trim().match(regex)
+    if (match) {
+      const proto = match[1] // tcp, udp...
+      const ip = match[2]    // 127.0.0.1...
+      const port = parseInt(match[3], 10)
+
+      // 1. 初始化协议层 (tcp/udp)
+      if (!result[proto]) {
+        result[proto] = {}
+      }
+
+      // 2. 初始化 IP 层并推入端口
+      if (!result[proto][ip]) {
+        result[proto][ip] = []
+      }
+
+      // 避免重复端口
+      if (!result[proto][ip].includes(port)) {
+        result[proto][ip].push(port)
+      }
+    }
+  })
+
+  return result
+}
