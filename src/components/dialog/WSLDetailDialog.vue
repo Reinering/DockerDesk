@@ -1,6 +1,6 @@
 <template>
   <q-dialog>
-    <q-card style="min-width: 90%">
+    <q-card style="min-width: 60%">
       <q-card-section>
         <q-item-label class="text-h6">{{props.data.servername + ' ' + t('wsl.detail')}}</q-item-label>
       </q-card-section>
