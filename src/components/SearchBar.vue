@@ -1,6 +1,8 @@
 <template>
   <q-input
+    class="text-subtitle1"
     v-model="search"
+    size="xl"
     clearable
     placeholder="Search"
     @keydown.enter="onSearch"
@@ -41,6 +43,7 @@ const currentSE = ref({
 
 const onSearch = () => {
   window.client.openUrlOnBrowser(currentSE.value.url + search.value)
+  search.value = ''
 }
 
 onMounted(() => {
