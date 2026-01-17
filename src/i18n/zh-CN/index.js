@@ -547,6 +547,8 @@ export default {
     option: "选项",
     settings: "设置",
     detail: "详情",
+    action: "操作",
+    tool: "工具",
     wslDetail: "WSL 详情",
 
     basicSettings: "基本设置",

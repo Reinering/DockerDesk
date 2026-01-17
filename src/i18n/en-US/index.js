@@ -548,6 +548,8 @@ export default {
     option: "Option",
     settings: "Settings",
     detail: "Detail",
+    action: "Action",
+    tool: "Tool",
     wslDetail: "WSL Detail",
 
     basicSettings: "Basic Settings",

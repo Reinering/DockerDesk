@@ -160,26 +160,7 @@
                   </q-tooltip>
                 </q-item-section>
               </q-item>
-
-              <q-item clickable v-close-popup size="sm" @click="onExport">
-                <q-item-section>
-                  <q-icon name="archive" color="teal-9" />
-                  <q-tooltip class="bg-amber text-black shadow-4">
-                    {{t('wsl.export')}}
-                  </q-tooltip>
-                </q-item-section>
-              </q-item>
-
-              <q-item clickable v-close-popup size="sm" @click="onMove">
-                <q-item-section>
-                  <q-icon name="drive_file_move" color="teal-9" />
-                  <q-tooltip class="bg-amber text-black shadow-4">
-                    {{t('wsl.move')}}
-                  </q-tooltip>
-                </q-item-section>
-              </q-item>
             </q-list>
-
           </q-btn-dropdown>
         </div>
       </q-card-actions>
@@ -444,112 +425,6 @@ const onTerminal = () => {
         connectionType: t('node.localNode'),
         serviceType: "WSL"
       }})
-}
-const onExport = async () => {
-  const folders = await window.myWindowAPI.selectFolders()
-  try {
-    if (folders.length === 0) {
-      return
-    }
-  } catch (err) {
-    return
-  }
-
-  $q.dialog({
-    title: t('wsl.option'),
-    message: t('wsl.selectFormat'),
-    options: {
-      type: 'radio',
-      model: "tar",
-      // inline: true
-      items: [
-        { label: 'TAR', value: 'tar' },
-        { label: 'VHD', value: 'vhd' },
-      ]
-    },
-    cancel: true,
-    persistent: true
-  }).onOk(data => {
-    // console.log('>>>> OK, received', data)
-    exportWSL(data, folders[0])
-  })
-}
-const onMove = async () => {
-  const folders = await window.myWindowAPI.selectFolders()
-  try {
-    if (folders.length === 0) {
-      return
-    }
-  } catch (err) {
-    return
-  }
-
-  window.wslTerminal.moveWSL({
-    name: props.data.servername,
-    distDir: folders[0]
-  }).then((result) => {
-    if (result.success) {
-      notify.value({
-        type: 'positive',
-        icon: 'done',
-        spinner: false,
-        message: `${t('wsl.movingSuccess')}: ${props.data.servername}`,
-        timeout: 3000
-      })
-    } else {
-      notify.value({
-        type: 'negative',
-        icon: 'done',
-        spinner: false,
-        message: `${t('wsl.movingFail')}: ${props.data.servername}: ${result.error}`,
-        timeout: 3000
-      })
-    }
-  })
-
-  notify.value = $q.notify({
-    type: 'info',
-    group: false,
-    timeout: 0,
-    spinner: true,
-    position: 'bottom-right',
-    message: t('wsl.moving'),
-  })
-}
-
-const exportWSL = (format, path) => {
-  window.wslTerminal.exportWSL({
-    name: props.data.servername,
-    format: format,
-    distDir: path
-  }).then((result) => {
-    if (result.success) {
-      notify.value({
-        type: 'positive',
-        icon: 'done',
-        spinner: false,
-        message: `${t('wsl.exportSuccess')}: ${props.data.servername}`,
-        timeout: 3000
-      })
-    } else {
-      notify.value({
-        type: 'negative',
-        icon: 'done',
-        spinner: false,
-        message: `${t('wsl.exportFail')}: ${props.data.servername}: ${result.error}`,
-        timeout: 3000
-      })
-    }
-  })
-
-  notify.value = $q.notify({
-    type: 'info',
-    group: false,
-    timeout: 0,
-    spinner: true,
-    position: 'bottom-right',
-    message: t('wsl.exporting'),
-  })
 }
 
 
