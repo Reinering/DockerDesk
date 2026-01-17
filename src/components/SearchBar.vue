@@ -8,12 +8,25 @@
     @keydown.enter="onSearch"
   >
     <template v-slot:prepend>
-      <q-icon :name="currentSE.icon" />
       <q-select
         v-model="currentSE"
         :options="searchEngines"
-        style="min-width: 70px;"
-      />
+        style="min-width: 100px;"
+      >
+        <template v-slot:prepend>
+          <q-icon :name="currentSE.icon" />
+        </template>
+        <template v-slot:option="scope">
+          <q-item v-bind="scope.itemProps">
+            <q-item-section avatar>
+              <q-icon :name="scope.opt.icon" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ scope.opt.label }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-select>
     </template>
     <template v-slot:append>
       <q-btn round flat icon="search" @click="onSearch" />
