@@ -2,7 +2,6 @@
   <q-input
     class="text-subtitle1"
     v-model="search"
-    size="xl"
     clearable
     placeholder="Search"
     @keydown.enter="onSearch"
