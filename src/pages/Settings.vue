@@ -2,7 +2,7 @@
   <q-page q-pa-md>
 
     <q-scroll-area :style="scrollAreaStyle">
-      <div class="q-pa-md">
+      <div class="q-pa-md q-gutter-y-md">
         <q-expansion-item
           expand-separator
           flat bordered
@@ -53,73 +53,7 @@
             />
           </div>
         </q-expansion-item>
-      </div>
 
-<!--      <div class="q-pa-md">-->
-<!--        <q-card class="q-mb-md" flat bordered>-->
-<!--          <q-card-section class="row items-center q-py-sm q-px-md" style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">-->
-<!--            <div class="col">-->
-<!--              <q-btn-->
-<!--                flat-->
-<!--                dense-->
-<!--                color="grey-6"-->
-<!--                style="background-color: #e9ecef; border-radius: 4px; font-size: 16px; padding: 4px 12px;"-->
-<!--              >-->
-<!--                {{t('setting.base')}}-->
-<!--              </q-btn>-->
-<!--            </div>-->
-<!--            <div class="col-auto row items-center q-gutter-sm">-->
-<!--              <q-btn color="teal" label="save" size="md"/>-->
-<!--            </div>-->
-<!--          </q-card-section>-->
-
-<!--          <div class="q-pa-md q-gutter-sm">-->
-<!--            <q-select-->
-<!--              class="bg-grey-3"-->
-<!--              color="blue"-->
-<!--              v-model="lang"-->
-<!--              :options="langOptions"-->
-<!--              label="Language"-->
-<!--              borderless-->
-<!--              emit-value-->
-<!--              map-options-->
-<!--              options-dense-->
-<!--              filled-->
-<!--            />-->
-
-<!--            <q-select-->
-<!--              class="bg-grey-3"-->
-<!--              color="blue"-->
-<!--              v-model="theme"-->
-<!--              :options="themeOptions"-->
-<!--              label="Theme"-->
-<!--              borderless-->
-<!--              emit-value-->
-<!--              map-options-->
-<!--              options-dense-->
-<!--              filled-->
-<!--              @update:modelValue="onThemeUpdate"-->
-<!--            />-->
-
-<!--            <q-select-->
-<!--              class="bg-grey-3"-->
-<!--              color="blue"-->
-<!--              v-model="userMode"-->
-<!--              :options="userModes"-->
-<!--              label="User Mode"-->
-<!--              borderless-->
-<!--              emit-value-->
-<!--              map-options-->
-<!--              options-dense-->
-<!--              filled-->
-<!--              @update:modelValue="onUserModeUpdate"-->
-<!--            />-->
-<!--          </div>-->
-
-<!--        </q-card>-->
-<!--      </div>-->
-
-      <div class="q-pa-md q-gutter-y-md">
         <q-expansion-item
           expand-separator
           flat bordered
@@ -169,47 +103,12 @@
               </q-item-section>
             </q-item>
 
-<!--            <q-item class="bg-grey-4">-->
-<!--              <q-item-section avatar top>-->
-<!--                <q-icon name="account_tree" color="black" size="34px" />-->
-<!--              </q-item-section>-->
-
-<!--              <q-item-section top class="col-2 gt-sm">-->
-<!--                <q-item-label class="q-mt-sm">GitHub</q-item-label>-->
-<!--              </q-item-section>-->
-
-<!--              <q-item-section top>-->
-<!--                <q-item-label lines="1">-->
-<!--                  <span class="text-weight-medium">[quasarframework/quasar]</span>-->
-<!--                  <span class="text-grey-8"> - GitHub repository</span>-->
-<!--                </q-item-label>-->
-<!--                <q-item-label caption lines="1">-->
-<!--                  @rstoenescu in #1: > The build system-->
-<!--                </q-item-label>-->
-<!--                <q-item-label lines="1" class="q-mt-xs text-body2 text-weight-bold text-primary text-uppercase">-->
-<!--                  <span class="cursor-pointer">Open in GitHub</span>-->
-<!--                </q-item-label>-->
-<!--              </q-item-section>-->
-
-<!--              <q-item-section top side>-->
-<!--                <div class="text-grey-8 q-gutter-xs">-->
-<!--                  <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />-->
-<!--                  <q-btn class="gt-xs" size="12px" flat dense round icon="done" />-->
-<!--                  <q-btn size="12px" flat dense round icon="more_vert" />-->
-<!--                </div>-->
-<!--              </q-item-section>-->
-<!--            </q-item>-->
-
           </div>
 
         </q-expansion-item>
       </div>
 
     </q-scroll-area>
-    <q-card>
-
-
-    </q-card>
 
   </q-page>
 
