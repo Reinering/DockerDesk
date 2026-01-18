@@ -309,7 +309,6 @@ const installDocker = () => {
           id: '11111111',
           delete_flags: 2
         })).then((result) => {
-          console.log(result)
           if (result.success) {
 
           } else {
@@ -347,7 +346,6 @@ const installDocker = () => {
           id: '11111111',
           delete_flags: 2
         })).then((result) => {
-          console.log(result)
           if (result.success) {
 
           } else {
@@ -369,8 +367,6 @@ const installDocker = () => {
 }
 
 const initDocker = () => {
-  console.log("initDocker")
-
   checkDockerInstall()
 }
 
@@ -640,7 +636,6 @@ const init = async () => {
         if (result.success) {
           connectState.value = true
 
-          console.log("service", service)
           await setTimeout(() => {
             if (firstLower(service.serviceType) === "docker") {
               initDocker()
@@ -648,7 +643,6 @@ const init = async () => {
               initPodman()
             }
           }, 2000)
-
         } else {
           connectState.value = false
 

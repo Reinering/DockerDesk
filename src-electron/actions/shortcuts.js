@@ -7,7 +7,7 @@ export const shortcuts = {
   getShortcutss:  async () => {
     // delete_flags: 0: normal, 1: deleted
     return db('shortcuts')
-      .select('*').then(
+      .select('*').where("delete_flags", '=', '0').then(
         rows => {
           return rows
         }).catch(error => {
@@ -17,7 +17,7 @@ export const shortcuts = {
 
   addShortcuts: async (data) => {
     return await db('shortcuts').insert(data)
-      .then(result => {
+      .then((result) => {
         return { success: true, error: '' }
       }).catch(error => {
         return { success: false, error: error }
@@ -137,5 +137,18 @@ export const shortcuts = {
     }).catch(error => {
       return { success: false, error: error }
     })
+  },
+
+  getLastShortcutsByPage:  async (pageNo) => {
+    // delete_flags: 0: normal, 1: deleted
+    return db('shortcuts')
+      .select('*')
+      .where("delete_flags", '=', '0')
+      .andWhere("page_no", '=', pageNo).then(
+        rows => {
+          return rows
+        }).catch(error => {
+        return { success: false, error: error }
+      })
   },
 }

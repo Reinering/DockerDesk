@@ -199,7 +199,6 @@ const shortcutsData = reactive([
 ])
 
 const onSetTemplate = (id) => {
-  console.log("onSetTemplate", id)
   templateId.value = id
 
   shortcutsStore.shortcutTemplate = id
@@ -325,8 +324,6 @@ const onDeleteShortcuts = (id) => {
       }
     }
   })
-
-  shortcutsStore.shortcutsData = shortcutsData
 }
 
 const onUpdate = () => {
@@ -339,7 +336,7 @@ const onDragMove = (event) => {
 }
 
 const onDragStart = async (event) => {
-  console.log("start")
+  // console.log("start")
 
   shortcutsData.push([])
 
@@ -353,7 +350,7 @@ const onDragEnd = (event) => {
 }
 
 const onDrag = (event) => {
-  console.log("drag")
+  // console.log("drag")
 
   isDrag.value = true
 
@@ -370,12 +367,10 @@ const onDrag = (event) => {
     lockScrolling()
     carouselRef.value.previous()
   }
-
-  shortcutsStore.shortcutsData = shortcutsData
 }
 
 const onChange = (event) => {
-  console.log("onChange", event)
+  // console.log("onChange", event)
 
   updatePrevId(event)
   updatePageNo(event)
@@ -419,7 +414,7 @@ const updatePrevId = (event) => {
   if (event.removed) console.log('从旧页面移除了:', event.removed.element)
 
   if (event.added) {
-    console.log('添加到了新页面:', event.added.element)
+    // console.log('添加到了新页面:', event.added.element)
     let page
     const node = JSON.parse(JSON.stringify(event.added.element))
 
@@ -544,7 +539,7 @@ const updatePrevId = (event) => {
   }
 
   if (event.moved) {
-    console.log('从页面移动:', event.moved.element)
+    // console.log('从页面移动:', event.moved.element)
 
     let page
     const node = JSON.parse(JSON.stringify(event.moved.element))
@@ -623,7 +618,7 @@ const updatePageNo = (event, node) => {
   const sqlList = []
 
   if (event.added) {
-    console.log('添加到了新页面:', event.added.element)
+    // console.log('添加到了新页面:', event.added.element)
 
     const node = JSON.parse(JSON.stringify(event.added.element))
     const page = shortcutsData[node.pageNo]
@@ -688,16 +683,10 @@ const getShortcutsList = () => {
       console.log("get shortcuts error")
     }
   })
-
-  shortcutsStore.shortcutsData = shortcutsData
 }
 
 const init = () => {
-
   getShortcutsList()
-
-  console.log(shortcutsData)
-
 
   if (shortcutsStore.shortcutTemplate) {
     templateId.value = shortcutsStore.shortcutTemplate

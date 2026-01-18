@@ -248,8 +248,6 @@ const props = defineProps({
 })
 
 import { inject, ref, onMounted, onUnmounted, onActivated, onDeactivated, reactive } from 'vue'
-import { useComponentsStore } from 'stores/components.js'
-import { useShortcutsStore } from 'stores/shortcuts.js'
 import { isEmptyObj } from 'src/utils/common.js'
 import { getPortsByContainer, parseContainerUsage } from 'src/utils/wsl.js'
 
@@ -257,9 +255,6 @@ const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
-
-const componentsStore = useComponentsStore()
-const shortcutsStore = useShortcutsStore()
 
 const service = inject("service")
 const serviceCmd = ref('info')
@@ -345,7 +340,7 @@ const columns_vol = [
   { name: 'actions', label: t('panel.images.action'), align: 'center' }
 ]
 
-const onSendHome = (row) => {
+const onSendHome = async (row) => {
   let data = {}
 
   if (service.connectionType === t('node.remoteNode')) {
@@ -368,17 +363,22 @@ const onSendHome = (row) => {
   data["fontSize"] = '24'
   data["pageNo"] = 0
 
-  if (shortcutsStore.shortcutsData.length === 0) {
+  const result = await window.shortcuts.getLastByPage(0)
+
+  if (!result.success) {
+    return
+  }
+
+  const last = result.data
+  if (last === '') {
     data["prevId"] = "0"
   } else {
-    data["prevId"] = shortcutsStore.shortcutsData[0][shortcutsStore.shortcutsData[0].length-1].id
+    data["prevId"] = last.id
   }
 
   window.shortcuts.addShortcuts(JSON.stringify(data))
     .then((result) => {
     if (result.success) {
-      shortcutsStore.shortcutsData[0].push(data)
-
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
