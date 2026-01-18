@@ -15,6 +15,48 @@ export const shortcuts = {
       })
   },
 
+  getShortcutsById:  async (id) => {
+    // delete_flags: 0: normal, 1: deleted
+    return db('shortcuts')
+      .select('*')
+      .where("delete_flags", '=', '0')
+      .andWhere("id", '=', id)
+      .then(
+        rows => {
+          return rows
+        }).catch(error => {
+        return { success: false, error: error }
+      })
+  },
+
+  getShortcutsByPrevId:  async (id) => {
+    // delete_flags: 0: normal, 1: deleted
+    return db('shortcuts')
+      .select('*')
+      .where("delete_flags", '=', '0')
+      .andWhere("prev_id", '=', id)
+      .then(
+        rows => {
+          return rows
+        }).catch(error => {
+        return { success: false, error: error }
+      })
+  },
+
+  getShortcutsByContainerId:  async (id) => {
+    // delete_flags: 0: normal, 1: deleted
+    return db('shortcuts')
+      .select('*')
+      .where("delete_flags", '=', '0')
+      .andWhere("container_id", '=', id)
+      .then(
+        rows => {
+          return rows
+        }).catch(error => {
+        return { success: false, error: error }
+      })
+  },
+
   addShortcuts: async (data) => {
     return await db('shortcuts').insert(data)
       .then((result) => {
@@ -64,6 +106,18 @@ export const shortcuts = {
     } catch (error) {
       return error
     }
+  },
+
+  updateShortcutsById: async (id, data) => {
+    return await db('shortcuts')
+      .where('id', '=', id)
+      .update(data)
+      .then((result) => {
+      if (result === 0) return { success: false, error: '' }
+      return { success: true, error: '' }
+    }).catch(error => {
+      return { success: false, error: error }
+    })
   },
 
   updatesShortcutsByPage: async (data) => {
@@ -139,6 +193,19 @@ export const shortcuts = {
     })
   },
 
+  delShortcutsByContainerId: async (id) => {
+    return await db('shortcuts').where('id', '=', id).update(
+      {
+        delete_time: Date.now(),
+        delete_flags: 1,
+      }
+    ).then((result) => {
+      return { success: true, error: '' }
+    }).catch(error => {
+      return { success: false, error: error }
+    })
+  },
+
   getLastShortcutsByPage:  async (pageNo) => {
     // delete_flags: 0: normal, 1: deleted
     return db('shortcuts')
@@ -151,4 +218,32 @@ export const shortcuts = {
         return { success: false, error: error }
       })
   },
+
+}
+
+export const delShortcutsById = async (id) => {
+  const result = await shortcuts.getShortcutsById(id)
+  if (!Array.isArray(result) || result.length === 0) {
+    return result
+  }
+  const prevId = result[0]["prev_id"]
+
+  const result1 = await shortcuts.getShortcutsByPrevId(id)
+  if (!Array.isArray(result1)) {
+    return result1
+  } else if (result1.length === 0) {
+    return shortcuts.delShortcutsByID(id)
+  }
+
+  const result3 =  await shortcuts.delShortcutsByID(id)
+  if (!result3.success) {
+    return result3
+  }
+
+  return shortcuts.updateShortcutsById(
+    result1[0].id,
+    {
+      prev_id: prevId
+    }
+  )
 }

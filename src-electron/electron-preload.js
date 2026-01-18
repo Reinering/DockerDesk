@@ -665,6 +665,10 @@ contextBridge.exposeInMainWorld('shortcuts', {
     return ipcRenderer.invoke('deleteShortcuts', data)
   },
 
+  delShortcutsByContainerId (data) {
+    return ipcRenderer.invoke('delShortcutsByContainerId', data)
+  },
+
   getLastByPage (data) {
     return ipcRenderer.invoke('getLastShortcutsByPage', data)
   },

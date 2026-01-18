@@ -331,6 +331,7 @@ export default {
       restartFail: "Restart Failure",
       deleteMessage: "Are you sure to delete?",
       forceDelete: "Need to force delete?",
+      delShortcuts: "Do you need to delete the associated shortcut?",
       deleteSuccess: "Delete Successfully",
       deleteFail: "Delete Failure",
       exporting: "Exporting",

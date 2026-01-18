@@ -190,7 +190,8 @@ async function initDB() {
     if (!tableExists) {
       await db.schema.createTableIfNotExists('shortcuts', function(table) {
         table.text('id').notNullable() // 主键，文本类型，非空
-        table.text('node_id').notNullable() //
+        table.text('container_id') //
+        table.text('node_id') //
         table.text('name').notNullable() //
         table.text('url').notNullable() //
         table.text('label') //

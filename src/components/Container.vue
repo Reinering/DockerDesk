@@ -199,7 +199,7 @@
   <ContainerDetailDialog
     v-if="showContainerDetailDialog"
     v-model="showContainerDetailDialog"
-    :data="props.data['data']"
+    :item="props.data['data']"
     :onClose="onShowContainerDetailDialog"
   />
 </template>
@@ -387,6 +387,7 @@ const onStart = async () => {
     message: t('panel.container.starting'),
   })
 }
+
 const onStop = () => {
   if (isEmptyObj(props.data)) {
     return
@@ -447,6 +448,7 @@ const onStop = () => {
     })
   }
 }
+
 const onRestart = () => {
   if (isEmptyObj(props.data)) {
     return
@@ -518,7 +520,9 @@ const onRestart = () => {
     message: t('panel.container.restarting'),
   })
 }
+
 const onDetail = () => {}
+
 const onDelete = () => {
   if (isEmptyObj(props.data)) {
     return
@@ -529,10 +533,11 @@ const onDelete = () => {
     message: t('panel.container.deleteMessage'),
     options: {
       type: 'checkbox',
-      model: [],
+      model: ['delete'],
       // inline: true
       items: [
         { label: t('panel.container.forceDelete'), value: 'force', color: 'red' },
+        { label: t('panel.container.delShortcuts'), value: 'delete', color: 'green' },
       ]
     },
     ok: {
@@ -545,7 +550,7 @@ const onDelete = () => {
     persistent: true
   }).onOk(async (data) => {
     let force = ''
-    if (data.length > 0) {
+    if (data.indexOf("force") !== -1) {
       force = '-f'
     }
 
@@ -569,6 +574,10 @@ const onDelete = () => {
           if (monitorInterval !== null) {
             clearInterval(monitorInterval)
             monitorInterval = null
+          }
+
+          if (data.indexOf("delete") !== -1) {
+            deleteShortcuts(props.data["data"]["containerId"])
           }
         } else {
           $q.notify({
@@ -594,6 +603,10 @@ const onDelete = () => {
             clearInterval(monitorInterval)
             monitorInterval = null
           }
+
+          if (data.indexOf("delete") !== -1) {
+            deleteShortcuts(props.data["data"]["containerId"])
+          }
         } else {
           $q.notify({
             type: 'negative',
@@ -605,6 +618,27 @@ const onDelete = () => {
     }
   })
 }
+
+const deleteShortcuts = (id) => {
+  window.shortcuts.delShortcutsByContainerId(id)
+    .then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.deleteShortcutsSuccess')}`,
+        })
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.deleteShortcutsFail')}`
+        })
+      }
+    })
+}
+
+
 const onPack = () => {
   if (isEmptyObj(props.data)) {
     return

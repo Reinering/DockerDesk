@@ -2,7 +2,7 @@
   <q-dialog persistent>
     <q-card style="min-width: 80%">
       <q-card-section>
-        <div class="text-subtitle1 text-weight-bold text-center" >{{`${props.data.names}`}}</div>
+        <div class="text-subtitle1 text-weight-bold text-center" >{{`${props.item.names}`}}</div>
       </q-card-section>
 
       <q-separator />
@@ -38,7 +38,7 @@
                     </q-item-section>
 
                     <q-item-section>
-                      <q-item-label >{{props.data.image}}</q-item-label>
+                      <q-item-label >{{props.item.image}}</q-item-label>
                     </q-item-section>
                   </q-item>
                   <q-item>
@@ -47,7 +47,7 @@
                     </q-item-section>
 
                     <q-item-section>
-                      <q-item-label >{{props.data.created}}</q-item-label>
+                      <q-item-label >{{props.item.created}}</q-item-label>
                     </q-item-section>
                   </q-item>
                   <q-item>
@@ -56,7 +56,7 @@
                     </q-item-section>
 
                     <q-item-section>
-                      <q-item-label >{{props.data.status}}</q-item-label>
+                      <q-item-label >{{props.item.status}}</q-item-label>
                     </q-item-section>
                   </q-item>
 
@@ -76,7 +76,7 @@
                     </q-item-section>
 
                     <q-item-section>
-                      <q-item-label >{{props.data.command}}</q-item-label>
+                      <q-item-label >{{props.item.command}}</q-item-label>
                     </q-item-section>
                   </q-item>
                 </q-list>
@@ -230,11 +230,12 @@
 import { clientConfig } from 'src/common/config.js'
 
 const props = defineProps({
-  data: {
+  item: {
     type: Object,
     default: () => ({
       templateId: 0,
-      nodeId: 0,
+      containerId: '',
+      nodeId: '',
       servername: '',
       description: '',
       data: {}
@@ -344,6 +345,7 @@ const onSendHome = async (row) => {
   let data = {}
 
   if (service.connectionType === t('node.remoteNode')) {
+    data["containerId"] = props.item.containerId
     data["nodeId"] = service.id
 
     data["website"] = `http://${service.address}:${row.external}`
@@ -357,8 +359,8 @@ const onSendHome = async (row) => {
     data["website"] = `http://localhost:${row.external}`
   }
 
-  data["websiteName"] = props.data.names
-  data["iconText"] = props.data.names.slice(0,1).toUpperCase()
+  data["websiteName"] = props.item.names
+  data["iconText"] = props.item.names.slice(0,1).toUpperCase()
   data["iconColor"] = 'teal'
   data["fontSize"] = '24'
   data["pageNo"] = 0
@@ -408,7 +410,7 @@ const getContainerUsage = () => {
 
     window.containerTerminal.exec({
       connID: service.id,
-      command: `${serviceCmd.value} stats ${props.data.names} --no-stream`
+      command: `${serviceCmd.value} stats ${props.item.names} --no-stream`
     }).then((result) => {
       if (result.success) {
         if (serviceCmd.value === "docker") {
@@ -430,7 +432,7 @@ const getContainerUsage = () => {
     }
 
     window.wslTerminal.execWSL(
-      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} stats ${props.data.names} --no-stream`]
+      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} stats ${props.item.names} --no-stream`]
     ).then((result) => {
       if (result.success) {
         if (serviceCmd.value === "docker") {
@@ -463,7 +465,7 @@ const getContainerInfo = () => {
 
     window.containerTerminal.exec({
       connID: service.id,
-      command: `${serviceCmd.value} inspect ${props.data.names}`
+      command: `${serviceCmd.value} inspect ${props.item.names}`
     }).then((result) => {
       if (result.success) {
         containerInfo.value = JSON.parse(result.data)[0]
@@ -509,7 +511,7 @@ const getContainerInfo = () => {
     }
 
     window.wslTerminal.execWSL(
-      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} inspect ${props.data.names}`]
+      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} inspect ${props.item.names}`]
     ).then((result) => {
       if (result.success) {
         containerInfo.value = JSON.parse(result.data)[0]
@@ -571,7 +573,7 @@ const init = () => {
 
   getContainerInfo()
 
-  ports.value = getPortsByContainer([props.data["ports"]])[0]
+  ports.value = getPortsByContainer([props.item["ports"]])[0]
 }
 
 onMounted(() => {

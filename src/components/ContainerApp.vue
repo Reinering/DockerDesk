@@ -1,6 +1,7 @@
 <template>
   <div class="card">
 <!--   glossy-->
+
     <div
       class="container shadow-14 q-pa-md"
       :style="getStyle()"
@@ -28,6 +29,30 @@
         <div class="text-center">{{ props.data.description }}</div>
         <div class="text-center">{{ props.storeName }}</div>
       </q-tooltip>
+
+<!--      <q-badge color="red" rounded floating />-->
+
+<!--      <q-menu-->
+<!--        touch-position-->
+<!--        context-menu-->
+<!--        auto-close-->
+<!--      >-->
+<!--        <q-list dense>-->
+<!--          <q-item clickable v-close-popup size="sm" @click="$emit('click', $event)">-->
+<!--            <q-item-section>-->
+<!--              <q-item-section>-->
+<!--                {{ t("store.install") }}-->
+<!--              </q-item-section>-->
+<!--            </q-item-section>-->
+<!--          </q-item>-->
+
+<!--          <q-item clickable @click="onDetail">-->
+<!--            <q-item-section>-->
+<!--              {{ t("store.detail") }}-->
+<!--            </q-item-section>-->
+<!--          </q-item>-->
+<!--        </q-list>-->
+<!--      </q-menu>-->
     </div>
 
     <div
@@ -66,7 +91,12 @@ const props = defineProps({
 
 defineEmits(['click'])
 
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
+
+const $q = inject("$q")
+const router = inject("router")
+const route = inject("route")
+const t = inject("t")
 
 const isShowImg = ref(true)
 
@@ -120,14 +150,17 @@ const onclick = () => {
   showSettingsDialog.value = true
 }
 
-const onClose = () => {
-  showSettingsDialog.value = false
-}
+const onDetail = () => {
 
+}
 
 </script>
 
 <style scoped>
+.container:hover {
+  transform: scale(1.1);
+}
+
 
 
 </style>

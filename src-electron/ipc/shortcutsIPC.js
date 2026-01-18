@@ -1,5 +1,5 @@
 import { ipcMain, dialog, shell } from 'electron'
-import { shortcuts } from '../actions/shortcuts.js'
+import { shortcuts, delShortcutsById } from '../actions/shortcuts.js'
 import { generateUuid } from 'app/src-electron/common/utils.js'
 
 
@@ -10,7 +10,7 @@ export function registerShortcutsIpcHandlers(win) {
       return shortcuts.getShortcutss()
         .then((result) => {
           if (!Array.isArray(result)) {
-            return { success: true, data: result }
+            return result
           }
 
           const pagesMap = {}
@@ -23,6 +23,7 @@ export function registerShortcutsIpcHandlers(win) {
 
             const item = {
               id: node.id,
+              containerId: node.container_id,
               nodeId: node.node_id,
               websiteName: node.name,
               website: node.url,
@@ -79,6 +80,7 @@ export function registerShortcutsIpcHandlers(win) {
       const res = JSON.parse(data)
       const value = {
         id: generateUuid(),
+        container_id: res.containerId,
         node_id: res.nodeId,
         name: res.websiteName,
         url: res.website,
@@ -108,6 +110,7 @@ export function registerShortcutsIpcHandlers(win) {
       const res = JSON.parse(data)
       const value = {
         id: res.id,
+        container_id: res.containerId,
         node_id: res.nodeId,
         name: res.websiteName,
         url: res.website,
@@ -171,7 +174,28 @@ export function registerShortcutsIpcHandlers(win) {
   })
 
   ipcMain.handle('deleteShortcuts', async (event, id) => {
-    return await shortcuts.delShortcutsByID(id)
+    return delShortcutsById(id)
+  })
+
+  ipcMain.handle('delShortcutsByContainerId', async (event, id) => {
+    try {
+      const result = await shortcuts.getShortcutsByContainerId(id)
+      if (!Array.isArray(result) || result.length === 0) {
+        return result
+      }
+
+      let i = 0
+      for (const item of result) {
+        const result1 = await delShortcutsById(item.id)
+        if (result1.success) {
+          i += 1
+        }
+      }
+
+      return { success: true, data: i }
+    } catch (e) {
+      return { success: false, error: e.message }
+    }
   })
 
   ipcMain.handle('getLastShortcutsByPage', async (event, data) => {
@@ -194,6 +218,7 @@ export function registerShortcutsIpcHandlers(win) {
 
             const item = {
               id: node.id,
+              containerId: node.container_id,
               nodeId: node.node_id,
               websiteName: node.name,
               website: node.url,
