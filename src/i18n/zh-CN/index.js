@@ -35,6 +35,7 @@ export default {
   mark: "备注",
 
   confirm: "确认",
+  alert: "警告",
 
   selectLanguage: '选择语言',
 
@@ -868,6 +869,8 @@ export default {
 
     actionSuccess: "操作成功",
     actionFail: "操作失败",
+
+    restoreMessage: "确认重置?"
   },
 
   store: {

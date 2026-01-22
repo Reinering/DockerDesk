@@ -400,11 +400,23 @@ const handleKeyDown = (event) => {
 }
 
 const resetHotKeys = () => {
-  window.client.restoreHotKeys().then((result) => {
-    window.client.getSettings("hot_keys").then((result) => {
-      if (result.success) {
-        settings.hotKeys = JSON.parse(result.data.value)
-      }
+  $q.dialog({
+    title: t('alert'),
+    message: t('setting.restoreMessage'),
+    ok: {
+      push: true
+    },
+    cancel: {
+      push: true,
+      color: 'negative'
+    },
+  }).onOk(() => {
+    window.client.restoreHotKeys().then((result) => {
+      window.client.getSettings("hot_keys").then((result) => {
+        if (result.success) {
+          settings.hotKeys = JSON.parse(result.data.value)
+        }
+      })
     })
   })
 }

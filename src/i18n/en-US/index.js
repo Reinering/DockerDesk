@@ -38,6 +38,7 @@ export default {
   mark: "mark",
 
   confirm: "Confirm",
+  alert: "警告",
 
   selectLanguage: 'Select Language',
 
@@ -853,6 +854,8 @@ export default {
 
     actionSuccess: "操作成功",
     actionFail: "操作失败",
+
+    restoreMessage: "Confirm reset?"
   },
 
   store: {
