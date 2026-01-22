@@ -298,21 +298,26 @@ export function wslStopLaunch () {
       return
     }
 
-    const data = JSON.parse(result.data)
-    if (data.length === 0) {
-      return
-    }
+    try {
+      const data = result.data
+      if (data.length === 0) {
+        return
+      }
 
-    getWSLList().then((result1) => {
-      const wsls = parseWSLListVersion(result1)
+      getWSLList().then((result1) => {
+        const wsls = parseWSLListVersion(result1)
 
-      for (const wsl of wsls) {
-        if (Object.prototype.hasOwnProperty.call(data, wsl["name"]) && data[wsl["name"]]["stopWithApp"]) {
-          if (wsl["state"] === "Running") {
-            stopSubSystem(wsl["name"])
+        for (const wsl of wsls) {
+          if (Object.prototype.hasOwnProperty.call(data, wsl["name"]) && data[wsl["name"]]["stopWithApp"]) {
+            if (wsl["state"] === "Running") {
+              stopSubSystem(wsl["name"])
+            }
           }
         }
-      }
-    })
+      })
+    } catch (e) {
+      console.log(e)
+    }
+
   })
 }

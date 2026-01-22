@@ -322,7 +322,7 @@ export function getWSLSettings (key) {
     .select('*').then(
       rows => {
         const data = JSON.parse(rows[0]["value"])
-        if (key === null) {
+        if (key === null || key === undefined) {
           return { success: true, data }
         }
 
