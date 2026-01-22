@@ -398,6 +398,18 @@ const initTerminal = () => {
   handleResize()
 
   connect()
+
+  // 关键部分：自定义键盘事件处理
+  term.attachCustomKeyEventHandler((event) => {
+    // Alt + 数字键 (Alt 的 keyCode 是 18，数字 1~9 的 keyCode 是 49~57)
+    if (event.altKey && !event.ctrlKey && !event.metaKey && event.code.startsWith('Digit')) {
+      // 返回 false → xterm 不处理这个事件 → 事件会继续冒泡给 Quasar
+      return false
+    }
+
+    // 其他所有按键都交给 xterm 正常处理
+    return true
+  })
 }
 
 const destroyTerminal = () => {
@@ -525,7 +537,7 @@ const sendSSHTerminal = (data) => {
 
 // 行列匹配
 const handleResize = () => {
-  console.log('resize', term.rows, term.cols)
+  // console.log('resize', term.rows, term.cols)
   if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
     window.sshTerminal.resize(JSON.stringify({
       uuid: props.terminalId,
@@ -638,7 +650,6 @@ onMounted(async () => {
 
   setupResizeObserver()
 
-  // window.addEventListener('keydown', handleKeyDown)
 })
 
 onBeforeUnmount(() => {
