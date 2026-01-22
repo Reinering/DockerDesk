@@ -156,6 +156,22 @@ contextBridge.exposeInMainWorld('client', {
 
   writeStoreData (path, data) {
     return ipcRenderer.invoke('writeStoreData', path, data)
+  },
+
+  registryHotKey (data) {
+    return ipcRenderer.invoke('registryHotKey', data)
+  },
+
+  unRegistryHotKey (data) {
+    return ipcRenderer.invoke('unRegistryHotKey', data)
+  },
+
+  restoreHotKeys () {
+    return ipcRenderer.invoke('restoreHotKeys')
+  },
+
+  switchTabOnHotKey (callback) {
+    return ipcRenderer.on('switchTabOnHotKey', (event, data) => callback(data))
   }
 
 })

@@ -861,6 +861,11 @@ export default {
 
     autoLaunch: "开机启动",
 
+    restoreHotKeys: "重置所有热键",
+    hotKeyMsg: "热键管理",
+    quickShowHide: "快速显示和隐藏",
+    switchTab: "快速切换TAB",
+
     actionSuccess: "操作成功",
     actionFail: "操作失败",
   },

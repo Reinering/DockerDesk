@@ -2,17 +2,19 @@ import { app, ipcMain, dialog, shell } from 'electron'
 import axios from 'axios'
 import puppeteer from 'puppeteer'
 import * as fs from 'fs'
+import Crypto from 'crypto.js'
 import {
   getOSInfo, getUtilization,
   getSystemProxy,
 } from '../actions/client.js'
 import { settings } from '../actions/settings.js'
-import { CmdRunner, cmdAdmin, cmd } from '../common/utils.js'
 
+import { CmdRunner, cmdAdmin, cmd } from '../common/utils.js'
 import { readStoreData, writeStoreData, } from '../common/store.js'
 import { setLang } from '../common/i18n.js'
-import Crypto from 'crypto.js'
 import { getAutoLaunch, setupAutoLaunch } from "../common/launch.js"
+import { HotKeys } from "../common/hotKeys.js"
+import { registryHotKey, unRegistryHotKey } from "../actions/hotKeys.js"
 
 
 export  const CmdRunners = new Map()
@@ -303,6 +305,18 @@ export function registerClientIpcHandlers(win) {
 
   ipcMain.handle('writeStoreData', async (event, data) => {
     return writeStoreData(data)
+  })
+
+  ipcMain.handle('registryHotKey', async (event, name) => {
+    return registryHotKey(name)
+  })
+
+  ipcMain.handle('unRegistryHotKey', async (event, name) => {
+    return unRegistryHotKey(name)
+  })
+
+  ipcMain.handle('restoreHotKeys', async (event) => {
+    return HotKeys.restore()
   })
 
 }

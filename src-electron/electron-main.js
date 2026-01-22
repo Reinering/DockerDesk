@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, nativeImage } from 'electron'
+import { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut } from 'electron'
 import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'
@@ -8,6 +8,7 @@ import { initDB } from './database/manager.js'
 import { ssh_clients, sftp_clients } from "./ipc/sshIPC.js"
 import { createTray } from "./common/tray.js"
 import { wslStartLaunch, wslStopLaunch } from "./common/wsl.js"
+import { HotKeys } from "./common/hotKeys.js"
 import { cleanupTmp } from "./common/utils.js"
 import { initLogging } from './common/logging.js'
 
@@ -96,6 +97,8 @@ app.whenReady().then(() => {
     .resize({ width: 16, height: 16 }) // 托盘图标通常较小
   createTray(mainWindow, icon)
 
+  HotKeys.registerAll(mainWindow)
+
   wslStartLaunch()
 })
 
@@ -117,7 +120,7 @@ app.on('window-all-closed', () => {
         sshClient.disconnect()
       }
     } catch (e) {
-
+      console.log(e)
     }
   }
 
@@ -128,9 +131,11 @@ app.on('window-all-closed', () => {
         sftpClient.disconnect()
       }
     } catch (e) {
-
+      console.log(e)
     }
   }
+
+  HotKeys.unRegisterAll()
 
   cleanupTmp()
 
@@ -142,7 +147,6 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
-
   }
 })
 

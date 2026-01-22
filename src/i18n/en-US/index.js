@@ -844,7 +844,12 @@ export default {
     searchBar: "Search Bar",
     carousel: "carousel",
 
-    autoStart: "Auto Start",
+    autoLaunch: "Auto Launch",
+
+    restoreHotKeys: "Reset all Hotkeys",
+    hotKeyMsg: "Hotkey Management",
+    quickShowHide: "Quick Display and Hide",
+    switchTab: "Quickly Switch TAB",
 
     actionSuccess: "操作成功",
     actionFail: "操作失败",
