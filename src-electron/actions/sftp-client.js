@@ -19,6 +19,8 @@ export class SFTPClient {
     this.win = win
     this.sftp = null
     this.stream = null
+    this.isManuallyClosing = false
+    this.status = 'disconnected'       // connecting | connected | disconnected |
   }
 
   async connect() {
@@ -33,7 +35,6 @@ export class SFTPClient {
     this.sftp = new Client()
 
     return new Promise((resolve, reject) => {
-
       this.sftp.connect(this.config)
         .then(() => {
 
@@ -46,6 +47,7 @@ export class SFTPClient {
           })
 
           this.status = 'connected'
+          this.isManuallyClosing = false
           console.log('sftp connected')
 
           resolve()
@@ -56,15 +58,20 @@ export class SFTPClient {
 
   sendDisconnected() {
     this.status = 'disconnected'
-    this.win.webContents.send("sftpTerminalReceive",
-      JSON.stringify({
-        uuid: this.uuid,
-        data: "SFTP Terminal disconnected"
-      }))
+    if (!this.isManuallyClosing) {
+      this.win.webContents.send("sftpTerminalReceive",
+        JSON.stringify({
+          uuid: this.uuid,
+          data: "SFTP Terminal disconnected"
+        }))
+    }
   }
 
   // 断开连接
   disconnect() {
+    this.isManuallyClosing = true
+    this.status = "disconnected"
+
     if (this.sftp) this.sftp.end()
   }
 

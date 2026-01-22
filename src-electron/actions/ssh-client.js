@@ -30,6 +30,7 @@ export class SSHClient {
     this.stream = null
     this.isSftp = null
     this.isSudo = null
+    this.isManuallyClosing = false
     this.status = 'disconnected'       // connecting | connected | disconnected |
   }
 
@@ -81,6 +82,7 @@ export class SSHClient {
           })
 
           this.status = 'connected'
+          this.isManuallyClosing = false
           console.log('ssh connected')
           resolve()
         }).on('end', () => {
@@ -122,11 +124,14 @@ export class SSHClient {
       this.conn
         .on('ready', async () => {
           this.status = 'connected'
+          this.isManuallyClosing = false
           console.log('ssh connected')
         }).on('error', (err) => {
         reject(err)
       }).on('close', () => {
-        this.sendDisconnected()
+        if (!this.isManuallyClosing) {
+          this.sendDisconnected()
+        }
       }).connect(this.config)
 
       resolve()
@@ -144,11 +149,14 @@ export class SSHClient {
   sendDisconnected() {
     console.log("sendDisconnected")
     this.status = 'disconnected'
-    this.win.webContents.send("sshTerminalReceive",
-      JSON.stringify({
-        uuid: this.uuid,
-        data: "Terminal disconnected"
-      }))
+
+    if (!this.isManuallyClosing) {
+      this.win.webContents.send("sshTerminalReceive",
+        JSON.stringify({
+          uuid: this.uuid,
+          data: "Terminal disconnected"
+        }))
+    }
   }
 
   // 清理连接
@@ -161,6 +169,7 @@ export class SSHClient {
     }
 
     this.status = 'disconnected'
+    this.isManuallyClosing = true
   }
 
   async listDir(remotePath){
@@ -767,6 +776,7 @@ export class SSH2Client {
     this.conn = new Client()
     this.stream = null
     this.isSudo = false
+    this.isManuallyClosing = false
     this.status = 'disconnected'       // connecting | connected | disconnected |
   }
 
@@ -781,6 +791,7 @@ export class SSH2Client {
       this.conn
         .on('ready', async () => {
           this.status = 'connected'
+          this.isManuallyClosing = false
           console.log("ssh connected")
           resolve()
       }).on('end', () => {
@@ -791,7 +802,6 @@ export class SSH2Client {
       }).on('close', () => {
         console.log("mark close")
         reject()
-        this.sendDisconnected()
       }).connect(this.config)
     })
   }
@@ -801,6 +811,7 @@ export class SSH2Client {
       this.conn
         .on('ready', async () => {
           this.status = 'connected'
+          this.isManuallyClosing = false
           console.log('ssh connected')
         }).on('error', (err) => {
         reject(err)
@@ -814,11 +825,13 @@ export class SSH2Client {
 
   sendDisconnected() {
     this.status = 'disconnected'
-    this.win.webContents.send("containerSSHState",
-      JSON.stringify({
-        uuid: this.uuid,
-        data: "Terminal disconnected"
-      }))
+    if (!this.isManuallyClosing) {
+      this.win.webContents.send("containerSSHState",
+        JSON.stringify({
+          uuid: this.uuid,
+          data: "Terminal disconnected"
+        }))
+    }
   }
 
   // 清理连接
@@ -831,6 +844,7 @@ export class SSH2Client {
     }
 
     this.status = 'Disconnected'
+    this.isManuallyClosing = true
   }
 
   exec(command) {

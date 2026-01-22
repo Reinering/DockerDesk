@@ -107,17 +107,14 @@ app.on('did-finish-load', () => {
 })
 
 // close
-app.on('window-all-closed', () => {
-  if (platform !== 'darwin') {
-    app.quit()
-  }
+app.on('window-all-closed', async () => {
 
   // 退出前，断开所有ssh连接
   for (let uuid of ssh_clients.keys()) {
     const sshClient =  ssh_clients.get(uuid)
     try {
       if (sshClient.status !== 'disconnected') {
-        sshClient.disconnect()
+        await sshClient.disconnect()
       }
     } catch (e) {
       console.log(e)
@@ -128,7 +125,7 @@ app.on('window-all-closed', () => {
     const sftpClient =  sftp_clients.get(uuid)
     try {
       if (sftpClient.status !== 'disconnected') {
-        sftpClient.disconnect()
+        await sftpClient.disconnect()
       }
     } catch (e) {
       console.log(e)
@@ -141,6 +138,11 @@ app.on('window-all-closed', () => {
 
   wslStopLaunch()
 
+
+
+  if (platform !== 'darwin') {
+    app.quit()
+  }
 })
 
 //
