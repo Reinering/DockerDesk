@@ -183,6 +183,13 @@ async function initDB() {
           mark: "display settings",
           delete_flags: 0
         },
+        {
+          field: "hot_keys",
+          type: "json",
+          value: '{}',
+          mark: "hotkey",
+          delete_flags: 0
+        }
       ])
     }
 
