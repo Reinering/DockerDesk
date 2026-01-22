@@ -18,15 +18,18 @@ export const HotKeys = {
       desc: 'setting.quickShowHide'
 
     },
-    {
-      name: 'switchTab',
-      txt: 'Switch Tab',
-      func: "switchTab",
-      keys: ['Alt', 'Num'],
-      enable: false,
-      isEdit: false,
-      desc: 'setting.switchTab'
-    }
+
+
+
+    // {
+    //   name: 'switchTab',
+    //   txt: 'Switch Tab',
+    //   func: "switchTab",
+    //   keys: ['Alt', 'Num'],
+    //   enable: false,
+    //   isEdit: false,
+    //   desc: 'setting.switchTab'
+    // }
   ],
 
   registerAll: async (mainWindow) => {
@@ -169,19 +172,20 @@ export const HotKeys = {
         rets.push(ret)
       }
 
-      return rets
+      return {success: true, data: rets}
     },
 
     unRegister: () => {
       // 注册 Ctrl + 1 到 Ctrl + 0
-      for (let i = 1; i <= 10; i++) {
+      for (let i = 1; i <= 6; i++) {
         const key = i === 10 ? '0' : String(i)
         const accelerator = `CommandOrControl+${key}`   // macOS 用 Cmd，Win/Linux 用 Ctrl
 
         HotKeys.unRegister(accelerator)
       }
-    }
 
+      return {success: true}
+    }
 
   },
 

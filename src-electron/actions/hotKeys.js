@@ -17,10 +17,16 @@ export async function registryHotKey (name) {
       } else if (!Object.prototype.hasOwnProperty.call(HotKeys, item.func)) {
         return {success: false, error: "registry failed: Function not found"}
       }
-      return HotKeys.register(item.keys.join('+'), HotKeys[item.func])
+
+      if (name === "switchTab") {
+        return HotKeys.switchTab.registry()
+      } else {
+        return HotKeys.register(item.keys.join('+'), HotKeys[item.func])
+      }
     }
-    return {success: false, error: "Hotkey not found"}
   }
+
+  return {success: false, error: "Hotkey not found"}
 }
 
 export async function unRegistryHotKey (name) {
@@ -33,7 +39,11 @@ export async function unRegistryHotKey (name) {
   for (const item of data) {
 
     if (item.name === name) {
-      return HotKeys.unRegister(item.keys.join('+'))
+      if (name === "switchTab") {
+        return HotKeys.switchTab.registry()
+      } else {
+        return HotKeys.switchTab.unRegister()
+      }
     }
   }
 
