@@ -103,7 +103,7 @@ export async function installWSL (win, data) {
         }
         password = data.password
       }
-       // throw new TypeError("asdfasdfasdf")
+
       return await cmdRunner.setupWslUser(command, username, password)
     } catch (error) {
       return new Promise((resolve, reject) => {
@@ -219,22 +219,32 @@ export async function exportSubSystem (name, format, distDir) {
 }
 
 export async function importSubSystem (format, name, installDir, file) {
-  let cmd = `wsl --import ${name}`
+  let command = name
 
   if (installDir) {
-    installDir = path.join(installDir, name)
-    cmd = `${cmd} ${installDir}`
+    command = `wsl --import ${command} "${path.join(installDir, name)}"`
+  } else {
+    const result = await getWSLSettings("defaultInstallDir")
+
+    if (result.success && result.data) {
+      command = `wsl --import ${command} "${path.join(result.data, name)}"`
+    } else {
+      command = `wsl --import-in-place ${command}`
+    }
   }
 
-  cmd = `${cmd} ${file}`
-
+  command = `${command} "${file}"`
   if (format === "vhdx") {
-    cmd = `${cmd} --vhd`
+    if (command.indexOf("--import-in-place") === -1) {
+      command = `${command} --vhd`
+    }
+  } else {
+    throw Error("If no installation location is specified, the file must be in VHDX format.")
   }
 
-  cmd = `${cmd} --version 2`
+  // command = `${command} --version 2`
 
-  return cmd(cmd, 'utf8')
+  return cmd(command, 'utf8')
 }
 
 export async function moveSubSystem (name, distDir) {
@@ -255,14 +265,12 @@ export async function execSubSystem (command) {
 
 export async function execSSubSystem (commands) {
   let result
-  console.log(commands)
   for (const command of commands) {
-    result = await cmd(`wsl ${command.join(' ')}`, 'utf8').then((data) => {
-      return data
-    }, (error) => {
-      throw error
-    })
+    console.log(command)
+    result = await cmd(`wsl ${command.join(' ')}`, 'utf8')
+    console.log("mark1")
   }
+  console.log("mark")
 
   return result
 }

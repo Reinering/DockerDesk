@@ -384,6 +384,30 @@ const onDelete = () => {
       if (result.success) {
         props.onDelete(props.data.servername)
 
+        if (props.data.servername === "DockerDesk") {
+          window.nodes.updateNode(JSON.stringify({
+            id: '11111111',
+            delete_flags: 1
+          })).then((result) => {
+            if (result.success) {
+
+            } else {
+
+            }
+          })
+
+          window.nodes.updateNode(JSON.stringify({
+            id: '11111112',
+            delete_flags: 1
+          })).then((result) => {
+            if (result.success) {
+
+            } else {
+
+            }
+          })
+        }
+
         $q.notify({
           type: 'positive',
           position: clientConfig.quasar.notify.position,

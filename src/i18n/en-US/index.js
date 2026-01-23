@@ -133,6 +133,7 @@ export default {
     basicSettings: "Basic Settings",
     wslSettings: "WSL Settings",
     defaultInstallDir: "WSL default installation directory",
+    proxy: "Proxy",
 
     wslVersionHint: "Version: WSL1, Suggestions: WSL2",
     wslVersionHint1: "Suggestions: WSL2",
@@ -159,6 +160,9 @@ export default {
     getSettingError: "Get Settings Failure",
     setSuccess: "Set Successfully",
     setFail: "Set Failure",
+
+    dockerInstallFail: "Docker installation Failed",
+    dcInstallFail: "Docker-Compose installation Failed"
   },
 
   asslocal: {

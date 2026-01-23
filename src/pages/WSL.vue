@@ -458,7 +458,6 @@ const onShutdownAll = () => {
     "taskkill /IM wslservice.exe /F"
   ).then((result) => {
     if (result.success) {
-      console.log(result)
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,

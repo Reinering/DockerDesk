@@ -520,7 +520,6 @@ const getNetworkDetail = async (row) => {
       `${serviceCmd.value} network inspect ${row.network_id}`,
     ])
     .then((result) => {
-      console.log(result)
       if (result.success) {
         const data = JSON.parse(result.data)
         if (serviceCmd.value ==="docker") {

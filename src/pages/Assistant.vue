@@ -84,9 +84,9 @@
 
             <q-btn-dropdown
               split
-              :disable="isWslStatusBtn"
               color="accent"
               icon="flight_takeoff"
+              :disable="isWslStatusBtn"
               :label="wslStatusBtn"
               style="width: 150px"
               @click="onWslStatusBtn"
@@ -180,6 +180,44 @@
               </q-item>
             </div>
           </q-expansion-item>
+
+          <q-expansion-item
+            expand-separator
+            flat bordered
+            :label="t('assistant.proxy')"
+            header-class="text-grey-6"
+            style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-size: 16px; "
+          >
+            <div class="q-pa-md q-gutter-sm">
+              <q-item class="bg-grey-4">
+                <q-item-section>
+                  <q-item-label caption>Start With App</q-item-label>
+                  <q-item-label >{{t('assistant.startWithApp')}}</q-item-label>
+                </q-item-section>
+                <q-item-section top side>
+                  <q-toggle
+                    v-model="settingsDatas.startWithApp"
+                    color="green"
+                    @update:model-value="onStartWithApp"
+                  />
+                </q-item-section>
+              </q-item>
+
+              <q-item class="bg-grey-4">
+                <q-item-section>
+                  <q-item-label caption>Stop With App</q-item-label>
+                  <q-item-label >{{t('assistant.stopWithApp')}}</q-item-label>
+                </q-item-section>
+                <q-item-section top side>
+                  <q-toggle
+                    v-model="settingsDatas.stopWithApp"
+                    color="green"
+                    @update:model-value="onStopWithApp"
+                  />
+                </q-item-section>
+              </q-item>
+            </div>
+          </q-expansion-item>
         </div>
 
         <q-card-actions align="right">
@@ -192,7 +230,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, reactive, onUnmounted } from 'vue'
+import { ref, inject, onMounted, reactive, onUnmounted, onActivated, onDeactivated } from 'vue'
 import { clientConfig } from 'src/common/config.js'
 import { parseWSLListVersion } from 'src/utils/wsl.js'
 import { isEmptyObj } from 'src/utils/common.js'
@@ -215,18 +253,41 @@ const vms = reactive([])
 
 let notify = ref(null)
 
-const debianSourcesLines = [
-  'deb https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib',
-  'deb-src https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib',
-  'deb https://mirrors.aliyun.com/debian-security/ bookworm-security main',
-  'deb-src https://mirrors.aliyun.com/debian-security/ bookworm-security main',
-  'deb https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib',
-  'deb-src https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib',
-  'deb https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib',
-  'deb-src https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib'
+const proxyServers = {
+  tsinghua: "mirrors.tuna.tsinghua.edu.cn",
+  aliyun: "mirrors.aliyun.com"
+}
+
+const serverName = "tsinghua"
+
+const debian12SourcesLines = [
+  `deb https://${proxyServers[serverName]}/debian/ bookworm main non-free non-free-firmware contrib`,
+  `deb-src https://${proxyServers[serverName]}/debian/ bookworm main non-free non-free-firmware contrib`,
+  `deb https://${proxyServers[serverName]}/debian-security/ bookworm-security main`,
+  `deb-src https://${proxyServers[serverName]}/debian-security/ bookworm-security main`,
+  `deb https://${proxyServers[serverName]}/debian/ bookworm-updates main non-free non-free-firmware contrib`,
+  `deb-src https://${proxyServers[serverName]}/debian/ bookworm-updates main non-free non-free-firmware contrib`,
+  `deb https://${proxyServers[serverName]}/debian/ bookworm-backports main non-free non-free-firmware contrib`,
+  `deb-src https://${proxyServers[serverName]}/debian/ bookworm-backports main non-free non-free-firmware contrib`
 ]
 
-const printfContent = debianSourcesLines.join('\\n') + '\\n'
+const debian13SourcesLines = [
+  `deb https://${proxyServers[serverName]}/debian/ trixie main non-free non-free-firmware contrib`,
+  `deb-src https://${proxyServers[serverName]}/debian/ trixie main non-free non-free-firmware contrib`,
+  `deb https://${proxyServers[serverName]}/debian-security/ trixie-security main`,
+  `deb-src https://${proxyServers[serverName]}/debian-security/ trixie-security main`,
+  `deb https://${proxyServers[serverName]}/debian/ trixie-updates main non-free non-free-firmware contrib`,
+  `deb-src https://${proxyServers[serverName]}/debian/ trixie-updates main non-free non-free-firmware contrib`,
+  `deb https://${proxyServers[serverName]}/debian/ trixie-backports main non-free non-free-firmware contrib`,
+  `deb-src https://${proxyServers[serverName]}/debian/ trixie-backports main non-free non-free-firmware contrib`
+]
+
+const versionMap = {
+  bookworm: debian12SourcesLines,
+  trixie: debian13SourcesLines
+}
+
+const printfContent = ref(debian13SourcesLines.join('\\n') + '\\n')
 
 const isAssLocalBtn = ref(true)
 const isAssRemoteBtn = ref(false)
@@ -247,12 +308,24 @@ const settingsDatas = reactive({
 
 const wslDefaultDir = ref('')
 
-const installWSLPackage = () => {
+const installWSLPackage = async () => {
+  await window.wslTerminal.execSWSL([
+    ['-d', "DockerDesk", '--user', "root", '-e', "cat /etc/os-release"]
+  ]).then((result) => {
+      if (result.success) {
+        if (result.data.indexOf("bookworm") !== -1) {
+          printfContent.value = debian12SourcesLines.join('\\n') + '\\n'
+        } else if (result.data.indexOf("trixie") !== -1) {
+          printfContent.value = debian13SourcesLines.join('\\n') + '\\n'
+        }
+      }
+  })
+
   window.wslTerminal.execSWSL([
     ['-d', "DockerDesk", '--user', "root", '-e', "apt-get update"],
     ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https ca-certificates"],
     ['-d', "DockerDesk", '--user', "root", '-e', "mv /etc/apt/sources.list /etc/apt/sources.list.bak"],
-    ['-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c', `"printf '${printfContent}' > /etc/apt/sources.list"`],
+    ['-d', "DockerDesk", '--user', "root", '-e', 'bash', '-c', `"printf '${printfContent.value}' > /etc/apt/sources.list"`],
     ['-d', "DockerDesk", '--user', "root", '-e', "apt-get update"],
     ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get install -y curl dbus dbus-x11 git "]
   ]).then((result) => {
@@ -545,18 +618,26 @@ const getWSLList = () => {
           return
         }
       }
+
+      wslStatusColor.value = "red"
+      wslStatus.value = "Stopped"
       wslStatusBtn.value = t('assistant.addSubSystem')
     } else {
-      wslStatusBtn.value = t('assistant.addSubSystem')
+      if (result.error.indexOf("Please try again later") === -1) {
+        wslStatusBtn.value = t('assistant.addSubSystem')
+      }
     }
   })
 }
 
 const checkSubSystem = async () => {
   window.wslTerminal.checkSubSystem().then((result) => {
-    console.log(result)
+    // console.log(result)
   })
 }
+
+let getWSLListInterval = null
+let isWSL = ref(false)
 
 const init = () => {
   if (process.env.MODE === 'electron' && deviceInfo.value.platform === "win32") {
@@ -568,7 +649,10 @@ const init = () => {
           wslVersionHint.value = t('assistant.wslVersionHint1')
           wslStatusBtn.value = t('assistant.installed')
 
-          getWSLList()
+          isWSL.value = true
+          getWSLListInterval = setInterval(() => {
+            getWSLList()
+          }, 10000)
         } else {
           wslStatusBtn.value = t('assistant.needUpgrade')
           wslVersionHint.value = t('assistant.wslVersionHint')
@@ -595,10 +679,30 @@ const init = () => {
 
 onMounted(() => {
   init()
+
+
 })
 
 onUnmounted(() => {
+  if (getWSLListInterval !== null) {
+    clearInterval(getWSLListInterval)
+    getWSLListInterval = null
+  }
+})
 
+onActivated(() => {
+  if (getWSLListInterval === null && isWSL.value) {
+    getWSLListInterval = setInterval(() => {
+      getWSLList()
+    }, 10000)
+  }
+})
+
+onDeactivated(() => {
+  if (getWSLListInterval !== null) {
+    clearInterval(getWSLListInterval)
+    getWSLListInterval = null
+  }
 })
 
 </script>

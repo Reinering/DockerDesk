@@ -317,3 +317,18 @@ function linesToParagraphs(lines) {
     .map(line => `<p>${line || '&nbsp;'}</p>`)
     .join('');
 }
+
+export function truncateMsg (msg) {
+  const tmp = msg.split('\n')
+  let res
+  if (tmp.length > 0) {
+    if (tmp[tmp.length - 1].length === 0) {
+      res = tmp[tmp.length - 2]
+    } else {
+      res = tmp[tmp.length - 1]
+    }
+  }  else {
+    res = msg
+  }
+  return res
+}

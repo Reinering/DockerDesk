@@ -5,7 +5,7 @@
     <div class="q-pa-md row  justify-center">
       <q-card class="bg-primary " style="width: 80%; height: 250px;">
         <div class="q-ma-md row justify-evenly">
-          <q-card class="bg-light-blue q-ma-md q-pa-md" style="width: 200px; height: 200px;">
+          <q-card class="bg-light-blue q-ma-md" style="width: 200px; height: 200px;">
             <div class="column items-center">
               <q-icon :name="`img:${dockerIconPath}`" style="width: 80px; height: 80px;" />
               <div class="text-h6">Docker</div>
@@ -15,15 +15,21 @@
               <div class="text-amber">{{ dockerInfo }}</div>
               <q-card-actions align="center">
                 <q-btn-dropdown
-                  :disable="isDockerBtn"
                   split
-                  class="glossy"
                   color="primary"
+                  icon="install_desktop"
+                  :disable="isDockerBtn"
                   :label="dockerBtn"
                   @click="onInstallDocker"
                 >
                   <q-list dense class="bg-blue-grey-13" >
-                    <q-item clickable v-close-popup size="sm" :disable="isReinstallDocker" @click="onReinstallDocker">
+                    <q-item
+                      clickable
+                      v-close-popup
+                      size="sm"
+                      :disable="isReinstallDocker"
+                      @click.stop.prevent="onReinstallDocker"
+                    >
                       <q-item-section>
                         <q-icon name="install_desktop" color="teal-7"/>
                       </q-item-section>
@@ -33,7 +39,13 @@
                       </q-item-section>
                     </q-item>
 
-                    <q-item clickable v-close-popup size="sm" @click="onRestartDocker">
+                    <q-item
+                      clickable
+                      v-close-popup
+                      size="sm"
+                      :disable="isRestartDocker"
+                      @click.stop.prevent="onRestartDocker"
+                    >
                       <q-item-section>
                         <q-icon name="restart_alt" color="red" />
                       </q-item-section>
@@ -46,10 +58,9 @@
                 </q-btn-dropdown>
               </q-card-actions>
             </div>
-
           </q-card>
 
-          <q-card class="bg-grey-6 q-ma-md q-pa-md"  style="width: 200px; height: 200px;">
+          <q-card class="bg-grey-6 q-ma-md"  style="width: 200px; height: 200px;">
             <div class="column items-center">
               <q-icon :name="`img:${podmanIconPath}`"  style="width: 80px; height: 80px;" />
               <div class="text-h6">Podman</div>
@@ -59,15 +70,21 @@
               <div class="text-amber">{{ podmanInfo }}</div>
               <q-card-actions align="center">
                 <q-btn-dropdown
-                  :disable="isPodmanBtn"
                   split
-                  class="glossy"
                   color="primary"
+                  icon="install_desktop"
+                  :disable="isPodmanBtn"
                   :label="podmanBtn"
                   @click="onInstallPodman"
                 >
                   <q-list dense class="bg-blue-grey-13" >
-                    <q-item clickable v-close-popup size="sm" :disable="isReinstallPodman" @click="onReinstallPodman">
+                    <q-item
+                      clickable
+                      v-close-popup
+                      size="sm"
+                      :disable="isReinstallPodman"
+                      @click.stop.prevent="onReinstallPodman"
+                    >
                       <q-item-section>
                         <q-icon name="install_desktop" color="teal-7"/>
                       </q-item-section>
@@ -77,7 +94,13 @@
                       </q-item-section>
                     </q-item>
 
-                    <q-item clickable v-close-popup size="sm" @click="onTerminal">
+                    <q-item
+                      clickable
+                      v-close-popup
+                      size="sm"
+                      :disable="isRestartPodman"
+                      @click.stop.prevent="onTerminal"
+                    >
                       <q-item-section>
                         <q-icon name="restart_alt" color="red" />
                       </q-item-section>
@@ -136,7 +159,7 @@ import { ref, inject, onMounted, onActivated, onDeactivated, onUnmounted } from 
 import DockerSettingsDialog from 'components/dialog/DockerSettingsDialog.vue'
 import PodmanSettingsDialog from 'components/dialog/PodmanSettingsDialog.vue'
 import {  QSpinnerGears } from 'quasar'
-import { getResourcePath } from 'src/utils/common.js'
+import { getResourcePath, truncateMsg } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
@@ -165,51 +188,82 @@ const dockerBtn = ref(t('asslocal.install'))
 const podmanBtn = ref(t('asslocal.install'))
 const isDockerBtn = ref(true)
 const isReinstallDocker = ref(true)
+const isRestartDocker = ref(true)
 const isPodmanBtn = ref(true)
 const isReinstallPodman = ref(true)
+const isRestartPodman = ref(true)
 const dockerInfo = ref(t('asslocal.notInstalled'))
 const podmanInfo = ref(t('asslocal.notInstalled'))
+
+const mirrors = ["Aliyun", "AzureChinaCloud"]
 
 const onInstallDocker = () => {
   if (dockerBtn.value === t('asslocal.install')) {
     window.wslTerminal.execSWSL([
       // https://raw.githubusercontent.com/docker/docker-install/master/install.sh https://get.docker.com
-      ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | bash -s docker --mirror Aliyun && systemctl enable --now docker >/dev/null 2>&1\""],
-      ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""]
+      // ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"curl -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | bash -s docker --mirror ${mirrors[1]} && systemctl enable --now docker >/dev/null 2>&1"`],
+      ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -fsSL https://get.docker.com | bash -s docker && systemctl enable --now docker >/dev/null 2>&1\""],
     ]).then((result) => {
-        if (result.success) {
-          notify.value({
-            type: 'positive',
-            group: false,
-            spinner: false,
-            message: `${t('assistant.installSuccess')}`,
-            timeout: 10000
-          })
+      window.wslTerminal.execWSL(
+        ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "docker --version"]
+      ).then((result) => {
+        if (!result.success) {
+          isDockerBtn.value = false
 
-          checkDockerInstall()
-
-          window.nodes.updateNode(JSON.stringify({
-            id: '11111111',
-            delete_flags: 2
-          })).then((result) => {
-            console.log(result)
-            if (result.success) {
-
-            } else {
-
-            }
-          })
-        } else {
-          notify.value({
+          return notify.value({
             type: 'negative',
             icon: 'done',
             spinner: false,
-            message: `${t('assistant.installFail')}: ${result.error}`,
+            message: `${t('assistant.dockerInstallFail')}: ${truncateMsg(result.error)}`,
             timeout: 10000
           })
         }
-      })
 
+        window.wslTerminal.execWSL(
+          // ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""]
+          ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose && docker-compose --version\""]
+        ).then((result) => {
+          window.wslTerminal.execWSL(
+            ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "docker-compose --version"]
+          ).then((result) => {
+            if (result.success) {
+              notify.value({
+                type: 'positive',
+                group: false,
+                spinner: false,
+                message: `${t('assistant.installSuccess')}`,
+                timeout: 10000
+              })
+
+              checkDockerInstall()
+
+              window.nodes.updateNode(JSON.stringify({
+                id: '11111111',
+                delete_flags: 2
+              })).then((result) => {
+                if (result.success) {
+
+                } else {
+
+                }
+              })
+            } else {
+              notify.value({
+                type: 'negative',
+                icon: 'done',
+                spinner: false,
+                message: `${t('assistant.dcInstallFail')}: ${truncateMsg(result.error)}`,
+                timeout: 10000
+              })
+            }
+
+            isDockerBtn.value = false
+          })
+        })
+      })
+    })
+
+    isDockerBtn.value = true
     notify.value = $q.notify({
       type: 'info',
       group: false,
@@ -245,7 +299,6 @@ const onInstallPodman = () => {
             id: '11111112',
             delete_flags: 2
           })).then((result) => {
-            console.log(result)
             if (result.success) {
 
             } else {
@@ -253,6 +306,8 @@ const onInstallPodman = () => {
             }
           })
         } else {
+          isDockerBtn.value = false
+
           notify.value({
             type: 'negative',
             icon: 'done',
@@ -261,8 +316,11 @@ const onInstallPodman = () => {
             timeout: 10000
           })
         }
+
+        isPodmanBtn.value = false
       })
 
+    isPodmanBtn.value = true
     notify.value = $q.notify({
       type: 'info',
       group: false,
@@ -283,8 +341,11 @@ const onReinstallDocker = () => {
     window.wslTerminal.execSWSL([
       ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get remove docker"],
     ]).then((result) => {
-      console.log(result)
-      if (result) {
+      if (result.success) {
+        dockerBtn.value = t('asslocal.install')
+        dockerInfo.value = t('asslocal.notInstalled')
+        isReinstallDocker.value = true
+
         notify.value({
           type: 'positive',
           group: false,
@@ -320,6 +381,8 @@ const onReinstallDocker = () => {
       message: `${t('asslocal.notInstalled')}`
     })
   }
+
+  isDockerBtn.value = true
 }
 
 const onRestartDocker = () => {
@@ -369,7 +432,10 @@ const onReinstallPodman = () => {
     window.wslTerminal.execSWSL([
       ['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get remove podman"],
     ]).then((result) => {
-      console.log(result)
+      podmanBtn.value = t('asslocal.install')
+      podmanInfo.value = t('asslocal.notInstalled')
+      isReinstallPodman.value = true
+
       if (result) {
         notify.value({
           type: 'positive',
@@ -406,6 +472,8 @@ const onReinstallPodman = () => {
       message: `${t('asslocal.notInstalled')}`
     })
   }
+
+  isPodmanBtn.value = true
 }
 
 const showDockerSettingsDialog = ref(false)
@@ -434,7 +502,7 @@ const showLoading = () => {
 
 const getOSInfo = () => {
   window.client.getOSUtilization().then(({cpuUsage, memoryUsage}) => {
-    console.log("getOSUtilization")
+    // console.log("getOSUtilization")
     cpuValue.value = parseInt(cpuUsage)
     memoryValue.value = parseInt(memoryUsage * 100)
   })
@@ -455,6 +523,7 @@ const checkDockerInstall = () => {
         dockerInfo.value = `docker: ${versionNumber}`
         dockerBtn.value = t('asslocal.panel')
         isReinstallDocker.value = false
+        isRestartDocker.value = false
       } else {
         console.log("未找到Docker版本号。")
       }
@@ -462,6 +531,7 @@ const checkDockerInstall = () => {
       dockerBtn.value = t('asslocal.install')
       dockerInfo.value = t('asslocal.notInstalled')
       isReinstallDocker.value = true
+      isRestartDocker.value = true
     }
 
     isDockerBtn.value = false
@@ -481,6 +551,7 @@ const checkPodmanInstall = () => {
         podmanInfo.value = `podman: ${versionNumber}`
         podmanBtn.value = t('asslocal.panel')
         isReinstallPodman.value = false
+        isRestartPodman.value = false
       } else {
         console.log("未找到Podman版本号。")
       }
@@ -488,6 +559,7 @@ const checkPodmanInstall = () => {
       podmanBtn.value = t('asslocal.install')
       podmanInfo.value = t('asslocal.notInstalled')
       isReinstallPodman.value = true
+      isRestartPodman.value = true
     }
 
     isPodmanBtn.value = false
@@ -498,12 +570,11 @@ const checkPodmanInstall = () => {
 const init = () => {
   showLoading ()
 
-
   if (deviceInfo.value.platform === "win32") {
 
-    checkDockerInstall()
-
-    checkPodmanInstall()
+    // checkDockerInstall()
+    //
+    // checkPodmanInstall()
 
     getOSInfoInterval = setInterval(() => {
       getOSInfo()
@@ -520,6 +591,13 @@ onActivated(() => {
     getOSInfoInterval = setInterval(() => {
       getOSInfo()
     }, 10000)
+  }
+
+  if (deviceInfo.value.platform === "win32") {
+
+    checkDockerInstall()
+
+    checkPodmanInstall()
   }
 })
 

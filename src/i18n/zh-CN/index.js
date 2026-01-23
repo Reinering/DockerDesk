@@ -128,6 +128,7 @@ export default {
     basicSettings: "基本设置",
     wslSettings: "WSL 设置",
     defaultInstallDir: "WSL默认安装目录",
+    proxy: "代理",
 
     wslVersionHint: "版本: WSL1, 建议: WSL2",
     wslVersionHint1: "建议: WSL2",
@@ -153,6 +154,10 @@ export default {
     getSettingError: "获取设置失败",
     setSuccess: "设置成功",
     setFail: "设置成功",
+
+    dockerInstallFail: "Docker 安装失败",
+    dcInstallFail: "Docker-Compose 安装失败"
+
   },
 
   asslocal: {
