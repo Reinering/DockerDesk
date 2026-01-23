@@ -268,9 +268,7 @@ export async function execSSubSystem (commands) {
   for (const command of commands) {
     console.log(command)
     result = await cmd(`wsl ${command.join(' ')}`, 'utf8')
-    console.log("mark1")
   }
-  console.log("mark")
 
   return result
 }

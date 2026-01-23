@@ -283,7 +283,6 @@ const onInstallPodman = () => {
   if (podmanBtn.value === t('asslocal.install')) {
     window.wslTerminal.execWSL(['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get -qq -y install podman podman-compose"])
       .then((result) => {
-        console.log(result)
         if (result.success) {
           notify.value({
             type: 'positive',
@@ -390,7 +389,6 @@ const onRestartDocker = () => {
     window.wslTerminal.execSWSL([
       ['-d', "DockerDesk", '--user', "root", '-e', "systemctl restart docker"],
     ]).then((result) => {
-      console.log(result)
       if (result) {
         notify.value({
           type: 'positive',
