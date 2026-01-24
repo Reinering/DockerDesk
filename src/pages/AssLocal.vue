@@ -79,6 +79,7 @@
                 >
                   <q-list dense class="bg-blue-grey-13" >
                     <q-item
+                      dense
                       clickable
                       v-close-popup
                       size="sm"
@@ -94,21 +95,21 @@
                       </q-item-section>
                     </q-item>
 
-                    <q-item
-                      clickable
-                      v-close-popup
-                      size="sm"
-                      :disable="isRestartPodman"
-                      @click.stop.prevent="onTerminal"
-                    >
-                      <q-item-section>
-                        <q-icon name="restart_alt" color="red" />
-                      </q-item-section>
+<!--                    <q-item-->
+<!--                      clickable-->
+<!--                      v-close-popup-->
+<!--                      size="sm"-->
+<!--                      :disable="isRestartPodman"-->
+<!--                      @click.stop.prevent="onRestartPodman"-->
+<!--                    >-->
+<!--                      <q-item-section>-->
+<!--                        <q-icon name="restart_alt" color="red" />-->
+<!--                      </q-item-section>-->
 
-                      <q-item-section>
-                        <q-item-label caption>{{t('asslocal.restart')}}</q-item-label>
-                      </q-item-section>
-                    </q-item>
+<!--                      <q-item-section>-->
+<!--                        <q-item-label caption>{{t('asslocal.restart')}}</q-item-label>-->
+<!--                      </q-item-section>-->
+<!--                    </q-item>-->
                   </q-list>
                 </q-btn-dropdown>
               </q-card-actions>
@@ -116,7 +117,9 @@
           </q-card>
         </div>
       </q-card>
+    </div>
 
+    <div class="q-pa-md row  justify-center">
       <q-card class="q-ma-md">
         <div class="q-pa-md flex flex-center">
           <q-knob
@@ -146,7 +149,6 @@
           </q-knob>
         </div>
       </q-card>
-
     </div>
   </q-page>
 
@@ -429,6 +431,47 @@ const onRestartDocker = () => {
   }
 }
 
+const onRestartPodman = () => {
+  if (dockerBtn.value === t('asslocal.panel')) {
+    window.wslTerminal.execSWSL([
+      ['-d', "DockerDesk", '--user', "root", '-e', "systemctl restart podman"],
+    ]).then((result) => {
+      if (result) {
+        notify.value({
+          type: 'positive',
+          group: false,
+          spinner: false,
+          message: `${t('assistant.restartSuccess')}`,
+          timeout: 10000
+        })
+      } else {
+        notify.value({
+          type: 'negative',
+          icon: 'done',
+          spinner: false,
+          message: `${t('assistant.restartFail')}: ${result.error}`,
+          timeout: 10000
+        })
+      }
+    })
+
+    notify.value = $q.notify({
+      type: 'info',
+      group: false,
+      timeout: 0,
+      spinner: true,
+      position: 'bottom-right',
+      message: t('assistant.restarting'),
+    })
+  } else {
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: `${t('asslocal.notInstalled')}`
+    })
+  }
+}
+
 const onReinstallPodman = () => {
   if (podmanBtn.value === t('asslocal.panel')) {
     window.wslTerminal.execSWSL([
@@ -456,7 +499,7 @@ const onReinstallPodman = () => {
         })
       }
 
-      onInstallDocker()
+      onInstallPodman()
     })
 
     notify.value = $q.notify({
@@ -513,7 +556,7 @@ const getOSInfo = () => {
 let getOSInfoInterval = null
 
 const checkDockerInstall = () => {
-  window.wslTerminal.execWSL([
+  return window.wslTerminal.execWSL([
     '-d', "DockerDesk", '--user', "root", '-e', "docker -v"
   ]).then((result) => {
     if (result.success) {
@@ -541,7 +584,7 @@ const checkDockerInstall = () => {
 }
 
 const checkPodmanInstall = () => {
-  window.wslTerminal.execWSL([
+  return window.wslTerminal.execWSL([
     '-d', "DockerDesk", '--user', "root", '-e', "podman -v"
   ]).then((result) => {
     if (result.success && result.data.includes("podman version ")) {
@@ -597,12 +640,9 @@ onActivated(() => {
 
   if (deviceInfo.value.platform === "win32") {
 
-    checkDockerInstall()
-
-    setTimeout(() => {
+    checkDockerInstall().then(() => {
       checkPodmanInstall()
-    }, 2000)
-
+    })
   }
 })
 
