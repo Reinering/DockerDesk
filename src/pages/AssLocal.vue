@@ -203,9 +203,9 @@ const onInstallDocker = () => {
       // https://raw.githubusercontent.com/docker/docker-install/master/install.sh https://get.docker.com
       // ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"curl -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | bash -s docker --mirror ${mirrors[1]} && systemctl enable --now docker >/dev/null 2>&1"`],
       ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -fsSL https://get.docker.com | bash -s docker && systemctl enable --now docker >/dev/null 2>&1\""],
-    ]).then((result) => {
+    ]).then((installDockerResult) => {
       window.wslTerminal.execWSL(
-        ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "docker --version"]
+        ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"docker --version"`]
       ).then((result) => {
         if (!result.success) {
           isDockerBtn.value = false
@@ -214,17 +214,17 @@ const onInstallDocker = () => {
             type: 'negative',
             icon: 'done',
             spinner: false,
-            message: `${t('assistant.dockerInstallFail')}: ${truncateMsg(result.error)}`,
+            message: `${t('assistant.dockerInstallFail')}: ${truncateMsg(installDockerResult.error)}`,
             timeout: 10000
           })
         }
 
         window.wslTerminal.execWSL(
           // ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""]
-          ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose && docker-compose --version\""]
-        ).then((result) => {
+          ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""]
+        ).then((installDCResult) => {
           window.wslTerminal.execWSL(
-            ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "docker-compose --version"]
+            ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"docker-compose --version"`]
           ).then((result) => {
             if (result.success) {
               notify.value({
@@ -252,7 +252,7 @@ const onInstallDocker = () => {
                 type: 'negative',
                 icon: 'done',
                 spinner: false,
-                message: `${t('assistant.dcInstallFail')}: ${truncateMsg(result.error)}`,
+                message: `${t('assistant.dcInstallFail')}: ${truncateMsg(installDCResult.error)}`,
                 timeout: 10000
               })
             }
@@ -281,42 +281,46 @@ const onInstallDocker = () => {
 
 const onInstallPodman = () => {
   if (podmanBtn.value === t('asslocal.install')) {
-    window.wslTerminal.execWSL(['-d', "DockerDesk", '--user', "root", '-e', "env DEBIAN_FRONTEND=noninteractive apt-get -qq -y install podman podman-compose"])
+    window.wslTerminal.execWSL(['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "env DEBIAN_FRONTEND=noninteractive apt-get -qq -y install podman podman-compose"])
       .then((result) => {
-        if (result.success) {
-          notify.value({
-            type: 'positive',
-            group: false,
-            spinner: false,
-            message: `${t('assistant.installSuccess')}`,
-            timeout: 10000
-          })
+        window.wslTerminal.execWSL(
+          ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"podman-compose -v"`]
+        ).then((result) => {
+          if (result.success) {
+            notify.value({
+              type: 'positive',
+              group: false,
+              spinner: false,
+              message: `${t('assistant.installSuccess')}`,
+              timeout: 10000
+            })
 
-          checkPodmanInstall()
+            checkPodmanInstall()
 
-          window.nodes.updateNode(JSON.stringify({
-            id: '11111112',
-            delete_flags: 2
-          })).then((result) => {
-            if (result.success) {
+            window.nodes.updateNode(JSON.stringify({
+              id: '11111112',
+              delete_flags: 2
+            })).then((result) => {
+              if (result.success) {
 
-            } else {
+              } else {
 
-            }
-          })
-        } else {
-          isDockerBtn.value = false
+              }
+            })
+          } else {
+            isDockerBtn.value = false
 
-          notify.value({
-            type: 'negative',
-            icon: 'done',
-            spinner: false,
-            message: `${t('assistant.installFail')}: ${result.error}`,
-            timeout: 10000
-          })
-        }
+            notify.value({
+              type: 'negative',
+              icon: 'done',
+              spinner: false,
+              message: `${t('assistant.installFail')}: ${result.error}`,
+              timeout: 10000
+            })
+          }
 
-        isPodmanBtn.value = false
+          isPodmanBtn.value = false
+        })
       })
 
     isPodmanBtn.value = true

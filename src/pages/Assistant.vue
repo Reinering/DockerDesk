@@ -650,6 +650,7 @@ const init = () => {
           wslStatusBtn.value = t('assistant.installed')
 
           isWSL.value = true
+          getWSLList()
           getWSLListInterval = setInterval(() => {
             getWSLList()
           }, 10000)
