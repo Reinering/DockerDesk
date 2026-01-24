@@ -246,7 +246,7 @@ const gotoAssLocal = () => {
 }
 
 const gotoAssRemote = () => {
-
+  router.push('/assistant/assremote')
 }
 
 const vms = reactive([])
