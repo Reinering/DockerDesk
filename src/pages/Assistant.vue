@@ -443,6 +443,7 @@ const onWslStatusBtn = () => {
     window.wslTerminal.startSubSystem()
 
     isWslStatusBtn.value = true
+    isBgStart.value = true
 
     setTimeout(() => {
       getWSLList()
@@ -461,6 +462,7 @@ const onWslStatusBtn = () => {
         wslStatusBtn.value = t('assistant.start')
         wslStatus.value = "Stopped"
         wslStatusColor.value = "red"
+        isBgStart.value = false
       } else {
         $q.notify({
           type: 'negative',
@@ -484,6 +486,7 @@ const onBackgroundStart = () => {
         })
       } else {
         isAssLocalBtn.value = false
+        isBgStart.value = true
 
         wslStatusBtn.value = t('assistant.stop')
         wslStatus.value = "Running"
@@ -605,20 +608,21 @@ const getWSLList = () => {
             wslStatusColor.value = "red"
             wslStatus.value = "Stopped"
             isAssLocalBtn.value = true
+            isBgStart.value = false
           } else if (data[index].state === "Running") {
             wslStatusBtn.value = t('assistant.stop')
             wslStatusColor.value = "green"
             wslStatus.value = "Running"
             isAssLocalBtn.value = false
+            isBgStart.value = true
           }
-
-          isBgStart.value = false
           showWslStatusBtn.value = false
           checkSubSystem()
           return
         }
       }
 
+      isBgStart.value = true
       wslStatusColor.value = "red"
       wslStatus.value = "Stopped"
       wslStatusBtn.value = t('assistant.addSubSystem')

@@ -599,7 +599,10 @@ onActivated(() => {
 
     checkDockerInstall()
 
-    checkPodmanInstall()
+    setTimeout(() => {
+      checkPodmanInstall()
+    }, 2000)
+
   }
 })
 
