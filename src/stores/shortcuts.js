@@ -1,10 +1,12 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
-import { ref } from 'vue'
 
-export const useShortcutsStore = defineStore('config', {
+
+export const useShortcutsStore = defineStore('shortcuts', {
   state: () => ({
     shortcutsData: null,
-    shortcutsTemplate: 0
+    shortcutsTemplate: 0,
+
+    searchCache: [],
   }),
 
   getters: {
@@ -19,7 +21,7 @@ export const useShortcutsStore = defineStore('config', {
 
   persist: {
     storage: localStorage,
-    paths: ["shortcutsTemplate"],
+    paths: ["shortcutsTemplate", "searchCache"],
   },
 })
 

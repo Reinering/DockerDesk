@@ -1,15 +1,14 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
-import { ref, reactive } from 'vue'
 
 
 export const usePreCmdsStore = defineStore('precmds', {
   state: () => ({
-    isSync: ref("0"),
-    option: ref(''),
-    preCmds: reactive({}),
+    isSync: "0",
+    option: '',
+    preCmds: {},
 
-    isSudo: ref(false),
-    isSendNow: ref(false),
+    isSudo: false,
+    isSendNow: false,
   }),
 
   getters: {
@@ -24,11 +23,10 @@ export const usePreCmdsStore = defineStore('precmds', {
     },
 
     cleanPreCmds(){
-      this.option = ref(''),
-      this.preCmds = reactive({})
+      this.option = '',
+      this.preCmds = {}
     }
   },
-
 
   persist: {
     storage: sessionStorage,

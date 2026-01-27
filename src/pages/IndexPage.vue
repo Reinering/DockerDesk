@@ -13,7 +13,7 @@
       >
         <Carousel v-if="displaySettings.isShowCarousel" />
 
-        <SearchBar class="search-bar-center" v-if="displaySettings.isShowSearchBar" style="width: 70%; margin-top: 16px; display: flex; justify-content: center; align-items: center;"/>
+        <SearchBar1 class="search-bar-center" v-if="displaySettings.isShowSearchBar" style="width: 70%; margin-top: 16px; display: flex; justify-content: center; align-items: center;"/>
 
         <ShortcutsList :height="SCHeight" />
       </div>
@@ -36,6 +36,7 @@ import { ref, onMounted, onUnmounted, onActivated, onDeactivated, inject, reacti
 import ShortcutsList from 'components/ShortcutsList.vue'
 import Carousel from 'components/Carousel.vue'
 import SearchBar from 'components/SearchBar.vue'
+import SearchBar1 from 'components/SearchBar1.vue'
 
 const $q = inject("$q")
 const router = inject("router")
