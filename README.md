@@ -1,7 +1,5 @@
 # Docker Desk App (dockerdesk)
 
-Docker Desk App
-
 Docker Desk App 是一个基于 Quasar 框架构建的桌面应用程序，旨在提供高效的Docker容器的管理和操作功能，包括远程和本地Docker容器。
 
 ## Install the dependencies
