@@ -2,6 +2,8 @@
 
 Docker Desk App
 
+Docker Desk App 是一个基于 Quasar 框架构建的桌面应用程序，旨在提供高效的Docker容器的管理和操作功能，包括远程和本地Docker容器。
+
 ## Install the dependencies
 ```bash
 yarn
@@ -38,3 +40,11 @@ quasar build
 
 ### Customize the configuration
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+
+## Display
+
+!['project'](public/images/navi.png)
+!['project'](public/images/index.png)
+!['project'](public/images/settings.png)
+!['project'](public/images/containers.png)
+!['project'](public/images/wsl.png)
