@@ -5,9 +5,66 @@ import { settings } from '../actions/settings.js'
 
 export const HotKeys = {
 
+  // local
+  defaultLocal: [
+    {
+      name: 'findBar',
+      txt: 'Show/Hide findBar',
+      func: "showFindBar",
+      keys: ['Ctrl', 'F'],
+      enable: true,
+      isEdit: false,
+      desc: 'setting.findBar'
+    },
+  ],
+
+  localRegistry: async (mainWindow) => {
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      if (input.type !== 'keyDown') return
+
+      // Mac 常用 Command，Windows/Linux 常用 Control
+      const isCmdOrCtrl = input.control || input.meta
+      const isShift = input.shift
+      const isAlt = input.alt
+
+      if (!isCmdOrCtrl && !isShift && isAlt) {
+        event.preventDefault()
+      }
+
+      for (const item of HotKeys.defaultLocal) {
+        if (!item.enable || !Object.prototype.hasOwnProperty.call(HotKeys, item.func)) {
+          continue
+        }
+
+        if (item.keys.length === 2) {
+          if (item.keys[0] === "Ctrl" && isCmdOrCtrl && item.keys[1] === input.key.toUpperCase()) {
+            HotKeys[item.func]()
+          } else if (item.keys[0] === 'Shift' && isShift && item.keys[1] === input.key.toUpperCase()) {
+            HotKeys[item.func]()
+          } else if (item.keys[0] === 'Alt' && isAlt && item.keys[1] === input.key.toUpperCase()) {
+            HotKeys[item.func]()
+          }
+
+        } else if (item.keys.length === 3) {
+          if (item.keys[0] === "Ctrl" && isCmdOrCtrl && item.keys[1] === 'Shift' && isShift && item.keys[2] === input.key.toUpperCase()) {
+            HotKeys[item.func]()
+          } else if (item.keys[0] === "Ctrl" && isCmdOrCtrl && item.keys[1] === 'Alt' && isAlt && item.keys[2] === input.key.toUpperCase()) {
+            HotKeys[item.func]()
+          }
+        } else if (item.keys.length === 4) {
+          if (item.keys[0] === "Ctrl" && isCmdOrCtrl && item.keys[1] === 'Shift' && isShift && item.keys[2] === 'Alt' && isAlt && item.keys[3] === input.key.toUpperCase()) {
+            HotKeys[item.func]()
+          }
+        }
+      }
+    })
+  },
+
+  // global
+
   mainWin: null,
   result: [],
-  default: [
+  defaultGlobal: [
     {
       name: 'showWindow',
       txt: 'Show/Hide Window',
@@ -18,7 +75,6 @@ export const HotKeys = {
       desc: 'setting.quickShowHide'
 
     },
-
 
 
     // {
@@ -46,9 +102,9 @@ export const HotKeys = {
 
     let data = JSON.parse(result.data[0].value)
     if (data.length === 0) {
-      const result = await settings.updateByField({field: "hot_keys", value: JSON.stringify(HotKeys.default)})
+      const result = await settings.updateByField({field: "hot_keys", value: JSON.stringify(HotKeys.defaultGlobal)})
       if (result.success) {
-        data = HotKeys.default
+        data = HotKeys.defaultGlobal
       } else {
         HotKeys.result = result
         return
@@ -133,7 +189,7 @@ export const HotKeys = {
     return HotKeys.unRegisterAll().then(() => {
       return settings.updateByField({
         field: "hot_keys",
-        value: JSON.stringify(HotKeys.default)
+        value: JSON.stringify(HotKeys.defaultGlobal)
       }).then((result) => {
         if (!result.success) {
           return result
@@ -188,6 +244,10 @@ export const HotKeys = {
     }
 
   },
+
+  showFindBar: async () => {
+    HotKeys.mainWin.webContents.send('showFindBar')
+  }
 
 
 }

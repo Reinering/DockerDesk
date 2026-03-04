@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut } from 'electron'
+import { app, BrowserWindow, nativeImage } from 'electron'
 import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'
@@ -41,6 +41,7 @@ async function createWindow () {
     height: 800,
     useContentSize: true,
     frame: false, // <-- 添加这里
+    // transparent: true,            // 核心：开启窗口透明
     webPreferences: {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
@@ -59,13 +60,13 @@ async function createWindow () {
 
   registerIpcHandlers(mainWindow)   // 注意注册顺序
 
-
+  // 挂载 route
   if (process.env.DEV) {
     await mainWindow.loadURL(process.env.APP_URL)
   } else {
     await mainWindow.loadFile('index.html')
   }
-
+  // webPreferences.devTools为true时，开启devConsole
   if (process.env.DEBUGGING) {
     // if on DEV or Production with debug enabled
     mainWindow.webContents.openDevTools()
@@ -98,6 +99,7 @@ app.whenReady().then(() => {
   createTray(mainWindow, icon)
 
   HotKeys.registerAll(mainWindow)
+  HotKeys.localRegistry(mainWindow)
 
   wslStartLaunch()
 })

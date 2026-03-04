@@ -1,5 +1,10 @@
 <template>
-  <div ref="xtermRef" :id="'xterm-container-' + terminalId">
+  <div ref="xtermRef" :id="'xterm-container-' + terminalId" :style="xtermStyle">
+    <FindBar
+      v-if="isShowFindBar"
+      :search="onSearch"
+    />
+
     <q-menu
       context-menu
       auto-close
@@ -19,6 +24,11 @@
         <q-item v-if="showMenu" clickable @click="onSelectPasteButton">
           <q-item-section>
             {{ t('selectPaste') }}
+          </q-item-section>
+        </q-item>
+        <q-item v-if="showMenu" clickable @click="onSearchButton">
+          <q-item-section>
+            {{ t('search') }}
           </q-item-section>
         </q-item>
         <q-item v-if="showMenu" clickable @click="onCleanButton">
@@ -56,8 +66,10 @@ const props = defineProps({
 })
 
 import { inject, ref, onMounted, onBeforeUnmount, nextTick, watch, reactive, onActivated, onDeactivated } from 'vue'
+import FindBar from "components/FindBar.vue"
 import { Terminal } from "@xterm/xterm"
 import { FitAddon } from "@xterm/addon-fit"
+import { SearchAddon } from "@xterm/addon-search"
 import '@xterm/xterm/css/xterm.css'
 import { clientConfig } from 'src/common/config.js'
 
@@ -71,8 +83,12 @@ const lastEnterTime = ref(0)
 const DOUBLE_ENTER_THRESHOLD = ref(500)
 const isDoubleEnter = ref(false)
 
+const isShowFindBar = ref(false)
+
 const xtermStyle = reactive({
-  height: process.env.MODE === 'electron' ? window.innerHeight - 98 + "px" : window.innerHeight - 70 + "px"
+  width: "100%",
+  height: process.env.MODE === 'electron' ? window.innerHeight - 97 + "px" : window.innerHeight - 70 + "px",
+  paddingLeft: "3px",
 })
 
 const xtermRef = ref(null)
@@ -89,7 +105,8 @@ const xtermConfig = reactive({
   fontFamily: 'Consolas, "Courier New", monospace', // 设置字体
   fontSize: 16, // 设置字体大小
   fontWeight: 'normal', // 可选：字体粗细（normal, bold, 100-900）
-  disableStdin: false // 禁止输入
+  disableStdin: false, // 禁止输入
+  scrollback: 2000,  // 缓存
 })
 
 const showMenu = ref(true)
@@ -382,6 +399,8 @@ const connect = () => {
   }
 }
 
+const searchAddon = new SearchAddon()
+
 const initTerminal = () => {
   if (Object.hasOwnProperty.call(props.data, "disableStdin")) {
     xtermConfig.disableStdin = props.data["disableStdin"]
@@ -389,11 +408,14 @@ const initTerminal = () => {
   }
 
   term = new Terminal(xtermConfig)
+
   fitAddon = new FitAddon()
   term.loadAddon(fitAddon)
 
   term.open(xtermRef.value)
   fitAddon.fit()
+
+  term.loadAddon(searchAddon)
 
   handleResize()
 
@@ -483,6 +505,18 @@ const onSelectPasteButton = () => {
     } catch (err) {
       console.error('Failed to copy:', err)
     }
+  }
+}
+
+const onSearchButton = () => {
+  isShowFindBar.value = true
+}
+
+const onSearch = (action, text) => {
+  if (action === "prev") {
+    searchAddon.findPrevious(text)
+  } else if (action === "next") {
+    searchAddon.findNext(text)
   }
 }
 
@@ -579,8 +613,6 @@ const setupResizeObserver = () => {
   onBeforeUnmount(() => resizeObserver.disconnect())
 }
 
-
-
 const handleKeyDown = (event) => {
   // 标签页切换，快捷键 alt + 数字键
   console.log("handleKeyDown", event.key)
@@ -639,8 +671,19 @@ defineExpose({
         })
       }
     }
-  }
+  },
 
+  showFindBar: () => {
+    isShowFindBar.value = !isShowFindBar.value
+  },
+
+  updateHeight: (height) => {
+    if (isShowFindBar.value) {
+      xtermStyle.height = height - 40 + "px"
+    } else {
+      xtermStyle.height = height + "px"
+    }
+  }
 })
 
 onMounted(async () => {
@@ -649,13 +692,12 @@ onMounted(async () => {
   fitAddon.fit()
 
   setupResizeObserver()
-
 })
 
 onBeforeUnmount(() => {
   destroyTerminal()
 
-  window.removeEventListener('keydown', handleKeyDown)
+  // window.removeEventListener('keydown', handleKeyDown)
 })
 
 onActivated(() => {

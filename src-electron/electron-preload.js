@@ -172,7 +172,11 @@ contextBridge.exposeInMainWorld('client', {
 
   switchTabOnHotKey (callback) {
     return ipcRenderer.on('switchTabOnHotKey', (event, data) => callback(data))
-  }
+  },
+
+  showFindBar (callback) {
+    return ipcRenderer.on('showFindBar', (event) => callback())
+  },
 
 })
 

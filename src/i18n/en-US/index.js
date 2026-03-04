@@ -731,6 +731,8 @@ export default {
 
   terminal: {
     globalSettingsTitle: "Terminal Node Global Settings",
+    autoSaveLog: "Auto Save Log",
+    showSearch: "Show Search",
 
     closeMessage: "Are you sure to close？",
   },

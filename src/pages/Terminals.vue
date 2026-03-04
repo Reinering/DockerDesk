@@ -38,7 +38,6 @@
             :terminal-id="item.id"
             :data="item.data"
             :ref="(el) => (xtermRefs[item.id] = el)"
-            :style="xtermStyle"
           />
 
 <!--          <q-splitter-->
@@ -103,6 +102,11 @@
           <q-checkbox v-model="isSendNow" label="Send Now" color="orange" />
         </q-card-section>
 
+        <q-card-section>
+          <q-checkbox v-model="isAutoSave" :label="t('terminal.autoSaveLog')" color="teal" />
+          <q-checkbox v-model="isShowSearch" :label="t('terminal.showSearch')" color="teal" />
+        </q-card-section>
+
         <q-card-actions align="right">
           <q-btn :label="t('ok')" class="q-mt-md" type="submit" color="blue" @click="addService" />
           <q-btn :label="t('cancel')" class="q-mt-md"  color="negative" @click="closeDialog" />
@@ -145,6 +149,7 @@ const xtermStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 97 + "px" : window.innerHeight - 70 + "px",
   paddingLeft: "3px",
 })
+const xtermHeight = ref(process.env.MODE === 'electron' ? window.innerHeight - 97 : window.innerHeight - 70)
 
 const cardStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 50 + "px" : window.innerHeight - 70 + "px",
@@ -152,6 +157,9 @@ const cardStyle = reactive({
 
 const fabPos = ref([ 30, 200 ])
 const draggingFab = ref(true)
+
+const isAutoSave = ref(false)
+const isShowSearch = ref(false)
 
 const moveFab = (ev) => {
   // draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
@@ -183,18 +191,26 @@ const showCmdBar = () => {
     if (process.env.MODE === 'electron') {
       cardStyle.height = window.innerHeight - 50 - 155 + "px"
       xtermStyle.height = window.innerHeight - 97 - 155 + "px"
+      xtermHeight.value = window.innerHeight - 97 - 155
     } else {
       cardStyle.height = window.innerHeight - 70 - 155 + "px"
       xtermStyle.height = window.innerHeight - 70 - 155 + "px"
+      xtermHeight.value = window.innerHeight - 70 - 155
     }
   } else {
     if (process.env.MODE === 'electron') {
       cardStyle.height = window.innerHeight - 50 + "px"
       xtermStyle.height = window.innerHeight - 97 + "px"
+      xtermHeight.value = window.innerHeight - 97
     } else {
       cardStyle.height = window.innerHeight - 70 + "px"
       xtermStyle.height = window.innerHeight - 70 + "px"
+      xtermHeight.value = window.innerHeight - 70
     }
+  }
+
+  for (let i in xtermRefs) {
+    xtermRefs[i].updateHeight(xtermHeight.value)
   }
 }
 
@@ -247,18 +263,26 @@ const checkScreenSize = () => {
     if (process.env.MODE === 'electron') {
       cardStyle.height = window.innerHeight - 50 - 155 + "px"
       xtermStyle.height = window.innerHeight - 97 - 155 + "px"
+      xtermHeight.value = window.innerHeight - 97 - 155
     } else {
       cardStyle.height = window.innerHeight - 70 - 155 + "px"
       xtermStyle.height = window.innerHeight - 70 - 155 + "px"
+      xtermHeight.value = window.innerHeight - 70 - 155
     }
   } else {
     if (process.env.MODE === 'electron') {
       cardStyle.height = window.innerHeight - 50 + "px"
       xtermStyle.height = window.innerHeight - 97 + "px"
+      xtermHeight.value = window.innerHeight - 97
     } else {
       cardStyle.height = window.innerHeight - 70 + "px"
       xtermStyle.height = window.innerHeight - 70 + "px"
+      xtermHeight.value = window.innerHeight - 70
     }
+  }
+
+  for (let i in xtermRefs) {
+    xtermRefs[i].updateHeight(xtermHeight.value)
   }
 }
 
@@ -299,6 +323,11 @@ const deleteTab = (id) => {
 onMounted(() => {
   window.addEventListener('resize', checkScreenSize)
   window.addEventListener('keydown', handleKeyDown)
+
+  window.client.showFindBar(() => {
+    xtermRefs[tab.value].showFindBar()
+    xtermRefs[tab.value].updateHeight(xtermHeight.value)
+  })
 })
 
 onUnmounted(() => {

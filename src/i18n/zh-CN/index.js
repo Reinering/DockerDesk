@@ -745,6 +745,8 @@ export default {
 
   terminal: {
     globalSettingsTitle: "终端节点全局设置",
+    autoSaveLog: "自动保存日志",
+    showSearch: "显示搜索",
 
     closeMessage: "确认关闭吗？",
   },
