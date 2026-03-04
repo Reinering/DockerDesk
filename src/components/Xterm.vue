@@ -26,11 +26,11 @@
             {{ t('selectPaste') }}
           </q-item-section>
         </q-item>
-        <q-item v-if="showMenu" clickable @click="onSearchButton">
-          <q-item-section>
-            {{ t('search') }}
-          </q-item-section>
-        </q-item>
+<!--        <q-item v-if="showMenu" clickable @click="onSearchButton">-->
+<!--          <q-item-section>-->
+<!--            {{ t('search') }}-->
+<!--          </q-item-section>-->
+<!--        </q-item>-->
         <q-item v-if="showMenu" clickable @click="onCleanButton">
           <q-item-section>
             {{ t('clean') }}

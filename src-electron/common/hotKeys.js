@@ -2,10 +2,11 @@ import { globalShortcut } from 'electron'
 import { settings } from '../actions/settings.js'
 
 
+const Numbers = ['1', '2', '3', '4', '5', '6']
 
 export const HotKeys = {
 
-  // local
+  ////////////// local ///////////////
   defaultLocal: [
     {
       name: 'findBar',
@@ -16,6 +17,16 @@ export const HotKeys = {
       isEdit: false,
       desc: 'setting.findBar'
     },
+
+    {
+      name: 'activateTab',
+      txt: 'Activate Tab',
+      func: "activateTab",
+      keys: ['Alt', 'Num'],
+      enable: true,
+      isEdit: false,
+      desc: 'setting.activateTab'
+    }
   ],
 
   localRegistry: async (mainWindow) => {
@@ -41,8 +52,12 @@ export const HotKeys = {
             HotKeys[item.func]()
           } else if (item.keys[0] === 'Shift' && isShift && item.keys[1] === input.key.toUpperCase()) {
             HotKeys[item.func]()
-          } else if (item.keys[0] === 'Alt' && isAlt && item.keys[1] === input.key.toUpperCase()) {
-            HotKeys[item.func]()
+          } else if (item.keys[0] === 'Alt' && isAlt) {
+            if (item.keys[1] === "Num" && Numbers.indexOf(input.key) !== -1) {
+              HotKeys[item.func](input.key)
+            } else if (item.keys[1] === input.key.toUpperCase()) {
+              HotKeys[item.func]()
+            }
           }
 
         } else if (item.keys.length === 3) {
@@ -60,7 +75,7 @@ export const HotKeys = {
     })
   },
 
-  // global
+  //////////// global /////////////
 
   mainWin: null,
   result: [],
@@ -75,17 +90,6 @@ export const HotKeys = {
       desc: 'setting.quickShowHide'
 
     },
-
-
-    // {
-    //   name: 'switchTab',
-    //   txt: 'Switch Tab',
-    //   func: "switchTab",
-    //   keys: ['Alt', 'Num'],
-    //   enable: false,
-    //   isEdit: false,
-    //   desc: 'setting.switchTab'
-    // }
   ],
 
   registerAll: async (mainWindow) => {
@@ -243,6 +247,10 @@ export const HotKeys = {
       return {success: true}
     }
 
+  },
+
+  activateTab: (i) => {
+    HotKeys.mainWin.webContents.send('switchTabOnHotKey', i - 1)
   },
 
   showFindBar: async () => {

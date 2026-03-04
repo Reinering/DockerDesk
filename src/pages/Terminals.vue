@@ -324,6 +324,14 @@ onMounted(() => {
   window.addEventListener('resize', checkScreenSize)
   window.addEventListener('keydown', handleKeyDown)
 
+  window.client.switchTabOnHotKey((index) => {
+    if (tabs.length <= parseInt(index)) {
+      return
+    }
+
+    tab.value = tabs[parseInt(index)].id
+  })
+
   window.client.showFindBar(() => {
     xtermRefs[tab.value].showFindBar()
     xtermRefs[tab.value].updateHeight(xtermHeight.value)
