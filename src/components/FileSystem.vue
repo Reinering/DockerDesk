@@ -466,10 +466,18 @@ const downloadSFile = (path) => {
           message: `${t('filesystem.downloadFileSuccess')}:${filename}`
         })
       } else {
-        $q.notify({
+        // $q.notify({
+        //   type: 'negative',
+        //   position: clientConfig.quasar.notify.position,
+        //   message: `${t('filesystem.downloadFileError')}:${filename}:${result.error}`,
+        // })
+
+        notify.value({
           type: 'negative',
-          position: clientConfig.quasar.notify.position,
+          icon: 'done',
+          spinner: false,
           message: `${t('filesystem.downloadFileError')}:${filename}:${result.error}`,
+          timeout: 10000
         })
       }
     })
@@ -485,10 +493,18 @@ const downloadSFile = (path) => {
           message: `${t('filesystem.downloadFileSuccess')}:${filename}`
         })
       } else {
-        $q.notify({
+        // $q.notify({
+        //   type: 'negative',
+        //   position: clientConfig.quasar.notify.position,
+        //   message: `${t('filesystem.downloadFileError')}:${filename}:${result.error}`,
+        // })
+
+        notify.value({
           type: 'negative',
-          position: clientConfig.quasar.notify.position,
+          icon: 'done',
+          spinner: false,
           message: `${t('filesystem.downloadFileError')}:${filename}:${result.error}`,
+          timeout: 10000
         })
       }
     })
@@ -502,10 +518,18 @@ const downloadStream = (path) => {
       remotePath: path,
     }).then((result) => {
       if (!result.success) {
-        $q.notify({
+        // $q.notify({
+        //   type: 'negative',
+        //   position: clientConfig.quasar.notify.position,
+        //   message: `${t('filesystem.downloadFileError')}:${path.split('/').slice(-1)}:${result.error}`,
+        // })
+
+        notify.value({
           type: 'negative',
-          position: clientConfig.quasar.notify.position,
+          icon: 'done',
+          spinner: false,
           message: `${t('filesystem.downloadFileError')}:${path.split('/').slice(-1)}:${result.error}`,
+          timeout: 10000
         })
       }
     })
@@ -515,10 +539,18 @@ const downloadStream = (path) => {
       remotePath: path
     })).then((result) => {
       if (!result.success) {
-        $q.notify({
+        // $q.notify({
+        //   type: 'negative',
+        //   position: clientConfig.quasar.notify.position,
+        //   message: `${t('filesystem.downloadFileError')}:${path.split('/').slice(-1)}:${result.error}`,
+        // })
+
+        notify.value({
           type: 'negative',
-          position: clientConfig.quasar.notify.position,
+          icon: 'done',
+          spinner: false,
           message: `${t('filesystem.downloadFileError')}:${path.split('/').slice(-1)}:${result.error}`,
+          timeout: 10000
         })
       }
     })
@@ -644,10 +676,18 @@ const downloadFolder = (path) => {
       remotePath: path,
     })).then((result) => {
       if (!result.success) {
-        $q.notify({
+        // $q.notify({
+        //   type: 'negative',
+        //   position: clientConfig.quasar.notify.position,
+        //   message: t('filesystem.downloadFolderError') + ':' + result.error,
+        // })
+
+        notify.value({
           type: 'negative',
-          position: clientConfig.quasar.notify.position,
+          icon: 'done',
+          spinner: false,
           message: t('filesystem.downloadFolderError') + ':' + result.error,
+          timeout: 10000
         })
       }
     })
@@ -657,10 +697,18 @@ const downloadFolder = (path) => {
       remotePath: path
     })).then((result) => {
       if (!result.success) {
-        $q.notify({
+        // $q.notify({
+        //   type: 'negative',
+        //   position: clientConfig.quasar.notify.position,
+        //   message: t('filesystem.downloadFolderError') + ':' + result.error,
+        // })
+
+        notify.value({
           type: 'negative',
-          position: clientConfig.quasar.notify.position,
+          icon: 'done',
+          spinner: false,
           message: t('filesystem.downloadFolderError') + ':' + result.error,
+          timeout: 10000
         })
       }
     })
@@ -790,6 +838,18 @@ const uploadFile1 = async (file) => {
 }
 
 const uploadFile = async (file) => {
+  lineProgress.value = 0.0
+
+  notify.value = $q.notify({
+    type: 'info',
+    group: false,
+    timeout: 0,
+    spinner: true,
+    position: 'bottom-right',
+    message: t('filesystem.uploadingFile'),
+    caption: '0%'
+  })
+
   if (isSftp.value) {
     window.sftpTerminal.uploadStream({
       uuid: props.data.id,
@@ -803,18 +863,6 @@ const uploadFile = async (file) => {
       localPath: file
     })
   }
-
-  lineProgress.value = 0.0
-
-  notify.value = $q.notify({
-    type: 'info',
-    group: false,
-    timeout: 0,
-    spinner: true,
-    position: 'bottom-right',
-    message: t('filesystem.uploadingFile'),
-    caption: '0%'
-  })
 }
 
 const uploadFileChunk = async (file, reader) => {
