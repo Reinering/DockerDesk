@@ -1,33 +1,33 @@
 <template>
   <q-card>
-<!--    // menu-->
-    <q-menu context-menu auto-close>
-      <q-list>
-        <q-item clickable @click="onAddButton">
-          <q-item-section>
-            {{ t('add') + 'Button' }}
-          </q-item-section>
-        </q-item>
-        <q-separator />
-        <q-item clickable @click="onAddButtonBar">
-          <q-item-section>
-            {{ t('add') + 'Button Bar' }}
-          </q-item-section>
-        </q-item>
-        <q-item clickable @click="onEditButtonBar">
-          <q-item-section>
-            {{ t('edit') + 'Button Bar' }}
-          </q-item-section>
-        </q-item>
-        <q-item clickable @click="onDelButtonBar">
-          <q-item-section>
-            {{ t('delete') + 'Button Bar' }}
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-menu>
-
     <div class="row no-wrap q-pa-md q-gutter-sm no-padding" style="margin-left: 2px;">
+      <!--    // menu-->
+      <q-menu context-menu auto-close>
+        <q-list>
+          <q-item clickable @click="onAddButton">
+            <q-item-section>
+              {{ t('add') + 'Button' }}
+            </q-item-section>
+          </q-item>
+          <q-separator />
+          <q-item clickable @click="onAddButtonBar">
+            <q-item-section>
+              {{ t('add') + 'Button Bar' }}
+            </q-item-section>
+          </q-item>
+          <q-item clickable @click="onEditButtonBar">
+            <q-item-section>
+              {{ t('edit') + 'Button Bar' }}
+            </q-item-section>
+          </q-item>
+          <q-item clickable @click="onDelButtonBar">
+            <q-item-section>
+              {{ t('delete') + 'Button Bar' }}
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
+
       <q-btn
         class="square-btn"
         icon="settings"

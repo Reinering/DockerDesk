@@ -14,6 +14,7 @@
         v-model="tab"
       >
         <RTab
+          :ref="(el) => (rTabRefs[item.id] = el)"
           v-for="item in tabs"
           :key="item.id"
           :name="item.id"
@@ -170,13 +171,14 @@ const moveFab = (ev) => {
   ]
 }
 
+const rTabRefs = reactive({})
 const tab = ref('')
 
 const tabs = reactive([])
 
 const splitterModel = ref(100)
 
-const xtermRefs = reactive({}); // 存储 xterm 实例的 ref
+const xtermRefs = reactive({}) // 存储 xterm 实例的 ref
 
 const isShowCmdBar = ref(false)
 
@@ -281,8 +283,12 @@ const checkScreenSize = () => {
     }
   }
 
-  for (let i in xtermRefs) {
-    xtermRefs[i].updateHeight(xtermHeight.value)
+  try {
+    for (let i in xtermRefs) {
+      xtermRefs[i].updateHeight(xtermHeight.value)
+    }
+  } catch (e) {
+
   }
 }
 
@@ -375,12 +381,23 @@ watch(tabs, (newVal, oldVal) =>  {
 })
 
 watch(tab, (newVal, oldVal) => {
-  // console.log(newVal, oldVal)
+  console.log(newVal, oldVal)
+
+  if (!isEmptyObj(oldVal)) {
+    rTabRefs[oldVal].showDelete(false)
+  }
+
   if (isEmptyObj(newVal)) {
     isShowSettingsDialog.value = false
     draggingFab.value = true
     checkScreenSize()
   } else {
+    try {
+      rTabRefs[newVal].showDelete(true)
+    } catch (e) {
+      console.log(e)
+    }
+
     draggingFab.value = false
 
     for (let i = 0; i < tabs.length; i++) {

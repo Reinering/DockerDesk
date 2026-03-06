@@ -11,6 +11,7 @@
       </q-tooltip>
     </q-tab>
     <q-btn
+      v-if="isShowDelete"
       flat
       round
       dense
@@ -28,8 +29,6 @@
 
 
 <script setup>
-import { inject } from 'vue'
-
 defineOptions({
   name: 'RTab',
 })
@@ -61,7 +60,11 @@ const props = defineProps({
   }
 })
 
+import { inject, onMounted, onActivated, onDeactivated, ref } from 'vue'
+
 const t = inject("t")
+
+const isShowDelete = ref(false)
 
 const onClick = (e) => {
   e.stopPropagation()
@@ -69,6 +72,25 @@ const onClick = (e) => {
   props.onClick()
 }
 
+// 暴露 resize 方法给父组件
+defineExpose({
+  showDelete: (state) => {
+    isShowDelete.value = state
+  }
+
+})
+
+onMounted(() => {
+  isShowDelete.value = true
+})
+
+onActivated(() => {
+
+})
+
+onDeactivated(() => {
+
+})
 
 </script>
 
