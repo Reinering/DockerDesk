@@ -10,6 +10,7 @@
       v-model="tab"
     >
       <RTab
+        :ref="(el) => (rTabRefs[item.id] = el)"
         v-for="item in tabs"
         :key="item.id"
         :name="item.id"
@@ -96,6 +97,7 @@ const moveFab = (ev) => {
   ]
 }
 
+const rTabRefs = reactive({})
 const tab = ref('')
 
 const tabs = reactive([
@@ -202,10 +204,20 @@ watch(tabs, (newVal, oldVal) => {
 })
 
 watch(tab, (newVal, oldVal) => {
+  if (!isEmptyObj(oldVal)) {
+    rTabRefs[oldVal].showDelete(false)
+  }
+
   if (isEmptyObj(newVal)) {
 
     checkScreenSize()
   } else {
+    try {
+      rTabRefs[newVal].showDelete(true)
+    } catch (e) {
+      console.log(e)
+    }
+
     for (let i = 0; i < tabs.length; i++) {
       if (tabs[i].id === newVal) {
         fsData.value = tabs[i]
