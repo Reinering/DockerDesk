@@ -90,6 +90,7 @@ const xtermStyle = reactive({
   height: process.env.MODE === 'electron' ? window.innerHeight - 97 + "px" : window.innerHeight - 70 + "px",
   paddingLeft: "3px",
 })
+const height = ref(process.env.MODE === 'electron' ? window.innerHeight - 97 : window.innerHeight - 70)
 
 const xtermRef = ref(null)
 let term = null
@@ -107,6 +108,7 @@ const xtermConfig = reactive({
   fontWeight: 'normal', // 可选：字体粗细（normal, bold, 100-900）
   disableStdin: false, // 禁止输入
   scrollback: 2000,  // 缓存
+  lineHeight: 1
 })
 
 const showMenu = ref(true)
@@ -588,6 +590,58 @@ const handleResize = () => {
 
 }
 
+const safeFit = async () => {
+
+  await nextTick()
+  if (fitAddon) {
+    fitAddon.fit()
+
+    // 关键步骤：获取单行高度，反向微调容器高度（可选）
+    // const dims = term._core._renderService.dimensions
+    // if (dims) {
+    //   const actualHeight = term.rows * dims.device.cell.height
+    //   // 你可以手动给容器设置这个 actualHeight，从而消除底部的半行空隙
+    //   console.log(height.value / dims.device.cell.height)
+    //   if (actualHeight > height.value) {
+    //     // 強制 reflow 或微調
+    //     setTimeout(() => {
+    //       const dims = fitAddon.proposeDimensions()
+    //       if (dims) {
+    //         term.resize(dims.cols, dims.rows - 1)  // 明確再設一次
+    //       }
+    //     }, 0)
+    //   } else {
+    //     // 強制 reflow 或微調
+    //     setTimeout(() => {
+    //       const dims = fitAddon.proposeDimensions()
+    //       if (dims) {
+    //         term.resize(dims.cols, dims.rows)  // 明確再設一次
+    //       }
+    //     }, 0)
+    //   }
+    // }
+    //
+    // // 強制修正最後一行問題
+    // setTimeout(() => {
+    //   const canvas = term.element.querySelector('canvas')
+    //   if (canvas) {
+    //     canvas.style.height = '100%'
+    //   }
+    // }, 100)
+    setTimeout(() => {
+      const dims = fitAddon.proposeDimensions()
+      if (dims && isShowFindBar.value) {
+        term.resize(dims.cols, dims.rows - 2)  // 明確再設一次
+      } else {
+        // term.resize(dims.cols, dims.rows - 1)  // 明確再設一次
+      }
+
+      handleResize()
+    }, 0)
+
+  }
+};
+
 const debounce = (func, wait) => {
   let timeout
 
@@ -604,7 +658,7 @@ const debounce = (func, wait) => {
 const setupResizeObserver = () => {
   const resizeObserver = new ResizeObserver(debounce(() => {
     if (fitAddon && xtermRef.value) {
-      fitAddon.fit()
+      safeFit()
       handleResize()
     }
   }, 200))
@@ -652,9 +706,7 @@ const handleKeyDown = (event) => {
 // 暴露 resize 方法给父组件
 defineExpose({
   resize: () => {
-    if (fitAddon) {
-      fitAddon.fit()
-    }
+    safeFit()
   },
 
   send: (data) => {
@@ -677,19 +729,21 @@ defineExpose({
     isShowFindBar.value = !isShowFindBar.value
   },
 
-  updateHeight: (height) => {
+  updateHeight: (h) => {
     if (isShowFindBar.value) {
-      xtermStyle.height = height - 40 + "px"
+      xtermStyle.height = h - 40 + "px"
     } else {
-      xtermStyle.height = height + "px"
+      xtermStyle.height = h + "px"
     }
+    height.value = h
+    safeFit()
   }
 })
 
 onMounted(async () => {
   initTerminal()
   await nextTick()
-  fitAddon.fit()
+  safeFit()
 
   setupResizeObserver()
 })

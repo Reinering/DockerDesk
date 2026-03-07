@@ -3,7 +3,7 @@
 <!--    -->
 <!--  </q-layout>-->
   <q-page q-pa-md>
-    <q-card :style="cardStyle">
+    <q-card class="full-height">
       <q-tabs
         inline-label
         switch-indicator
@@ -26,20 +26,22 @@
 
       <q-separator />
 
-      <q-tab-panels v-model="tab" animated keep-alive :style="xtermStyle">
+      <q-tab-panels class="no-padding full-height" v-model="tab" animated keep-alive>
 <!--        class="grey-9 text-white"-->
         <q-tab-panel
           v-for="item in tabs"
           :key="item.id"
           :name="item.id"
-          class="no-padding"
-          style="width: 100%; height: 100%"
+          class="no-padding overflow-hidden"
+          :style="xtermStyle"
         >
           <Xterm
             :terminal-id="item.id"
             :data="item.data"
             :ref="(el) => (xtermRefs[item.id] = el)"
+            :style="xtermStyle"
           />
+
 
 <!--          <q-splitter-->
 <!--            v-model="splitterModel"-->
@@ -421,7 +423,7 @@ watch(tab, (newVal, oldVal) => {
     try {
       rTabRefs[newVal].showDelete(true)
     } catch (e) {
-      console.log(e)
+      // console.log(e)
     }
 
     draggingFab.value = false
