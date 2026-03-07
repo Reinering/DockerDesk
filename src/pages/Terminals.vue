@@ -115,8 +115,19 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-if="isShowFileSystemDialog" v-model="isShowFileSystemDialog" >
-      <FileSystem :data="fsData" />
+    <q-dialog
+      v-if="isFileSystemDialog"
+      v-model="isFileSystemDialog"
+      :maximized="maximizedToggle"
+      seamless
+    >
+      <FileSystem
+        v-show="isShowFileSystemDialog"
+        :data="fsData"
+        :minimized="onMinimizedFSDialog"
+        :maximized="onMaximizedFSDialog"
+        :closed="onClosedFSDialog"
+      />
     </q-dialog>
 
   </q-page>
@@ -216,15 +227,30 @@ const showCmdBar = () => {
   }
 }
 
+const maximizedToggle = ref(false)
+const isFileSystemDialog = ref(false)
 const isShowFileSystemDialog = ref(false)
 
 const showFileSystem = () => {
   if (tab.value === '') {
+    isFileSystemDialog.value = false
     isShowFileSystemDialog.value = false
     return
   }
 
+  isFileSystemDialog.value = true
   isShowFileSystemDialog.value = ! isShowFileSystemDialog.value
+}
+
+const onMinimizedFSDialog = () => {
+  isShowFileSystemDialog.value = false
+}
+const onMaximizedFSDialog = () => {
+  maximizedToggle.value = !maximizedToggle.value
+}
+const onClosedFSDialog = () => {
+  isFileSystemDialog.value = false
+  isShowFileSystemDialog.value = false
 }
 
 const isShowSettingsDialog = ref(false)
@@ -381,7 +407,7 @@ watch(tabs, (newVal, oldVal) =>  {
 })
 
 watch(tab, (newVal, oldVal) => {
-  console.log(newVal, oldVal)
+  // console.log(newVal, oldVal)
 
   if (!isEmptyObj(oldVal)) {
     rTabRefs[oldVal].showDelete(false)

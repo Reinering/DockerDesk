@@ -1,7 +1,15 @@
 <template>
   <q-card style="min-width: 100%">
     <q-card-section>
-      <div class="text-h6">{{ t('filesystem.title') }}</div>
+      <div class="row">
+        <div class="text-h6">{{ t('filesystem.title') }}</div>
+
+        <q-space />
+
+        <q-btn round dense flat icon="minimize" @click="props.minimized" />
+        <q-btn round dense flat icon="crop_square" @click="props.maximized" />
+        <q-btn flat round dense icon="close" @click="props.closed" />
+      </div>
     </q-card-section>
 
     <q-linear-progress size="2px" :value="lineProgress" color="accent" />
@@ -159,11 +167,6 @@
 </template>
 
 <script setup>
-import { ref, inject, reactive, onMounted, onUnmounted } from 'vue'
-import { clientConfig } from 'src/common/config.js'
-
-
-
 defineOptions({
   name: 'FileSystem',
 })
@@ -172,8 +175,26 @@ const props = defineProps({
   data: {
     type: Object,
     default: () => {},
+  },
+
+  minimized: {
+    type: Function,
+    deault: () => {}
+  },
+
+  maximized: {
+    type: Function,
+    deault: () => {}
+  },
+
+  closed: {
+    type: Function,
+    deault: () => {}
   }
 })
+
+import { ref, inject, reactive, onMounted, onUnmounted, onActivated, watch } from 'vue'
+import { clientConfig } from 'src/common/config.js'
 
 const $q = inject("$q")
 const router = inject("router")
@@ -1277,7 +1298,7 @@ const onEditFile = (row) => {
 
 
 const init = async () => {
-  console.log("init", props.data)
+  // console.log("init", props.data)
   if (props.data.data.connectionType === t('node.remoteNode')  && props.data.data.protocol === 'SSH') {
     await window.sshTerminal.detect(props.data.id)
       .then(async (result) => {
@@ -1394,7 +1415,16 @@ onMounted( () => {
   receive()
 })
 
+onActivated(() => {
+})
+
 onUnmounted(() => {
+
+})
+
+watch(() => props.data, (newVal, oldVal) => {
+  console.log(newVal, oldVal)
+  init()
 
 })
 </script>
