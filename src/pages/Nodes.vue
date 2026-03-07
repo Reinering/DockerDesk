@@ -183,6 +183,11 @@
                     <q-item-label class="text-blue">{{t('node.refresh')}}</q-item-label>
                   </q-item-section>
                 </q-item>
+                <q-item clickable v-close-popup size="sm" class="bg-brown-6" @click="onLocalTerminal">
+                  <q-item-section>
+                    <q-item-label >{{t('node.terminal')}}</q-item-label>
+                  </q-item-section>
+                </q-item>
               </q-list>
             </q-btn-dropdown>
           </div>
@@ -420,6 +425,20 @@ const onFileSelected = (file) => {
 
 const onRefresh = () => {
   init()
+}
+
+const onLocalTerminal = () => {
+  let item
+  let data = JSON.parse(JSON.stringify({
+    id: '00000000',
+    serviceName:'CMD',
+    connectionType: '本地节点',
+    serviceType: "terminal"
+  }))
+
+  item = findNaviItemByName(navigatorStore.naviItems, "Terminal")
+
+  return changeNavigatorGoto(router, item[0], item[1], {data: data})
 }
 
 const addService = () => {
