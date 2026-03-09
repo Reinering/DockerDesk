@@ -41,6 +41,7 @@ See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-
 
 ## Display
 
+!['project'](public/images/show.png)
 !['project'](public/images/navi.png)
 !['project'](public/images/index.png)
 !['project'](public/images/settings.png)
