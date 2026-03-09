@@ -36,6 +36,17 @@ npm run format
 quasar build
 ```
 
+### Build the electron app for production
+```bash
+quasar electron:build
+
+or
+
+electron:buildbug
+```
+
+
+
 ### Customize the configuration
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
 
