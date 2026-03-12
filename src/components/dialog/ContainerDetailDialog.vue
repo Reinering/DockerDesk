@@ -111,8 +111,10 @@
                   bordered
                   hide-bottom
                 >
-                  <template v-slot:body-cell-actions="props">
+                  <template
+                    v-slot:body-cell-actions="props">
                     <q-btn
+                      v-if="props.row['external']"
                       icon="send"
                       color="purple-14"
                       dense
@@ -249,7 +251,7 @@ const props = defineProps({
 })
 
 import { inject, ref, onMounted, onUnmounted, onActivated, onDeactivated, reactive } from 'vue'
-import { isEmptyObj } from 'src/utils/common.js'
+import { firstLower, isEmptyObj } from 'src/utils/common.js'
 import { getPortsByContainer, parseContainerUsage } from 'src/utils/wsl.js'
 
 const $q = inject("$q")
@@ -556,7 +558,7 @@ const getContainerInfo = () => {
 
 
 const init = () => {
-  serviceCmd.value = service.serviceType
+  serviceCmd.value = firstLower(service.serviceType)
   if (isEmptyObj(serviceCmd.value)) {
     return
   }
@@ -568,8 +570,6 @@ const init = () => {
       getContainerUsage()
     }, 40000)
   }
-
-
 
   getContainerInfo()
 

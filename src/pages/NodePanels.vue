@@ -215,7 +215,7 @@ watch(tab, (newVal, oldVal) => {
     try {
       rTabRefs[newVal].showDelete(true)
     } catch (e) {
-      console.log(e)
+      // console.log(e)
     }
 
     for (let i = 0; i < tabs.length; i++) {
