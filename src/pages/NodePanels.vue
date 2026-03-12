@@ -205,7 +205,9 @@ watch(tabs, (newVal, oldVal) => {
 
 watch(tab, (newVal, oldVal) => {
   if (!isEmptyObj(oldVal)) {
-    rTabRefs[oldVal].showDelete(false)
+    try {
+      rTabRefs[oldVal].showDelete(false)
+    } catch (e) {}
   }
 
   if (isEmptyObj(newVal)) {

@@ -373,65 +373,45 @@ export const parsePodmanContainer = (input) => {
 }
 
 function parseExPorts(ports) {
-  // 按协议分开处理
-  const tcpPorts = ports
-    .filter(p => p.protocol === 'tcp')
-    .map(p => parseInt(p.port, 10))
-    .sort((a, b) => a - b)
-  const udpPorts = ports
-    .filter(p => p.protocol === 'udp')
-    .map(p => parseInt(p.port, 10))
-    .sort((a, b) => a - b)
-
-  // 合并连续端口的函数
-  const mergePorts = (portNumbers) => {
-    if (portNumbers.length === 0) return []
-    const ranges = []
-    let start = portNumbers[0]
-    let prev = start
-
-    for (let i = 1; i <= portNumbers.length; i++) {
-      const current = portNumbers[i]
-      if (current !== prev + 1 || i === portNumbers.length) {
-        if (start === prev) {
-          ranges.push(start.toString())
-        } else {
-          ranges.push(`${start}-${prev}`)
-        }
-        start = current
-      }
-      prev = current
-    }
-    return ranges
-  }
-
-  // 合并 TCP 和 UDP 端口
-  const tcpRanges = mergePorts(tcpPorts)
-  const udpRanges = mergePorts(udpPorts)
-
-  // 合并结果并保留协议信息
   const result = []
-  tcpRanges.forEach(port => result.push({ port, protocol: 'tcp' }))
-  udpRanges.forEach(port => result.push({ port, protocol: 'udp' }))
 
-  return result
+  // 1. 遍历匹配到的每一个原始数据项
+  ports.forEach(item => {
+    if (item.port.includes('-')) {
+      // 2. 如果包含连字符，拆分起始和结束端口
+      const [start, end] = item.port.split('-').map(Number)
+      for (let i = start; i <= end; i++) {
+        result.push({ port: i.toString(), protocol: item.protocol })
+      }
+    } else {
+      // 3. 如果是单个端口，直接推入
+      result.push({ port: item.port, protocol: item.protocol })
+    }
+  })
+
+  // 4. 按协议排序并去重（防止原始字符串中有重叠的范围）
+  return result.sort((a, b) => {
+    if (a.protocol !== b.protocol) return a.protocol.localeCompare(b.protocol)
+    return parseInt(a.port) - parseInt(b.port)
+  }).filter((item, index, self) =>
+      index === self.findIndex((t) => (
+        t.port === item.port && t.protocol === item.protocol
+      ))
+  )
 }
 
 export function getExPortsByContainer(mapping) {
   const externalPorts = []
-  // 按逗号分割多个端口映射
   const ports = mapping.split(',').map(p => p.trim())
 
   ports.forEach(port => {
-    // 仅匹配 0.0.0.0:XXXX->YYYY/tcp 或 0.0.0.0:XXXX->YYYY/udp
-    const mappedMatch = port.match(/^0\.0\.0\.0:(\d+)->\d+\/(tcp|udp)$/)
+    // 修正正则：允许端口位匹配数字和连字符 ([\d-]+)
+    const mappedMatch = port.match(/^0\.0\.0\.0:([\d-]+)->[\d-]+\/(tcp|udp)$/)
     if (mappedMatch) {
       externalPorts.push({ port: mappedMatch[1], protocol: mappedMatch[2] })
     }
-    // 忽略直接暴露的端口（如 80/tcp, 5000/tcp）和范围（如 6883-6999/tcp）
   })
 
-  // 合并连续端口
   return parseExPorts(externalPorts)
 }
 
@@ -542,7 +522,7 @@ function mergeConsecutivePorts(ports) {
   return result
 }
 
-export function getPortsByContainer(mappings) {
+export function getPortsByContainer1(mappings) {
   const result = mappings.map(mapping => {
     const externalPorts = []
     // 按逗号分割多个端口映射
@@ -563,6 +543,60 @@ export function getPortsByContainer(mappings) {
 
   return result
 }
+
+function parseAndExpand(str) {
+  if (str.includes('-')) {
+    const [start, end] = str.split('-').map(Number)
+    const result = []
+    for (let i = start; i <= end; i++) {
+      result.push(i.toString())
+    }
+    return result
+  }
+  return [str]
+}
+
+export function getPortsByContainer(mappings) {
+  // mappings 是数组，例如 ["50000/tcp", "0.0.0.0:9030->8080/tcp", ...]
+  return mappings.map(mapping => {
+    const result = []
+    // 按逗号分割多个端口映射
+    const parts = mapping.split(',').map(p => p.trim())
+
+    parts.forEach(part => {
+      // 模式 1: 50000/tcp (仅内部，无 external)
+      const internalOnlyMatch = part.match(/^(\d+)\/(tcp|udp)$/)
+      if (internalOnlyMatch) {
+        result.push({
+          external: '', // 明确要求：第一个识别结果没有 external
+          internal: internalOnlyMatch[1],
+          protocol: internalOnlyMatch[2]
+        })
+        return
+      }
+
+      // 模式 2: 0.0.0.0:9000-9001->9000-9001/tcp 或 0.0.0.0:9030->8080/tcp
+      const mappedMatch = part.match(/(?:0\.0\.0\.0:)?([\d-]+)->([\d-]+)\/(tcp|udp)/)
+      if (mappedMatch) {
+        const [_, extStr, intStr, protocol] = mappedMatch
+        const extList = parseAndExpand(extStr)
+        const intList = parseAndExpand(intStr)
+
+        // 将展开后的每一个端口对应存入数组
+        extList.forEach((ext, index) => {
+          result.push({
+            external: ext,
+            internal: intList[index] || intList[0], // 防止索引不匹配
+            protocol: protocol
+          })
+        })
+      }
+    })
+
+    return result
+  })
+}
+
 
 export function parseNetstat(data) {
   const lines = data.trim().split('\n')
