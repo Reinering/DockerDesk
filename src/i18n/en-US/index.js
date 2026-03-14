@@ -852,6 +852,8 @@ export default {
     carousel: "carousel",
 
     autoLaunch: "Auto Launch",
+    autoBackup: "Auto Backup",
+    backUpDir: "Backup Direcory",
 
     restoreHotKeys: "Reset all Hotkeys",
     hotKeyMsg: "Hotkey Management",
@@ -861,7 +863,8 @@ export default {
     actionSuccess: "操作成功",
     actionFail: "操作失败",
 
-    restoreMessage: "Confirm reset?"
+    restoreMessage: "Confirm reset?",
+    setBackupMessage: "Please select the backup directory first"
   },
 
   store: {

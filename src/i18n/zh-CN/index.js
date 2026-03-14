@@ -868,6 +868,8 @@ export default {
     carousel: "幻灯片",
 
     autoLaunch: "开机启动",
+    autoBackup: "自动备份",
+    backUpDir: "备份目录",
 
     restoreHotKeys: "重置所有热键",
     hotKeyMsg: "热键管理",
@@ -877,7 +879,8 @@ export default {
     actionSuccess: "操作成功",
     actionFail: "操作失败",
 
-    restoreMessage: "确认重置?"
+    restoreMessage: "确认重置?",
+    setBackupMessage: "请先选择备份目录"
   },
 
   store: {

@@ -4,7 +4,9 @@ import path from 'path'
 import { fileURLToPath } from 'node:url'
 import fs from 'fs'
 import { app } from 'electron'
+import { settings } from 'app/src-electron/actions/settings.js'
 // import Database from 'better-sqlite3'
+import log from 'electron-log'
 
 const isDev = process.defaultApp || process.env.NODE_ENV === 'development'
 
@@ -189,6 +191,13 @@ async function initDB() {
           value: '{}',
           mark: "hotkey",
           delete_flags: 0
+        },
+        {
+          field: "backup_settings",
+          type: "json",
+          value: '{}',
+          mark: "backup settings",
+          delete_flags: 0
         }
       ])
     }
@@ -222,5 +231,25 @@ async function initDB() {
 }
 
 
+function backupDB () {
+  settings.getByField("backup_settings")
+    .then((result) => {
+      if (!result.success) {
+        return result
+      }
 
-export { db, initDB }
+      const data = JSON.parse(result.data[0].value)
+
+      if (!Object.prototype.hasOwnProperty.call(data, "enable") || !data.enable) {
+        return
+      }
+
+      fs.cp(dbPath, path.join(data.folder, "dockerdesk"), { recursive: true },(err) => {
+        console.log(err)
+        log.error(err)
+      })
+    })
+}
+
+
+export { db, initDB, backupDB }

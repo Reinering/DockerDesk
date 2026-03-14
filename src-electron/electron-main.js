@@ -4,7 +4,7 @@ import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { registerIpcHandlers } from './ipcManager.js'
-import { initDB } from './database/manager.js'
+import { initDB, backupDB } from './database/manager.js'
 import { ssh_clients, sftp_clients } from "./ipc/sshIPC.js"
 import { createTray } from "./common/tray.js"
 import { wslStartLaunch, wslStopLaunch } from "./common/wsl.js"
@@ -102,6 +102,8 @@ app.whenReady().then(() => {
   HotKeys.localRegistry(mainWindow)
 
   wslStartLaunch()
+
+  backupDB()
 })
 
 app.on('did-finish-load', () => {

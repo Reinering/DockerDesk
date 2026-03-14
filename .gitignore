@@ -41,3 +41,4 @@ package-lock.json
 npminstall-debug.log
 
 test/*
+data/

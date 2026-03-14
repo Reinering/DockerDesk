@@ -172,6 +172,32 @@
               </q-item-section>
             </q-item>
 
+            <q-item class="bg-grey-4">
+              <q-item-section>
+                <q-item-label caption>Auto Backup</q-item-label>
+                <q-item-label >{{t('setting.autoBackup')}}</q-item-label>
+              </q-item-section>
+
+              <q-item-section>
+                <q-input
+                  :readonly="settings.autoBackup.enable"
+                  dense
+                  clearable
+                  v-model="settings.autoBackup.folder"
+                  :label="t('setting.backUpDir')"
+                  @update:model-value="changeAutoBackup"
+                >
+                  <template v-slot:append>
+                    <q-btn :disable="settings.autoBackup.enable" round dense flat icon="add"  @click="onSelectBackupFolder"/>
+                  </template>
+                </q-input>
+              </q-item-section>
+
+              <q-item-section avatar>
+                <q-toggle color="green" v-model="settings.autoBackup.enable" @update:model-value="changeAutoBackup"/>
+              </q-item-section>
+            </q-item>
+
           </div>
 
         </q-expansion-item>
@@ -251,7 +277,11 @@ const settings = reactive({
       isEdit: true,
       desc: ''
     }
-  ]
+  ],
+  autoBackup: {
+    enable: false,
+    folder: ''
+  }
 })
 
 const onUserModeUpdate = () => {
@@ -290,6 +320,43 @@ const changeAutoLaunch = () => {
         message: t('setting.actionSuccess')
       })
     } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('setting.actionFail')}: ${result.error}`
+      })
+    }
+  })
+}
+
+const onSelectBackupFolder = async () => {
+  const folders = await window.myWindowAPI.selectFolders()
+
+  try {
+    if (folders.length === 0) {
+      return
+    }
+  } catch (err) {
+    return
+  }
+  settings.autoBackup.folder = folders[0]
+}
+
+const changeAutoBackup = (state) => {
+  if (state && !settings.autoBackup.folder) {
+    settings.autoBackup.enable = false
+    return $q.notify({
+      type: 'negative',
+      position: clientConfig.quasar.notify.position,
+      message: `${t('setting.setBackupMessage')}`
+    })
+  }
+
+  window.client.updateSettings({
+    field: "backup_settings",
+    value: JSON.stringify(settings.autoBackup)
+  }).then((result) => {
+    if (!result.success) {
       $q.notify({
         type: 'negative',
         position: clientConfig.quasar.notify.position,
@@ -573,6 +640,12 @@ const init = () => {
   window.client.getSettings("hot_keys").then((result) => {
     if (result.success) {
       settings.hotKeys = JSON.parse(result.data.value)
+    }
+  })
+
+  window.client.getSettings("backup_settings").then((result) => {
+    if (result.success) {
+      settings.autoBackup = JSON.parse(result.data.value)
     }
   })
 }
