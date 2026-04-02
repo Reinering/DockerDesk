@@ -1,5 +1,5 @@
 <template>
-  <q-card>
+  <q-card style="height: 195px; margin-top: 2px">
     <div class="row no-wrap q-pa-md q-gutter-sm no-padding" style="margin-left: 2px;">
       <!--    // menu-->
       <q-menu context-menu auto-close>
@@ -45,7 +45,7 @@
         size="sm"
         style="width: 150px;"
       />
-      <q-scroll-area style="height: 50px; width: 100%;">
+      <q-scroll-area style="width: 100%; min-height: 50px">
         <div class="row no-wrap q-gutter-sm">
 <!--          size=sm-->
           <q-btn
@@ -56,7 +56,7 @@
             color="green"
             no-caps
             @click="onClickCMD(cmd)"
-            style="{width: 100px;}"
+            style="{min-width: 80px; max-width: 100px; height: 36px; max-height: 36px;}"
           >
             <q-tooltip>
               {{cmd.label}}
@@ -85,20 +85,32 @@
       </q-scroll-area>
     </div>
 
-    <div>
-      <q-input
-        class="cmd-textarea"
-        type="textarea"
-        v-model="command"
-        placeholder="Send commands to active session, press Shift+Enter to line break"
-        filled
-        clearable
-        @keydown="handleKeyDown"
-      />
-<!--      autofocus-->
-<!--      @keyup.enter="scope.set"-->
-<!--      onKeyDown={handleKeyDown}-->
-    </div>
+    <q-input
+      class="cmd-textarea"
+      type="textarea"
+      v-model="command"
+      placeholder="Send commands to active session, press Shift+Enter to line break"
+      filled
+      clearable
+      @keydown="handleKeyDown"
+      style="min-height: 150px; max-height: 150px"
+    />
+
+<!--    <div>-->
+<!--      <q-input-->
+<!--        class="cmd-textarea"-->
+<!--        type="textarea"-->
+<!--        v-model="command"-->
+<!--        placeholder="Send commands to active session, press Shift+Enter to line break"-->
+<!--        filled-->
+<!--        clearable-->
+<!--        @keydown="handleKeyDown"-->
+<!--        style="min-height: 150px"-->
+<!--      />-->
+<!--&lt;!&ndash;      autofocus&ndash;&gt;-->
+<!--&lt;!&ndash;      @keyup.enter="scope.set"&ndash;&gt;-->
+<!--&lt;!&ndash;      onKeyDown={handleKeyDown}&ndash;&gt;-->
+<!--    </div>-->
   </q-card>
 
   <q-dialog v-model="showGroupDialog" persistent>
@@ -246,6 +258,8 @@ const newCmd = reactive({
 let selectedItem = {}
 
 const isEdit = ref(false)
+
+const textAreaStyle = reactive({})
 
 const closeGroupDialog = () => {
   showGroupDialog.value = false
@@ -560,6 +574,10 @@ const onShowSettingsDialog = () => {
 }
 
 const onClickCMD = (cmd) => {
+  if (command.value === null) {
+    command.value = ''
+  }
+
   if (isSendNow.value) {
     if (isSudo.value) {
       props.send("sudo " + cmd["text"] + "\n");
@@ -636,7 +654,7 @@ watch(isSendNow, (newVal, oldVal) => {
 
 <style scoped>
 .cmd-textarea :deep(.q-field__control) {
-  max-height: 100px;
+  //max-height: 100px;
   overflow-y: auto; /* 确保内容超出时显示滚动条 */
 }
 
@@ -649,6 +667,27 @@ watch(isSendNow, (newVal, oldVal) => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.cmd-btn {
+  /* 强制单行、不换行 */
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+
+  /* 文字最多显示多少个字符 → 通过 max-width 间接控制 */
+  /* 假设中文字体 ≈ 14px 一个字，180px ≈ 10~12 个中文字 */
+  max-width: 180px;           /* ← 核心：控制显示长度 */
+
+  /* 固定高度（和你原来写的一样） */
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+
+  /* 可选：让文字稍微居中、好看一点 */
+  padding: 0 8px !important;
+  font-size: 13px !important;   /* 根据需求可调 12px~14px */
+  line-height: 1.35 !important; /* 避免文字被裁切 */
 }
 
 </style>

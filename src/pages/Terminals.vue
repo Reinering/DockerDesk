@@ -27,47 +27,30 @@
       <q-separator />
 
       <q-tab-panels class="no-padding full-height" v-model="tab" animated keep-alive>
-<!--        class="grey-9 text-white"-->
+        <!--        class="grey-9 text-white"-->
         <q-tab-panel
           v-for="item in tabs"
           :key="item.id"
           :name="item.id"
           class="no-padding overflow-hidden"
-          :style="xtermStyle"
+          :style="terminalStyle"
         >
-          <Xterm
-            :terminal-id="item.id"
-            :data="item.data"
-            :ref="(el) => (xtermRefs[item.id] = el)"
-            :style="xtermStyle"
+<!--          <Xterm-->
+<!--            :terminal-id="item.id"-->
+<!--            :data="item.data"-->
+<!--            :ref="(el) => (xtermRefs[item.id] = el)"-->
+<!--            :style="xtermStyle"-->
+<!--          />-->
+          <Terminal
+            :item="item"
+            :ref="(el) => (termianlRefs[item.id] = el)"
+            :style="terminalStyle"
           />
-
-
-<!--          <q-splitter-->
-<!--            v-model="splitterModel"-->
-<!--          >-->
-<!--            <template v-slot:before>-->
-<!--              -->
-
-<!--            </template>-->
-
-<!--            <template v-slot:after>-->
-<!--              <q-scroll-area>-->
-
-<!--              </q-scroll-area>-->
-
-<!--            </template>-->
-
-<!--            &lt;!&ndash; 可选：自定义左侧分隔器（加折叠按钮） &ndash;&gt;-->
-<!--            <template v-slot:separator>-->
-<!--              <q-separator vertical />-->
-<!--            </template>-->
-<!--          </q-splitter>-->
         </q-tab-panel>
       </q-tab-panels>
     </q-card>
 
-    <CommandBar v-if="isShowCmdBar" :send="submitCmd" />
+<!--    <CommandBar v-if="isShowCmdBar" :send="submitCmd" />-->
 
     <q-page-sticky position="bottom-right" :offset="fabPos">
       <q-fab
@@ -80,6 +63,11 @@
         <q-fab-action @click="showSettings" color="primary" icon="settings" :disable="draggingFab">
           <q-tooltip>
             Settings
+          </q-tooltip>
+        </q-fab-action>
+        <q-fab-action @click="showCopilot" color="primary" icon="chat" :disable="draggingFab">
+          <q-tooltip>
+            Copilot
           </q-tooltip>
         </q-fab-action>
         <q-fab-action @click="showCmdBar" color="blue" icon="keyboard_command_key" :disable="draggingFab">
@@ -141,6 +129,7 @@ defineOptions({
 })
 
 import { inject, onMounted, onActivated, reactive, ref, nextTick, watch, onUnmounted } from 'vue'
+import Terminal from 'components/Terminal.vue'
 import CommandBar from 'components/CommandBar.vue'
 import Xterm from 'components/Xterm.vue'
 import RTab from 'components/RTab.vue'
@@ -158,10 +147,11 @@ const background = reactive({
   height: window.innerHeight - 70 + "px",
 })
 
-const xtermStyle = reactive({
+const terminalStyle = reactive({
   width: "100%",
   height: process.env.MODE === 'electron' ? window.innerHeight - 97 + "px" : window.innerHeight - 70 + "px",
   paddingLeft: "3px",
+  background: "#1e1e1e"
 })
 const xtermHeight = ref(process.env.MODE === 'electron' ? window.innerHeight - 97 : window.innerHeight - 70)
 
@@ -189,13 +179,12 @@ const tab = ref('')
 
 const tabs = reactive([])
 
-const splitterModel = ref(100)
-
 const xtermRefs = reactive({}) // 存储 xterm 实例的 ref
+const termianlRefs = reactive({}) // 存储 xterm 实例的 ref
 
 const isShowCmdBar = ref(false)
 
-const showCmdBar = () => {
+const showCmdBar1 = () => {
   if (tab.value === '') {
     isShowCmdBar.value = false
     return
@@ -205,21 +194,21 @@ const showCmdBar = () => {
   if (isShowCmdBar.value) {
     if (process.env.MODE === 'electron') {
       cardStyle.height = window.innerHeight - 50 - 155 + "px"
-      xtermStyle.height = window.innerHeight - 97 - 155 + "px"
+      terminalStyle.height = window.innerHeight - 97 - 155 + "px"
       xtermHeight.value = window.innerHeight - 97 - 155
     } else {
       cardStyle.height = window.innerHeight - 70 - 155 + "px"
-      xtermStyle.height = window.innerHeight - 70 - 155 + "px"
+      terminalStyle.height = window.innerHeight - 70 - 155 + "px"
       xtermHeight.value = window.innerHeight - 70 - 155
     }
   } else {
     if (process.env.MODE === 'electron') {
       cardStyle.height = window.innerHeight - 50 + "px"
-      xtermStyle.height = window.innerHeight - 97 + "px"
+      terminalStyle.height = window.innerHeight - 97 + "px"
       xtermHeight.value = window.innerHeight - 97
     } else {
       cardStyle.height = window.innerHeight - 70 + "px"
-      xtermStyle.height = window.innerHeight - 70 + "px"
+      terminalStyle.height = window.innerHeight - 70 + "px"
       xtermHeight.value = window.innerHeight - 70
     }
   }
@@ -261,6 +250,15 @@ const showSettings = () => {
   isShowSettingsDialog.value = !isShowSettingsDialog.value
 }
 
+const showCopilot = () => {
+  // termianlRefs[tab.value].showCopilot()
+  window.myWindowAPI.showSubWindow("AIToolSub")
+}
+
+const showCmdBar = () => {
+  termianlRefs[tab.value].showCmdBar()
+}
+
 const settingDialogTitle = ref(t('terminal.globalSettingsTitle'))
 
 const fsData = ref({})
@@ -289,31 +287,19 @@ const submitCmd = (cmd) => {
 const checkScreenSize = () => {
   console.log('check screenHeightSize', window.innerHeight)
 
-  if (isShowCmdBar.value) {
-    if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 50 - 155 + "px"
-      xtermStyle.height = window.innerHeight - 97 - 155 + "px"
-      xtermHeight.value = window.innerHeight - 97 - 155
-    } else {
-      cardStyle.height = window.innerHeight - 70 - 155 + "px"
-      xtermStyle.height = window.innerHeight - 70 - 155 + "px"
-      xtermHeight.value = window.innerHeight - 70 - 155
-    }
+  if (process.env.MODE === 'electron') {
+    cardStyle.height = window.innerHeight - 50 + "px"
+    terminalStyle.height = window.innerHeight - 97 + "px"
+    xtermHeight.value = window.innerHeight - 97
   } else {
-    if (process.env.MODE === 'electron') {
-      cardStyle.height = window.innerHeight - 50 + "px"
-      xtermStyle.height = window.innerHeight - 97 + "px"
-      xtermHeight.value = window.innerHeight - 97
-    } else {
-      cardStyle.height = window.innerHeight - 70 + "px"
-      xtermStyle.height = window.innerHeight - 70 + "px"
-      xtermHeight.value = window.innerHeight - 70
-    }
+    cardStyle.height = window.innerHeight - 70 + "px"
+    terminalStyle.height = window.innerHeight - 70 + "px"
+    xtermHeight.value = window.innerHeight - 70
   }
 
   try {
-    for (let i in xtermRefs) {
-      xtermRefs[i].updateHeight(xtermHeight.value)
+    for (let i in termianlRefs) {
+      termianlRefs[i].updateHeight(xtermHeight.value)
     }
   } catch (e) {
 
@@ -367,8 +353,8 @@ onMounted(() => {
   })
 
   window.client.showFindBar(() => {
-    xtermRefs[tab.value].showFindBar()
-    xtermRefs[tab.value].updateHeight(xtermHeight.value)
+    termianlRefs[tab.value].showFindBar()
+    // xtermRefs[tab.value].updateHeight(xtermHeight.value)
   })
 })
 

@@ -70,6 +70,7 @@ import FindBar from "components/FindBar.vue"
 import { Terminal } from "@xterm/xterm"
 import { FitAddon } from "@xterm/addon-fit"
 import { SearchAddon } from "@xterm/addon-search"
+import { SerializeAddon } from "@xterm/addon-serialize"
 import '@xterm/xterm/css/xterm.css'
 import { clientConfig } from 'src/common/config.js'
 
@@ -255,12 +256,16 @@ const connect = () => {
         } else {
           connectState.value = "connected"
 
-          term.onData((data) => {
-            sendSSHTerminal({
-              uuid: props.terminalId,
-              data: data,
+          try {
+            term.onData((data) => {
+              sendSSHTerminal({
+                uuid: props.terminalId,
+                data: data,
+              })
             })
-          })
+          } catch (e) {
+            console.log(e)
+          }
         }
       }
     })
@@ -403,6 +408,8 @@ const connect = () => {
 
 const searchAddon = new SearchAddon()
 
+const serializeAddon = new SerializeAddon()
+
 const initTerminal = () => {
   if (Object.hasOwnProperty.call(props.data, "disableStdin")) {
     xtermConfig.disableStdin = props.data["disableStdin"]
@@ -418,6 +425,8 @@ const initTerminal = () => {
   fitAddon.fit()
 
   term.loadAddon(searchAddon)
+
+  term.loadAddon(serializeAddon)
 
   handleResize()
 
@@ -574,20 +583,23 @@ const sendSSHTerminal = (data) => {
 // 行列匹配
 const handleResize = () => {
   // console.log('resize', term.rows, term.cols)
-  if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
-    window.sshTerminal.resize(JSON.stringify({
-      uuid: props.terminalId,
-      rows: term.rows,
-      cols: term.cols,
-    }))
-  } else {
-    window.terminal.resize(JSON.stringify({
-      uuid: props.terminalId,
-      rows: term.rows,
-      cols: term.cols,
-    }))
+  try {
+    if (props.data.connectionType === t('node.remoteNode') && props.data.protocol === 'SSH') {
+      window.sshTerminal.resize(JSON.stringify({
+        uuid: props.terminalId,
+        rows: term.rows,
+        cols: term.cols,
+      }))
+    } else {
+      window.terminal.resize(JSON.stringify({
+        uuid: props.terminalId,
+        rows: term.rows,
+        cols: term.cols,
+      }))
+    }
+  } catch (e) {
+    console.log(e)
   }
-
 }
 
 const safeFit = async () => {
@@ -765,5 +777,24 @@ onDeactivated(() => {
 </script>
 
 <style scoped>
+/* 1. 定制滚动条轨道 */
+:deep(.xterm-viewport::-webkit-scrollbar) {
+  width: 8px;   /* 纵向滚动条宽度 */
+  height: 8px;  /* 横向滚动条高度 */
+}
 
+/* 2. 定制滚动条滑块 (Thumb) */
+:deep(.xterm-viewport::-webkit-scrollbar-thumb) {
+  background: rgba(76,76,76, 0.2); /* 默认半透明灰色 */
+  border-radius: 10px;
+}
+
+:deep(.xterm-viewport::-webkit-scrollbar-thumb:hover) {
+  background: rgba(0, 0, 0, 0.4); /* 悬停时加深 */
+}
+
+/* 3. 定制轨道背景 (Track) */
+:deep(.xterm-viewport::-webkit-scrollbar-track) {
+  background: transparent;
+}
 </style>

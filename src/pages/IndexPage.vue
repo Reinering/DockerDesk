@@ -15,7 +15,7 @@
 
         <SearchBar1 class="search-bar-center" v-if="displaySettings.isShowSearchBar" style="width: 70%; margin-top: 16px; display: flex; justify-content: center; align-items: center;"/>
 
-        <ShortcutsList :height="SCHeight" />
+        <ShortcutsList ref="shortcutsListRef" />
       </div>
 
 <!--      <q-parallax-->
@@ -43,6 +43,8 @@ const router = inject("router")
 const route = inject("route")
 const t = inject("t")
 
+const shortcutsListRef = ref(null)
+
 const windowHeight = ref(window.innerHeight)
 
 const background = reactive({
@@ -64,6 +66,8 @@ const SCHeight = computed(() => {
   }
   return height + "px"
 })
+
+
 
 const pHeight = computed(() => {
   return innerHeight.value - 34 - 16
@@ -95,6 +99,8 @@ const init = () => {
 
 const checkScreenHeightSize = () => {
   windowHeight.value = window.innerHeight
+
+  shortcutsListRef.value.updateHeight(displaySettings, window.innerHeight)
 }
 
 onMounted(() => {

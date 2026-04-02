@@ -3,7 +3,7 @@
     class="bg-grey-8 text-white"
     dark
     dense
-
+    spellcheck="false"
     v-model="searchText"
     clearable
     placeholder="Search"

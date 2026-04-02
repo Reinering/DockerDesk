@@ -11,7 +11,7 @@
     arrows
     transition-prev="slide-right"
     transition-next="slide-left"
-    :height="props.height"
+    :height="carouselHeight"
     @dblclick="onDBClick"
     style="background-color: transparent;"
   >
@@ -20,41 +20,46 @@
       :key="'page-' + index"
       :name="index"
     >
-      <VueDraggableNext
-        v-model="shortcutsData[index]"
-        class="flex flex-center q-gutter-x-md"
-        group="{ name: 'shortcuts-group', put: true }"
-        itemKey="id"
-        :animation="200"
-        :move="onDragMove"
-        @start="onDragStart"
-        @end="onDragEnd"
-        @drag="onDrag"
-        @remove="onRemove"
-        @change="onChange"
-        @mousedown.stop
-        @touchstart.stop
-        style="padding-bottom: 40px; min-height: 150px; width: 100%;"
+      <q-scroll-area
+        :horizontal-offset="[0, 2]"
+        :thumb-style="thumbStyle"
+        :style="scrollAreaStyle"
       >
-<!--        <Shortcuts2-->
-<!--          v-for="(item) in page"-->
-<!--          :key="item.id"-->
-<!--          :data="item"-->
-<!--          :onEdit="onEditShortcuts"-->
-<!--          :onDelete="onDeleteShortcuts"-->
-<!--        />-->
+        <VueDraggable
+          v-model="shortcutsData[index]"
+          class="flex flex-center q-gutter-x-md"
+          group="{ name: 'shortcuts-group', put: true }"
+          itemKey="id"
+          :animation="200"
+          :move="onDragMove"
+          @start="onDragStart"
+          @end="onDragEnd"
+          @drag="onDrag"
+          @remove="onRemove"
+          @change="onChange"
+          @mousedown.stop
+          @touchstart.stop
+          style="padding-bottom: 40px; min-height: 150px; width: 100%;"
+        >
+          <!--        <Shortcuts2-->
+          <!--          v-for="(item) in page"-->
+          <!--          :key="item.id"-->
+          <!--          :data="item"-->
+          <!--          :onEdit="onEditShortcuts"-->
+          <!--          :onDelete="onDeleteShortcuts"-->
+          <!--        />-->
 
-        <component
-          :is="templateMap[templateId]"
-          v-for="(item) in page"
-          :key="item.id"
-          :data="item"
-          :onEdit="onEditShortcuts"
-          :onDelete="onDeleteShortcuts"
-        />
-      </VueDraggableNext>
+          <component
+            :is="templateMap[templateId]"
+            v-for="(item) in page"
+            :key="item.id"
+            :data="item"
+            :onEdit="onEditShortcuts"
+            :onDelete="onDeleteShortcuts"
+          />
+        </VueDraggable>
+      </q-scroll-area>
     </q-carousel-slide>
-
   </q-carousel>
 
   <q-menu context-menu auto-close>
@@ -129,7 +134,8 @@ import Shortcuts1 from 'components/Shortcuts1.vue'
 import Shortcuts2 from 'components/Shortcuts2.vue'
 import ShortcutsEditDialog from 'components/dialog/ShortcutsEditDialog.vue'
 import ShortcutsSettingsDialog from 'components/dialog/ShortcutsSettingsDialog.vue'
-import { VueDraggableNext } from 'vue-draggable-next'
+// import { VueDraggableNext } from 'vue-draggable-next'
+import { VueDraggable } from 'vue-draggable-plus'
 import { clientConfig } from 'src/common/config.js'
 import { useShortcutsStore } from 'stores/shortcuts.js'
 
@@ -140,10 +146,20 @@ const t = inject("t")
 
 const shortcutsStore = useShortcutsStore()
 
+const carouselHeight = ref(0)
+
 const background = reactive({
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
   height: window.innerHeight - 70 + "px"
+})
+
+const scrollAreaStyle = reactive({
+  height: 500 + "px"
+})
+const thumbStyle = reactive({
+  backgroundColor: 'rgba(0,0,0,0.02)',
+  color: '#555'
 })
 
 const templateMap = {
@@ -685,6 +701,25 @@ const getShortcutsList = () => {
   })
 }
 
+// 暴露 resize 方法给父组件
+defineExpose({
+
+  updateHeight: (displaySettings, h) => {
+    let height = h - 50 - 32
+    if (displaySettings.isShowCarousel) {
+      height = height - 200 - 16
+    }
+
+    if (displaySettings.isShowSearchBar) {
+      height = height - 56 - 16
+    }
+    carouselHeight.value = height + "px"
+    scrollAreaStyle.height =  height - 70 + "px"
+  }
+
+})
+
+
 const init = () => {
   getShortcutsList()
 
@@ -719,5 +754,20 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+
+/* 隐藏全局浏览器滚动条 */
+body {
+  overflow: hidden;
+}
+
+/* 如果是 q-carousel 产生了溢出，也将其隐藏 */
+q-carousel {
+  overflow: hidden !important;
+}
+
+/* 针对 Webkit 浏览器 (Chrome, Safari, Edge) 的通用隐藏技巧 */
+.no-scroll-bar::-webkit-scrollbar {
+  display: none;
+}
 
 </style>
