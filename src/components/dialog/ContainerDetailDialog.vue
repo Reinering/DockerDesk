@@ -62,11 +62,17 @@
 
                   <q-item>
                     <q-item-section>
-                      <q-item-label >{{t('panel.container.selfStart')}}</q-item-label>
+                      <q-item-label >{{t('panel.container.autoLaunch')}}</q-item-label>
                     </q-item-section>
 
                     <q-item-section>
-                      <q-item-label >{{restartPolicy["name"]}}</q-item-label>
+                      <div class="row ">
+                        <q-item-label class="col self-center" >{{restartPolicy["name"]}}</q-item-label>
+
+                        <q-item-label class="col self-center" >
+                          <q-toggle v-model="isAutoLaunch" color="green" @update:model-value="onChangeAutoLaunch"/>
+                        </q-item-label>
+                      </div>
                     </q-item-section>
                   </q-item>
 
@@ -78,6 +84,7 @@
                     <q-item-section>
                       <q-item-label >{{props.item.command}}</q-item-label>
                     </q-item-section>
+
                   </q-item>
                 </q-list>
               </q-tab-panel>
@@ -325,6 +332,8 @@ const ports = ref([])
 const volumes = ref([])
 const networks = reactive({})
 
+const isAutoLaunch = ref(false)
+
 const visibleColumns_ports = ['external', 'internal', 'protocol', 'actions']
 const columns_ports = [
   { name: 'id', label: 'ID', align: 'left', field: 'id' },
@@ -396,6 +405,73 @@ const onSendHome = async (row) => {
       })
     }
   })
+}
+
+const onChangeAutoLaunch = (state) => {
+  if (serviceCmd.value === "docker" && !dockerInfo.enable) {
+    return
+  } else if (serviceCmd.value === "podman" && !podmanInfo.enable) {
+    return
+  }
+
+  let param
+  if (state) {
+    param = "--restart always"
+  } else {
+    param = "--restart no"
+  }
+
+  if (service.connectionType === t('node.remoteNode')) {
+    if (!connectState.value) {
+      return
+    }
+
+    window.containerTerminal.exec({
+      connID: service.id,
+      command: `${serviceCmd.value} update ${props.item.names} ${param}`
+    }).then((result) => {
+      if(result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.configModifySuccess')}`,
+        })
+      } else {
+        isAutoLaunch.value = !state
+
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.configModifyFail')}`
+        })
+      }
+    })
+
+  } else {
+    if (!wslInfo.enable) {
+      return
+    }
+
+    window.wslTerminal.execWSL(
+      ['-d', service.address, '--user', "root", '-e', `${serviceCmd.value} update ${props.item.names} ${param}`]
+    ).then((result) => {
+      if(result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.configModifySuccess')}`,
+        })
+      } else {
+        isAutoLaunch.value = !state
+
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.configModifyFail')}`
+        })
+      }
+    })
+  }
 }
 
 const getContainerUsage = () => {
@@ -475,6 +551,12 @@ const getContainerInfo = () => {
         restartPolicy.value["name"] = containerInfo.value["HostConfig"]["RestartPolicy"]["Name"]
         restartPolicy.value["maximumRetryCount"] = containerInfo.value["HostConfig"]["RestartPolicy"]["MaximumRetryCount"]
 
+        if (restartPolicy.value["name"]  === "no") {
+          isAutoLaunch.value = false
+        } else {
+          isAutoLaunch.value = true
+        }
+
         const Env = containerInfo.value["Config"]["Env"]
         const tmpEnv = {}
         for (const item of Env) {
@@ -484,7 +566,6 @@ const getContainerInfo = () => {
         }
 
         envs.value = tmpEnv
-
 
         Object.keys(containerInfo.value["NetworkSettings"]["Networks"]).forEach(key => {
           networks["network"] = `${key} - ${containerInfo.value["NetworkSettings"]["Networks"][key]["NetworkID"].slice(0, 12)}`
@@ -505,6 +586,12 @@ const getContainerInfo = () => {
             volumes.value.push(tmp)
           }
         }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('panel.container.getConfigFail')}`
+        })
       }
     })
   } else {
@@ -521,6 +608,12 @@ const getContainerInfo = () => {
         restartPolicy.value["name"] = containerInfo.value["HostConfig"]["RestartPolicy"]["Name"]
         restartPolicy.value["maximumRetryCount"] = containerInfo.value["HostConfig"]["RestartPolicy"]["MaximumRetryCount"]
 
+        if (restartPolicy.value["name"]  === "no") {
+          isAutoLaunch.value = false
+        } else {
+          isAutoLaunch.value = true
+        }
+
         const Env = containerInfo.value["Config"]["Env"]
         const tmpEnv = {}
         for (const item of Env) {
@@ -530,7 +623,6 @@ const getContainerInfo = () => {
         }
 
         envs.value = tmpEnv
-
 
         Object.keys(containerInfo.value["NetworkSettings"]["Networks"]).forEach(key => {
           networks["network"] = `${key} - ${containerInfo.value["NetworkSettings"]["Networks"][key]["NetworkID"].slice(0, 12)}`
@@ -551,6 +643,12 @@ const getContainerInfo = () => {
             volumes.value.push(tmp)
           }
         }
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('assistant.getSettingError')}`
+        })
       }
     })
   }
@@ -563,6 +661,8 @@ const init = () => {
     return
   }
 
+  getContainerInfo()
+
   getContainerUsage()
 
   if (getContainerUsageInterval === null) {
@@ -570,8 +670,6 @@ const init = () => {
       getContainerUsage()
     }, 40000)
   }
-
-  getContainerInfo()
 
   ports.value = getPortsByContainer([props.item["ports"]])[0]
 }

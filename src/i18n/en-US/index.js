@@ -313,7 +313,7 @@ export default {
       image: "Image",
       createTime: "Create Time",
       status: "Status",
-      selfStart: "Self-Start",
+      autoLaunch: "Self-Start",
       command: "Command",
 
       externalPort: "External Port",
@@ -348,6 +348,7 @@ export default {
       packFail: "Pack Failure",
       configModifySuccess: "Configuration Modification Successful",
       configModifyFail: "Configuration modification Failure",
+      getConfigFail: "Configuration retrieval failed",
 
       sendSuccess: "Send successfully",
       sendFail: "Send failed",
@@ -733,6 +734,16 @@ export default {
     globalSettingsTitle: "Terminal Node Global Settings",
     autoSaveLog: "Auto Save Log",
     showSearch: "Show Search",
+
+    mode: "Mode",
+    chatMode: "Chat Mode",
+    agentMode: "Agent Mode",
+    aiSetting: "AI Service Settings",
+    custom: "Custom",
+    service: "Service",
+    model: "Model",
+    modelSettings: "Model Settings",
+    modelServiceSettings: "Model Service Settings",
 
     closeMessage: "Are you sure to close？",
   },

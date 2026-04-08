@@ -546,7 +546,7 @@ export function getPortsByContainer1(mappings) {
 
 function parseAndExpand(str) {
   if (str.includes('-')) {
-    const [start, end] = str.split('-').map(Number)
+    const [start, end] = str.split('-').map(Number);
     const result = []
     for (let i = start; i <= end; i++) {
       result.push(i.toString())
@@ -560,43 +560,61 @@ export function getPortsByContainer(mappings) {
   // mappings 是数组，例如 ["50000/tcp", "0.0.0.0:9030->8080/tcp", ...]
   return mappings.map(mapping => {
     const result = []
+    const seen = new Set()        // 用于去重
+
     // 按逗号分割多个端口映射
     const parts = mapping.split(',').map(p => p.trim())
 
-    parts.forEach(part => {
-      // 模式 1: 50000/tcp (仅内部，无 external)
-      const internalOnlyMatch = part.match(/^(\d+)\/(tcp|udp)$/)
+    for (const part of parts) {
+      // 归一化：去掉 IPv4 / IPv6 前缀
+      let normalized = part
+        .replace(/^0\.0\.0\.0:/, '')      // 去掉 0.0.0.0:
+        .replace(/^\[::\]:/, '')         // 去掉 [::]:
+
+      // 模式 1: 仅内部端口（如 50000/tcp）
+      const internalOnlyMatch = normalized.match(/^(\d+)\/(tcp|udp)$/);
       if (internalOnlyMatch) {
-        result.push({
-          external: '', // 明确要求：第一个识别结果没有 external
-          internal: internalOnlyMatch[1],
-          protocol: internalOnlyMatch[2]
-        })
-        return
+        const [, internal, protocol] = internalOnlyMatch
+        const key = `${internal}/${protocol}`
+
+        if (!seen.has(key)) {
+          seen.add(key)
+          result.push({
+            external: '',
+            internal,
+            protocol
+          });
+        }
+        continue
       }
 
-      // 模式 2: 0.0.0.0:9000-9001->9000-9001/tcp 或 0.0.0.0:9030->8080/tcp
-      const mappedMatch = part.match(/(?:0\.0\.0\.0:)?([\d-]+)->([\d-]+)\/(tcp|udp)/)
+      // 模式 2: 端口映射（如 18789-18790->18789-18790/tcp）
+      const mappedMatch = normalized.match(/([\d-]+)->([\d-]+)\/(tcp|udp)/)
       if (mappedMatch) {
-        const [_, extStr, intStr, protocol] = mappedMatch
+        const [, extStr, intStr, protocol] = mappedMatch
+
         const extList = parseAndExpand(extStr)
         const intList = parseAndExpand(intStr)
 
-        // 将展开后的每一个端口对应存入数组
         extList.forEach((ext, index) => {
-          result.push({
-            external: ext,
-            internal: intList[index] || intList[0], // 防止索引不匹配
-            protocol: protocol
-          })
+          const internal = intList[index] || intList[0]
+          const key = `${ext}/${protocol}`   // 以 external + protocol 作为去重依据
+
+          if (!seen.has(key)) {
+            seen.add(key)
+            result.push({
+              external: ext,
+              internal: internal,
+              protocol: protocol
+            })
+          }
         })
       }
-    })
+    }
 
     return result
   })
 }
-
 
 export function parseNetstat(data) {
   const lines = data.trim().split('\n')

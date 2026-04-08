@@ -223,7 +223,8 @@ const onInstallDocker = () => {
 
         window.wslTerminal.execWSL(
           // ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""]
-          ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose\""]
+          ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', "\"curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && " +
+          "\""]
         ).then((installDCResult) => {
           window.wslTerminal.execWSL(
             ['-d', "DockerDesk", '--user', "root", '-e', "bash", '-c', `"docker-compose --version"`]

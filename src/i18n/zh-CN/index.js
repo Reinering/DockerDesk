@@ -310,7 +310,7 @@ export default {
       image: "镜像",
       createTime: "创建时间",
       status: "状态",
-      selfStart: "自启动",
+      autoLaunch: "自启动",
       command: "命令",
 
       externalPort: "本地端口",
@@ -347,6 +347,7 @@ export default {
       packFail: "打包失败",
       configModifySuccess: "配置修改成功",
       configModifyFail: "配置修改失败",
+      getConfigFail: "配置获取失败",
 
       sendSuccess: "发送成功",
       sendFail: "发送失败",
@@ -747,6 +748,17 @@ export default {
     globalSettingsTitle: "终端节点全局设置",
     autoSaveLog: "自动保存日志",
     showSearch: "显示搜索",
+
+    mode: "模式",
+    chatMode: "会话模式",
+    agentMode: "Agent模式",
+    aiSetting: "AI服务设置",
+    custom: "自定义",
+    service: "模型服务商",
+    model: "模型",
+    modelSettings: "模型设置",
+    modelServiceSettings: "模型服务商设置",
+
 
     closeMessage: "确认关闭吗？",
   },
