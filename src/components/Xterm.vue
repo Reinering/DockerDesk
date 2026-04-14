@@ -369,6 +369,67 @@ const connect = () => {
       }
     )
   } else {
+    // $q.dialog({
+    //   title: t('confirm'),
+    //   message: t('xterm.isSudoTerminal'),
+    //   ok: {
+    //     push: true
+    //   },
+    //   cancel: {
+    //     push: true,
+    //     color: 'negative'
+    //   },
+    //   persistent: true
+    // }).onOk(() => {
+    //   window.terminal.execTerminal({
+    //     uuid: props.terminalId,
+    //     cmd: [
+    //       "-NoProfile",
+    //       "-Command",
+    //       "Start-Process powershell.exe -Verb RunAs"
+    //     ],
+    //   }).then((result) => {
+    //       if (result.success === false) {
+    //
+    //         $q.notify({
+    //           type: 'negative',
+    //           position: clientConfig.quasar.notify.position,
+    //           message: t('xterm.termInitError') + ': ' + result.error
+    //         })
+    //       } else {
+    //         connectState.value = "connected"
+    //
+    //         term.onData((data) => {
+    //           sendTerminal({
+    //             uuid: props.terminalId,
+    //             data: data,
+    //           })
+    //         })
+    //       }
+    //     })
+    // }).onCancel(() => {
+    //   window.terminal.createTerminal(props.terminalId)
+    //     .then((result) => {
+    //       if (result.success === false) {
+    //
+    //         $q.notify({
+    //           type: 'negative',
+    //           position: clientConfig.quasar.notify.position,
+    //           message: t('xterm.termInitError') + ': ' + result.error
+    //         })
+    //       } else {
+    //         connectState.value = "connected"
+    //
+    //         term.onData((data) => {
+    //           sendTerminal({
+    //             uuid: props.terminalId,
+    //             data: data,
+    //           })
+    //         })
+    //       }
+    //     })
+    // })
+
     window.terminal.createTerminal(props.terminalId)
       .then((result) => {
         if (result.success === false) {

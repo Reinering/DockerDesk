@@ -640,6 +640,7 @@ export default {
     remoteNode: "远程节点",
     containerPanel: "容器面板",
     terminal: "终端",
+    localTerminal: "本地终端",
 
     serviceName: "服务名称",
     serviceType: "服务类型",
@@ -769,7 +770,7 @@ export default {
 
     nodePtyInitError: "node-pty 未初始化",
 
-
+    isSudoTerminal: "是否以管理员权限运行"
   },
 
   cmdBar: {

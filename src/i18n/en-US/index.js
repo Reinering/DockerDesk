@@ -634,6 +634,7 @@ export default {
     remoteNode: "remote node",
     containerPanel: "Container panel",
     terminal: "Terminal",
+    localTerminal: "Local Terminal",
 
     serviceName: "Service Name",
     serviceType: "Service Type",
@@ -753,6 +754,8 @@ export default {
     termInitError: "Terminal init error",
 
     nodePtyInitError: "node-pty uninitialized",
+
+    isSudoTerminal: "Run with administrator privileges?"
 
   },
 

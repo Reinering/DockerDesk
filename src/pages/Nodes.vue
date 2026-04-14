@@ -185,7 +185,7 @@
                 </q-item>
                 <q-item clickable v-close-popup size="sm" class="bg-brown-6" @click="onLocalTerminal">
                   <q-item-section>
-                    <q-item-label >{{t('node.terminal')}}</q-item-label>
+                    <q-item-label >{{t('node.localTerminal')}}</q-item-label>
                   </q-item-section>
                 </q-item>
               </q-list>
