@@ -70,7 +70,15 @@ const naviItems = reactive([
     state: false,
     children: []
   },
-
+  {
+    name: 'aiTools',
+    label: 'AI',
+    icon: "store",
+    route: 'ai',
+    mode: '',
+    state: false,
+    children: []
+  },
   {
     name: 'Assistant',
     label: 'navigator.assistant',
