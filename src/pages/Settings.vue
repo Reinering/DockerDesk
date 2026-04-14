@@ -68,7 +68,7 @@
                 <q-item-label >{{t('setting.show') + t('setting.carousel')}}</q-item-label>
               </q-item-section>
               <q-item-section avatar>
-                <q-toggle color="green" v-model="settings.display.isShowCarousel" @update:model-value="changeDisplay"/>
+                <q-toggle color="green" v-model="settings.display.isShowCarousel" @update:model-value="changeCarouselDisplay"/>
               </q-item-section>
             </q-item>
 
@@ -78,7 +78,7 @@
                 <q-item-label >{{t('setting.show') + t('setting.searchBar')}}</q-item-label>
               </q-item-section>
               <q-item-section avatar>
-                <q-toggle color="green" v-model="settings.display.isShowSearchBar" @update:model-value="changeDisplay"/>
+                <q-toggle color="green" v-model="settings.display.isShowSearchBar" @update:model-value="changeSearchBarDisplay"/>
               </q-item-section>
             </q-item>
 
@@ -288,19 +288,16 @@ const onUserModeUpdate = () => {
   configStore.userMode = userMode.value
 }
 
-const changeDisplay = () => {
-  window.client.updateSettings({
-    field: "display_settings",
-    type: "json",
-    value: JSON.stringify(settings.display),
-
-  }).then((result) => {
+const changeCarouselDisplay = () => {
+  changeDisplay().then((result) => {
     if (result.success) {
       $q.notify({
         type: 'positive',
         position: clientConfig.quasar.notify.position,
         message: t('setting.actionSuccess')
       })
+
+      configStore.isShowCarousel = settings.display.isShowCarousel
     } else {
       $q.notify({
         type: 'negative',
@@ -308,6 +305,34 @@ const changeDisplay = () => {
         message: `${t('setting.actionFail')}: ${result.error}`
       })
     }
+  })
+}
+
+const changeSearchBarDisplay = () => {
+  changeDisplay().then((result) => {
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        position: clientConfig.quasar.notify.position,
+        message: t('setting.actionSuccess')
+      })
+
+      configStore.isShowSearchBar = settings.display.isShowSearchBar
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: clientConfig.quasar.notify.position,
+        message: `${t('setting.actionFail')}: ${result.error}`
+      })
+    }
+  })
+}
+
+const changeDisplay = () => {
+  return window.client.updateSettings({
+    field: "display_settings",
+    type: "json",
+    value: JSON.stringify(settings.display),
   })
 }
 

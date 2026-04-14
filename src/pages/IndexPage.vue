@@ -1,12 +1,6 @@
 <template>
   <q-layout container :style="background" >
     <q-page>
-<!--      <img-->
-<!--        alt="Quasar logo"-->
-<!--        src="~assets/quasar-logo-vertical.svg"-->
-<!--        style="width: 200px; height: 200px"-->
-<!--      >-->
-
       <div
         class="q-pa-md q-gutter-y-md"
         :style="{height: background.height}"
@@ -17,31 +11,24 @@
 
         <ShortcutsList ref="shortcutsListRef" />
       </div>
-
-<!--      <q-parallax-->
-<!--        :height="pHeight"-->
-<!--      >-->
-<!--        <template v-slot:media>-->
-<!--          <img alt src="https://cdn.quasar.dev/img/parallax1.jpg" :style="background">-->
-<!--        </template>-->
-
-<!--        -->
-<!--      </q-parallax>-->
     </q-page>
   </q-layout>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, onActivated, onDeactivated, inject, reactive, computed } from 'vue'
+import { ref, onMounted, onUnmounted, onActivated, onDeactivated, inject, reactive, computed, watch } from 'vue'
 import ShortcutsList from 'components/ShortcutsList.vue'
 import Carousel from 'components/Carousel.vue'
 import SearchBar from 'components/SearchBar.vue'
 import SearchBar1 from 'components/SearchBar1.vue'
+import { useConfigStore } from 'stores/config.js'
 
 const $q = inject("$q")
 const router = inject("router")
 const route = inject("route")
 const t = inject("t")
+
+const configStore = useConfigStore()
 
 const shortcutsListRef = ref(null)
 
@@ -120,6 +107,16 @@ onDeactivated(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreenHeightSize)
+})
+
+watch(() => configStore.isShowCarousel, (newVal, oldVal) => {
+  displaySettings.isShowCarousel = newVal
+  checkScreenHeightSize()
+})
+
+watch(() => configStore.isShowSearchBar, (newVal, oldVal) => {
+  displaySettings.isShowSearchBar = newVal
+  checkScreenHeightSize()
 })
 
 

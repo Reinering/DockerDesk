@@ -5,7 +5,9 @@ export const useConfigStore = defineStore('config', {
   state: () => ({
     lang: '',
     theme: 'dark',
-    userMode: ''
+    userMode: '',
+    isShowCarousel: '',
+    isShowSearchBar: ''
   }),
 
   getters: {
