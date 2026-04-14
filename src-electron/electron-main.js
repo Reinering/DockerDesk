@@ -3,9 +3,12 @@ import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
+import { exec } from 'child_process'
+import * as sudo from 'sudo-prompt'
 import { registerIpcHandlers } from './ipcManager.js'
 import { initDB, backupDB } from './database/manager.js'
 import { ssh_clients, sftp_clients } from "./ipc/sshIPC.js"
+import { terminals } from "./ipc/terminalIPC.js"
 import { createTray } from "./common/tray.js"
 import { wslStartLaunch, wslStopLaunch } from "./common/wsl.js"
 import { HotKeys } from "./common/hotKeys.js"
@@ -81,7 +84,6 @@ async function createWindow () {
     mainWindow = null
   })
 
-
 }
 
 initDB()
@@ -90,7 +92,15 @@ initLogging()
 app.setName('DockerDesk')
 
 let tray = null
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // if (app.isPackaged) {
+  //   const isAdmin = await ensureAdmin() // 你需要封装一个返回 Promise 的检查函数
+  //   if (!isAdmin) {
+  //     handleElevation() // 处理提权逻辑
+  //     return // 重要：直接结束，不执行后面的创建窗口逻辑
+  //   }
+  // }
+
   createWindow()
 
   // 创建托盘图标 path.resolve(currentDir, 'icons/icon.png')
@@ -112,6 +122,21 @@ app.on('did-finish-load', () => {
 
 // close
 app.on('window-all-closed', async () => {
+
+  if (platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+//
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow()
+  }
+})
+
+app.on('will-quit', async () => {
+  console.log("will-quit")
 
   // 退出前，断开所有ssh连接
   for (let uuid of ssh_clients.keys()) {
@@ -136,23 +161,45 @@ app.on('window-all-closed', async () => {
     }
   }
 
+  for (let uuid of terminals.keys()) {
+    const terminal =  terminals.get(uuid)
+    try {
+      await terminal.destroy()
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  wslStopLaunch()
+
   HotKeys.unRegisterAll()
 
   cleanupTmp()
 
-  wslStopLaunch()
-
-
-
-  if (platform !== 'darwin') {
-    app.quit()
-  }
 })
 
-//
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow()
-  }
-})
+
+function ensureAdmin() {
+  return new Promise((resolve) => {
+    exec('net session', (err) => {
+      resolve(!err)
+    })
+  })
+}
+
+// 封装提权跳转
+function handleElevation() {
+  const command = `"${process.execPath}"`
+
+  sudo.exec(command, { name: 'DockerDesk' }, (error) => {
+    if (error) {
+      console.error('提权失败或被拒绝')
+      app.quit()
+    } else {
+      // 新进程已启动，老进程功成身退
+      app.exit(0)
+    }
+  })
+}
+
 

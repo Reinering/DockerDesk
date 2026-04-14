@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import { Terminal } from '../actions/terminal.js'
 
 
-const terminals = new Map()
+export const terminals = new Map()
 
 export function registerTerminalIpcHandlers(win) {
 

@@ -1,5 +1,6 @@
 import * as pty from 'node-pty'
 import * as os from 'node:os'
+import { exec } from 'child_process'
 
 
 // 终端实例类
@@ -73,9 +74,23 @@ export class Terminal {
 
   // 销毁终端
   destroy() {
-    if (this.ptyProcess) {
-      this.ptyProcess.kill()
-      this.ptyProcess = null
+    try {
+      if (this.ptyProcess) {
+        if (os.platform() === 'win32') {
+          // Windows 下强制杀死进程树
+          exec(`taskkill /pid ${this.ptyProcess.pid} /t /f`, (err) => {
+            if (err) {
+              console.error('Failed to kill process tree:', err)
+            }
+          })
+        } else {
+          // Unix/macOS 下杀死进程
+          this.ptyProcess.kill('SIGTERM')
+        }
+        this.ptyProcess = null
+      }
+    } catch (e) {
+      console.error('Error destroying terminal:', e)
     }
   }
 }
