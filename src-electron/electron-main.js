@@ -3,7 +3,7 @@ import { initialize, enable } from '@electron/remote/main/index.js'
 import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
-import { exec } from 'child_process'
+import { exec, execSync } from 'child_process'
 import * as sudo from 'sudo-prompt'
 import { registerIpcHandlers } from './ipcManager.js'
 import { initDB, backupDB } from './database/manager.js'
@@ -15,6 +15,7 @@ import { HotKeys } from "./common/hotKeys.js"
 import { cleanupTmp } from "./common/utils.js"
 import { initLogging } from './common/logging.js'
 
+const APPNAME = "DockerDesk"
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -27,6 +28,9 @@ console.log("userData", app.getPath('userData'))
 // public
 const publicFolder = path.resolve(currentDir, process.env.QUASAR_PUBLIC_FOLDER)
 console.log("publicFolder", publicFolder)
+
+
+
 
 let mainWindow
 
@@ -89,17 +93,10 @@ async function createWindow () {
 initDB()
 initLogging()
 
-app.setName('DockerDesk')
+app.setName(APPNAME)
 
 let tray = null
 app.whenReady().then(async () => {
-  // if (app.isPackaged) {
-  //   const isAdmin = await ensureAdmin() // 你需要封装一个返回 Promise 的检查函数
-  //   if (!isAdmin) {
-  //     handleElevation() // 处理提权逻辑
-  //     return // 重要：直接结束，不执行后面的创建窗口逻辑
-  //   }
-  // }
 
   createWindow()
 
@@ -179,6 +176,15 @@ app.on('will-quit', async () => {
 })
 
 
+// if (app.isPackaged) {
+//   const isAdmin = await ensureAdmin() // 你需要封装一个返回 Promise 的检查函数
+//   if (!isAdmin) {
+//     handleElevation() // 处理提权逻辑
+//     app.exit(0) // 重要：直接结束，不执行后面的创建窗口逻辑
+//   }
+// }
+
+
 function ensureAdmin() {
   return new Promise((resolve) => {
     exec('net session', (err) => {
@@ -189,9 +195,10 @@ function ensureAdmin() {
 
 // 封装提权跳转
 function handleElevation() {
+
   const command = `"${process.execPath}"`
 
-  sudo.exec(command, { name: 'DockerDesk' }, (error) => {
+  sudo.exec(command, { name: APPNAME }, (error) => {
     if (error) {
       console.error('提权失败或被拒绝')
       app.quit()

@@ -4,7 +4,7 @@
 import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'child_process'
-import monacoEditorPlugin from 'vite-plugin-monaco-editor'
+// import monacoEditorPlugin from 'vite-plugin-monaco-editor'
 
 
 export default defineConfig((ctx) => {
@@ -72,8 +72,8 @@ export default defineConfig((ctx) => {
 
         viteConf.optimizeDeps = {
           exclude: [
-            'monaco-editor',
-            'monaco-editor-vue3'
+            // 'monaco-editor',
+            // 'monaco-editor-vue3'
           ]
         }
       },
@@ -102,10 +102,10 @@ export default defineConfig((ctx) => {
           }
         }, { server: false }],
 
-        [monacoEditorPlugin, {
-          // 可以在这里指定需要支持的语言，减少打包体积
-          languageWorkers: []
-        }]
+        // [monacoEditorPlugin, {
+        //   // 可以在这里指定需要支持的语言，减少打包体积
+        //   languageWorkers: []
+        // }]
 
       ]
     },
@@ -256,6 +256,9 @@ export default defineConfig((ctx) => {
 
         // Windows only
         // win32metadata: { ... }
+        win32metadata: {
+          'requested-execution-level': 'requireAdministrator'   // 管理员权限运行
+        },
 
         asar: true, // 可选，建议启用
         // extraResource: [
@@ -305,6 +308,8 @@ export default defineConfig((ctx) => {
             console.error('Failed to rebuild native modules:', error)
           }
         },
+
+        requestedExecutionLevel: "requireAdministrator"     // 管理员权限运行
       }
     },
 
