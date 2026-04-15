@@ -1,6 +1,7 @@
 import knex from 'knex'
-import { clientConfig } from 'src/common/config.js'
 import path from 'path'
+import { clientConfig } from 'src/common/config.js'
+import { formatDateTime } from 'app/src-electron/common/utils.js'
 import { fileURLToPath } from 'node:url'
 import fs from 'fs'
 import { app } from 'electron'
@@ -198,6 +199,13 @@ async function initDB() {
           value: '{}',
           mark: "backup settings",
           delete_flags: 0
+        },
+        {
+          field: "ai_settings",
+          type: "json",
+          value: '{"services":[{"name":"OpenAI", "models":[], "apiKey":"", "url":"", "config":{}},{"name":"Gemini", "models":[], "apiKey":"", "url":"", "config":{}},{"name":"Azure", "models":[], "apiKey":"", "url":"", "config":{}},{"name":"Aliyun", "models":[], "apiKey":"", "url":"", "config":{}},{"name":"LMStudio", "models":[], "apiKey":"", "url":"", "config":{}},{"name":"Claude", "models":[], "apiKey":"", "url":"", "config":{}}]}',
+          mark: "AI settings",
+          delete_flags: 0
         }
       ])
     }
@@ -244,10 +252,24 @@ function backupDB () {
         return
       }
 
-      fs.cp(dbPath, path.join(data.folder, "dockerdesk"), { recursive: true },(err) => {
+      if (!fs.existsSync(path.join(data.folder, "dockerdesk"))) {
+        fs.cp(dbPath, path.join(data.folder, "dockerdesk"), { recursive: true },(err) => {
+          console.log(err)
+          log.error(err)
+        })
+      }
+
+      const [suffix, ...fileName] = clientConfig.sqlite.dbName.split('.').reverse()
+
+      const date = new Date()
+
+      fs.cp(path.join(dbPath, clientConfig.sqlite.dbName), path.join(data.folder, "dockerdesk", `${fileName}-${formatDateTime(date, "yyyy-MM-dd")}.${suffix}`), { recursive: true },(err) => {
         console.log(err)
         log.error(err)
       })
+
+
+
     })
 }
 

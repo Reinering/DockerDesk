@@ -15,6 +15,7 @@ import { HotKeys } from "./common/hotKeys.js"
 import { cleanupTmp } from "./common/utils.js"
 import { initLogging } from './common/logging.js'
 
+
 const APPNAME = "DockerDesk"
 
 // needed in case process is undefined under Linux
@@ -110,7 +111,9 @@ app.whenReady().then(async () => {
 
   wslStartLaunch()
 
-  backupDB()
+  if (app.isPackaged) {
+    backupDB()
+  }
 })
 
 app.on('did-finish-load', () => {
