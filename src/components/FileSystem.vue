@@ -233,6 +233,7 @@ const getSelectedString = () => {
 }
 
 const isSftp = ref(false)
+const isSFTPBusying = ref(false)
 
 const currentPath = ref(null)
 
@@ -858,6 +859,39 @@ const uploadFile1 = async (file) => {
   }
 }
 
+
+const uploadSFile = async (file) => {
+  if (isSftp.value) {
+    return await window.sftpTerminal.uploadSFile({
+      uuid: props.data.id,
+      remotePath: currentPath.value + '/' + file.name,
+      fileData: file
+    }).then((result) => {
+      if (result.success) {
+        $q.notify({
+          type: 'positive',
+          position: clientConfig.quasar.notify.position,
+          message: t('filesystem.uploadFileSuccess')
+        })
+
+        listDir(currentPath.value)
+      } else {
+        $q.notify({
+          type: 'negative',
+          position: clientConfig.quasar.notify.position,
+          message: `${t('filesystem.uploadFileError')}:${file.name}:${result.error}`,
+        })
+      }
+    })
+  } else {
+    return await window.scpTerminal.uploadStream({
+      uuid: props.data.id,
+      remotePath: currentPath.value,
+      localPath: file
+    })
+  }
+}
+
 const uploadFile = async (file) => {
   lineProgress.value = 0.0
 
@@ -875,14 +909,18 @@ const uploadFile = async (file) => {
     window.sftpTerminal.uploadStream({
       uuid: props.data.id,
       remotePath: currentPath.value,
-      localPath: file
+      localPath: file.path
     })
+
+    isSFTPBusying.value = true
   } else {
     window.scpTerminal.uploadStream({
       uuid: props.data.id,
       remotePath: currentPath.value,
-      localPath: file
+      localPath: file.path
     })
+
+    isSFTPBusying.value = true
   }
 }
 
@@ -1167,8 +1205,29 @@ const triggerUploadFilesRef = async () => {
   }
 
   for (const file of files) {
-    await uploadFile(file)
+    if (file.size <= clientConfig.file.limitSize) {
+      await uploadSFile(file)
+    } else {
+      // 大文件：先等待上一个任务结束
+      console.log("等待中...")
+      await waitUntilReady()
+
+      console.log("开始上传大文件:", file.name)
+      // 务必使用 await，确保这个文件传完才进入下一个循环迭代
+      await uploadFile(file)
+    }
   }
+}
+
+const waitUntilReady = () => {
+  return new Promise((resolve) => {
+    const timer = setInterval(() => {
+      if (!isSFTPBusying.value) {
+        clearInterval(timer)
+        resolve()
+      }
+    }, 3000) // 每 500ms 检查一次状态
+  })
 }
 
 const triggerUploadFolder = async () => {
@@ -1215,7 +1274,6 @@ const onDownloadBatch = async () => {
       remotePath: currentPath.value,
       files: selected.value
     })).then((result) => {
-      console.log(result)
       if (result.success) {
 
       } else {
@@ -1285,7 +1343,6 @@ const onEditFile = (row) => {
       uuid: props.data.id,
       remotePath: currentPath.value + '/' + row.name,
     }).then((result) => {
-    console.log(result)
     if (!result.success) {
       $q.notify({
         type: 'negative',
@@ -1355,7 +1412,6 @@ const init = async () => {
 
 const receive = () => {
   window.sftpTerminal.onProgress((result) => {
-    console.log(result)
     const { uuid, type, file, progress, status, error } = result
     if (props.data.id === uuid ) {
       if (status === "doing") {
@@ -1386,6 +1442,8 @@ const receive = () => {
             listDir(currentPath.value)
           }
         }
+
+        isSFTPBusying.value = false
       } else if (status === "done"  && type === "download") {
         if (error) {
           notify.value({
@@ -1404,6 +1462,8 @@ const receive = () => {
             timeout: 3000
           })
         }
+
+        isSFTPBusying.value = false
       }
     }
   })
@@ -1446,7 +1506,7 @@ watch(() => props.data, (newVal, oldVal) => {
   background-color: #aba79d;
 }
 
-::v-deep .q-editor-content pre {
+:deep(.q-editor-content pre) {
   background: #f4f4f4;
   padding: 10px;
   border-radius: 4px;
@@ -1455,7 +1515,7 @@ watch(() => props.data, (newVal, oldVal) => {
   margin: 10px 0;
 }
 
-::v-deep .q-editor-content code {
+:deep(.q-editor-content code) {
   font-family: 'Courier New', monospace;
   background: transparent;
 }

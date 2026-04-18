@@ -417,7 +417,7 @@ export function registerSFTPIpcHandlers(win) {
     }
   })
 
-  ipcMain.handle('uploadSFileSFTP', async (event, { uuid, remotePath, localPath }) => {
+  ipcMain.handle('uploadSFileSFTP', async (event, { uuid, remotePath, fileData }) => {
     try {
       if (!sftp_clients.has(uuid)) {
         return { success: false, error: "sftp disconnected" }
@@ -433,7 +433,7 @@ export function registerSFTPIpcHandlers(win) {
         return { success: false, error: 'sftp disconnected' }
       }
 
-      return await sftpClient.uploadSFile(remotePath, localPath)
+      return await sftpClient.uploadSFile(remotePath, fileData)
         .then((result) => {
           return { success: true, error: '' }
         }, (error) => {

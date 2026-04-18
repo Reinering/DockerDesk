@@ -2,6 +2,7 @@ import { app, ipcMain, dialog, shell } from 'electron'
 import axios from 'axios'
 import puppeteer from 'puppeteer'
 import * as fs from 'fs'
+import path from 'path'
 import Crypto from 'crypto.js'
 import {
   getOSInfo, getUtilization,
@@ -15,6 +16,7 @@ import { setLang } from '../common/i18n.js'
 import { getAutoLaunch, setupAutoLaunch } from "../common/launch.js"
 import { HotKeys } from "../common/hotKeys.js"
 import { registryHotKey, unRegistryHotKey } from "../actions/hotKeys.js"
+import { showSubWindow, closeSubWindow } from "../actions/electron-sub.js"
 
 
 export  const CmdRunners = new Map()
@@ -91,8 +93,20 @@ export function registerClientIpcHandlers(win) {
     })
 
     if (!result.canceled) {
-      return result.filePaths // 返回文件路径
+      // 遍历所有选中的路径，转换为包含元数据的对象
+      const fileDetails = result.filePaths.map(filePath => {
+        const stats = fs.statSync(filePath) // 获取文件状态
+        return {
+          name: path.basename(filePath), // 文件名，例如 "test.zip"
+          path: filePath,                // 完整路径
+          size: stats.size,              // 文件大小 (单位: Bytes)
+          // sizeFormatted: (stats.size / 1024 / 1024).toFixed(2) + ' MB' // 可选：提前格式化
+        }
+      })
+
+      return fileDetails
     }
+
     return null
   })
 
@@ -317,6 +331,14 @@ export function registerClientIpcHandlers(win) {
 
   ipcMain.handle('restoreHotKeys', async (event) => {
     return HotKeys.restore()
+  })
+
+  ipcMain.handle('showSubWindow', async (event, sub) => {
+    return showSubWindow(sub)
+  })
+
+  ipcMain.handle('closeSubWindow', async (event, sub) => {
+    return closeSubWindow(sub)
   })
 
 }

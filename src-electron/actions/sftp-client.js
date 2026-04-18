@@ -431,7 +431,7 @@ export class SFTPClient {
   }
 
   // 上传小文件 sftp.fastPut()
-  async uploadSFile(remotePath, fileData) {
+  async uploadSFile1(remotePath, fileData) {
     if (!this.sftp) throw new Error('SFTP not connected')
 
     const tempFilePath = path.join(os.tmpdir(), fileData.name)
@@ -446,6 +446,24 @@ export class SFTPClient {
         this.sftp.fastPut(tempFilePath, remotePath)
           .then(() => {
             fs.promises.unlink(tempFilePath)
+            resolve()
+          }, (err) => {
+            reject(err)
+          })
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+
+  // 上传小文件 sftp.fastPut()
+  async uploadSFile(remotePath, fileData) {
+    if (!this.sftp) throw new Error('SFTP not connected')
+
+    return new Promise((resolve, reject) => {
+      try {
+        this.sftp.fastPut(fileData.path, path.join(remotePath, fileData.name))
+          .then(() => {
             resolve()
           }, (err) => {
             reject(err)
@@ -534,7 +552,6 @@ export class SFTPClient {
             // const estimatedTimeLeft = remainingBytes / speed
 
             // 发送进度到渲染进程
-
             this.win.webContents.send("onProgressSFTP",
               {
                 uuid: this.uuid,
