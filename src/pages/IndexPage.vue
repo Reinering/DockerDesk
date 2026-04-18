@@ -18,6 +18,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, onActivated, onDeactivated, inject, reactive, computed, watch } from 'vue'
 import ShortcutsList from 'components/ShortcutsList.vue'
+import ShortcutsList1 from 'components/ShortcutsList1.vue'
+import ShortcutsList2 from 'components/ShortcutsList2.vue'
 import Carousel from 'components/Carousel.vue'
 import SearchBar from 'components/SearchBar.vue'
 import SearchBar1 from 'components/SearchBar1.vue'

@@ -25,11 +25,11 @@
         :thumb-style="thumbStyle"
         :style="scrollAreaStyle"
       >
-        <VueDraggable
+        <VueDraggableNext
           v-model="shortcutsData[index]"
           class="flex flex-center q-gutter-x-md"
-          group="{ name: 'shortcuts-group', put: true }"
-          itemKey="id"
+          :group="{ name: 'shortcuts-group', pull: true, put: true }"
+          item-key="id"
           :animation="200"
           :move="onDragMove"
           @start="onDragStart"
@@ -57,7 +57,7 @@
             :onEdit="onEditShortcuts"
             :onDelete="onDeleteShortcuts"
           />
-        </VueDraggable>
+        </VueDraggableNext>
       </q-scroll-area>
     </q-carousel-slide>
   </q-carousel>
@@ -134,8 +134,7 @@ import Shortcuts1 from 'components/Shortcuts1.vue'
 import Shortcuts2 from 'components/Shortcuts2.vue'
 import ShortcutsEditDialog from 'components/dialog/ShortcutsEditDialog.vue'
 import ShortcutsSettingsDialog from 'components/dialog/ShortcutsSettingsDialog.vue'
-// import { VueDraggableNext } from 'vue-draggable-next'
-import { VueDraggable } from 'vue-draggable-plus'
+import { VueDraggableNext } from 'vue-draggable-next'
 import { clientConfig } from 'src/common/config.js'
 import { useShortcutsStore } from 'stores/shortcuts.js'
 
@@ -352,7 +351,7 @@ const onDragMove = (event) => {
 }
 
 const onDragStart = async (event) => {
-  // console.log("start")
+  console.log("start")
 
   shortcutsData.push([])
 
@@ -366,7 +365,7 @@ const onDragEnd = (event) => {
 }
 
 const onDrag = (event) => {
-  // console.log("drag")
+  console.log("drag")
 
   isDrag.value = true
 
@@ -386,10 +385,18 @@ const onDrag = (event) => {
 }
 
 const onChange = (event) => {
-  // console.log("onChange", event)
+  console.log("onChange")
+  // console.log(event)
+
+  let node
+  if (event.added) {
+    node = JSON.parse(JSON.stringify(event.added.element))
+  } else if (event.moved) {
+    node = JSON.parse(JSON.stringify(event.moved.element))
+  }
 
   updatePrevId(event)
-  updatePageNo(event)
+  updatePageNo(event, node)
 
   // if (shortcutsData[shortcutsData.length - 1].length === 0) {
   //   shortcutsData.splice(shortcutsData.length - 1, 1)
@@ -436,6 +443,15 @@ const updatePrevId = (event) => {
 
     if (node.pageNo === slide.value) {  // 同页拖拽
       page = shortcutsData[node.pageNo]
+      const seen = new Set()
+      shortcutsData[node.pageNo] = page.filter(item => {
+        const duplicate = seen.has(item.id)
+        seen.add(item.id)
+        return !duplicate
+      })
+
+      page = shortcutsData[node.pageNo]
+
       for (let i=0; i < page.length; i++) {
         if (page[i].id === node.id) {
           if (i === 0) {
@@ -483,6 +499,14 @@ const updatePrevId = (event) => {
       }
     } else {  // 不同页拖拽
       // 目标页面
+      page = shortcutsData[node.pageNo]
+      let seen = new Set()
+      shortcutsData[node.pageNo] = page.filter(item => {
+        const duplicate = seen.has(item.id)
+        seen.add(item.id)
+        return !duplicate
+      })
+
       page = shortcutsData[slide.value]
       for (let i=0; i < page.length; i++) {
         if (page[i].id !== node.id) {
@@ -525,6 +549,15 @@ const updatePrevId = (event) => {
 
       // 原页面
       page = shortcutsData[node.pageNo]
+      seen = new Set()
+      shortcutsData[node.pageNo] = page.filter(item => {
+        const duplicate = seen.has(item.id)
+        seen.add(item.id)
+        return !duplicate
+      })
+
+      page = shortcutsData[node.pageNo]
+
       for (let i = 0; i < page.length; i++) {
         if (page[i].id !== node.id) {
           continue
@@ -547,7 +580,6 @@ const updatePrevId = (event) => {
         }
 
         page.splice(i, 1)
-
         break
       }
       // shortcutsData[node.pageNo] = shortcutsData[node.pageNo].filter(item => item.id !== node.id)
@@ -630,20 +662,18 @@ const updatePrevId = (event) => {
   }
 }
 
-const updatePageNo = (event, node) => {
+const updatePageNo = (event, oldNode) => {
   const sqlList = []
 
   if (event.added) {
     // console.log('添加到了新页面:', event.added.element)
-
-    const node = JSON.parse(JSON.stringify(event.added.element))
-    const page = shortcutsData[node.pageNo]
+    const page = shortcutsData[oldNode.pageNo]
 
     // 删除空白页
     if (page.length === 0) {
-      const nextPage = shortcutsData[node.pageNo + 1]
+      const nextPage = shortcutsData[oldNode.pageNo + 1]
 
-      for (let i=node.pageNo+1; i < shortcutsData.length; i++) {
+      for (let i=oldNode.pageNo+1; i < shortcutsData.length; i++) {
 
         for (const item of shortcutsData[i]) {
           item.pageNo = item.pageNo - 1
@@ -671,11 +701,11 @@ const updatePageNo = (event, node) => {
         }
       })
 
-      if (slide.value > node.pageNo) {
+      if (slide.value > oldNode.pageNo) {
         slide.value = slide.value -1
       }
 
-      shortcutsData.splice(node.pageNo, 1)
+      shortcutsData.splice(oldNode.pageNo, 1)
     }
   }
 }

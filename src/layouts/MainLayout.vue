@@ -10,7 +10,6 @@
 
     <q-drawer
       show-if-above
-      bordered
       v-model="leftDrawerOpen"
       side="left"
       :behavior="behavior"
