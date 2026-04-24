@@ -984,6 +984,8 @@ const uploadFolder = async (folder, ) => {
       remotePath: currentPath.value,
       localPath: folder,
     }).then(async (result) => {
+      isSFTPBusying.value = false
+
       if (result.success) {
         // $q.notify({
         //   type: 'positive',
@@ -1006,6 +1008,8 @@ const uploadFolder = async (folder, ) => {
       remotePath: currentPath.value,
       localPath: folder,
     }).then(async (result) => {
+      isSFTPBusying.value = true
+
       if (!result.success) {
         $q.notify({
           type: 'negative',
@@ -1015,6 +1019,8 @@ const uploadFolder = async (folder, ) => {
       }
     })
   }
+
+  isSFTPBusying.value = true
 
   notify.value = $q.notify({
     type: 'info',
@@ -1242,6 +1248,8 @@ const triggerUploadFolder = async () => {
 
   // console.log(folders)
   for (const folder of folders) {
+    await waitUntilReady()
+
     await uploadFolder(folder)
   }
 }
