@@ -1526,10 +1526,10 @@ const onCreateContainer = () => {
       query: {
         tab: "logs",
         data: JSON.stringify({
-          label: service.adress,
+          label: service.address,
           icon: 'terminal',
           data: {
-            serviceName: service.adress,
+            serviceName: service.address,
             serviceType: 'WSL',
             user: 'root',
             disableStdin: true,
