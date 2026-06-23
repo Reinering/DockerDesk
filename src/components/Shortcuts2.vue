@@ -20,7 +20,7 @@
 
       <div
         class="text-center text-body2"
-        style="word-break: break-all; white-space: normal;"
+        :style="webSiteNameStyle"
       >
         {{ shortcutsData.websiteName }}
       </div>
@@ -83,6 +83,7 @@ const props = defineProps({
 
 import { ref, inject, reactive, watch, onMounted, onUnmounted } from 'vue'
 import { isEmptyObj, isEmptyStr } from 'src/utils/common.js'
+import { ping } from 'src/utils/net.js'
 
 const $q = inject("$q")
 const router = inject("router")
@@ -97,6 +98,10 @@ const btnStyle = ref({
   height: "72px",
 })
 const textStyle = ref('')
+const webSiteNameStyle = reactive({
+  wordBreak: "break-all",
+  whiteSpace: "normal"
+})
 
 const isShowImg = ref(false)
 
@@ -124,6 +129,21 @@ const onDelete = () => {
   props.onDelete(props.data.id)
 }
 
+const getStatus = () => {
+  ping(props.data.website).then((result) => {
+    if (!result.success) {
+      webSiteNameStyle.color = 'red'
+    }
+  })
+
+  setInterval(() => {
+    ping(props.data.website).then((result) => {
+      if (!result.success) {
+        webSiteNameStyle.color = 'red'
+      }
+    })
+  }, 30000)
+}
 
 const init = () => {
   shortcutsData.value = JSON.parse(JSON.stringify(props.data))
@@ -147,6 +167,8 @@ const init = () => {
 
 onMounted(() => {
   init()
+
+  getStatus()
 })
 
 onUnmounted(() => {

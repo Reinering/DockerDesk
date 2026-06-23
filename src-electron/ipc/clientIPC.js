@@ -4,6 +4,7 @@ import puppeteer from 'puppeteer'
 import * as fs from 'fs'
 import path from 'path'
 import Crypto from 'crypto.js'
+import  ping from 'ping'
 import {
   getOSInfo, getUtilization,
   getSystemProxy,
@@ -339,6 +340,10 @@ export function registerClientIpcHandlers(win) {
 
   ipcMain.handle('closeSubWindow', async (event, sub) => {
     return closeSubWindow(sub)
+  })
+
+  ipcMain.handle('ping', async (event, host) => {
+    return await ping.promise.probe(host)
   })
 
 }

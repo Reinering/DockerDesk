@@ -75,7 +75,15 @@ contextBridge.exposeInMainWorld('myWindowAPI', {
 
   getTitle (url) {
     return ipcRenderer.invoke('getTitle', url)
-  }
+  },
+
+  showSubWindow (sub) {
+    return ipcRenderer.invoke('showSubWindow', sub)
+  },
+
+  closeSubWindow (sub) {
+    return ipcRenderer.invoke('closeSubWindow', sub)
+  },
 
 })
 
@@ -177,6 +185,10 @@ contextBridge.exposeInMainWorld('client', {
   showFindBar (callback) {
     return ipcRenderer.on('showFindBar', (event) => callback())
   },
+
+  ping (data) {
+    return ipcRenderer.invoke('ping', data)
+  }
 
 })
 

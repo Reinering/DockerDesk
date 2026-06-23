@@ -262,9 +262,6 @@
 </template>
 
 <script setup>
-// 定义组件名称
-import { parseDistributionList, parseWSLListVersion } from 'src/utils/wsl.js'
-
 defineOptions({
   name: 'Nodes',
 })
@@ -273,6 +270,7 @@ import { inject, ref, onMounted, onUnmounted, onBeforeMount, watch, reactive, co
 import { deepClone, isEmptyObj, findNaviItemByName } from 'src/utils/common.js'
 import { clientConfig } from 'src/common/config.js'
 import { useNavigatorStore } from 'stores/navigator.js'
+import { parseDistributionList, parseWSLListVersion } from 'src/utils/wsl.js'
 import { changeNavigatorGoto, changeNaviGotoPanel } from "src/utils/router.js"
 
 const name = 'node'
@@ -332,6 +330,7 @@ const WSLList = reactive([])
 const protocolOptions = ['SSH', 'Telnet']
 const passwordOptions = [t('node.password'), t('node.key')]
 const keyOptions = [t('node.keyString'), t('node.keyFile')]
+const statusOptions = [t('node.nodeStatusOnline'), t('node.nodeStatusOffline'), t('node.nodeStatusError')]
 
 const localServiceTypeOptions = ['Docker', 'Podman']
 const remoteServiceTypeOptions = ['Docker', 'Podman', 'SSH', 'Telnet']
@@ -345,10 +344,11 @@ const columns = [
   { name: 'protocol', label: t('node.protocol'), align: 'left', field: 'protocol' },
   { name: 'address', label: t('node.address'), align: 'left', field: 'address' },
   { name: 'port', label: t('node.port'), align: 'left', field: 'port' },
+  { name: 'status', label: t('node.nodeStatus'), align: 'left', field: 'status' },
   { name: 'actions', label: t('node.action'), align: 'center' }
 ]
 
-const visibleColumns = ['serviceName', 'connectionType', 'serviceType', 'protocol', 'address', 'port', 'actions']
+const visibleColumns = ['serviceName', 'connectionType', 'serviceType', 'protocol', 'address', 'port', 'status', 'actions']
 
 const isEdit = ref(false)
 
@@ -768,11 +768,57 @@ const getWSLList = () => {
   window.wslTerminal.getWSLList().then((result) => {
     if (result.success) {
       const data = parseWSLListVersion(result.data)
+      WSLList.length = 0
       for (let index in data) {
         WSLList.push(data[index].name)
       }
     }
   })
+}
+
+const getStatus = () => {
+
+    setInterval(() => {
+      if (services.length === 0) {
+        return
+      }
+
+      window.wslTerminal.getWSLList().then((result) => {
+        if (result.success) {
+          const data = parseWSLListVersion(result.data)
+
+          for (let i = 0; i < services.length; i++) {
+            if (services[i].connectionType === t('node.localNode')) {
+              for (let j = 0; j < data.length; j++) {
+                if (services[i].address === data[j].name) {
+                  if (data[j].state === "Running") {
+                    services[i].status = statusOptions[0]
+                  } else if (data[j].state === "") {
+                    services[i].status = statusOptions[1]
+                  } else {
+                    services[i].status = statusOptions[2]
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+
+      new Promise(() => {
+        for (let i = 0; i < services.length; i++) {
+          if (services[i].connectionType === t('node.remoteNode')) {
+            window.client.ping(services[i].address).then((result) => {
+              if (result.alive) {
+                services[i].status = statusOptions[0]
+              } else {
+                services[i].status = statusOptions[1]
+              }
+            })
+          }
+        }
+        })
+    }, 30000)
 }
 
 const init = () => {
@@ -815,6 +861,8 @@ const init = () => {
   })
 
   getWSLList()
+
+  getStatus()
 }
 
 onMounted(() => {
@@ -863,7 +911,6 @@ watch(() => newService.connectionType, (newValue, oldValue) => {
 
   }
 })
-
 
 watch(() => newService.serviceType, (newValue, oldValue) => {
   if (newValue === "SSH") {
