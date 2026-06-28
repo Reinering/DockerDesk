@@ -81,7 +81,7 @@ const props = defineProps({
   }
 })
 
-import { ref, inject, reactive, watch, onMounted, onUnmounted } from 'vue'
+import { ref, inject, reactive, watch, onMounted, onUnmounted, onActivated, onDeactivated } from 'vue'
 import { isEmptyObj, isEmptyStr } from 'src/utils/common.js'
 import { ping } from 'src/utils/net.js'
 
@@ -129,6 +129,7 @@ const onDelete = () => {
   props.onDelete(props.data.id)
 }
 
+const statusInterval = ref(null)
 const getStatus = () => {
   ping(props.data.website).then((result) => {
     if (!result.success) {
@@ -136,7 +137,7 @@ const getStatus = () => {
     }
   })
 
-  setInterval(() => {
+  statusInterval.value = setInterval(() => {
     ping(props.data.website).then((result) => {
       if (!result.success) {
         webSiteNameStyle.color = 'red'
@@ -168,7 +169,18 @@ const init = () => {
 onMounted(() => {
   init()
 
+
+})
+
+onActivated(() => {
   getStatus()
+})
+
+onDeactivated(() => {
+  if (statusInterval.value) {
+    clearInterval(statusInterval.value)
+    statusInterval.value = null
+  }
 })
 
 onUnmounted(() => {

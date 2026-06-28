@@ -776,9 +776,11 @@ const getWSLList = () => {
   })
 }
 
+const statusInterval = ref(null)
+
 const getStatus = () => {
 
-    setInterval(() => {
+    statusInterval.value = setInterval(() => {
       if (services.length === 0) {
         return
       }
@@ -863,7 +865,6 @@ const init = () => {
 
   getWSLList()
 
-  getStatus()
 }
 
 onMounted(() => {
@@ -874,11 +875,14 @@ onMounted(() => {
 })
 
 onActivated(() => {
-
+  getStatus()
 })
 
 onDeactivated(() => {
-
+  if (statusInterval.value) {
+    clearInterval(statusInterval.value)
+    statusInterval.value = null
+  }
 })
 
 onUnmounted(() => {
