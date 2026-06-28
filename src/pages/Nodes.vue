@@ -791,9 +791,10 @@ const getStatus = () => {
             if (services[i].connectionType === t('node.localNode')) {
               for (let j = 0; j < data.length; j++) {
                 if (services[i].address === data[j].name) {
+                  console.log(data[j])
                   if (data[j].state === "Running") {
                     services[i].status = statusOptions[0]
-                  } else if (data[j].state === "") {
+                  } else if (data[j].state === "Stopped") {
                     services[i].status = statusOptions[1]
                   } else {
                     services[i].status = statusOptions[2]
